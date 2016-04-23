@@ -1,9 +1,10 @@
 set(HEADER_FILES
-
+    src/sockethandler.h
 )
 
 set(SOURCE_FILES
     src/main.cpp
+    src/sockethandler.cpp
 )
 
 # find_package(Qt5Widgets)
@@ -25,3 +26,6 @@ add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
 target_link_libraries(${APPLICATION_NAME}
     Qt5::Network
 )
+
+set_property(TARGET ${APPLICATION_NAME} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${APPLICATION_NAME} PROPERTY CXX_STANDARD_REQUIRED On)
