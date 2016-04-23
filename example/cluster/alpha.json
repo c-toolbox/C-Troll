@@ -1,0 +1,11 @@
+{
+    "name": "Alpha Cluster",
+    "nodes": [
+        { "name": "alpha1", "ip": "172.19.1.11", "port": 30001 },
+        { "name": "alpha2", "ip": "172.19.1.12", "port": 30002 },
+        { "name": "alpha3", "ip": "172.19.1.13", "port": 30003 },
+        { "name": "alpha4", "ip": "172.19.1.14", "port": 30004 },
+        { "name": "alpha5", "ip": "172.19.1.15", "port": 30005 },
+        { "name": "alpha6", "ip": "172.19.1.16", "port": 30006 }
+    ]
+}

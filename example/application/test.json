@@ -1,0 +1,23 @@
+{
+    "id": "identifier1",
+    "name": "Application name",
+    "executable": "executable name",
+    "baseDirectory": "base directory",
+    "fileSynchronization": true,
+    "commandlineParameters": "commandline parameters",
+    "currentWorkingDirectory": "current working directory",
+    "tags": [
+        "tag1",
+        "tag2"
+    ],
+    "configurations": [
+        {
+            "identifier": "configuration identifier 1",
+            "commandlineParameter": "commandline parameter 1"
+        },        
+        {
+            "identifier": "configuration identifier 2",
+            "commandlineParameter": "commandline parameter 2"
+        }
+    ]
+}
