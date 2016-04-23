@@ -3,6 +3,7 @@ set(HEADER_FILES
     src/application/applicationhandler.h
     src/cluster/cluster.h
     src/cluster/clusterhandler.h
+    src/configuration.h
 )
 
 set(SOURCE_FILES
@@ -10,6 +11,7 @@ set(SOURCE_FILES
     src/application/applicationhandler.cpp
     src/cluster/cluster.cpp
     src/cluster/clusterhandler.cpp
+    src/configuration.cpp
     src/main.cpp
 )
 
