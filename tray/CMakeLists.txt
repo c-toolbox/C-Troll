@@ -3,7 +3,7 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
-    main.cpp
+    src/main.cpp
 )
 
 # find_package(Qt5Widgets)
@@ -15,7 +15,7 @@ qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
 # qt5_add_resources(RESOURCE_FILES ${application_path}/files.qrc)
 
 set(APPLICATION_NAME C-Troll-Tray)
-add_executable(APPLICATION_NAME MACOSX_BUNDLE
+add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
     ${SOURCE_FILES}
     ${HEADER_FILES}
     ${MOC_FILES}
