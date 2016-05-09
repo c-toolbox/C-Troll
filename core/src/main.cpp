@@ -12,9 +12,7 @@
 #include <QThread>
 #include <cassert>
 
-#include "program/program.h"
-#include "handler/mainhandler.h"
-#include "configuration.h"
+#include "application.h"
 
 #define DEVELOP
 
@@ -24,12 +22,8 @@ namespace {
 }
 
 int main(int argc, char** argv) {
-    QCoreApplication app(argc, argv);
+    QCoreApplication application(argc, argv);
     
-//    qDebug() << QFileInfo(".").absolutePath();
-//    qDebug() << QFileInfo("../..").absolutePath();
-//    qDebug() << QFileInfo("../../example").absolutePath();
-
 #ifdef DEVELOP
     QDir current = QDir::current();
 #ifndef WIN32
@@ -40,7 +34,6 @@ int main(int argc, char** argv) {
     current.cd("example");
     QDir::setCurrent(current.absolutePath());
 #endif
-    
     
     // Load configuration file
     QString configurationFile = QDir::current().relativeFilePath("config.json");
@@ -55,25 +48,7 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
     }
 
-
-
-    
-    Configuration config(configurationFile);
-    qDebug() << "Application Path: " << config.applicationPath;
-    qDebug() << "Cluster Path: " << config.clusterPath;
-    
-    ProgramHandler appHandler;
-    appHandler.loadFromDirectory(config.applicationPath);
-    
-    //for (Application a : appHandler.applications())
-    //    qDebug() << a;
-    
-    ClusterHandler clusterHandler;
-    clusterHandler.loadFromDirectory(config.clusterPath);
-    
-    //for (Cluster c : cluHandler.clusters())
-    //    qDebug() << c;
-    
+    Application app(configurationFile);
     
     QTcpSocket socket;
     socket.connectToHost(HostAddress, Port);
@@ -92,5 +67,5 @@ int main(int argc, char** argv) {
     
     socket.close();
     
-    app.exec();
+    application.exec();
 }

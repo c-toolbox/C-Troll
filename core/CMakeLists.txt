@@ -5,7 +5,7 @@ set(HEADER_FILES
     src/handler/sockethandler.h
     src/program/program.h
     src/program/programhandler.h
-    src/configuration.h
+    src/application.h
     src/traycommand.h
 )
 
@@ -16,7 +16,7 @@ set(SOURCE_FILES
     src/handler/sockethandler.cpp
     src/program/program.cpp
     src/program/programhandler.cpp
-    src/configuration.cpp
+    src/application.cpp
     src/main.cpp
     src/traycommand.cpp
 )
@@ -24,8 +24,8 @@ set(SOURCE_FILES
 # find_package(Qt5Widgets)
 find_package(Qt5Network)
 
-set(MOC_FILES 
-    src/handler/mainhandler.h
+set(MOC_FILES "")
+qt5_wrap_cpp(MOC_FILES 
     src/handler/sockethandler.h
 )
 
