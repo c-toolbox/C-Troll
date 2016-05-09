@@ -6,22 +6,30 @@
 
 Program::Program(const QJsonObject& jsonObject) {
     // jsonObject.contains(...) -> bool
-    id = jsonObject.value("id").toString();
-    name = jsonObject.value("name").toString();
-    executable = jsonObject.value("executable").toString();
-    baseDirectory = jsonObject.value("baseDirectory").toString();
-    fileSynchronization = jsonObject.value("fileSynchronization").toBool();
-    commandlineParameters = jsonObject.value("commandlineParameters").toString();
-    currentWorkingDirectory = jsonObject.value("currentWorkingDirectory").toString();
+    _id = jsonObject.value("id").toString();
+    _name = jsonObject.value("name").toString();
+    _executable = jsonObject.value("executable").toString();
+    _baseDirectory = jsonObject.value("baseDirectory").toString();
+    _fileSynchronization = jsonObject.value("fileSynchronization").toBool();
+    _commandlineParameters = jsonObject.value("commandlineParameters").toString();
+    _currentWorkingDirectory = jsonObject.value("currentWorkingDirectory").toString();
     
     QJsonArray tagsArray = jsonObject.value("tags").toArray();
-    tags.clear();
+    _tags.clear();
     for (const QJsonValue& v : tagsArray) {
-        tags.push_back(v.toString());
+        _tags.push_back(v.toString());
+    }
+
+    QJsonValue v = jsonObject.value("cluster");
+    if (v.isArray()) {
+        QJsonArray clusterArray = v.toArray();
+        for (const QJsonValue& v : clusterArray) {
+            _clusters.push_back(v.toString());
+        }
     }
     
     QJsonArray configurationArray = jsonObject.value("configurations").toArray();
-    configurations.clear();
+    _configurations.clear();
     for (const QJsonValue& v : configurationArray) {
         Configuration conf;
         QJsonObject a = v.toObject();
@@ -30,22 +38,30 @@ Program::Program(const QJsonObject& jsonObject) {
         conf.identifier = a.value("identifier").toString();
         conf.commandlineParameters = a.value("commandlineParamters").toString();
         
-        configurations.push_back(conf);
+        _configurations.push_back(conf);
     }
+}
+
+const QString& Program::id() const {
+    return _id;
+}
+
+const QList<QString>& Program::clusters() const {
+    return _clusters;
 }
 
 QDebug operator<<(QDebug debug, const Program& application) {
     debug << "Application\n";
     debug << "===========\n";
-    debug << "ID: " << application.id << "\n";
-    debug << "Name: " << application.name << "\n";
-    debug << "Executable: " << application.executable << "\n";
-    debug << "Base Directory: " << application.baseDirectory << "\n";
-    debug << "File Sync: " << application.fileSynchronization << "\n";
-    debug << "Params: " << application.commandlineParameters << "\n";
-    debug << "Working Dir: " << application.currentWorkingDirectory << "\n";
-    debug << "Tags: " << application.tags << "\n";
-    debug << "Configs: " << application.configurations << "\n";
+    debug << "ID: " << application._id << "\n";
+    debug << "Name: " << application._name << "\n";
+    debug << "Executable: " << application._executable << "\n";
+    debug << "Base Directory: " << application._baseDirectory << "\n";
+    debug << "File Sync: " << application._fileSynchronization << "\n";
+    debug << "Params: " << application._commandlineParameters << "\n";
+    debug << "Working Dir: " << application._currentWorkingDirectory << "\n";
+    debug << "Tags: " << application._tags << "\n";
+    debug << "Configs: " << application._configurations << "\n";
     debug << "\n";
     return debug;
 }
