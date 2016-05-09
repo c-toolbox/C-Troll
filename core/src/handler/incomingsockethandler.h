@@ -1,10 +1,10 @@
-#ifndef __SOCKETHANDLER_H__
-#define __SOCKETHANDLER_H__
+#ifndef __INCOMINGSOCKETHANDLER_H__
+#define __INCOMINGSOCKETHANDLER_H__
 
 #include <QObject>
 #include <QTcpServer>
 
-class SocketHandler : public QObject {
+class IncomingSocketHandler : public QObject {
 Q_OBJECT
 public:
     void initialize(quint16 port);
@@ -22,4 +22,4 @@ private:
     QVector<QTcpSocket*> _sockets;
 };
 
-#endif __SOCKETHANDLER_H__
+#endif __INCOMINGSOCKETHANDLER_H__

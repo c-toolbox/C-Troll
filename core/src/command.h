@@ -4,6 +4,7 @@
 #include <QString>
 
 struct Command {
+    Command() = default; // temporary for texting ---abock
     Command(QString command);
 
     QString cluster;

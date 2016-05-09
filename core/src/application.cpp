@@ -6,6 +6,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTcpSocket>
+#include <QObject>
+#include <QThread>
 
 #include <assert.h>
 
@@ -21,17 +23,22 @@ Application::Application(QString configurationFile) {
 
     _programHandler.loadFromDirectory(programPath);
     _clusterHandler.loadFromDirectory(clusterPath);
-    _socketHandler.initialize(listeningPort);
+    _incomingSocketHandler.initialize(listeningPort);
 
     connect(
-        &_socketHandler, &SocketHandler::messageReceived,
+        &_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
         this, &Application::incomingMessage
     );
 
 }
 
 void Application::incomingMessage(QString message) {
-    Command cmd(message);
+    //Command cmd(message);
+    // This is for testing purposes ---abock
+    Command cmd;
+    cmd.application = "identifier2";
+    cmd.cluster = "Office Computer Alex";
+    cmd.configuration = "";
 
     // Get the correct program
     auto iProgram = std::find_if(
@@ -90,6 +97,12 @@ void Application::sendMessage(TrayCommand command, const Cluster& cluster) {
         QTcpSocket socket;
         socket.connectToHost(node.ipAddress, node.port);
         bool success = socket.waitForConnected();
-        socket.write(command.json().toUtf8());
+        //QString message = command.json();
+         QString message("&Fooar");
+        socket.write(message.toUtf8());
+        QObject().thread()->usleep(1000 * 1000 * 2);
+        bool bb = socket.waitForReadyRead();
+        QByteArray b = socket.readAll();
+        qDebug() << QString::fromLatin1(b);
     }
 }

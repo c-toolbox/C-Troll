@@ -1,19 +1,19 @@
-#include "sockethandler.h"
+#include "incomingsockethandler.h"
 
 #include <QTcpSocket>
 
 #include <assert.h>
 
-void SocketHandler::initialize(quint16 port) {
+void IncomingSocketHandler::initialize(quint16 port) {
     _server.listen(QHostAddress::Any, port);
 
     connect(
         &_server, &QTcpServer::newConnection,
-        this, &SocketHandler::newConnection
+        this, &IncomingSocketHandler::newConnection
     );
 }
 
-void SocketHandler::newConnection() {
+void IncomingSocketHandler::newConnection() {
     while (_server.hasPendingConnections()) {
         QTcpSocket* socket = _server.nextPendingConnection();
         connect(
@@ -28,14 +28,14 @@ void SocketHandler::newConnection() {
     }
 }
 
-void SocketHandler::readyRead(QTcpSocket* socket) {
+void IncomingSocketHandler::readyRead(QTcpSocket* socket) {
     assert(socket);
     QByteArray data = socket->readAll();
     QString message = QString::fromUtf8(data);
     emit messageReceived(message);
 }
 
-void SocketHandler::disconnectedConnection(QTcpSocket* socket) {
+void IncomingSocketHandler::disconnectedConnection(QTcpSocket* socket) {
     auto it = std::find(_sockets.begin(), _sockets.end(), socket);
     assert(it != _sockets.end());
     _sockets.erase(it);

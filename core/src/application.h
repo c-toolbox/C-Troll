@@ -5,7 +5,8 @@
 
 #include "program/programhandler.h"
 #include "cluster/clusterhandler.h"
-#include "handler/sockethandler.h"
+#include "handler/incomingsockethandler.h"
+#include "handler/outgoingsockethandler.h"
 #include "traycommand.h"
 
 class Application : public QObject {
@@ -20,7 +21,8 @@ private:
 
     ProgramHandler _programHandler;
     ClusterHandler _clusterHandler;
-    SocketHandler _socketHandler;
+    IncomingSocketHandler _incomingSocketHandler;
+    OutgoingSocketHandler _outgoingSocketHandler;
 };
 
 #endif // __APPLICATION_H__
