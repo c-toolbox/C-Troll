@@ -5,18 +5,19 @@
 
 #include "program/programhandler.h"
 #include "cluster/clusterhandler.h"
+#include "handler/sockethandler.h"
 
-class Application : QObject {
+class Application : public QObject {
 //Q_OBJECT
 public:
     Application(QString configurationFile);
 
-    ProgramHandler& programHandler();
-    ClusterHandler& clusterHandler();
-
 private:
+    void incomingMessage(QString message);
+
     ProgramHandler _programHandler;
     ClusterHandler _clusterHandler;
+    SocketHandler _socketHandler;
 };
 
 #endif // __APPLICATION_H__

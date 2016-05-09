@@ -1,25 +1,12 @@
 #include <QCoreApplication>
-#include <iostream>
-#include <QFileInfo>
-#include <QTCPSocket>
-#include <QJsonArray>
-#include <QFile>
-#include <QJsonDocument>
 #include <QDir>
-#include <QJsonObject>
+#include <QFileInfo>
+
 #include <iostream>
-#include <QDebug>
-#include <QThread>
-#include <cassert>
 
 #include "application.h"
 
 #define DEVELOP
-
-namespace {
-    const QString HostAddress = "130.236.145.183";
-    const int Port = 5000;
-}
 
 int main(int argc, char** argv) {
     QCoreApplication application(argc, argv);
@@ -50,22 +37,22 @@ int main(int argc, char** argv) {
 
     Application app(configurationFile);
     
-    QTcpSocket socket;
-    socket.connectToHost(HostAddress, Port);
-    
-    bool success = socket.waitForConnected();
-    std::cout << success << std::endl;
-    
-    QString s("&Fooar");
-    socket.write(s.toUtf8());
-    
-    QObject().thread()->usleep(1000*1000*2);
-    
-    bool bb = socket.waitForReadyRead();
-    QByteArray b = socket.readAll();
-    qDebug() << QString::fromLatin1(b);
-    
-    socket.close();
+    //QTcpSocket socket;
+    //socket.connectToHost(HostAddress, Port);
+    //
+    //bool success = socket.waitForConnected();
+    //std::cout << success << std::endl;
+    //
+    //QString s("&Fooar");
+    //socket.write(s.toUtf8());
+    //
+    //QObject().thread()->usleep(1000*1000*2);
+    //
+    //bool bb = socket.waitForReadyRead();
+    //QByteArray b = socket.readAll();
+    //qDebug() << QString::fromLatin1(b);
+    //
+    //socket.close();
     
     application.exec();
 }

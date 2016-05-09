@@ -7,7 +7,7 @@
 class SocketHandler : public QObject {
 Q_OBJECT
 public:
-    SocketHandler(quint16 port);
+    void initialize(quint16 port);
 
 signals:
     void messageReceived(QString message);
@@ -20,7 +20,6 @@ private:
     QTcpServer _server;
 
     QVector<QTcpSocket*> _sockets;
-
 };
 
 #endif __SOCKETHANDLER_H__

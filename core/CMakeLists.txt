@@ -6,7 +6,7 @@ set(HEADER_FILES
     src/program/program.h
     src/program/programhandler.h
     src/application.h
-    src/traycommand.h
+    src/command.h
 )
 
 set(SOURCE_FILES
@@ -18,7 +18,7 @@ set(SOURCE_FILES
     src/program/programhandler.cpp
     src/application.cpp
     src/main.cpp
-    src/traycommand.cpp
+    src/command.cpp
 )
 
 # find_package(Qt5Widgets)

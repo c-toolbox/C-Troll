@@ -9,14 +9,14 @@ public:
     
     void loadFromDirectory(QString directory);
     
-    void addApplication(Program application);
+    void addProgram(Program application);
     
-    const QList<Program>& applications() const;
+    const QList<Program>& programs() const;
     
 private:
-    Program loadApplication(QString jsonFile, QString baseDirectory);
+    Program loadProgram(QString jsonFile, QString baseDirectory);
     
-    QList<Program> _applications;
+    QList<Program> _programs;
 };
 
 

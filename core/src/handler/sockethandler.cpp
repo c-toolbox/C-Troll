@@ -4,7 +4,7 @@
 
 #include <assert.h>
 
-SocketHandler::SocketHandler(quint16 port) {
+void SocketHandler::initialize(quint16 port) {
     _server.listen(QHostAddress::Any, port);
 
     connect(

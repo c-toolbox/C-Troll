@@ -1,5 +1,7 @@
 #include "application.h"
 
+#include "command.h"
+
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -12,15 +14,21 @@ Application::Application(QString configurationFile) {
 
     QString programPath = jsonObject.value("applicationPath").toString();
     QString clusterPath = jsonObject.value("clusterPath").toString();
+    int listeningPort = jsonObject.value("listeningPort").toInt();
 
     _programHandler.loadFromDirectory(programPath);
     _clusterHandler.loadFromDirectory(clusterPath);
+    _socketHandler.initialize(listeningPort);
+
+    connect(
+        &_socketHandler, &SocketHandler::messageReceived,
+        this, &Application::incomingMessage
+    );
+
 }
 
-ProgramHandler& Application::programHandler() {
-    return _programHandler;
-}
+void Application::incomingMessage(QString message) {
+    Command cmd(message);
 
-ClusterHandler& Application::clusterHandler() {
-    return _clusterHandler;
+
 }

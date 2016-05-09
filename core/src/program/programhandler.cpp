@@ -10,21 +10,20 @@ void ProgramHandler::loadFromDirectory(QString directory) {
     // First, get all the *.json files from the directory and subdirectories
     QDirIterator it(directory, QStringList() << "*.json", QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {
-        Program a = loadApplication(it.next(), directory);
-        addApplication(a);
+        Program a = loadProgram(it.next(), directory);
+        addProgram(a);
     }
 }
 
-void ProgramHandler::addApplication(Program application) {
-    _applications.push_back(std::move(application));
+void ProgramHandler::addProgram(Program program) {
+    _programs.push_back(std::move(program));
 }
 
-const QList<Program>& ProgramHandler::applications() const {
-    return _applications;
+const QList<Program>& ProgramHandler::programs() const {
+    return _programs;
 }
 
-Program ProgramHandler::loadApplication(QString jsonFile, QString baseDirectory)
-{
+Program ProgramHandler::loadProgram(QString jsonFile, QString baseDirectory) {
     QDir dir(baseDirectory);
     dir.cdUp();
     
