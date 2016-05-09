@@ -1,21 +1,21 @@
 set(HEADER_FILES
-    src/application/application.h
-    src/application/applicationhandler.h
     src/cluster/cluster.h
     src/cluster/clusterhandler.h
     src/handler/mainhandler.h
     src/handler/sockethandler.h
+    src/program/program.h
+    src/program/programhandler.h
     src/configuration.h
     src/traycommand.h
 )
 
 set(SOURCE_FILES
-    src/application/application.cpp
-    src/application/applicationhandler.cpp
     src/cluster/cluster.cpp
     src/cluster/clusterhandler.cpp
     src/handler/mainhandler.cpp
     src/handler/sockethandler.cpp
+    src/program/program.cpp
+    src/program/programhandler.cpp
     src/configuration.cpp
     src/main.cpp
     src/traycommand.cpp
