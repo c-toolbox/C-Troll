@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "application/applicationhandler.h"
+#include "program/programhandler.h"
 #include "cluster/clusterhandler.h"
 
 class MainHandler : QObject {
@@ -11,11 +11,11 @@ Q_OBJECT
 public:
     MainHandler();
 
-    ApplicationHandler& applicationHandler();
+    ProgramHandler& programHandler();
     ClusterHandler& clusterHandler();
 
 private:
-    ApplicationHandler _applicationHandler;
+    ProgramHandler _programHandler;
     ClusterHandler _clusterHandler;
 };
 

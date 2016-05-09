@@ -1,7 +1,7 @@
 #include "mainhandler.h"
 
-ApplicationHandler& MainHandler::applicationHandler() {
-    return _applicationHandler;
+ProgramHandler& MainHandler::programHandler() {
+    return _programHandler;
 }
 
 ClusterHandler& MainHandler::clusterHandler() {

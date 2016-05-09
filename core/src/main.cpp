@@ -12,7 +12,7 @@
 #include <QThread>
 #include <cassert>
 
-#include "application/application.h"
+#include "program/program.h"
 #include "handler/mainhandler.h"
 #include "configuration.h"
 
@@ -56,12 +56,13 @@ int main(int argc, char** argv) {
     }
 
 
+
     
     Configuration config(configurationFile);
     qDebug() << "Application Path: " << config.applicationPath;
     qDebug() << "Cluster Path: " << config.clusterPath;
     
-    ApplicationHandler appHandler;
+    ProgramHandler appHandler;
     appHandler.loadFromDirectory(config.applicationPath);
     
     //for (Application a : appHandler.applications())

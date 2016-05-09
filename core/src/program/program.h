@@ -1,14 +1,14 @@
-#ifndef __APPLICATION_H__
-#define __APPLICATION_H__
+#ifndef __PROGRAM_H__
+#define __PROGRAM_H__
 
 #include <QDebug>
 #include <QJsonObject>
 #include <QList>
 #include <QString>
 
-class Application {
+class Program {
 public:
-    Application(const QJsonObject& jsonObject);
+    Program(const QJsonObject& jsonObject);
     
     struct Configuration {
         QString identifier;
@@ -16,10 +16,10 @@ public:
     };
 
 private:
-    friend QDebug operator<<(QDebug debug, const Application& application);
+    friend QDebug operator<<(QDebug debug, const Program& application);
 
-    QString id; // Application ID (name of the file + directory)
-    QString name; // Application Name
+    QString id; // Program ID (name of the file + directory)
+    QString name; // Program Name
     QString executable; // Executable name
     QString baseDirectory; // Base Directory
     bool fileSynchronization; // File synchronization
@@ -30,9 +30,8 @@ private:
     QList<Configuration> configurations; // List of all configurations
 };
 
-QDebug operator<<(QDebug debug, const Application& application);
+QDebug operator<<(QDebug debug, const Program& application);
 
-QDebug operator<<(QDebug debug, const Application::Configuration& configuration);
+QDebug operator<<(QDebug debug, const Program::Configuration& configuration);
 
-#endif // __APPLICATION_H__
-
+#endif // __PROGRAM_H__

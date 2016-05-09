@@ -1,29 +1,29 @@
-#include "applicationhandler.h"
+#include "program/programhandler.h"
 
 #include <QDirIterator>
 #include <QFile>
 #include <QJsonDocument>
 #include <QStringList>
 
-void ApplicationHandler::loadFromDirectory(QString directory) {
+void ProgramHandler::loadFromDirectory(QString directory) {
     qDebug() << directory;
     // First, get all the *.json files from the directory and subdirectories
     QDirIterator it(directory, QStringList() << "*.json", QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {
-        Application a = loadApplication(it.next(), directory);
+        Program a = loadApplication(it.next(), directory);
         addApplication(a);
     }
 }
 
-void ApplicationHandler::addApplication(Application application) {
+void ProgramHandler::addApplication(Program application) {
     _applications.push_back(std::move(application));
 }
 
-const QList<Application>& ApplicationHandler::applications() const {
+const QList<Program>& ProgramHandler::applications() const {
     return _applications;
 }
 
-Application ApplicationHandler::loadApplication(QString jsonFile, QString baseDirectory)
+Program ProgramHandler::loadApplication(QString jsonFile, QString baseDirectory)
 {
     QDir dir(baseDirectory);
     dir.cdUp();
@@ -38,5 +38,5 @@ Application ApplicationHandler::loadApplication(QString jsonFile, QString baseDi
     QJsonDocument d = QJsonDocument::fromJson(f.readAll());
     QJsonObject obj = d.object();
     obj["id"] = identifier;
-    return Application(d.object());
+    return Program(d.object());
 }

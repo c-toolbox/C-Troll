@@ -1,10 +1,10 @@
-#include "application.h"
+#include "program/program.h"
 
 #include <QJsonArray>
 #include <cassert>
 #include <iostream>
 
-Application::Application(const QJsonObject& jsonObject) {
+Program::Program(const QJsonObject& jsonObject) {
     // jsonObject.contains(...) -> bool
     id = jsonObject.value("id").toString();
     name = jsonObject.value("name").toString();
@@ -34,7 +34,7 @@ Application::Application(const QJsonObject& jsonObject) {
     }
 }
 
-QDebug operator<<(QDebug debug, const Application& application) {
+QDebug operator<<(QDebug debug, const Program& application) {
     debug << "Application\n";
     debug << "===========\n";
     debug << "ID: " << application.id << "\n";
@@ -50,7 +50,7 @@ QDebug operator<<(QDebug debug, const Application& application) {
     return debug;
 }
 
-QDebug operator<<(QDebug debug, const Application::Configuration& configuration) {
+QDebug operator<<(QDebug debug, const Program::Configuration& configuration) {
     debug << "[";
     debug << configuration.identifier;
     debug << " , ";

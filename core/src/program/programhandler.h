@@ -1,23 +1,23 @@
-#ifndef __APPLICATIONHANDLER_H__
-#define __APPLICATIONHANDLER_H__
+#ifndef __PROGRAMHANDLER_H__
+#define __PROGRAMHANDLER_H__
 
-#include "application.h"
+#include "program/program.h"
 
-class ApplicationHandler {
+class ProgramHandler {
 public:
-    ApplicationHandler() = default;
+    ProgramHandler() = default;
     
     void loadFromDirectory(QString directory);
     
-    void addApplication(Application application);
+    void addApplication(Program application);
     
-    const QList<Application>& applications() const;
+    const QList<Program>& applications() const;
     
 private:
-    Application loadApplication(QString jsonFile, QString baseDirectory);
+    Program loadApplication(QString jsonFile, QString baseDirectory);
     
-    QList<Application> _applications;
+    QList<Program> _applications;
 };
 
 
-#endif // __APPLICATIONHANDLER_H__
+#endif // __PROGRAMHANDLER_H__
