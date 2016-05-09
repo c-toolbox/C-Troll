@@ -3,7 +3,10 @@ set(HEADER_FILES
     src/application/applicationhandler.h
     src/cluster/cluster.h
     src/cluster/clusterhandler.h
+    src/handler/mainhandler.h
+    src/handler/sockethandler.h
     src/configuration.h
+    src/traycommand.h
 )
 
 set(SOURCE_FILES
@@ -11,18 +14,25 @@ set(SOURCE_FILES
     src/application/applicationhandler.cpp
     src/cluster/cluster.cpp
     src/cluster/clusterhandler.cpp
+    src/handler/mainhandler.cpp
+    src/handler/sockethandler.cpp
     src/configuration.cpp
     src/main.cpp
+    src/traycommand.cpp
 )
 
 # find_package(Qt5Widgets)
 find_package(Qt5Network)
 
-set(MOC_FILES "")
+set(MOC_FILES 
+    src/handler/mainhandler.h
+    src/handler/sockethandler.h
+)
+
 qt5_wrap_cpp(
     MOC_FILES
-    ""
 )
+
 # set(RESOURCE_FILES "")
 # qt5_add_resources(RESOURCE_FILES ${application_path}/files.qrc)
 
