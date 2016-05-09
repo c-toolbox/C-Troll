@@ -6,10 +6,10 @@
 
 Cluster::Cluster(const QJsonObject& jsonObject) {
     // jsonObject.contains(...) -> bool
-    name = jsonObject.value("name").toString();
+    _name = jsonObject.value("name").toString();
     
     QJsonArray nodesArray = jsonObject.value("nodes").toArray();
-    nodes.clear();
+    _nodes.clear();
     for (const QJsonValue& v : nodesArray) {
         Node node;
         QJsonObject a = v.toObject();
@@ -18,15 +18,19 @@ Cluster::Cluster(const QJsonObject& jsonObject) {
         node.name = a.value("name").toString();
         node.ipAddress = a.value("ip").toString();
         node.port = a.value("port").toInt();
-        nodes.push_back(node);
+        _nodes.push_back(node);
     }
+}
+
+QString Cluster::name() const {
+    return _name;
 }
 
 QDebug operator<<(QDebug debug, const Cluster& cluster) {
     debug << "Cluster\n";
     debug << "=======\n";
-    debug << "Name: " << cluster.name << "\n";
-    debug << "Nodes: " << cluster.nodes << "\n";
+    debug << "Name: " << cluster._name << "\n";
+    debug << "Nodes: " << cluster._nodes << "\n";
     return debug;
 }
 

@@ -13,12 +13,14 @@ public:
         QString ipAddress;
         int port;
     };
+
+    QString name() const;
     
 private:
     friend QDebug operator<<(QDebug debug, const Cluster& cluster);
     
-    QString name;
-    QList<Node> nodes;
+    QString _name;
+    QList<Node> _nodes;
 };
 
 QDebug operator<<(QDebug debug, const Cluster& cluster);
