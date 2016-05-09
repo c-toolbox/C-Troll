@@ -1,0 +1,6 @@
+{
+    "name": "Office Computer Alex",
+    "nodes": [
+        { "name": "office", "ip": "130.236.145.183", "port": 5000 }
+    ]
+}

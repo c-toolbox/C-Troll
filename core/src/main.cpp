@@ -13,14 +13,13 @@
 #include <cassert>
 
 #include "application/application.h"
-#include "application/applicationhandler.h"
-#include "cluster/clusterhandler.h"
+#include "handler/mainhandler.h"
 #include "configuration.h"
 
 #define DEVELOP
 
 namespace {
-    const QString HostAddress = "10.7.38.89";
+    const QString HostAddress = "130.236.145.183";
     const int Port = 5000;
 }
 
@@ -33,7 +32,9 @@ int main(int argc, char** argv) {
 
 #ifdef DEVELOP
     QDir current = QDir::current();
+#ifndef WIN32
     current.cdUp();
+#endif
     current.cdUp();
     current.cdUp();
     current.cd("example");
@@ -53,6 +54,8 @@ int main(int argc, char** argv) {
             QFileInfo(configurationFile).absolutePath().toStdString() << "'" << std::endl;
         exit(EXIT_FAILURE);
     }
+
+
     
     Configuration config(configurationFile);
     qDebug() << "Application Path: " << config.applicationPath;
@@ -61,14 +64,14 @@ int main(int argc, char** argv) {
     ApplicationHandler appHandler;
     appHandler.loadFromDirectory(config.applicationPath);
     
-    for (Application a : appHandler.applications())
-        qDebug() << a;
+    //for (Application a : appHandler.applications())
+    //    qDebug() << a;
     
-    ClusterHandler cluHandler;
-    cluHandler.loadFromDirectory(config.clusterPath);
+    ClusterHandler clusterHandler;
+    clusterHandler.loadFromDirectory(config.clusterPath);
     
-    for (Cluster c : cluHandler.clusters())
-        qDebug() << c;
+    //for (Cluster c : cluHandler.clusters())
+    //    qDebug() << c;
     
     
     QTcpSocket socket;
