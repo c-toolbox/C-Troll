@@ -8,6 +8,7 @@ struct Command {
 
     QString cluster;
     QString application;
+    QString configuration;
 };
 
 #endif // __COMMAND_H__

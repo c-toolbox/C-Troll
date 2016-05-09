@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QTcpSocket>
 
 #include <assert.h>
 
@@ -37,8 +38,8 @@ void Application::incomingMessage(QString message) {
         _programHandler.programs().begin(),
         _programHandler.programs().end(),
         [&](const Program& p) {
-            return p.id() == cmd.application;
-        }
+        return p.id() == cmd.application;
+    }
     );
     // At the moment, we just crash if we can't find the program
     assert(iProgram != _programHandler.programs().end());
@@ -48,8 +49,8 @@ void Application::incomingMessage(QString message) {
         _clusterHandler.clusters().begin(),
         _clusterHandler.clusters().end(),
         [&](const Cluster& c) {
-            return c.name() == cmd.cluster;
-        }
+        return c.name() == cmd.cluster;
+    }
     );
     // At the moment, we just crash if we can't find the cluster
     assert(iCluster != _clusterHandler.clusters().end());
@@ -64,6 +65,31 @@ void Application::incomingMessage(QString message) {
            ) != iProgram->clusters().end()
     );
 
+    // Get the correct configuration, if it exists
+    if (cmd.configuration.isEmpty()) {
+        sendMessage(TrayCommand(*iProgram), *iCluster);
+    }
+    else {
+        auto iConfiguration = std::find_if(
+            iProgram->configurations().begin(),
+            iProgram->configurations().end(),
+            [&](const Program::Configuration& c) {
+                return c.identifier == cmd.configuration;
+            }
+        );
+        // At the moment, we just crash if the configuration does not exist
+        assert(iConfiguration != iProgram->configurations().end());
 
+        sendMessage(TrayCommand(*iProgram, iConfiguration->commandlineParameters), *iCluster);
+    }
+    
+}
 
+void Application::sendMessage(TrayCommand command, const Cluster& cluster) {
+    for (const Cluster::Node& node : cluster.nodes()) {
+        QTcpSocket socket;
+        socket.connectToHost(node.ipAddress, node.port);
+        bool success = socket.waitForConnected();
+        socket.write(command.json().toUtf8());
+    }
 }

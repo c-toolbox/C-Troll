@@ -6,6 +6,7 @@
 #include "program/programhandler.h"
 #include "cluster/clusterhandler.h"
 #include "handler/sockethandler.h"
+#include "traycommand.h"
 
 class Application : public QObject {
 //Q_OBJECT
@@ -14,6 +15,8 @@ public:
 
 private:
     void incomingMessage(QString message);
+
+    void sendMessage(TrayCommand command, const Cluster& cluster);
 
     ProgramHandler _programHandler;
     ClusterHandler _clusterHandler;

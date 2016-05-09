@@ -46,8 +46,40 @@ const QString& Program::id() const {
     return _id;
 }
 
+const QString& Program::name() const {
+    return _name;
+}
+
+const QString& Program::executable() const {
+    return _executable;
+}
+
+const QString& Program::baseDirectory() const {
+    return _baseDirectory;
+}
+
+bool Program::fileSynchronization() const {
+    return _fileSynchronization;
+}
+
+const QString& Program::commandlineParameters() const {
+    return _commandlineParameters;
+}
+
+const QString& Program::currentWorkingDirectory() const {
+    return _currentWorkingDirectory;
+}
+
+const QList<QString>& Program::tags() const {
+    return _tags;
+}
+
 const QList<QString>& Program::clusters() const {
     return _clusters;
+}
+
+const QList<Program::Configuration>& Program::configurations() const {
+    return _configurations;
 }
 
 QDebug operator<<(QDebug debug, const Program& application) {

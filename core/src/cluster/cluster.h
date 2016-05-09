@@ -14,7 +14,8 @@ public:
         int port;
     };
 
-    QString name() const;
+    const QString& name() const;
+    const QList<Node>& nodes() const;
     
 private:
     friend QDebug operator<<(QDebug debug, const Cluster& cluster);

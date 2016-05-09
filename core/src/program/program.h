@@ -16,7 +16,15 @@ public:
     };
 
     const QString& id() const;
+    const QString& name() const;
+    const QString& executable() const;
+    const QString& baseDirectory() const;
+    bool fileSynchronization() const;
+    const QString& commandlineParameters() const;
+    const QString& currentWorkingDirectory() const;
+    const QList<QString>& tags() const;
     const QList<QString>& clusters() const;
+    const QList<Configuration>& configurations() const;
 
 private:
     friend QDebug operator<<(QDebug debug, const Program& application);

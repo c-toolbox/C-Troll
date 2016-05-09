@@ -22,8 +22,12 @@ Cluster::Cluster(const QJsonObject& jsonObject) {
     }
 }
 
-QString Cluster::name() const {
+const QString& Cluster::name() const {
     return _name;
+}
+
+const QList<Cluster::Node>& Cluster::nodes() const {
+    return _nodes;
 }
 
 QDebug operator<<(QDebug debug, const Cluster& cluster) {
