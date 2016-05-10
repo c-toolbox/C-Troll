@@ -90,28 +90,3 @@ const QList<QString>& Program::clusters() const {
 const QList<Program::Configuration>& Program::configurations() const {
     return _configurations;
 }
-
-QDebug operator<<(QDebug debug, const Program& application) {
-    debug << "Application\n";
-    debug << "===========\n";
-    debug << "ID: " << application._id << "\n";
-    debug << "Name: " << application._name << "\n";
-    debug << "Executable: " << application._executable << "\n";
-    debug << "Base Directory: " << application._baseDirectory << "\n";
-    debug << "File Sync: " << application._fileSynchronization << "\n";
-    debug << "Params: " << application._commandlineParameters << "\n";
-    debug << "Working Dir: " << application._currentWorkingDirectory << "\n";
-    debug << "Tags: " << application._tags << "\n";
-    debug << "Configs: " << application._configurations << "\n";
-    debug << "\n";
-    return debug;
-}
-
-QDebug operator<<(QDebug debug, const Program::Configuration& configuration) {
-    debug << "[";
-    debug << configuration.identifier;
-    debug << " , ";
-    debug << configuration.commandlineParameters;
-    debug << "]";
-    return debug;
-}

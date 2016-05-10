@@ -29,18 +29,3 @@ const QString& Cluster::name() const {
 const QList<Cluster::Node>& Cluster::nodes() const {
     return _nodes;
 }
-
-QDebug operator<<(QDebug debug, const Cluster& cluster) {
-    debug << "Cluster\n";
-    debug << "=======\n";
-    debug << "Name: " << cluster._name << "\n";
-    debug << "Nodes: " << cluster._nodes << "\n";
-    return debug;
-}
-
-QDebug operator<<(QDebug debug, const Cluster::Node& node) {
-    debug << "[";
-    debug << node.name << ", " << node.ipAddress << ", " << node.port;
-    debug << "]";
-    return debug;
-}

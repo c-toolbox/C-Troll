@@ -29,8 +29,6 @@ public:
     const QList<Configuration>& configurations() const;
 
 private:
-    friend QDebug operator<<(QDebug debug, const Program& application);
-
     QString _id; // Program ID (name of the file + directory)
     QString _name; // Program Name
     QString _executable; // Executable name
@@ -44,9 +42,6 @@ private:
 
     QList<Configuration> _configurations; // List of all configurations
 };
-
-QDebug operator<<(QDebug debug, const Program& application);
-QDebug operator<<(QDebug debug, const Program::Configuration& configuration);
 
 TrayCommand programToTrayCommand(const Program& program, QString configuration = "");
 

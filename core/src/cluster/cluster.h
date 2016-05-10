@@ -24,7 +24,4 @@ private:
     QList<Node> _nodes;
 };
 
-QDebug operator<<(QDebug debug, const Cluster& cluster);
-QDebug operator<<(QDebug debug, const Cluster::Node& node);
-
 #endif // __CLUSTER_H__

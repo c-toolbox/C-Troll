@@ -19,5 +19,4 @@ private:
     QList<Cluster> _clusters;
 };
 
-
 #endif // __APPLICATIONHANDLER_H__
