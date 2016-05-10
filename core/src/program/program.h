@@ -6,6 +6,8 @@
 #include <QList>
 #include <QString>
 
+#include "traycommand.h"
+
 class Program {
 public:
     Program(const QJsonObject& jsonObject);
@@ -44,7 +46,8 @@ private:
 };
 
 QDebug operator<<(QDebug debug, const Program& application);
-
 QDebug operator<<(QDebug debug, const Program::Configuration& configuration);
+
+TrayCommand programToTrayCommand(const Program& program, QString configuration = "");
 
 #endif // __PROGRAM_H__

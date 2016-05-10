@@ -74,7 +74,7 @@ void Application::incomingMessage(QString message) {
 
     // Get the correct configuration, if it exists
     if (cmd.configuration.isEmpty()) {
-        sendMessage(TrayCommand(*iProgram), *iCluster);
+        sendMessage(programToTrayCommand(*iProgram), *iCluster);
     }
     else {
         auto iConfiguration = std::find_if(
@@ -87,9 +87,11 @@ void Application::incomingMessage(QString message) {
         // At the moment, we just crash if the configuration does not exist
         assert(iConfiguration != iProgram->configurations().end());
 
-        sendMessage(TrayCommand(*iProgram, iConfiguration->commandlineParameters), *iCluster);
+        sendMessage(
+            programToTrayCommand(*iProgram, iConfiguration->commandlineParameters),
+            *iCluster
+        );
     }
-    
 }
 
 void Application::sendMessage(TrayCommand command, const Cluster& cluster) {
@@ -99,7 +101,6 @@ void Application::sendMessage(TrayCommand command, const Cluster& cluster) {
         bool success = socket.waitForConnected();
         QString message = command.json();
         socket.write(message.toUtf8());
-
         socket.flush();
     }
 }

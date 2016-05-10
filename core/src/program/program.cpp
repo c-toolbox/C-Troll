@@ -4,6 +4,15 @@
 #include <cassert>
 #include <iostream>
 
+TrayCommand programToTrayCommand(const Program& program, QString configuration) {
+    TrayCommand t;
+    t.executable = program.executable();
+    t.baseDirectory = program.baseDirectory();
+    t.commandlineParameters = program.commandlineParameters() + " " + configuration;
+
+    return t;
+}
+
 Program::Program(const QJsonObject& jsonObject) {
     // jsonObject.contains(...) -> bool
     _id = jsonObject.value("id").toString();

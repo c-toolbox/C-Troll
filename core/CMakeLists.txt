@@ -7,7 +7,6 @@ set(HEADER_FILES
     src/program/programhandler.h
     src/application.h
     src/command.h
-    src/traycommand.h
 )
 
 set(SOURCE_FILES
@@ -20,7 +19,6 @@ set(SOURCE_FILES
     src/application.cpp
     src/main.cpp
     src/command.cpp
-    src/traycommand.cpp
 )
 
 # find_package(Qt5Widgets)
@@ -50,6 +48,7 @@ add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
 target_include_directories(${APPLICATION_NAME} PUBLIC "src") 
 
 target_link_libraries(${APPLICATION_NAME}
+    C-Troll-Common
     Qt5::Network
 )
 

@@ -6,6 +6,7 @@ if (APPLE)
     set(CMAKE_PREFIX_PATH "~/Qt/5.6/clang_64/lib/cmake")
 endif ()
 
+add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(tray)
 
