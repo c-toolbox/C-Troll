@@ -5,6 +5,9 @@
 #include <QString>
 
 struct TrayCommand {
+    /// Default constructor
+    TrayCommand() = default;
+
     /**
      * Creates a TrayCommand from the passed \p document.
      * \param document The QJsonDocument that contains the information about this

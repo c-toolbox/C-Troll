@@ -99,7 +99,7 @@ void Application::sendMessage(TrayCommand command, const Cluster& cluster) {
         QTcpSocket socket;
         socket.connectToHost(node.ipAddress, node.port);
         bool success = socket.waitForConnected();
-        QString message = command.json();
+        QString message = QString::fromUtf8(command.toJson().toJson());
         socket.write(message.toUtf8());
         socket.flush();
     }
