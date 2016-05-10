@@ -97,12 +97,9 @@ void Application::sendMessage(TrayCommand command, const Cluster& cluster) {
         QTcpSocket socket;
         socket.connectToHost(node.ipAddress, node.port);
         bool success = socket.waitForConnected();
-        //QString message = command.json();
-         QString message("&Fooar");
+        QString message = command.json();
         socket.write(message.toUtf8());
-        QObject().thread()->usleep(1000 * 1000 * 2);
-        bool bb = socket.waitForReadyRead();
-        QByteArray b = socket.readAll();
-        qDebug() << QString::fromLatin1(b);
+
+        socket.flush();
     }
 }
