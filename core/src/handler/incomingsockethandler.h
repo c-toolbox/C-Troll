@@ -22,4 +22,4 @@ private:
     QVector<QTcpSocket*> _sockets;
 };
 
-#endif __INCOMINGSOCKETHANDLER_H__
+#endif // __INCOMINGSOCKETHANDLER_H__

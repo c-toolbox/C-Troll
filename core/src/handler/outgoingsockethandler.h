@@ -10,4 +10,4 @@ public:
  
 };
 
-#endif __OUTGOINGSOCKETHANDLER_H__
+#endif // __OUTGOINGSOCKETHANDLER_H__
