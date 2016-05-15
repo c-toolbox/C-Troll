@@ -21,8 +21,8 @@ Application::Application(QString configurationFile) {
     QString clusterPath = jsonObject.value("clusterPath").toString();
     int listeningPort = jsonObject.value("listeningPort").toInt();
 
-    _programHandler.loadFromDirectory(programPath);
-    _clusterHandler.loadFromDirectory(clusterPath);
+    _programs = loadProgramsFromDirectory(programPath);
+    _clusters = loadClustersFromDirectory(clusterPath);
     _incomingSocketHandler.initialize(listeningPort);
 
     connect(
@@ -42,25 +42,25 @@ void Application::incomingMessage(QString message) {
 
     // Get the correct program
     auto iProgram = std::find_if(
-        _programHandler.programs().begin(),
-        _programHandler.programs().end(),
+        _programs.begin(),
+        _programs.end(),
         [&](const Program& p) {
         return p.id() == cmd.application;
     }
     );
     // At the moment, we just crash if we can't find the program
-    assert(iProgram != _programHandler.programs().end());
+    assert(iProgram != _programs.end());
 
     // Get the correct Cluster
     auto iCluster = std::find_if(
-        _clusterHandler.clusters().begin(),
-        _clusterHandler.clusters().end(),
+        _clusters.begin(),
+        _clusters.end(),
         [&](const Cluster& c) {
         return c.name() == cmd.cluster;
     }
     );
     // At the moment, we just crash if we can't find the cluster
-    assert(iCluster != _clusterHandler.clusters().end());
+    assert(iCluster != _clusters.end());
 
     // Check if the program is valid for the selected cluster
     // At the moment, we just crash if the cluster is not valid

@@ -3,8 +3,8 @@
 
 #include <QObject>
 
-#include "program/programhandler.h"
-#include "cluster/clusterhandler.h"
+#include "cluster.h"
+#include "program.h"
 #include "handler/incomingsockethandler.h"
 #include "handler/outgoingsockethandler.h"
 #include "traycommand.h"
@@ -19,8 +19,8 @@ private:
 
     void sendMessage(TrayCommand command, const Cluster& cluster);
 
-    ProgramHandler _programHandler;
-    ClusterHandler _clusterHandler;
+    Programs _programs;
+    Clusters _clusters;
     IncomingSocketHandler _incomingSocketHandler;
     OutgoingSocketHandler _outgoingSocketHandler;
 };

@@ -1,21 +1,17 @@
 set(HEADER_FILES
-    src/cluster/cluster.h
-    src/cluster/clusterhandler.h
+    src/cluster.h
     src/handler/incomingsockethandler.h
     src/handler/outgoingsockethandler.h
-    src/program/program.h
-    src/program/programhandler.h
+    src/program.h
     src/application.h
     src/command.h
 )
 
 set(SOURCE_FILES
-    src/cluster/cluster.cpp
-    src/cluster/clusterhandler.cpp
+    src/cluster.cpp
     src/handler/incomingsockethandler.cpp
     src/handler/outgoingsockethandler.cpp
-    src/program/program.cpp
-    src/program/programhandler.cpp
+    src/program.cpp
     src/application.cpp
     src/main.cpp
     src/command.cpp

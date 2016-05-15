@@ -24,7 +24,6 @@ int main(int argc, char** argv) {
     
     // Load configuration file
     QString configurationFile = QDir::current().relativeFilePath("config.json");
-    qDebug() << configurationFile;
     if (argc == 2) {
         configurationFile = QString::fromLatin1(argv[1]);
     }

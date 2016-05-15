@@ -1,8 +1,27 @@
-#include "program/program.h"
+#include "program.h"
 
+#include <QDirIterator>
 #include <QJsonArray>
 #include <cassert>
-#include <iostream>
+
+
+Program loadProgram(QString jsonFile, QString baseDirectory) {
+    QDir dir(baseDirectory);
+    dir.cdUp();
+
+    QString identifier = dir.relativeFilePath(jsonFile);
+    // The extension is only 5 characters ('.json')
+    // so we can just remove it
+    identifier = identifier.left(identifier.size() - 5);
+
+    QFile f(jsonFile);
+    f.open(QFile::ReadOnly);
+    QJsonDocument d = QJsonDocument::fromJson(f.readAll());
+    QJsonObject obj = d.object();
+    obj["id"] = identifier;
+    return Program(d.object());
+}
+
 
 TrayCommand programToTrayCommand(const Program& program, QString configuration) {
     TrayCommand t;
@@ -11,6 +30,17 @@ TrayCommand programToTrayCommand(const Program& program, QString configuration) 
     t.commandlineParameters = program.commandlineParameters() + " " + configuration;
 
     return t;
+}
+
+Programs loadProgramsFromDirectory(QString directory) {
+    Programs programs;
+    // First, get all the *.json files from the directory and subdirectories
+    QDirIterator it(directory, QStringList() << "*.json", QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        Program a = loadProgram(it.next(), directory);
+        programs.push_back(a);
+    }
+    return programs;
 }
 
 Program::Program(const QJsonObject& jsonObject) {

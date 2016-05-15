@@ -10,6 +10,7 @@
 
 class Program {
 public:
+    Program() = default;
     Program(const QJsonObject& jsonObject);
     
     struct Configuration {
@@ -44,5 +45,9 @@ private:
 };
 
 TrayCommand programToTrayCommand(const Program& program, QString configuration = "");
+
+using Programs = QVector<Program>;
+
+Programs loadProgramsFromDirectory(QString directory);
 
 #endif // __PROGRAM_H__

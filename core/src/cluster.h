@@ -6,6 +6,7 @@
 
 class Cluster {
 public:
+    Cluster() = default;
     Cluster(const QJsonObject& jsonObject);
     
     struct Node {
@@ -18,10 +19,12 @@ public:
     const QList<Node>& nodes() const;
     
 private:
-    friend QDebug operator<<(QDebug debug, const Cluster& cluster);
-    
     QString _name;
     QList<Node> _nodes;
 };
+
+using Clusters = QVector<Cluster>;
+
+Clusters loadClustersFromDirectory(QString directory);
 
 #endif // __CLUSTER_H__
