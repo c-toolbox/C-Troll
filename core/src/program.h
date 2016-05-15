@@ -1,10 +1,10 @@
 #ifndef __PROGRAM_H__
 #define __PROGRAM_H__
 
-#include <QDebug>
 #include <QJsonObject>
 #include <QList>
 #include <QString>
+#include <QVector>
 
 #include "traycommand.h"
 

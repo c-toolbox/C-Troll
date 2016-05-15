@@ -3,7 +3,6 @@
 #include <QDirIterator>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <QJsonObject>
 #include <QVector>
 #include <cassert>
 

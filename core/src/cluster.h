@@ -1,8 +1,8 @@
 #ifndef __CLUSTER_H__
 #define __CLUSTER_H__
 
-#include <QDebug>
 #include <QList>
+#include <QJsonObject>
 
 class Cluster {
 public:
