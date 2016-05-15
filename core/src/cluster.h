@@ -3,10 +3,12 @@
 
 #include <QList>
 #include <QJsonObject>
+#include <QTcpSocket>
+
+#include <memory>
 
 class Cluster {
 public:
-    Cluster() = default;
     Cluster(const QJsonObject& jsonObject);
     
     struct Node {
@@ -23,7 +25,7 @@ private:
     QList<Node> _nodes;
 };
 
-using Clusters = QVector<Cluster>;
+using Clusters = QList<Cluster>;
 
 Clusters loadClustersFromDirectory(QString directory);
 

@@ -2,11 +2,26 @@
 #define __OUTGOINGSOCKETHANDLER_H__
 
 #include <QObject>
-#include <QTcpServer>
+
+#include <QMap>
+#include <QTcpSocket>
+
+#include <memory>
+
+#include "cluster.h"
 
 class OutgoingSocketHandler : public QObject {
 Q_OBJECT
 public:
+    void initialize(const QList<Cluster>& clusters);
+
+    void sendMessage(const Cluster& cluster, QString message) const;
+
+private:
+    using HashValue = QString;
+    HashValue hash(const Cluster& cluster, const Cluster::Node& node) const;
+
+    std::map<HashValue, std::unique_ptr<QTcpSocket>> _sockets;
  
 };
 

@@ -13,14 +13,14 @@ Cluster::Cluster(const QJsonObject& jsonObject) {
     QJsonArray nodesArray = jsonObject.value("nodes").toArray();
     _nodes.clear();
     for (const QJsonValue& v : nodesArray) {
-        Node node;
         QJsonObject a = v.toObject();
         assert(a.size() == 3);
         
-        node.name = a.value("name").toString();
-        node.ipAddress = a.value("ip").toString();
-        node.port = a.value("port").toInt();
-        _nodes.push_back(node);
+        QString name = a.value("name").toString();
+        QString ipAddress = a.value("ip").toString();
+        int port = a.value("port").toInt();
+
+        _nodes.push_back({ name, ipAddress, port });
     }
 }
 
@@ -43,7 +43,12 @@ Cluster loadCluster(QString jsonFile) {
 Clusters loadClustersFromDirectory(QString directory) {
     Clusters result;
     // First, get all the *.json files from the directory and subdirectories
-    QDirIterator it(directory, QStringList() << "*.json", QDir::Files, QDirIterator::Subdirectories);
+    QDirIterator it(
+        directory,
+        QStringList() << "*.json",
+        QDir::Files,
+        QDirIterator::Subdirectories
+    );
     while (it.hasNext()) {
         Cluster c = loadCluster(it.next());
         result.push_back(c);

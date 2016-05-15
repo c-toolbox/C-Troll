@@ -23,7 +23,9 @@ Application::Application(QString configurationFile) {
 
     _programs = loadProgramsFromDirectory(programPath);
     _clusters = loadClustersFromDirectory(clusterPath);
+
     _incomingSocketHandler.initialize(listeningPort);
+    _outgoingSocketHandler.initialize(_clusters);
 
     connect(
         &_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
@@ -74,7 +76,7 @@ void Application::incomingMessage(QString message) {
 
     // Get the correct configuration, if it exists
     if (cmd.configuration.isEmpty()) {
-        sendMessage(programToTrayCommand(*iProgram), *iCluster);
+        sendMessage(*iCluster, programToTrayCommand(*iProgram));
     }
     else {
         auto iConfiguration = std::find_if(
@@ -88,19 +90,12 @@ void Application::incomingMessage(QString message) {
         assert(iConfiguration != iProgram->configurations().end());
 
         sendMessage(
-            programToTrayCommand(*iProgram, iConfiguration->commandlineParameters),
-            *iCluster
+            *iCluster,
+            programToTrayCommand(*iProgram, iConfiguration->commandlineParameters)
         );
     }
 }
 
-void Application::sendMessage(TrayCommand command, const Cluster& cluster) {
-    for (const Cluster::Node& node : cluster.nodes()) {
-        QTcpSocket socket;
-        socket.connectToHost(node.ipAddress, node.port);
-        bool success = socket.waitForConnected();
-        QString message = QString::fromUtf8(command.toJson().toJson());
-        socket.write(message.toUtf8());
-        socket.flush();
-    }
+void Application::sendMessage(const Cluster& cluster, TrayCommand command) {
+    _outgoingSocketHandler.sendMessage(cluster, command.toJson().toJson());
 }

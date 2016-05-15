@@ -35,7 +35,12 @@ TrayCommand programToTrayCommand(const Program& program, QString configuration) 
 Programs loadProgramsFromDirectory(QString directory) {
     Programs programs;
     // First, get all the *.json files from the directory and subdirectories
-    QDirIterator it(directory, QStringList() << "*.json", QDir::Files, QDirIterator::Subdirectories);
+    QDirIterator it(
+        directory,
+        QStringList() << "*.json",
+        QDir::Files,
+        QDirIterator::Subdirectories
+    );
     while (it.hasNext()) {
         Program a = loadProgram(it.next(), directory);
         programs.push_back(a);

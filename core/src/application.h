@@ -17,7 +17,7 @@ public:
 private:
     void incomingMessage(QString message);
 
-    void sendMessage(TrayCommand command, const Cluster& cluster);
+    void sendMessage(const Cluster& cluster, TrayCommand command);
 
     Programs _programs;
     Clusters _clusters;
