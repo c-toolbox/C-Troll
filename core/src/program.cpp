@@ -4,6 +4,23 @@
 #include <QJsonArray>
 #include <cassert>
 
+#include "jsonsupport.h"
+
+namespace {
+    const QString KeyId = "id";
+    const QString KeyName = "name";
+    const QString KeyExecutable = "executable";
+    const QString KeyBaseDirectory = "baseDirectory";
+    const QString KeyFileSynchronization = "fileSynchronization";
+    const QString KeyCommandlineParameters = "commandlineParameters";
+    const QString KeyCurrentWorkingDirectory = "currentWorkingDirectory";
+    const QString KeyTags = "tags";
+    const QString KeyClusters = "clusters";
+    const QString KeyConfigurations = "configurations";
+
+    const QString KeyConfigurationIdentifier = "identifier";
+    const QString KeyConfigurationParameters = "commandlineParameters";
+}
 
 Program loadProgram(QString jsonFile, QString baseDirectory) {
     QDir dir(baseDirectory);
@@ -49,22 +66,25 @@ Programs loadProgramsFromDirectory(QString directory) {
 }
 
 Program::Program(const QJsonObject& jsonObject) {
-    // jsonObject.contains(...) -> bool
-    _id = jsonObject.value("id").toString();
-    _name = jsonObject.value("name").toString();
-    _executable = jsonObject.value("executable").toString();
-    _baseDirectory = jsonObject.value("baseDirectory").toString();
-    _fileSynchronization = jsonObject.value("fileSynchronization").toBool();
-    _commandlineParameters = jsonObject.value("commandlineParameters").toString();
-    _currentWorkingDirectory = jsonObject.value("currentWorkingDirectory").toString();
+    _id = json::testAndReturnString(jsonObject, KeyId);
+    _name = json::testAndReturnString(jsonObject, KeyName);
+    _executable = json::testAndReturnString(jsonObject, KeyExecutable);
+    _baseDirectory = json::testAndReturnString(jsonObject, KeyBaseDirectory);
+    _fileSynchronization = json::testAndReturnBool(jsonObject, KeyFileSynchronization);
+    _commandlineParameters = json::testAndReturnString(
+        jsonObject, KeyCommandlineParameters
+    );
+    _currentWorkingDirectory = json::testAndReturnString(
+        jsonObject, KeyCurrentWorkingDirectory
+    );
     
-    QJsonArray tagsArray = jsonObject.value("tags").toArray();
+    QJsonArray tagsArray = json::testAndReturnArray(jsonObject, KeyTags);
     _tags.clear();
     for (const QJsonValue& v : tagsArray) {
         _tags.push_back(v.toString());
     }
 
-    QJsonValue v = jsonObject.value("cluster");
+    QJsonValue v = jsonObject.value(KeyClusters);
     if (v.isArray()) {
         QJsonArray clusterArray = v.toArray();
         for (const QJsonValue& v : clusterArray) {
@@ -72,15 +92,21 @@ Program::Program(const QJsonObject& jsonObject) {
         }
     }
     
-    QJsonArray configurationArray = jsonObject.value("configurations").toArray();
+    QJsonArray configurationArray = json::testAndReturnArray(
+        jsonObject, KeyConfigurations
+    );
     _configurations.clear();
     for (const QJsonValue& v : configurationArray) {
         Configuration conf;
-        QJsonObject a = v.toObject();
-        assert(a.size() == 2);
+        QJsonObject obj = v.toObject();
+        assert(obj.size() == 2);
         
-        conf.identifier = a.value("identifier").toString();
-        conf.commandlineParameters = a.value("commandlineParamters").toString();
+        conf.identifier = json::testAndReturnString(
+            obj, KeyConfigurationIdentifier
+        );
+        conf.commandlineParameters = json::testAndReturnString(
+            obj, KeyConfigurationParameters
+        );
         
         _configurations.push_back(conf);
     }

@@ -11,11 +11,22 @@
 
 #include <assert.h>
 
+namespace {
+    const QString KeyApplicationPath = "applicationPath";
+    const QString KeyClusterPath = "clusterPath";
+    const QString KeyListeningPort = "listeningPort";
+}
+
 Application::Application(QString configurationFile) {
     QFile f(configurationFile);
     f.open(QFile::ReadOnly);
     QJsonDocument d = QJsonDocument::fromJson(f.readAll());
     QJsonObject jsonObject = d.object();
+
+    auto testAndSet = [&jsonObject](const QString& key) -> QString {
+
+    };
+
 
     QString programPath = jsonObject.value("applicationPath").toString();
     QString clusterPath = jsonObject.value("clusterPath").toString();

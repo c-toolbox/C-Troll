@@ -10,7 +10,7 @@
         "tag1",
         "tag2"
     ],
-    "cluster": [
+    "clusters": [
         "alpha"
     ]
     "configurations": [

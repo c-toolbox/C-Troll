@@ -6,20 +6,30 @@
 #include <QVector>
 #include <cassert>
 
+#include "jsonsupport.h"
+
+namespace {
+    const QString KeyName = "name";
+    const QString KeyNodes = "nodes";
+
+    const QString KeyNodeName = "name";
+    const QString KeyNodeIpAddress = "ip";
+    const QString KeyNodePort = "port";
+}
+
 Cluster::Cluster(const QJsonObject& jsonObject) {
-    // jsonObject.contains(...) -> bool
-    _name = jsonObject.value("name").toString();
+    _name = json::testAndReturnString(jsonObject, KeyName);
     
-    QJsonArray nodesArray = jsonObject.value("nodes").toArray();
+    QJsonArray nodesArray = json::testAndReturnArray(jsonObject, KeyNodes);
     _nodes.clear();
     for (const QJsonValue& v : nodesArray) {
-        QJsonObject a = v.toObject();
-        assert(a.size() == 3);
-        
-        QString name = a.value("name").toString();
-        QString ipAddress = a.value("ip").toString();
-        int port = a.value("port").toInt();
+        QJsonObject obj = v.toObject();
+        assert(obj.size() == 3);
 
+        QString name = json::testAndReturnString(obj, KeyNodeName);
+        QString ipAddress = json::testAndReturnString(obj, KeyNodeIpAddress);
+        int port = json::testAndReturnInt(obj, KeyNodePort);
+        
         _nodes.push_back({ name, ipAddress, port });
     }
 }

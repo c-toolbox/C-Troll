@@ -1,8 +1,10 @@
 set(HEADER_FILES
+    include/jsonsupport.h
     include/traycommand.h
 )
 
 set(SOURCE_FILES
+    src/jsonsupport.cpp
     src/traycommand.cpp
 )
 
