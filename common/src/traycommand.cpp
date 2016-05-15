@@ -12,13 +12,15 @@ namespace {
     const QString KeyCommandlineArguments = "commandlineArguments";
 }
 
+namespace common {
+
 TrayCommand::TrayCommand(const QJsonDocument& document) {
     QJsonObject obj = document.object();
 
-    executable = json::testAndReturnString(obj, KeyExecutable);
-    baseDirectory = json::testAndReturnString(obj, KeyBaseDirectory);
-    currentWorkingDirectory = json::testAndReturnString(obj, KeyCurrentWorkingDirectory);
-    commandlineParameters = json::testAndReturnString(obj, KeyCommandlineArguments);
+    executable = common::testAndReturnString(obj, KeyExecutable);
+    baseDirectory = common::testAndReturnString(obj, KeyBaseDirectory);
+    currentWorkingDirectory = common::testAndReturnString(obj, KeyCurrentWorkingDirectory);
+    commandlineParameters = common::testAndReturnString(obj, KeyCommandlineArguments);
 }
 
 QJsonDocument TrayCommand::toJson() const {
@@ -30,3 +32,5 @@ QJsonDocument TrayCommand::toJson() const {
 
     return QJsonDocument(obj);
 }
+
+} // namespace common

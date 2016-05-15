@@ -40,8 +40,8 @@ Program loadProgram(QString jsonFile, QString baseDirectory) {
 }
 
 
-TrayCommand programToTrayCommand(const Program& program, QString configuration) {
-    TrayCommand t;
+common::TrayCommand programToTrayCommand(const Program& program, QString configuration) {
+    common::TrayCommand t;
     t.executable = program.executable();
     t.baseDirectory = program.baseDirectory();
     t.commandlineParameters = program.commandlineParameters() + " " + configuration;
@@ -66,19 +66,19 @@ Programs loadProgramsFromDirectory(QString directory) {
 }
 
 Program::Program(const QJsonObject& jsonObject) {
-    _id = json::testAndReturnString(jsonObject, KeyId);
-    _name = json::testAndReturnString(jsonObject, KeyName);
-    _executable = json::testAndReturnString(jsonObject, KeyExecutable);
-    _baseDirectory = json::testAndReturnString(jsonObject, KeyBaseDirectory);
-    _fileSynchronization = json::testAndReturnBool(jsonObject, KeyFileSynchronization);
-    _commandlineParameters = json::testAndReturnString(
+    _id = common::testAndReturnString(jsonObject, KeyId);
+    _name = common::testAndReturnString(jsonObject, KeyName);
+    _executable = common::testAndReturnString(jsonObject, KeyExecutable);
+    _baseDirectory = common::testAndReturnString(jsonObject, KeyBaseDirectory);
+    _fileSynchronization = common::testAndReturnBool(jsonObject, KeyFileSynchronization);
+    _commandlineParameters = common::testAndReturnString(
         jsonObject, KeyCommandlineParameters
     );
-    _currentWorkingDirectory = json::testAndReturnString(
+    _currentWorkingDirectory = common::testAndReturnString(
         jsonObject, KeyCurrentWorkingDirectory
     );
     
-    QJsonArray tagsArray = json::testAndReturnArray(jsonObject, KeyTags);
+    QJsonArray tagsArray = common::testAndReturnArray(jsonObject, KeyTags);
     _tags.clear();
     for (const QJsonValue& v : tagsArray) {
         _tags.push_back(v.toString());
@@ -92,7 +92,7 @@ Program::Program(const QJsonObject& jsonObject) {
         }
     }
     
-    QJsonArray configurationArray = json::testAndReturnArray(
+    QJsonArray configurationArray = common::testAndReturnArray(
         jsonObject, KeyConfigurations
     );
     _configurations.clear();
@@ -101,10 +101,10 @@ Program::Program(const QJsonObject& jsonObject) {
         QJsonObject obj = v.toObject();
         assert(obj.size() == 2);
         
-        conf.identifier = json::testAndReturnString(
+        conf.identifier = common::testAndReturnString(
             obj, KeyConfigurationIdentifier
         );
-        conf.commandlineParameters = json::testAndReturnString(
+        conf.commandlineParameters = common::testAndReturnString(
             obj, KeyConfigurationParameters
         );
         

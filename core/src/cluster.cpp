@@ -18,17 +18,17 @@ namespace {
 }
 
 Cluster::Cluster(const QJsonObject& jsonObject) {
-    _name = json::testAndReturnString(jsonObject, KeyName);
+    _name = common::testAndReturnString(jsonObject, KeyName);
     
-    QJsonArray nodesArray = json::testAndReturnArray(jsonObject, KeyNodes);
+    QJsonArray nodesArray = common::testAndReturnArray(jsonObject, KeyNodes);
     _nodes.clear();
     for (const QJsonValue& v : nodesArray) {
         QJsonObject obj = v.toObject();
         assert(obj.size() == 3);
 
-        QString name = json::testAndReturnString(obj, KeyNodeName);
-        QString ipAddress = json::testAndReturnString(obj, KeyNodeIpAddress);
-        int port = json::testAndReturnInt(obj, KeyNodePort);
+        QString name = common::testAndReturnString(obj, KeyNodeName);
+        QString ipAddress = common::testAndReturnString(obj, KeyNodeIpAddress);
+        int port = common::testAndReturnInt(obj, KeyNodePort);
         
         _nodes.push_back({ name, ipAddress, port });
     }

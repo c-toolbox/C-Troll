@@ -1,9 +1,10 @@
+
 #ifndef __JSONSUPPORT_H__
 #define __JSONSUPPORT_H__
 
 #include <QJsonObject>
 
-namespace json {
+namespace common {
 
 /**
  * Tests whether the \p key exists in the QJsonObject \p obj and if it is of the string
@@ -49,6 +50,6 @@ QJsonArray testAndReturnArray(const QJsonObject& obj, const QString& key);
  */
 bool testAndReturnBool(const QJsonObject& obj, const QString& key);
 
-} // namespace json
+} // namespace common
 
 #endif // __JSONSUPPORT_H__

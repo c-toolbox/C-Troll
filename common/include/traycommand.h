@@ -4,6 +4,8 @@
 #include <QJsonDocument>
 #include <QString>
 
+namespace common {
+
 struct TrayCommand {
     /// Default constructor
     TrayCommand() = default;
@@ -16,7 +18,7 @@ struct TrayCommand {
      * wrong type
      */
     TrayCommand(const QJsonDocument& document);
-    
+
     /**
      * Converts the TrayCommand into a valid QJsonDocument object and returns it.
      * \return the QJsonDocument representing this TrayCommand
@@ -32,5 +34,7 @@ struct TrayCommand {
     /// The list of commandline parameters to be passed to the executable
     QString commandlineParameters;
 };
+
+} // namespace
 
 #endif // __TRAYCOMMAND_H__

@@ -44,7 +44,7 @@ private:
     QList<Configuration> _configurations; // List of all configurations
 };
 
-TrayCommand programToTrayCommand(const Program& program, QString configuration = "");
+common::TrayCommand programToTrayCommand(const Program& program, QString configuration = "");
 
 using Programs = QVector<Program>;
 

@@ -2,7 +2,7 @@
 
 #include <QJsonArray>
 
-namespace json {
+namespace common {
 
 QString testAndReturnString(const QJsonObject& obj, const QString& key) {
     if (!obj.contains(key)) {
@@ -64,4 +64,4 @@ bool testAndReturnBool(const QJsonObject& obj, const QString& key) {
     return obj[key].toBool();
 }
 
-} // namespace json
+} // namespace common
