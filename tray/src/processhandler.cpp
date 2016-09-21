@@ -5,8 +5,9 @@
 #include <trayprocessstatus.h>
 
 #include <QDebug>
-
 #include <QJsonDocument>
+
+#include <functional>
 
 template<class T>
 struct map_data_compare : public std::binary_function<typename T::value_type,
