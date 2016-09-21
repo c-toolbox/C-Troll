@@ -142,5 +142,10 @@ void Application::incomingMessage(QString message) {
 }
 
 void Application::sendMessage(const Cluster& cluster, common::TrayCommand command) {
-    _outgoingSocketHandler.sendMessage(cluster, command.toJson().toJson());
+    // We have to wrap the TrayCommand into a GenericMessage first
+    common::GenericMessage msg;
+    msg.type = common::TrayCommand::Type;
+    msg.payload = command.toJson();
+    
+    _outgoingSocketHandler.sendMessage(cluster, msg.toJson().toJson());
 }
