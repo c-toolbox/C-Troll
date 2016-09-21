@@ -27,7 +27,7 @@ private:
     void sendMessage(const Cluster& cluster, common::TrayCommand command);
 
     Programs _programs;
-    Clusters _clusters;
+    QList<Cluster> _clusters;
     IncomingSocketHandler _incomingSocketHandler;
     OutgoingSocketHandler _outgoingSocketHandler;
 };

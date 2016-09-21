@@ -6,6 +6,8 @@
 #include <QVector>
 #include <cassert>
 
+#include <QDebug>
+
 #include "jsonsupport.h"
 
 namespace {
@@ -76,8 +78,8 @@ Cluster loadCluster(QString jsonFile, QString baseDirectory) {
     return Cluster(obj);
 }
 
-Clusters loadClustersFromDirectory(QString directory) {
-    Clusters result;
+QList<Cluster> loadClustersFromDirectory(QString directory) {
+    QList<Cluster> result;
     // First, get all the *.json files from the directory and subdirectories
     QDirIterator it(
         directory,
