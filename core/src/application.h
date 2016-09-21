@@ -9,12 +9,16 @@
 #include "handler/outgoingsockethandler.h"
 #include "traycommand.h"
 
+struct CoreCommand;
+
 class Application : public QObject {
 public:
     Application(QString configurationFile);
 
 private:
     void incomingMessage(QString message);
+    
+    void handleIncomingCommand(CoreCommand cmd);
 
     void sendMessage(const Cluster& cluster, common::TrayCommand command);
 
