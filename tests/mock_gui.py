@@ -17,9 +17,9 @@ data['type'] = "GuiCommand"
 
 payload = {}
 payload['command'] = "Start"
-payload['application_identifier'] = "test"
+payload['application_identifier'] = "itunes"
 payload['configuration_identifier'] = ""
-payload['cluster_identifier'] = "alpha"
+payload['cluster_identifier'] = "mock"
 data['payload'] = payload
 s.send(bytearray(json.dumps(data), 'utf-8'))
 
