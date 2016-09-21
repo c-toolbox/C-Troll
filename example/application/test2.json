@@ -3,7 +3,6 @@
     "name": "Application name 2",
     "executable": "executable name 2",
     "baseDirectory": "base directory 2",
-    "fileSynchronization": true,
     "commandlineParameters": "commandline parameters 2",
     "currentWorkingDirectory": "current working directory 2",
     "tags": [
@@ -12,10 +11,12 @@
     ],
     "configurations": [
         {
+            "name": "Configuration 21",
             "identifier": "configuration identifier 12",
             "commandlineParameter": "commandline parameter 12"
         },        
         {
+            "name": "Configuration 22",
             "identifier": "configuration identifier 22",
             "commandlineParameter": "commandline parameter 22"
         }
