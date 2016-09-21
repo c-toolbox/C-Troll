@@ -38,6 +38,17 @@ int testAndReturnInt(const QJsonObject& obj, const QString& key);
  * \throw std::runtime_error If the \p key does not exist or if it is not a array
  */
 QJsonArray testAndReturnArray(const QJsonObject& obj, const QString& key);
+    
+/**
+ * Tests whether the \p key exists in the QJsonObject \p obj and if it is of the 
+ * document type. If it is, the value is returned, otherwise a
+ * <code>std::runtime_error</code> is raised.
+ * \param obj The QJsonObject from which the value is returned
+ * \param key The key to inspeect
+ * \return The value if the \p key exists and is an object
+ * \throw std::runtime_error If the \p key does not exist of if it is not an object
+ */
+QJsonObject testAndReturnObject(const QJsonObject& obj, const QString& key);
 
 /**
  * Tests whether the \p key exists in the QJsonObject \p obj and if it is of the boolean
