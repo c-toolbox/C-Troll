@@ -1,14 +1,14 @@
 #include "cluster.h"
 
+#include "jsonsupport.h"
+#include <logging.h>
+
 #include <QDirIterator>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QVector>
-#include <cassert>
 
-#include <logging.h>
-
-#include "jsonsupport.h"
+#include <assert.h>
 
 namespace {
     const QString KeyName = "name";

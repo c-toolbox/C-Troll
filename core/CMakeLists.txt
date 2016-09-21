@@ -4,7 +4,6 @@ set(HEADER_FILES
     src/handler/outgoingsockethandler.h
     src/program.h
     src/application.h
-    src/command.h
 )
 
 set(SOURCE_FILES
@@ -14,7 +13,6 @@ set(SOURCE_FILES
     src/program.cpp
     src/application.cpp
     src/main.cpp
-    src/command.cpp
 )
 
 # find_package(Qt5Widgets)

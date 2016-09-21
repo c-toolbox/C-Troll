@@ -7,20 +7,20 @@
 void IncomingSocketHandler::initialize(quint16 port) {
     _server.listen(QHostAddress::Any, port);
 
-    connect(
+    QObject::connect(
         &_server, &QTcpServer::newConnection,
-        this, &IncomingSocketHandler::newConnection
+        [this]() { newConnection(); }
     );
 }
 
 void IncomingSocketHandler::newConnection() {
     while (_server.hasPendingConnections()) {
         QTcpSocket* socket = _server.nextPendingConnection();
-        connect(
+        QObject::connect(
             socket, &QTcpSocket::readyRead,
             [=]() { readyRead(socket); }
         );
-        connect(
+        QObject::connect(
             socket, &QTcpSocket::disconnected,
             [=]() { disconnectedConnection(socket); }
         );
@@ -38,6 +38,7 @@ void IncomingSocketHandler::readyRead(QTcpSocket* socket) {
 }
 
 void IncomingSocketHandler::disconnectedConnection(QTcpSocket* socket) {
+    assert(socket);
     auto it = std::find(_sockets.begin(), _sockets.end(), socket);
     assert(it != _sockets.end());
     _sockets.erase(it);

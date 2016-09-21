@@ -1,8 +1,12 @@
 #include "outgoingsockethandler.h"
 
+#include <QTcpSocket>
 #include <QTimer>
 
 #include <assert.h>
+
+// This is just here so that we can use a forward declaration in the header file
+OutgoingSocketHandler::~OutgoingSocketHandler() = default;
 
 OutgoingSocketHandler::HashValue OutgoingSocketHandler::hash(
     const Cluster& cluster, const Cluster::Node& node) const
@@ -73,6 +77,8 @@ void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
 }
 
 void OutgoingSocketHandler::sendMessage(const Cluster& cluster, QString msg) const {
+    assert(!msg.isEmpty());
+
     for (const Cluster::Node& node : cluster.nodes()) {
         qDebug() << "Node: " << node.name << node.ipAddress << node.port;
         HashValue h = hash(cluster, node);

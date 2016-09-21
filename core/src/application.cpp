@@ -1,6 +1,5 @@
 #include "application.h"
 
-#include "command.h"
 #include <guicommand.h>
 #include <logging.h>
 #include <genericmessage.h>
@@ -41,14 +40,14 @@ Application::Application(QString configurationFile) {
     // The outgoing socket handler takes care of messages to the Tray
     _outgoingSocketHandler.initialize(_clusters);
 
-    connect(
+    QObject::connect(
         &_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
-        this, &Application::incomingMessage
+        [this](QString message) { incomingMessage(message); }
     );
     
-    connect(
-            &_incomingSocketHandler, &IncomingSocketHandler::newConnectionEstablished,
-            this, &Application::sendInitializationInformation
+    QObject::connect(
+        &_incomingSocketHandler, &IncomingSocketHandler::newConnectionEstablished,
+        [this](QTcpSocket* socket) { sendInitializationInformation(socket); }
     );
 }
 
@@ -57,94 +56,92 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
     Log("Application: " + cmd.applicationId);
     Log("Configuration: " + cmd.configurationId);
     Log("Cluster: " + cmd.clusterId);
-//    if (cmd.command == "start") {
-        // Find the correct program to start
-        auto iProgram = std::find_if(
-            _programs.begin(),
-            _programs.end(),
-             [&](const Program& p) {
-                 return p.id() == cmd.applicationId;
-             }
-        );
+
+    auto iProgram = std::find_if(
+        _programs.begin(),
+        _programs.end(),
+            [&](const Program& p) {
+                return p.id() == cmd.applicationId;
+            }
+    );
         
-        if (iProgram == _programs.end()) {
-            // We didn't find the program you were looking for
-            // TODO(alex): Signal this back to the GUI
-            Log("Could not find application id " + cmd.applicationId);
-            return;
-        }
+    if (iProgram == _programs.end()) {
+        // We didn't find the program you were looking for
+        // TODO(alex): Signal this back to the GUI
+        Log("Could not find application id " + cmd.applicationId);
+        return;
+    }
     
-        // Get the correct Cluster
-        auto iCluster = std::find_if(
-            _clusters.begin(),
-            _clusters.end(),
-            [&](const Cluster& c) {
-                return c.identifier() == cmd.clusterId;
-            }
-        );
-            
-        if (iCluster == _clusters.end()) {
-            // We didn't find the cluster you were looking for
-            // TODO(alex): Signal this back to the GUI
-            Log("Could not find cluster id " + cmd.clusterId);
-            return;
+    // Get the correct Cluster
+    auto iCluster = std::find_if(
+        _clusters.begin(),
+        _clusters.end(),
+        [&](const Cluster& c) {
+            return c.identifier() == cmd.clusterId;
         }
-        
-        auto validCluster = [this](const Program& p, const Cluster& c) -> bool {
-            if (p.clusters().empty()) {
-                return true;
-            }
-            else {
-                const QStringList& clusters = p.clusters();
-                auto it = std::find_if(
-                    clusters.begin(),
-                    clusters.end(),
-                    [&](const QString& s) { return c.identifier() == s; }
-                );
-                return it != clusters.end();
-            }
-        };
-        
-        if (!validCluster(*iProgram, *iCluster)) {
-            // We tried to start an application on a cluster for which the application
-            // is not configured
-            // TODO(alex): Signal this back to the GUI
-            Log(
-                "Application id " + cmd.applicationId +
-                " cannot be started on cluster id " + cmd.clusterId
-            );
-            return;
-        }
+    );
             
-        // Get the correct configuration, if it exists
-        if (cmd.configurationId.isEmpty()) {
-            sendMessage(*iCluster, programToTrayCommand(*iProgram), cmd.command);
+    if (iCluster == _clusters.end()) {
+        // We didn't find the cluster you were looking for
+        // TODO(alex): Signal this back to the GUI
+        Log("Could not find cluster id " + cmd.clusterId);
+        return;
+    }
+        
+    auto validCluster = [this](const Program& p, const Cluster& c) -> bool {
+        if (p.clusters().empty()) {
+            return true;
         }
         else {
-            auto iConfiguration = std::find_if(
-                iProgram->configurations().begin(),
-                iProgram->configurations().end(),
-                [&](const Program::Configuration& c) {
-                   return c.identifier == cmd.configurationId;
-                }
+            const QStringList& clusters = p.clusters();
+            auto it = std::find_if(
+                clusters.begin(),
+                clusters.end(),
+                [&](const QString& s) { return c.identifier() == s; }
             );
-            
-            if (iConfiguration == iProgram->configurations().end()) {
-                // The requested configuration does not exist for the application
-                // TODO(alex): Signal this back to the GUI
-                Log(
-                    "The configuration " + cmd.configurationId +
-                    " does not exist for the application id " + cmd.applicationId
-                );
-                return;
-                
-            }
-            sendMessage(
-                *iCluster,
-                programToTrayCommand(*iProgram, iConfiguration->commandlineParameters), cmd.command
-            );
+            return it != clusters.end();
         }
-//    }
+    };
+        
+    if (!validCluster(*iProgram, *iCluster)) {
+        // We tried to start an application on a cluster for which the application
+        // is not configured
+        // TODO(alex): Signal this back to the GUI
+        Log(
+            "Application id " + cmd.applicationId +
+            " cannot be started on cluster id " + cmd.clusterId
+        );
+        return;
+    }
+            
+    // Get the correct configuration, if it exists
+    if (cmd.configurationId.isEmpty()) {
+        sendMessage(*iCluster, programToTrayCommand(*iProgram), cmd.command);
+    }
+    else {
+        auto iConfiguration = std::find_if(
+            iProgram->configurations().begin(),
+            iProgram->configurations().end(),
+            [&](const Program::Configuration& c) {
+                return c.identifier == cmd.configurationId;
+            }
+        );
+            
+        if (iConfiguration == iProgram->configurations().end()) {
+            // The requested configuration does not exist for the application
+            // TODO(alex): Signal this back to the GUI
+            Log(
+                "The configuration " + cmd.configurationId +
+                " does not exist for the application id " + cmd.applicationId
+            );
+            return;
+                
+        }
+        sendMessage(
+            *iCluster,
+            programToTrayCommand(*iProgram, iConfiguration->commandlineParameters), cmd.command
+        );
+    }
 }
 
 void Application::incomingMessage(QString message) {
@@ -161,7 +158,7 @@ void Application::incomingMessage(QString message) {
             handleIncomingCommand(common::GuiCommand(QJsonDocument(msg.payload)));
         }
     } catch (const std::runtime_error& e) {
-        qDebug() << "Error with incoming message: " << e.what();
+        Log(QString("Error with incoming message: ") + e.what());
     }
 }
 

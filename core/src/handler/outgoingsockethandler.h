@@ -3,16 +3,20 @@
 
 #include <QObject>
 
-#include <QMap>
-#include <QTcpSocket>
+#include "cluster.h"
 
+#include <QMap>
+
+#include <map>
 #include <memory>
 
-#include "cluster.h"
+class QTcpSocket;
 
 class OutgoingSocketHandler : public QObject {
 Q_OBJECT
 public:
+    ~OutgoingSocketHandler();
+
     void initialize(const QList<Cluster>& clusters);
 
     void sendMessage(const Cluster& cluster, QString message) const;

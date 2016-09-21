@@ -1,8 +1,6 @@
 #ifndef __APPLICATION_H__
 #define __APPLICATION_H__
 
-#include <QObject>
-
 #include "cluster.h"
 #include "program.h"
 #include "handler/incomingsockethandler.h"
@@ -13,7 +11,7 @@ namespace common {
     struct GuiCommand;
 } // namespace common
 
-class Application : public QObject {
+class Application {
 public:
     Application(QString configurationFile);
 

@@ -27,19 +27,17 @@ public:
      * Cluster::Nodes, each with the following values:
      * \c name <string> The human-readable name of the computer
      * \c ip <string> The IP address or hostname of the computer
-     * \c port <int> The port on which the Tray application on that computer is
-     * listening
-     * \param jsonObject The JSON object that contains the information for this
-     * cluster
+     * \c port <int> The port on which the Tray application on that computer is listening
+     * \param jsonObject The JSON object that contains the information for this cluster
      * \throw std::runtime_error If the \p jsonObject does not contain all necessary
      * keys or if at least one of the keys has the wrong type
      */
     Cluster(const QJsonObject& jsonObject);
     
     /**
-     * This struct contains information about individual computer nodes of the 
-     * cluster. Each node has a human-readable \m name, an \m ipAddress, and a \m port
-     * on which the Tray application is listening.
+     * This struct contains information about individual computer nodes of the cluster.
+     * Each node has a human-readable \m name, an \m ipAddress, and a \m port on which the
+     * Tray application is listening.
      */
     struct Node {
         /// The human readable name of the computer node
@@ -88,18 +86,16 @@ private:
 
 /**
  * This method walks the passed \p directory and looks for all <code>*.json</code>
- * files in it. Any \c JSON file in it will be interpreted as a cluster configuration
- * and returned.
- * \param directory The directory that is walked in search for <code>*.json</code>
- * files
+ * files in it. Any \c JSON file in it will be interpreted as a cluster configuration and
+ * returned.
+ * \param directory The directory that is walked in search for <code>*.json</code> files
  * \return A list of all Cluster%s that were found by walking the \p directory
  */
 QList<Cluster> loadClustersFromDirectory(QString directory);
 
 /**
- * This method converts a Cluster information into the
- * common::GuiInitialization::Cluster format so that it can be send to connected
- * GUIs.
+ * This method converts a Cluster information into the common::GuiInitialization::Cluster
+ * format so that it can be send to connected GUIs.
  * \param cluster The Cluster information that is to be converte
  * \return A common::GuiInitialization::Cluster structure that contains all relevant
  * information for the GUI initialization step
