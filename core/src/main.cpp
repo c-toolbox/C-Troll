@@ -5,11 +5,14 @@
 #include <iostream>
 
 #include "application.h"
+#include <logging.h>
 
 #define DEVELOP
 
 int main(int argc, char** argv) {
     QCoreApplication application(argc, argv);
+    
+    common::Log::initialize("core");
     
 #ifdef DEVELOP
     QDir current = QDir::current();

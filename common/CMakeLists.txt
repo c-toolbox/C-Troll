@@ -3,6 +3,7 @@ set(HEADER_FILES
     include/guicommand.h
     include/guiinitialization.h
     include/jsonsupport.h
+    include/logging.h
     include/traycommand.h
     include/trayprocesslogmessage.h
     include/trayprocessstatus.h
@@ -13,6 +14,7 @@ set(SOURCE_FILES
     src/guicommand.cpp
     src/guiinitialization.cpp
     src/jsonsupport.cpp
+    src/logging.cpp
     src/traycommand.cpp
     src/trayprocesslogmessage.cpp
     src/trayprocessstatus.cpp

@@ -2,6 +2,7 @@
 
 #include "command.h"
 #include <guicommand.h>
+#include <logging.h>
 #include <genericmessage.h>
 
 #include <QFile>
@@ -52,11 +53,10 @@ Application::Application(QString configurationFile) {
 }
 
 void Application::handleIncomingCommand(common::GuiCommand cmd) {
-    qDebug() << "\tCommand: " << cmd.command;
-    qDebug() << "\tApplication: " << cmd.applicationId;
-    qDebug() << "\tConfiguration: " << cmd.configurationId;
-    qDebug() << "\tCluster: " << cmd.clusterId;
-    
+    Log("Command: " + cmd.command);
+    Log("Application: " + cmd.applicationId);
+    Log("Configuration: " + cmd.configurationId);
+    Log("Cluster: " + cmd.clusterId);
     if (cmd.command == "Start") {
         // Find the correct program to start
         auto iProgram = std::find_if(
@@ -70,7 +70,7 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
         if (iProgram == _programs.end()) {
             // We didn't find the program you were looking for
             // TODO(alex): Signal this back to the GUI
-            qDebug() << "Could not find application id '" << cmd.applicationId << "'";
+            Log("Could not find application id " + cmd.applicationId);
             return;
         }
     
@@ -86,7 +86,7 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
         if (iCluster == _clusters.end()) {
             // We didn't find the cluster you were looking for
             // TODO(alex): Signal this back to the GUI
-            qDebug() << "Could not find cluster id '" << cmd.clusterId << "'";
+            Log("Could not find cluster id " + cmd.clusterId);
             return;
         }
         
@@ -109,8 +109,10 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
             // We tried to start an application on a cluster for which the application
             // is not configured
             // TODO(alex): Signal this back to the GUI
-            qDebug() << "Application id '" << cmd.applicationId << "' cannot be "
-                << "started on cluster id '" << cmd.clusterId << "'";
+            Log(
+                "Application id " + cmd.applicationId +
+                " cannot be started on cluster id " + cmd.clusterId
+            );
             return;
         }
             
@@ -130,8 +132,10 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
             if (iConfiguration == iProgram->configurations().end()) {
                 // The requested configuration does not exist for the application
                 // TODO(alex): Signal this back to the GUI
-                qDebug() << "The configuration '" << cmd.configurationId << "' does "
-                << "not exist for the application id '" << cmd.applicationId << "'";
+                Log(
+                    "The configuration " + cmd.configurationId +
+                    " does not exist for the application id " + cmd.applicationId
+                );
                 return;
                 
             }

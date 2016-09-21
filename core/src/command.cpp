@@ -11,8 +11,10 @@ Command::Command(QString command) {
     application = obj.value("application").toString();
     
     QJsonValue confObj = obj.value("configuration");
-    if (confObj.isString())
+    if (confObj.isString()) {
         configuration = confObj.toString();
-    else
+    }
+    else {
         configuration = "";
+    }
 }

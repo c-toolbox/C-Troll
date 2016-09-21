@@ -6,6 +6,7 @@
 #include <QJsonParseError>
 
 #include <cassert>
+#include <logging.h>
 
 #include "jsonsupport.h"
 
@@ -97,9 +98,8 @@ Programs loadProgramsFromDirectory(QString directory) {
     );
     while (it.hasNext()) {
         QString file = it.next();
-        qDebug() << "Loading application file " << file;
-        Program a = loadProgram(file, directory);
-        programs.push_back(a);
+        Log("Loading application file " + file);
+        programs.push_back(loadProgram(file, directory));
     }
     return programs;
 }
@@ -137,7 +137,6 @@ Program::Program(const QJsonObject& jsonObject) {
     for (const QJsonValue& v : configurationArray) {
         Configuration conf;
         QJsonObject obj = v.toObject();
-        assert(obj.size() == 3);
         
         conf.name = common::testAndReturnString(obj, KeyConfigurationName);
         

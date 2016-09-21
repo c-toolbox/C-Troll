@@ -6,7 +6,7 @@
 #include <QVector>
 #include <cassert>
 
-#include <QDebug>
+#include <logging.h>
 
 #include "jsonsupport.h"
 
@@ -89,7 +89,8 @@ QList<Cluster> loadClustersFromDirectory(QString directory) {
     );
     while (it.hasNext()) {
         QString file = it.next();
-        qDebug() << "Loading cluster file " << file;
+        
+        Log("Loading cluster file " + file);
         Cluster c = loadCluster(file, directory);
         result.push_back(c);
     }
@@ -104,4 +105,3 @@ common::GuiInitialization::Cluster clusterToGuiInitializationCluster(Cluster c) 
     cluster.enabled = c.enabled();
     return cluster;
 }
-
