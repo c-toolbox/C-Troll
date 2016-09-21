@@ -9,8 +9,6 @@ set(SOURCE_FILES
     src/sockethandler.cpp
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/common/include)
-
 # find_package(Qt5Widgets)
 find_package(Qt5Network)
 
@@ -28,6 +26,7 @@ add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
 )
 
 target_link_libraries(${APPLICATION_NAME}
+    C-Troll-Common
     Qt5::Network
 )
 

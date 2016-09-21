@@ -14,7 +14,9 @@ public:
     ProcessHandler();
     ~ProcessHandler();
     void createProcessFromTrayCommand(common::TrayCommand command);
- private:
+public slots:
+    void handleMessage(std::string message);
+private:
     // The maps string is a unique id (recieved from core)
     std::map<QString, QProcess*> _processes;
     std::map<QString, common::TrayCommand> _commands;
