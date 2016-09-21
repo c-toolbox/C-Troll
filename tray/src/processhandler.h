@@ -23,7 +23,7 @@ public slots:
 signals:
     void sendSocketMessage(QString message);
 private:
-    void runProcessWithTrayCommand(QProcess* process, const common::TrayCommand& command);
+    void executeProcessWithTrayCommand(QProcess* process, const common::TrayCommand& command);
     void createAndRunProcessFromTrayCommand(const common::TrayCommand& command);
     
     // The key of these maps is a unique id (recieved from core)
