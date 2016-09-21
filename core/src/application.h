@@ -9,7 +9,9 @@
 #include "handler/outgoingsockethandler.h"
 #include "traycommand.h"
 
-struct CoreCommand;
+namespace common {
+    struct CoreCommand;
+} // namespace common
 
 class Application : public QObject {
 public:
@@ -18,7 +20,7 @@ public:
 private:
     void incomingMessage(QString message);
     
-    void handleIncomingCommand(CoreCommand cmd);
+    void handleIncomingCommand(common::CoreCommand cmd);
     
     void sendInitializationInformation(QTcpSocket* socket);
 

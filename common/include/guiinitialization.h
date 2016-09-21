@@ -15,6 +15,9 @@ struct GuiInitialization {
     /// This struct represents the information about an application that is registered
     /// with the Core library
     struct Application {
+        /// Default constructor
+        Application() = default;
+        
         /**
          * Creates an Application from the passed \p application. The \p application
          * must contain all of the following keys with the associated types:

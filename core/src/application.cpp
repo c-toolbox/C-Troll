@@ -1,6 +1,8 @@
 #include "application.h"
 
 #include "command.h"
+#include <corecommand.h>
+#include <genericmessage.h>
 
 #include <QFile>
 #include <QJsonDocument>
@@ -49,7 +51,7 @@ Application::Application(QString configurationFile) {
     );
 }
 
-void Application::handleIncomingCommand(CoreCommand cmd) {
+void Application::handleIncomingCommand(common::CoreCommand cmd) {
     qDebug() << "\tCommand: " << cmd.command;
     qDebug() << "\tApplication: " << cmd.applicationId;
     qDebug() << "\tConfiguration: " << cmd.configurationId;
@@ -61,14 +63,14 @@ void Application::handleIncomingCommand(CoreCommand cmd) {
             _programs.begin(),
             _programs.end(),
              [&](const Program& p) {
-                 return p.id() == cmd.application;
+                 return p.id() == cmd.applicationId;
              }
         );
         
-        if (iProgram == _programs.end() {
+        if (iProgram == _programs.end()) {
             // We didn't find the program you were looking for
             // TODO(alex): Signal this back to the GUI
-            qDebug() << "Could not find application id '" << cmd.Application << "'";
+            qDebug() << "Could not find application id '" << cmd.applicationId << "'";
             return;
         }
     
@@ -77,14 +79,14 @@ void Application::handleIncomingCommand(CoreCommand cmd) {
             _clusters.begin(),
             _clusters.end(),
             [&](const Cluster& c) {
-                return c.name() == cmd.cluster;
+                return c.name() == cmd.clusterId;
             }
         );
             
-        if (iCluster == _clusters.end() {
+        if (iCluster == _clusters.end()) {
             // We didn't find the cluster you were looking for
             // TODO(alex): Signal this back to the GUI
-            qDebug() << "Could not find cluster id '" << cmd.cluster << "'";
+            qDebug() << "Could not find cluster id '" << cmd.clusterId << "'";
             return;
         }
         
@@ -100,13 +102,13 @@ void Application::handleIncomingCommand(CoreCommand cmd) {
             // We tried to start an application on a cluster for which the application
             // is not configured
             // TODO(alex): Signal this back to the GUI
-            qDebug() << "Application id '" << cmd.application << "' cannot be "
-                << "started on cluster id '" << cmd.cluster << "'";
+            qDebug() << "Application id '" << cmd.applicationId << "' cannot be "
+                << "started on cluster id '" << cmd.clusterId << "'";
             return;
         }
             
         // Get the correct configuration, if it exists
-        if (cmd.configuration.isEmpty()) {
+        if (cmd.configurationId.isEmpty()) {
             sendMessage(*iCluster, programToTrayCommand(*iProgram));
         }
         else {
@@ -114,15 +116,15 @@ void Application::handleIncomingCommand(CoreCommand cmd) {
                 iProgram->configurations().begin(),
                 iProgram->configurations().end(),
                 [&](const Program::Configuration& c) {
-                   return c.identifier == cmd.configuration;
+                   return c.identifier == cmd.configurationId;
                 }
             );
             
-            if (iConfiguration == iProgram->configurations().end() {
+            if (iConfiguration == iProgram->configurations().end()) {
                 // The requested configuration does not exist for the application
                 // TODO(alex): Signal this back to the GUI
-                qDebug() << "The configuration '" << cmd.configuration << "' does "
-                << "not exist for the application id '" << cmd.application << "'";
+                qDebug() << "The configuration '" << cmd.configurationId << "' does "
+                << "not exist for the application id '" << cmd.applicationId << "'";
                 return;
                 
             }
@@ -136,19 +138,21 @@ void Application::handleIncomingCommand(CoreCommand cmd) {
 
 void Application::incomingMessage(QString message) {
     // The message contains a JSON object of the GenericMessage
-    GenericMessage msg(QJsonDocument(message));
+    common::GenericMessage msg = common::GenericMessage(
+        QJsonDocument::fromJson(message.toUtf8())
+    );
     
     qDebug() << "Received message of type '" << msg.type << "'";
 
-    if (msg.type == CoreCommand::Type) {
+    if (msg.type == common::CoreCommand::Type) {
         // We have received a message from the GUI to start a new application
-        handleIncomingCommand(CoreCommand(msg.payload));
+        handleIncomingCommand(common::CoreCommand(QJsonDocument(msg.payload)));
     }
 }
                 
 void Application::sendInitializationInformation(QTcpSocket* socket) {
     common::GenericMessage msg;
-    msg.type = commmon::GuiInitialization::Type;
+    msg.type = common::GuiInitialization::Type;
     
     common::GuiInitialization initMsg;
     for (const Program& p : _programs) {
@@ -159,15 +163,15 @@ void Application::sendInitializationInformation(QTcpSocket* socket) {
         initMsg.clusters.push_back(c.name());
     }
     
-    msg.payload = initMsg;
-    _incomingSocketHandler.sendMessage(socket, msg);
+    msg.payload = initMsg.toJson().object();
+    _incomingSocketHandler.sendMessage(socket, msg.toJson().toJson());
 }
 
 void Application::sendMessage(const Cluster& cluster, common::TrayCommand command) {
     // We have to wrap the TrayCommand into a GenericMessage first
     common::GenericMessage msg;
     msg.type = common::TrayCommand::Type;
-    msg.payload = command.toJson();
+    msg.payload = command.toJson().object();
     
     _outgoingSocketHandler.sendMessage(cluster, msg.toJson().toJson());
 }

@@ -51,15 +51,15 @@ common::TrayCommand programToTrayCommand(const Program& program, QString configu
 }
 
 common::GuiInitialization::Application programToGuiInitializationApplication(
-                                                         const Program& program)
+    const Program& program)
 {
     common::GuiInitialization::Application app;
-    app.name = name();
-    app.identifier = id();
-    app.tags = tags();
-    app.clusters = clusters();
+    app.name = program.name();
+    app.identifier = program.id();
+    app.tags = program.tags();
+    app.clusters = program.clusters();
     
-    for (const Configuration& conf : _configurations) {
+    for (const Program::Configuration& conf : program.configurations()) {
         common::GuiInitialization::Application::Configuration c;
         c.name = conf.name;
         c.identifier = conf.identifier;
