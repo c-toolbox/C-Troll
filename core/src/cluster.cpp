@@ -11,6 +11,7 @@
 namespace {
     const QString KeyName = "name";
     const QString KeyIdentifier = "id";
+    const QString KeyEnabled = "enabled";
     const QString KeyNodes = "nodes";
 
     const QString KeyNodeName = "name";
@@ -20,8 +21,8 @@ namespace {
 
 Cluster::Cluster(const QJsonObject& jsonObject) {
     _name = common::testAndReturnString(jsonObject, KeyName);
-    
     _identifier = common::testAndReturnString(jsonObject, KeyIdentifier);
+    _enabled = common::testAndReturnBool(jsonObject, KeyEnabled);
     
     QJsonArray nodesArray = common::testAndReturnArray(jsonObject, KeyNodes);
     _nodes.clear();
@@ -43,6 +44,10 @@ QString Cluster::name() const {
 
 QString Cluster::identifier() const {
     return _identifier;
+}
+
+bool Cluster::enabled() const {
+    return _enabled;
 }
 
 QList<Cluster::Node> Cluster::nodes() const {
@@ -94,6 +99,7 @@ common::GuiInitialization::Cluster clusterToGuiInitializationCluster(Cluster c) 
     common::GuiInitialization::Cluster cluster;
     cluster.name = c.name();
     cluster.identifier = c.identifier();
+    cluster.enabled = c.enabled();
     return cluster;
 }
 

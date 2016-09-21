@@ -22,6 +22,7 @@ private:
     
     HashValue hash(const Cluster& cluster, const Cluster::Node& node) const;
 
+    Clusters _clusters;
     std::map<HashValue, std::unique_ptr<QTcpSocket>> _sockets;
  
 };

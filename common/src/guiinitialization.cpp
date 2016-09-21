@@ -19,6 +19,7 @@ namespace {
     
     const QString KeyClusterName = "name";
     const QString KeyClusterIdentifier = "id";
+    const QString KeyClusterEnabled = "enabled";
 }
 
 namespace common {
@@ -76,12 +77,14 @@ QJsonObject GuiInitialization::Application::toJson() const {
 GuiInitialization::Cluster::Cluster(QJsonObject cluster) {
     name = common::testAndReturnString(cluster, KeyClusterName);
     identifier = common::testAndReturnString(cluster, KeyClusterIdentifier);
+    enabled = common::testAndReturnBool(cluster, KeyClusterEnabled);
 }
     
 QJsonObject GuiInitialization::Cluster::toJson() const {
     QJsonObject res;
     res[KeyClusterName] = name;
     res[KeyClusterIdentifier] = identifier;
+    res[KeyClusterEnabled] = enabled;
     return res;
 }
 

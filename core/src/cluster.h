@@ -21,11 +21,13 @@ public:
 
     QString name() const;
     QString identifier() const;
+    bool enabled() const;
     QList<Node> nodes() const;
     
 private:
     QString _name;
     QString _identifier;
+    bool _enabled;
     QList<Node> _nodes;
 };
 

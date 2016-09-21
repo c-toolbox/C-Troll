@@ -79,8 +79,12 @@ struct GuiInitialization {
          */
         QJsonObject toJson() const;
         
+        /// The human-readable name of the cluster
         QString name;
+        /// The unique identifier for the cluster
         QString identifier;
+        /// Whether the cluster is currently enabled or not
+        bool enabled;
     };
     
     /// Default constructor

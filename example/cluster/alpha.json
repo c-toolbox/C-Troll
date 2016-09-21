@@ -1,5 +1,6 @@
 {
     "name": "Alpha Cluster",
+    "enabled": false,
     "nodes": [
         { "name": "alpha1", "ip": "172.19.1.11", "port": 30001 },
         { "name": "alpha2", "ip": "172.19.1.12", "port": 30002 },

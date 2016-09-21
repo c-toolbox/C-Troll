@@ -1,5 +1,6 @@
 {
     "name": "Office Computer Alex",
+    "enabled": false,
     "nodes": [
         { "name": "office", "ip": "130.236.145.183", "port": 5000 }
     ]
