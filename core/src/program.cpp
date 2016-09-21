@@ -1,7 +1,10 @@
 #include "program.h"
 
+#include <QDebug>
 #include <QDirIterator>
 #include <QJsonArray>
+#include <QJsonParseError>
+
 #include <cassert>
 
 #include "jsonsupport.h"
@@ -11,7 +14,6 @@ namespace {
     const QString KeyName = "name";
     const QString KeyExecutable = "executable";
     const QString KeyBaseDirectory = "baseDirectory";
-    const QString KeyFileSynchronization = "fileSynchronization";
     const QString KeyCommandlineParameters = "commandlineParameters";
     const QString KeyCurrentWorkingDirectory = "currentWorkingDirectory";
     const QString KeyTags = "tags";
@@ -32,12 +34,23 @@ Program loadProgram(QString jsonFile, QString baseDirectory) {
     // so we can just remove it
     identifier = identifier.left(identifier.size() - 5);
 
+    qDebug() << "Loading application from file" << jsonFile;
     QFile f(jsonFile);
     f.open(QFile::ReadOnly);
-    QJsonDocument d = QJsonDocument::fromJson(f.readAll());
+
+    QJsonParseError err;
+    QJsonDocument d = QJsonDocument::fromJson(f.readAll(), &err);
+
+    if (d.isEmpty()) {
+        throw std::runtime_error(
+            std::to_string(err.offset) + ": " +
+            err.errorString().toStdString()
+        );
+    }
+    
     QJsonObject obj = d.object();
     obj["id"] = identifier;
-    return Program(d.object());
+    return Program(obj);
 }
 
 
@@ -90,7 +103,6 @@ Program::Program(const QJsonObject& jsonObject) {
     _name = common::testAndReturnString(jsonObject, KeyName);
     _executable = common::testAndReturnString(jsonObject, KeyExecutable);
     _baseDirectory = common::testAndReturnString(jsonObject, KeyBaseDirectory);
-    _fileSynchronization = common::testAndReturnBool(jsonObject, KeyFileSynchronization);
     _commandlineParameters = common::testAndReturnString(
         jsonObject, KeyCommandlineParameters
     );
@@ -134,42 +146,38 @@ Program::Program(const QJsonObject& jsonObject) {
     }
 }
 
-const QString& Program::id() const {
+QString Program::id() const {
     return _id;
 }
 
-const QString& Program::name() const {
+QString Program::name() const {
     return _name;
 }
 
-const QString& Program::executable() const {
+QString Program::executable() const {
     return _executable;
 }
 
-const QString& Program::baseDirectory() const {
+QString Program::baseDirectory() const {
     return _baseDirectory;
 }
 
-bool Program::fileSynchronization() const {
-    return _fileSynchronization;
-}
-
-const QString& Program::commandlineParameters() const {
+QString Program::commandlineParameters() const {
     return _commandlineParameters;
 }
 
-const QString& Program::currentWorkingDirectory() const {
+QString Program::currentWorkingDirectory() const {
     return _currentWorkingDirectory;
 }
 
-const QStringList& Program::tags() const {
+QStringList Program::tags() const {
     return _tags;
 }
 
-const QStringList& Program::clusters() const {
+QStringList Program::clusters() const {
     return _clusters;
 }
 
-const QList<Program::Configuration>& Program::configurations() const {
+QList<Program::Configuration> Program::configurations() const {
     return _configurations;
 }

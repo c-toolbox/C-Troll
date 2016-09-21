@@ -16,12 +16,12 @@
         {
             "name": "Configuration 1",
             "identifier": "configuration identifier 1",
-            "commandlineParameter": "commandline parameter 1"
+            "commandlineParameters": "commandline parameter 1"
         },        
         {
             "name": "Configuration 2",
             "identifier": "configuration identifier 2",
-            "commandlineParameter": "commandline parameter 2"
+            "commandlineParameters": "commandline parameter 2"
         }
-    ],
+    ]
 }

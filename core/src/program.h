@@ -20,23 +20,21 @@ public:
         QString commandlineParameters;
     };
 
-    const QString& id() const;
-    const QString& name() const;
-    const QString& executable() const;
-    const QString& baseDirectory() const;
-    bool fileSynchronization() const;
-    const QString& commandlineParameters() const;
-    const QString& currentWorkingDirectory() const;
-    const QStringList& tags() const;
-    const QStringList& clusters() const;
-    const QList<Configuration>& configurations() const;
+    QString id() const;
+    QString name() const;
+    QString executable() const;
+    QString baseDirectory() const;
+    QString commandlineParameters() const;
+    QString currentWorkingDirectory() const;
+    QStringList tags() const;
+    QStringList clusters() const;
+    QList<Configuration> configurations() const;
 
 private:
     QString _id; // Program ID (name of the file + directory)
     QString _name; // Program Name
     QString _executable; // Executable name
     QString _baseDirectory; // Base Directory
-    bool _fileSynchronization; // File synchronization
     QString _commandlineParameters; // General Comandline Parameters
     QString _currentWorkingDirectory; // Current working directory
     QList<QString> _tags; // Tags

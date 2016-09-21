@@ -13,12 +13,12 @@
         {
             "name": "Configuration 21",
             "identifier": "configuration identifier 12",
-            "commandlineParameter": "commandline parameter 12"
+            "commandlineParameters": "commandline parameter 12"
         },        
         {
             "name": "Configuration 22",
             "identifier": "configuration identifier 22",
-            "commandlineParameter": "commandline parameter 22"
+            "commandlineParameters": "commandline parameter 22"
         }
     ]
 }
