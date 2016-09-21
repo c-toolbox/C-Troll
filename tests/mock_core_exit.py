@@ -11,7 +11,7 @@ data['type'] = "TrayCommand"
 
 payload = {}
 payload['identifier'] = "12345"
-payload['command'] = "start"
+payload['command'] = "exit"
 payload['executable'] = "/Applications/Safari.app/Contents/MacOS/Safari"
 payload['baseDirectory'] = ""
 payload['currentWorkingDirectory'] = ""

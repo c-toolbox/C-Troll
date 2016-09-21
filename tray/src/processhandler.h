@@ -16,6 +16,7 @@ public slots:
     void handleSocketMessage(QString message);
     // Process slots
     void handlerErrorOccurred(QProcess::ProcessError error);
+    void handleFinished(int exitCode);
     void handleFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void handleReadyReadStandardError();
     void handleReadyReadStandardOutput();
@@ -26,12 +27,10 @@ private:
     void executeProcessWithTrayCommand(QProcess* process, const common::TrayCommand& command);
     void createAndRunProcessFromTrayCommand(const common::TrayCommand& command);
     
-    // The key of these maps is a unique id (recieved from core)
-    std::map<QString, QProcess*> _processes;
-    std::map<QString, common::TrayCommand> _commands;
-    
-    // The key of this map is a process id
-    std::map<qint64, QString> _processIdToTrayId;
+    // The key of this map is a unique id (recieved from core)
+    // The value is the process which is running
+    typedef std::map<QString, QProcess*> ProcessMap;
+    ProcessMap _processes;
 };
 
 #endif
