@@ -25,6 +25,8 @@ struct TrayCommand {
      */
     QJsonDocument toJson() const;
 
+    /// The kind of command that is to be executed
+    QString command;
     /// The name of the executable
     QString executable;
     /// The directory in which the executable is located
@@ -33,6 +35,8 @@ struct TrayCommand {
     QString currentWorkingDirectory;
     /// The list of commandline parameters to be passed to the executable
     QString commandlineParameters;
+    /// The unique identifier for the process that will be created
+    QString identifier;
 };
 
 } // namespace
