@@ -15,6 +15,7 @@ public:
     void disconnected(QTcpSocket*);
     void readyRead(QTcpSocket*);
     void initialize();
+public slots:    
     void sendMessage(std::string message);
 signals:
     void messageRecieved(std::string message);

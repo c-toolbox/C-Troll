@@ -13,10 +13,14 @@ class ProcessHandler : public QObject {
 public:
     ProcessHandler();
     ~ProcessHandler();
-    void createProcessFromTrayCommand(common::TrayCommand command);
 public slots:
-    void handleMessage(std::string message);
+    void handleSocketMessage(std::string message);
+signals:
+    void sendSocketMessage(std::string message);
 private:
+    void runProcessWithTrayCommand(QProcess* process, const common::TrayCommand& command);
+    void createAndRunProcessFromTrayCommand(const common::TrayCommand& command);
+    
     // The maps string is a unique id (recieved from core)
     std::map<QString, QProcess*> _processes;
     std::map<QString, common::TrayCommand> _commands;
