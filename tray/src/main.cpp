@@ -1,17 +1,21 @@
 #include <iostream>
 
 #include "sockethandler.h"
+#include "processhandler.h"
 #include <QCoreApplication>
 
 
 int main(int argc, char** argv) {
     QCoreApplication app(argc, argv);
-    SocketHandler handler;
-    handler.initialize();
     
-    QObject::connect(&handler, &SocketHandler::messageRecieved, [&](std::string message) {
+    SocketHandler socketHandler;
+    socketHandler.initialize();
+    
+    ProcessHandler processHandler;
+    
+    QObject::connect(&socketHandler, &SocketHandler::messageRecieved, [&](std::string message) {
         std::cout << "message recieved: " << message;
-        handler.sendMessage("I feel you bro. I also say " + message + " all the time.");
+        socketHandler.sendMessage("I feel you bro. I also say " + message + " all the time.");
     });
 
     app.exec();

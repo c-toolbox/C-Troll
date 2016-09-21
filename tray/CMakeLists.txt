@@ -1,11 +1,15 @@
 set(HEADER_FILES
     src/sockethandler.h
+    src/processhandler.h
 )
 
 set(SOURCE_FILES
     src/main.cpp
+    src/processhandler.cpp
     src/sockethandler.cpp
 )
+
+include_directories(${CMAKE_SOURCE_DIR}/common/include)
 
 # find_package(Qt5Widgets)
 find_package(Qt5Network)
