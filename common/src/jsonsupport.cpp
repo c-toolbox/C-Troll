@@ -4,7 +4,13 @@
 
 namespace common {
 
-QString testAndReturnString(const QJsonObject& obj, const QString& key) {
+QString testAndReturnString(const QJsonObject& obj, const QString& key,
+                            Optional optional, QString defaultValue)
+{
+    if (optional == Optional::Yes && !obj.contains(key)) {
+        return defaultValue;
+    }
+    
     if (!obj.contains(key)) {
         throw std::runtime_error(
             "Missing key '" + key.toStdString() + "'"
@@ -19,7 +25,13 @@ QString testAndReturnString(const QJsonObject& obj, const QString& key) {
     return obj[key].toString();
 }
 
-int testAndReturnInt(const QJsonObject& obj, const QString& key) {
+int testAndReturnInt(const QJsonObject& obj, const QString& key,
+                     Optional optional, int defaultValue)
+{
+    if (optional == Optional::Yes && !obj.contains(key)) {
+        return defaultValue;
+    }
+    
     if (!obj.contains(key)) {
         throw std::runtime_error(
             "Missing key '" + key.toStdString() + "'"
@@ -34,7 +46,13 @@ int testAndReturnInt(const QJsonObject& obj, const QString& key) {
     return obj[key].toInt();
 }
 
-QJsonArray testAndReturnArray(const QJsonObject& obj, const QString& key) {
+QJsonArray testAndReturnArray(const QJsonObject& obj, const QString& key,
+                              Optional optional, QJsonArray defaultValue)
+{
+    if (optional == Optional::Yes && !obj.contains(key)) {
+        return defaultValue;
+    }
+    
     if (!obj.contains(key)) {
         throw std::runtime_error(
             "Missing key '" + key.toStdString() + "'"
@@ -49,7 +67,13 @@ QJsonArray testAndReturnArray(const QJsonObject& obj, const QString& key) {
     return obj[key].toArray();
 }
     
-QStringList testAndReturnStringList(const QJsonObject& obj, const QString& key) {
+QStringList testAndReturnStringList(const QJsonObject& obj, const QString& key,
+                                    Optional optional, QStringList defaultValue)
+{
+    if (optional == Optional::Yes && !obj.contains(key)) {
+        return defaultValue;
+    }
+    
     QStringList result;
     QJsonArray array = testAndReturnArray(obj, key);
     for (const QJsonValue& value : array) {
@@ -63,7 +87,13 @@ QStringList testAndReturnStringList(const QJsonObject& obj, const QString& key) 
     return result;
 }
 
-QJsonObject testAndReturnObject(const QJsonObject& obj, const QString& key) {
+QJsonObject testAndReturnObject(const QJsonObject& obj, const QString& key,
+                                Optional optional, QJsonObject defaultValue)
+{
+    if (optional == Optional::Yes && !obj.contains(key)) {
+        return defaultValue;
+    }
+    
     if (!obj.contains(key)) {
         throw std::runtime_error(
             "Missing key '" + key.toStdString() + "'"
@@ -78,7 +108,13 @@ QJsonObject testAndReturnObject(const QJsonObject& obj, const QString& key) {
     return obj[key].toObject();
 };
 
-bool testAndReturnBool(const QJsonObject& obj, const QString& key) {
+bool testAndReturnBool(const QJsonObject& obj, const QString& key,
+                       Optional optional, bool defaultValue)
+{
+    if (optional == Optional::Yes && !obj.contains(key)) {
+        return defaultValue;
+    }
+    
     if (!obj.contains(key)) {
         throw std::runtime_error(
             "Missing key '" + key.toStdString() + "'"

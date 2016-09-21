@@ -22,7 +22,7 @@ namespace {
 Cluster::Cluster(const QJsonObject& jsonObject) {
     _name = common::testAndReturnString(jsonObject, KeyName);
     _identifier = common::testAndReturnString(jsonObject, KeyIdentifier);
-    _enabled = common::testAndReturnBool(jsonObject, KeyEnabled);
+    _enabled = common::testAndReturnBool(jsonObject, KeyEnabled, Optional::Yes, true);
     
     QJsonArray nodesArray = common::testAndReturnArray(jsonObject, KeyNodes);
     _nodes.clear();
