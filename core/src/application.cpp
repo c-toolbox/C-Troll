@@ -23,29 +23,35 @@ Application::Application(QString configurationFile) {
     QJsonDocument d = QJsonDocument::fromJson(f.readAll());
     QJsonObject jsonObject = d.object();
 
-    auto testAndSet = [&jsonObject](const QString& key) -> QString {
-
-    };
-
-
     QString programPath = jsonObject.value("applicationPath").toString();
     QString clusterPath = jsonObject.value("clusterPath").toString();
     int listeningPort = jsonObject.value("listeningPort").toInt();
 
+    // Load all program descriptions from the path provided by the configuration file
     _programs = loadProgramsFromDirectory(programPath);
+    // Load all cluster descriptions from the path provided by the configuration file
     _clusters = loadClustersFromDirectory(clusterPath);
 
+    // The incoming socket handler takes care of messages from the GUI
     _incomingSocketHandler.initialize(listeningPort);
+    
+    // The outgoing socket handler takes care of messages to the Tray
     _outgoingSocketHandler.initialize(_clusters);
 
     connect(
         &_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
         this, &Application::incomingMessage
     );
-
 }
 
 void Application::incomingMessage(QString message) {
+    
+    
+    
+    
+    
+    
+    
     //Command cmd(message);
     // This is for testing purposes ---abock
     Command cmd;

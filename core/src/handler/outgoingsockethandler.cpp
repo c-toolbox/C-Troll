@@ -9,27 +9,27 @@ OutgoingSocketHandler::HashValue OutgoingSocketHandler::hash(
     return cluster.name() + "::" + node.name;
 }
 
-
 void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
     for (const Cluster& c : clusters) {
-        for (const Cluster::Node& n : c.nodes()) {
-            HashValue h = hash(c, n);
+        for (const Cluster::Node& node : c.nodes()) {
+            HashValue h = hash(c, node);
 
+            // This handler keeps the sockets to the tray applications open
             std::unique_ptr<QTcpSocket> socket = std::make_unique<QTcpSocket>();
-            socket->connectToHost(n.ipAddress, n.port);
+            socket->connectToHost(node.ipAddress, node.port);
             _sockets[h] = std::move(socket);
         }
     }
 }
 
-void OutgoingSocketHandler::sendMessage(const Cluster& cluster, QString message) const {
-    for (const Cluster::Node& n : cluster.nodes()) {
-        HashValue h = hash(cluster, n);
+void OutgoingSocketHandler::sendMessage(const Cluster& cluster, QString msg) const {
+    for (const Cluster::Node& node : cluster.nodes()) {
+        HashValue h = hash(cluster, node);
 
         auto it = _sockets.find(h);
         assert(it != _sockets.end());
 
-        it->second->write(message.toUtf8());
+        it->second->write(msg.toUtf8());
         it->second->flush();
     }
 }

@@ -19,6 +19,7 @@ public:
 
 private:
     using HashValue = QString;
+    
     HashValue hash(const Cluster& cluster, const Cluster::Node& node) const;
 
     std::map<HashValue, std::unique_ptr<QTcpSocket>> _sockets;

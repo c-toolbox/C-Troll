@@ -10,7 +10,6 @@
 #include "traycommand.h"
 
 class Application : public QObject {
-//Q_OBJECT
 public:
     Application(QString configurationFile);
 
