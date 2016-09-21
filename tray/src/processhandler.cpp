@@ -4,16 +4,23 @@
 #include <trayprocesslogmessage.h>
 #include <trayprocessstatus.h>
 
+#include <QDebug>
+
 #include <QJsonDocument>
 
 ProcessHandler::ProcessHandler() {}
 
 ProcessHandler::~ProcessHandler() {}
 
-void ProcessHandler::handleSocketMessage(QString message){
+void ProcessHandler::handleSocketMessage(QString message) {
     // Create new traycommand
     QJsonDocument messageDoc = QJsonDocument::fromJson(message.toUtf8());
     common::TrayCommand command(messageDoc);
+    
+    qDebug() << "Received TrayCommand";
+    qDebug() << "Executable: " << command.executable;
+    qDebug() << "Identifier: " << command.identifier;
+    
     
     // Check if identifer of traycommand already is tied to a process
     // We don't allow the same identifier for multiple processes
@@ -30,7 +37,8 @@ void ProcessHandler::handleSocketMessage(QString message){
     
 }
 
-void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error){
+void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
+    qDebug() << "Error occurred: " << error;
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     std::map<qint64, QString>::iterator p2T = _processIdToTrayId.find(process->processId());
     if (p2T != _processIdToTrayId.end() ) {

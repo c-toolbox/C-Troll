@@ -14,10 +14,10 @@ int main(int argc, char** argv) {
     ProcessHandler processHandler;
     
     // Connect the sockethandler and the processhandler
-    QObject::connect(&socketHandler, SIGNAL(messageRecieved(std::string)),
-                     &processHandler, SLOT(handleSocketMessage(std::string)));
-    QObject::connect(&processHandler, SIGNAL(sendSocketMessage(std::string)),
-                     &socketHandler, SLOT(sendMessage(std::string)));
+    QObject::connect(&socketHandler, SIGNAL(messageRecieved(QString)),
+                     &processHandler, SLOT(handleSocketMessage(QString)));
+    QObject::connect(&processHandler, SIGNAL(sendSocketMessage(QString)),
+                     &socketHandler, SLOT(sendMessage(QString)));
     
     /*QObject::connect(&socketHandler, &SocketHandler::messageRecieved, [&](std::string message) {
         std::cout << "message recieved: " << message;
@@ -25,4 +25,5 @@ int main(int argc, char** argv) {
     });*/
 
     app.exec();
+    qDebug() << "Application finished";
 }
