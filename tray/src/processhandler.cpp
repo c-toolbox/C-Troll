@@ -1,13 +1,18 @@
 #include "processhandler.h"
+
+#include <genericmessage.h>
+#include <trayprocesslogmessage.h>
+#include <trayprocessstatus.h>
+
 #include <QJsonDocument>
 
 ProcessHandler::ProcessHandler() {}
 
 ProcessHandler::~ProcessHandler() {}
 
-void ProcessHandler::handleSocketMessage(std::string message){
+void ProcessHandler::handleSocketMessage(QString message){
     // Create new traycommand
-    QJsonDocument messageDoc = QJsonDocument::fromJson(QByteArray::fromStdString(message));
+    QJsonDocument messageDoc = QJsonDocument::fromJson(message.toUtf8());
     common::TrayCommand command(messageDoc);
     
     // Check if identifer of traycommand already is tied to a process
@@ -29,31 +34,35 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error){
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     std::map<qint64, QString>::iterator p2T = _processIdToTrayId.find(process->processId());
     if (p2T != _processIdToTrayId.end() ) {
-        std::string errorStr;
+        common::TrayProcessStatus ps;
+        ps.identifier = p2T->second;
         bool sendError = true;
         switch (error) {
             case QProcess::FailedToStart:
-                errorStr = "FailedToStart";
+                ps.status = "FailedToStart";
                 break;
             case QProcess::Timedout:
-                errorStr = "Timedout";
+                ps.status = "Timedout";
                 break;
             case QProcess::WriteError:
-                errorStr = "WriteError";
+                ps.status = "WriteError";
                 break;
             case QProcess::ReadError:
-                errorStr = "ReadError";
+                ps.status = "ReadError";
                 break;
             case QProcess::UnknownError:
-                errorStr = "UnknownError";
+                ps.status = "UnknownError";
                 break;
             default:
                 sendError = false;
                 break;
         }
         if(sendError) {
-            // Send out the TrayProcessStatus with the error string
-            emit sendSocketMessage(errorStr);
+            // Send out the TrayProcessStatus with the error/status string
+            common::GenericMessage msg;
+            msg.type = common::TrayProcessStatus::Type;
+            msg.payload = ps.toJson().object();
+            emit sendSocketMessage(msg.toJson().toJson());
         }
     }
 }
@@ -62,8 +71,14 @@ void ProcessHandler::handleStarted(){
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     std::map<qint64, QString>::iterator p2T = _processIdToTrayId.find(process->processId());
     if (p2T != _processIdToTrayId.end() ) {
-        // Send out the TrayProcessStatus
-        emit sendSocketMessage("Running");
+        // Send out the TrayProcessStatus with the status string
+        common::TrayProcessStatus ps;
+        ps.identifier = p2T->second;
+        ps.status = "Running";
+        common::GenericMessage msg;
+        msg.type = common::TrayProcessStatus::Type;
+        msg.payload = ps.toJson().object();
+        emit sendSocketMessage(msg.toJson().toJson());
     }
 }
 
@@ -71,19 +86,23 @@ void ProcessHandler::handleFinished(int exitCode, QProcess::ExitStatus exitStatu
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     std::map<qint64, QString>::iterator p2T = _processIdToTrayId.find(process->processId());
     if (p2T != _processIdToTrayId.end() ) {
-        std::string exitStr;
+        common::TrayProcessStatus ps;
+        ps.identifier = p2T->second;
         switch (exitStatus) {
             case QProcess::NormalExit:
-                exitStr = "NormalExit";
+                ps.status = "NormalExit";
                 break;
             case QProcess::CrashExit:
-                exitStr = "CrashExit";
+                ps.status = "CrashExit";
                 break;
             default:
                 break;
         }
-        // Send out the TrayProcessStatus with the error string
-        emit sendSocketMessage(exitStr);
+        // Send out the TrayProcessStatus with the error/status string
+        common::GenericMessage msg;
+        msg.type = common::TrayProcessStatus::Type;
+        msg.payload = ps.toJson().object();
+        emit sendSocketMessage(msg.toJson().toJson());
     }
 }
 
@@ -92,7 +111,14 @@ void ProcessHandler::handleReadyReadStandardError(){
     std::map<qint64, QString>::iterator p2T = _processIdToTrayId.find(process->processId());
     if (p2T != _processIdToTrayId.end() ) {
         // Send out the TrayProcessLogMessage with the stderror key
-        emit sendSocketMessage("StdError");
+        common::TrayProcessLogMessage pm;
+        pm.identifier = p2T->second;
+        pm.stdOutLog = "";
+        pm.stdErrorLog = QString::fromUtf8(process->readAllStandardError());
+        common::GenericMessage msg;
+        msg.type = common::TrayProcessLogMessage::Type;
+        msg.payload = pm.toJson().object();
+        emit sendSocketMessage(msg.toJson().toJson());
     }
 }
 
@@ -100,8 +126,14 @@ void ProcessHandler::handleReadyReadStandardOutput(){
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     std::map<qint64, QString>::iterator p2T = _processIdToTrayId.find(process->processId());
     if (p2T != _processIdToTrayId.end() ) {
-        // Send out the TrayProcessLogMessage with the stdout key
-        emit sendSocketMessage("StdOut");
+        common::TrayProcessLogMessage pm;
+        pm.identifier = p2T->second;
+        pm.stdOutLog = QString::fromUtf8(process->readAllStandardOutput());
+        pm.stdErrorLog = "";
+        common::GenericMessage msg;
+        msg.type = common::TrayProcessLogMessage::Type;
+        msg.payload = pm.toJson().object();
+        emit sendSocketMessage(msg.toJson().toJson());
     }
 }
 

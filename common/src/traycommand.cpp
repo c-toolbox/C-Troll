@@ -6,17 +6,17 @@
 
 
 namespace {
+    const QString KeyIdentifier = "identifier";
     const QString KeyCommand = "command";
     const QString KeyExecutable = "executable";
     const QString KeyBaseDirectory = "baseDirectory";
     const QString KeyCurrentWorkingDirectory = "currentWorkingDirectory";
     const QString KeyCommandlineArguments = "commandlineArguments";
-    const QString KeyIdentifier = "identifier";
 }
 
 namespace common {
 
-const QString TrayCommand::Type = "Command";
+const QString TrayCommand::Type = "TrayCommand";
     
 TrayCommand::TrayCommand(const QJsonDocument& document) {
     QJsonObject obj = document.object();
@@ -31,12 +31,12 @@ TrayCommand::TrayCommand(const QJsonDocument& document) {
 
 QJsonDocument TrayCommand::toJson() const {
     QJsonObject obj;
+    obj[KeyIdentifier] = identifier;
     obj[KeyCommand] = command;
     obj[KeyExecutable] = executable;
     obj[KeyBaseDirectory] = baseDirectory;
     obj[KeyCurrentWorkingDirectory] = currentWorkingDirectory;
     obj[KeyCommandlineArguments] = commandlineParameters;
-    obj[KeyIdentifier] = identifier;
 
     return QJsonDocument(obj);
 }

@@ -13,7 +13,7 @@ public:
     ProcessHandler();
     ~ProcessHandler();
 public slots:
-    void handleSocketMessage(std::string message);
+    void handleSocketMessage(QString message);
     // Process slots
     void handlerErrorOccurred(QProcess::ProcessError error);
     void handleFinished(int exitCode, QProcess::ExitStatus exitStatus);
@@ -21,7 +21,7 @@ public slots:
     void handleReadyReadStandardOutput();
     void handleStarted();
 signals:
-    void sendSocketMessage(std::string message);
+    void sendSocketMessage(QString message);
 private:
     void runProcessWithTrayCommand(QProcess* process, const common::TrayCommand& command);
     void createAndRunProcessFromTrayCommand(const common::TrayCommand& command);

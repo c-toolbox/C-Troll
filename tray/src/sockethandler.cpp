@@ -16,13 +16,13 @@ void SocketHandler::initialize() {
 
 void SocketHandler::readyRead(QTcpSocket* socket) {
     QByteArray byteArray = socket->readAll();
-    std::string message = byteArray.toStdString();
+    QString message = QString::fromUtf8(byteArray);
     emit messageRecieved(message);
 }
 
-void SocketHandler::sendMessage(std::string message) {
+void SocketHandler::sendMessage(QString message) {
     for (QTcpSocket* socket : _sockets) {
-        socket->write(QByteArray(message.c_str()));
+        socket->write(message.toUtf8());
     }
 }
 

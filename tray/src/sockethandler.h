@@ -16,9 +16,9 @@ public:
     void readyRead(QTcpSocket*);
     void initialize();
 public slots:    
-    void sendMessage(std::string message);
+    void sendMessage(QString message);
 signals:
-    void messageRecieved(std::string message);
+    void messageRecieved(QString message);
  private:
     QTcpServer _server;
     std::vector<QTcpSocket*> _sockets;
