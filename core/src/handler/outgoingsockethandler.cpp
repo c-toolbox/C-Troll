@@ -32,6 +32,16 @@ void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
                     }
                 }
             );
+            connect(
+                socket.get(), &QTcpSocket::readyRead,
+                [s = socket.get()]() {
+                    QByteArray data = s->readAll();
+                    QString message = QString::fromUtf8(data);
+                    qDebug() << message;
+                }
+            );
+
+            
             socket->connectToHost(node.ipAddress, node.port);
             _sockets[h] = std::move(socket);
         }

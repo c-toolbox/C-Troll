@@ -1,24 +1,5 @@
 {
-    "id": "itunes",
-    "name": "Application name 2",
-    "executable": "open -a ITunes",
-    "baseDirectory": "base directory 2",
-    "commandlineParameters": "commandline parameters 2",
-    "currentWorkingDirectory": "current working directory 2",
-    "tags": [
-        "tag12",
-        "tag22"
-    ],
-    "configurations": [
-        {
-            "name": "Configuration 21",
-            "identifier": "configuration identifier 12",
-            "commandlineParameters": "commandline parameter 12"
-        },        
-        {
-            "name": "Configuration 22",
-            "identifier": "configuration identifier 22",
-            "commandlineParameters": "commandline parameter 22"
-        }
-    ]
+    "id": "safari",
+    "name": "Safari",
+    "executable": "/Applications/Safari.app/Contents/MacOS/Safari"
 }

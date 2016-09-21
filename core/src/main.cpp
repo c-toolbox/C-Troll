@@ -2,8 +2,6 @@
 #include <QDir>
 #include <QFileInfo>
 
-#include <iostream>
-
 #include "application.h"
 #include <logging.h>
 
@@ -28,33 +26,18 @@ int main(int argc, char** argv) {
     // Load configuration file
     QString configurationFile = QDir::current().relativeFilePath("config.json");
     if (argc == 2) {
+        // If someone passed us a second argument, we assume this to be the configuration
         configurationFile = QString::fromLatin1(argv[1]);
     }
-    
-    if (!QFileInfo(configurationFile).exists()) {
-        std::cerr << "Could not find configuration file '" <<
-            QFileInfo(configurationFile).absolutePath().toStdString() << "'" << std::endl;
+
+    QFileInfo info(configurationFile);
+    if (!info.exists()) {
+        Log(
+            "Could not find configuration file " + info.absolutePath()
+        );
         exit(EXIT_FAILURE);
     }
 
     Application app(configurationFile);
-    
-    //QTcpSocket socket;
-    //socket.connectToHost(HostAddress, Port);
-    //
-    //bool success = socket.waitForConnected();
-    //std::cout << success << std::endl;
-    //
-    //QString s("&Fooar");
-    //socket.write(s.toUtf8());
-    //
-    //QObject().thread()->usleep(1000*1000*2);
-    //
-    //bool bb = socket.waitForReadyRead();
-    //QByteArray b = socket.readAll();
-    //qDebug() << QString::fromLatin1(b);
-    //
-    //socket.close();
-    
     application.exec();
 }

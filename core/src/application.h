@@ -24,7 +24,7 @@ private:
     
     void sendInitializationInformation(QTcpSocket* socket);
 
-    void sendMessage(const Cluster& cluster, common::TrayCommand command);
+    void sendMessage(const Cluster& cluster, common::TrayCommand command, QString cmd);
 
     Programs _programs;
     QList<Cluster> _clusters;

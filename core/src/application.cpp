@@ -57,7 +57,7 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
     Log("Application: " + cmd.applicationId);
     Log("Configuration: " + cmd.configurationId);
     Log("Cluster: " + cmd.clusterId);
-    if (cmd.command == "Start") {
+//    if (cmd.command == "start") {
         // Find the correct program to start
         auto iProgram = std::find_if(
             _programs.begin(),
@@ -118,7 +118,7 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
             
         // Get the correct configuration, if it exists
         if (cmd.configurationId.isEmpty()) {
-            sendMessage(*iCluster, programToTrayCommand(*iProgram));
+            sendMessage(*iCluster, programToTrayCommand(*iProgram), cmd.command);
         }
         else {
             auto iConfiguration = std::find_if(
@@ -141,10 +141,10 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
             }
             sendMessage(
                 *iCluster,
-                programToTrayCommand(*iProgram, iConfiguration->commandlineParameters)
+                programToTrayCommand(*iProgram, iConfiguration->commandlineParameters), cmd.command
             );
         }
-    }
+//    }
 }
 
 void Application::incomingMessage(QString message) {
@@ -181,13 +181,23 @@ void Application::sendInitializationInformation(QTcpSocket* socket) {
     msg.payload = initMsg.toJson().object();
     _incomingSocketHandler.sendMessage(socket, msg.toJson().toJson());
 }
-
-void Application::sendMessage(const Cluster& cluster, common::TrayCommand command) {
+int i = 0;
+void Application::sendMessage(const Cluster& cluster, common::TrayCommand command, QString cmd) {
     // Generate identifier
     
     qDebug() << "Sending Message: ";
     qDebug() << "Cluster:" << cluster.name() << cluster.identifier();
+    
+    command.command = cmd;
+    command.identifier = "Hello" + QString::fromStdString(std::to_string(i));
+    i++;
+
+    qDebug() << "\tCommand: " << command.command;
     qDebug() << "Executable: " << command.executable;
+    qDebug() << "\tIdentifier: " << command.identifier;
+    qDebug() << "\t:Base Directory:  " << command.baseDirectory;
+    qDebug() << "\tCommandline Parameters: " << command.commandlineParameters;
+    qDebug() << "\tCWD: " << command.currentWorkingDirectory;
     
     // We have to wrap the TrayCommand into a GenericMessage first
     common::GenericMessage msg;

@@ -63,7 +63,14 @@ common::TrayCommand programToTrayCommand(const Program& program, QString configu
     common::TrayCommand t;
     t.executable = program.executable();
     t.baseDirectory = program.baseDirectory();
-    t.commandlineParameters = program.commandlineParameters() + " " + configuration;
+    t.currentWorkingDirectory = program.currentWorkingDirectory();
+    
+    if (program.commandlineParameters().isEmpty() && configuration.isEmpty()) {
+        t.commandlineParameters = "";
+    }
+    else {
+        t.commandlineParameters = program.commandlineParameters() + " " + configuration;
+    }
 
     return t;
 }
@@ -108,30 +115,22 @@ Program::Program(const QJsonObject& jsonObject) {
     _id = common::testAndReturnString(jsonObject, KeyId);
     _name = common::testAndReturnString(jsonObject, KeyName);
     _executable = common::testAndReturnString(jsonObject, KeyExecutable);
-    _baseDirectory = common::testAndReturnString(jsonObject, KeyBaseDirectory);
+    _baseDirectory = common::testAndReturnString(
+        jsonObject, KeyBaseDirectory, Optional::Yes
+    );
     _commandlineParameters = common::testAndReturnString(
-        jsonObject, KeyCommandlineParameters
+        jsonObject, KeyCommandlineParameters, Optional::Yes
     );
     _currentWorkingDirectory = common::testAndReturnString(
-        jsonObject, KeyCurrentWorkingDirectory
+        jsonObject, KeyCurrentWorkingDirectory,
+        Optional::Yes, _baseDirectory
     );
     
-    QJsonArray tagsArray = common::testAndReturnArray(jsonObject, KeyTags);
-    _tags.clear();
-    for (const QJsonValue& v : tagsArray) {
-        _tags.push_back(v.toString());
-    }
-
-    QJsonValue v = jsonObject.value(KeyClusters);
-    if (v.isArray()) {
-        QJsonArray clusterArray = v.toArray();
-        for (const QJsonValue& v : clusterArray) {
-            _clusters.push_back(v.toString());
-        }
-    }
+    _tags = common::testAndReturnStringList(jsonObject, KeyTags, Optional::Yes);
+    _clusters = common::testAndReturnStringList(jsonObject, KeyClusters, Optional::Yes);
     
     QJsonArray configurationArray = common::testAndReturnArray(
-        jsonObject, KeyConfigurations
+        jsonObject, KeyConfigurations, Optional::Yes
     );
     _configurations.clear();
     for (const QJsonValue& v : configurationArray) {
