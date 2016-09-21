@@ -5,7 +5,6 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-
 namespace {
     const QString KeyApplications = "applications";
     const QString KeyClusters = "clusters";

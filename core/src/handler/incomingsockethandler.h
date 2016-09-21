@@ -8,8 +8,11 @@ class IncomingSocketHandler : public QObject {
 Q_OBJECT
 public:
     void initialize(quint16 port);
+    
+    void sendMessage(QTcpSocket* socket, QString message);
 
 signals:
+    void newConnectionEstablished(QTcpSocket* socket);
     void messageReceived(QString message);
 
 private:

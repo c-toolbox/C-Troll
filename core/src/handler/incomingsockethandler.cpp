@@ -25,6 +25,8 @@ void IncomingSocketHandler::newConnection() {
             [=]() { disconnectedConnection(socket); }
         );
         _sockets.push_back(socket);
+        
+        emit newConnectionEstablished(socket);
     }
 }
 
@@ -39,4 +41,15 @@ void IncomingSocketHandler::disconnectedConnection(QTcpSocket* socket) {
     auto it = std::find(_sockets.begin(), _sockets.end(), socket);
     assert(it != _sockets.end());
     _sockets.erase(it);
+}
+
+void IncomingSocketHandler::sendMessage(QTcpSocket* socket, QString message) {
+    assert(socket);
+    assert(
+        std::find(_sockets.begin(), _sockets.end(), socket) != _sockets.end()
+    );
+    assert(!message.isEmpty());
+
+    socket->write(message.toUtf8());
+    socket->flush();   
 }

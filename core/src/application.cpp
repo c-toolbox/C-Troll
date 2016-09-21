@@ -42,6 +42,11 @@ Application::Application(QString configurationFile) {
         &_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
         this, &Application::incomingMessage
     );
+    
+    connect(
+            &_incomingSocketHandler, &IncomingSocketHandler::newConnectionEstablished,
+            this, &Application::sendInitializationInformation
+    );
 }
 
 void Application::handleIncomingCommand(CoreCommand cmd) {
@@ -139,6 +144,23 @@ void Application::incomingMessage(QString message) {
         // We have received a message from the GUI to start a new application
         handleIncomingCommand(CoreCommand(msg.payload));
     }
+}
+                
+void Application::sendInitializationInformation(QTcpSocket* socket) {
+    common::GenericMessage msg;
+    msg.type = commmon::GuiInitialization::Type;
+    
+    common::GuiInitialization initMsg;
+    for (const Program& p : _programs) {
+        initMsg.applications.push_back(programToGuiInitializationApplication(p));
+    }
+    
+    for (const Cluster& c : _clusters) {
+        initMsg.clusters.push_back(c.name());
+    }
+    
+    msg.payload = initMsg;
+    _incomingSocketHandler.sendMessage(socket, msg);
 }
 
 void Application::sendMessage(const Cluster& cluster, common::TrayCommand command) {

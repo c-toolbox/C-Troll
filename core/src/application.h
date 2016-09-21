@@ -19,6 +19,8 @@ private:
     void incomingMessage(QString message);
     
     void handleIncomingCommand(CoreCommand cmd);
+    
+    void sendInitializationInformation(QTcpSocket* socket);
 
     void sendMessage(const Cluster& cluster, common::TrayCommand command);
 

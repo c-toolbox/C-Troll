@@ -6,6 +6,7 @@
 #include <QString>
 #include <QVector>
 
+#include "guiinitialization.h"
 #include "traycommand.h"
 
 class Program {
@@ -14,6 +15,7 @@ public:
     Program(const QJsonObject& jsonObject);
     
     struct Configuration {
+        QString name;
         QString identifier;
         QString commandlineParameters;
     };
@@ -25,8 +27,8 @@ public:
     bool fileSynchronization() const;
     const QString& commandlineParameters() const;
     const QString& currentWorkingDirectory() const;
-    const QList<QString>& tags() const;
-    const QList<QString>& clusters() const;
+    const QStringList& tags() const;
+    const QStringList& clusters() const;
     const QList<Configuration>& configurations() const;
 
 private:
@@ -45,6 +47,8 @@ private:
 };
 
 common::TrayCommand programToTrayCommand(const Program& program, QString configuration = "");
+
+common::GuiInitialization::Application programToGuiInitializationApplication(const Program& program);
 
 using Programs = QVector<Program>;
 

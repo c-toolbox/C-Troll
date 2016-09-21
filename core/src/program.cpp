@@ -18,6 +18,7 @@ namespace {
     const QString KeyClusters = "clusters";
     const QString KeyConfigurations = "configurations";
 
+    const QString KeyConfigurationName = "name";
     const QString KeyConfigurationIdentifier = "identifier";
     const QString KeyConfigurationParameters = "commandlineParameters";
 }
@@ -47,6 +48,25 @@ common::TrayCommand programToTrayCommand(const Program& program, QString configu
     t.commandlineParameters = program.commandlineParameters() + " " + configuration;
 
     return t;
+}
+
+common::GuiInitialization::Application programToGuiInitializationApplication(
+                                                         const Program& program)
+{
+    common::GuiInitialization::Application app;
+    app.name = name();
+    app.identifier = id();
+    app.tags = tags();
+    app.clusters = clusters();
+    
+    for (const Configuration& conf : _configurations) {
+        common::GuiInitialization::Application::Configuration c;
+        c.name = conf.name;
+        c.identifier = conf.identifier;
+        app.configurations.push_back(c);
+    }
+    
+    return app;
 }
 
 Programs loadProgramsFromDirectory(QString directory) {
@@ -99,7 +119,9 @@ Program::Program(const QJsonObject& jsonObject) {
     for (const QJsonValue& v : configurationArray) {
         Configuration conf;
         QJsonObject obj = v.toObject();
-        assert(obj.size() == 2);
+        assert(obj.size() == 3);
+        
+        conf.name = common::testAndReturnString(obj, KeyConfigurationName);
         
         conf.identifier = common::testAndReturnString(
             obj, KeyConfigurationIdentifier
@@ -140,11 +162,11 @@ const QString& Program::currentWorkingDirectory() const {
     return _currentWorkingDirectory;
 }
 
-const QList<QString>& Program::tags() const {
+const QStringList& Program::tags() const {
     return _tags;
 }
 
-const QList<QString>& Program::clusters() const {
+const QStringList& Program::clusters() const {
     return _clusters;
 }
 
