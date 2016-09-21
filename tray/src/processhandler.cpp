@@ -15,10 +15,11 @@ ProcessHandler::~ProcessHandler() {}
 void ProcessHandler::handleSocketMessage(QString message) {
     // Create new traycommand
     QJsonDocument messageDoc = QJsonDocument::fromJson(message.toUtf8());
+    // qDebug() << messageDoc;
     common::TrayCommand command(messageDoc);
     
     qDebug() << "Received TrayCommand";
-    qDebug() << "Executable: " << command.executable;
+    qDebug() << "Command: " << command.command;
     qDebug() << "Identifier: " << command.identifier;
     
     
@@ -32,7 +33,7 @@ void ProcessHandler::handleSocketMessage(QString message) {
         createAndRunProcessFromTrayCommand(command);
     } else {
         // Found
-        runProcessWithTrayCommand(p->second, command);
+        executeProcessWithTrayCommand(p->second, command);
     }
     
 }
@@ -145,11 +146,25 @@ void ProcessHandler::handleReadyReadStandardOutput(){
     }
 }
 
-void ProcessHandler::runProcessWithTrayCommand(QProcess* process, const common::TrayCommand& command) {
-    QStringList arguments;
-    arguments << command.commandlineParameters;
-    
-    process->start(command.executable, arguments);
+void ProcessHandler::executeProcessWithTrayCommand(QProcess* process, const common::TrayCommand& command) {
+    if(command.command == "start"){
+        if(!command.currentWorkingDirectory.isEmpty()){
+            process->setWorkingDirectory(command.currentWorkingDirectory);
+        }
+        else if(!command.baseDirectory.isEmpty()){
+            process->setWorkingDirectory(command.baseDirectory);
+        }
+        
+        if(command.commandlineParameters.isEmpty()){
+            process->start(command.executable);
+        }
+        else {
+            process->start(command.executable + " " + command.commandlineParameters);
+        }
+    }
+    else if(command.command == "kill"){
+        process->kill();
+    }
 }
 
 void ProcessHandler::createAndRunProcessFromTrayCommand(const common::TrayCommand& command) {
@@ -168,7 +183,7 @@ void ProcessHandler::createAndRunProcessFromTrayCommand(const common::TrayComman
                      this, SLOT(handleStarted()));
     
     // Run the process with the command
-    runProcessWithTrayCommand(newProcess, command);
+    executeProcessWithTrayCommand(newProcess, command);
 
     
     // Insert command and process into out lists

@@ -19,14 +19,15 @@ namespace common {
 const QString TrayCommand::Type = "TrayCommand";
     
 TrayCommand::TrayCommand(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
+    QJsonObject payload = document.object();
+    QJsonObject obj = common::testAndReturnObject(payload, "payload");
 
+    identifier = common::testAndReturnString(obj, KeyIdentifier);
     command = common::testAndReturnString(obj, KeyCommand);
     executable = common::testAndReturnString(obj, KeyExecutable);
     baseDirectory = common::testAndReturnString(obj, KeyBaseDirectory);
     currentWorkingDirectory = common::testAndReturnString(obj, KeyCurrentWorkingDirectory);
     commandlineParameters = common::testAndReturnString(obj, KeyCommandlineArguments);
-    identifier = common::testAndReturnString(obj, KeyIdentifier);
 }
 
 QJsonDocument TrayCommand::toJson() const {
