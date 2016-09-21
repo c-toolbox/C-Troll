@@ -3,7 +3,6 @@
     "name": "Application name",
     "executable": "executable name",
     "baseDirectory": "base directory",
-    "fileSynchronization": true,
     "commandlineParameters": "commandline parameters",
     "currentWorkingDirectory": "current working directory",
     "tags": [
@@ -12,7 +11,7 @@
     ],
     "clusters": [
         "alpha"
-    ]
+    ],
     "configurations": [
         {
             "identifier": "configuration identifier 1",
