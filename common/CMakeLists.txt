@@ -1,6 +1,7 @@
 set(HEADER_FILES
     include/corecommand.h
     include/genericmessage.h
+    include/guiinitialization.h
     include/jsonsupport.h
     include/traycommand.h
 )
@@ -8,6 +9,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
     src/corecommand.cpp
     src/genericmessage.cpp
+    src/guiinitialization.cpp
     src/jsonsupport.cpp
     src/traycommand.cpp
 )
