@@ -91,7 +91,6 @@ QJsonObject GuiInitialization::Cluster::toJson() const {
 GuiInitialization::GuiInitialization(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
-    
     QJsonArray applicationsJson = common::testAndReturnArray(obj, KeyApplications);
     for (const QJsonValue& val : applicationsJson) {
         if (!val.isObject()) {

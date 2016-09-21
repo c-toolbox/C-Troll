@@ -5,7 +5,8 @@
 #include <assert.h>
 
 namespace {
-    const QString BaseName = "log_";
+    const QString LogPrefix = "log_";
+    const QString LogPostfix = ".txt";
 }
 
 namespace common {
@@ -23,7 +24,7 @@ Log& Log::ref() {
 }
     
 Log::Log(QString componentName)
-    : _file(BaseName + componentName + ".txt")
+    : _file(LogPrefix + componentName + LogPostfix)
 {
     assert(!componentName.isEmpty());
     _file.open(QIODevice::WriteOnly);

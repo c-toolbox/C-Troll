@@ -4,13 +4,12 @@
 
 #include <QJsonObject>
 
-
 namespace {
     const QString KeyIdentifier = "identifier";
     const QString KeyCommand = "command";
     const QString KeyExecutable = "executable";
     const QString KeyBaseDirectory = "baseDirectory";
-    const QString KeyCurrentWorkingDirectory = "currentWorkingDirectory";
+    const QString KeyWorkingDirectory = "currentWorkingDirectory";
     const QString KeyCommandlineArguments = "commandlineArguments";
 }
 
@@ -26,7 +25,7 @@ TrayCommand::TrayCommand(const QJsonDocument& document) {
     command = common::testAndReturnString(obj, KeyCommand);
     executable = common::testAndReturnString(obj, KeyExecutable);
     baseDirectory = common::testAndReturnString(obj, KeyBaseDirectory);
-    currentWorkingDirectory = common::testAndReturnString(obj, KeyCurrentWorkingDirectory);
+    currentWorkingDirectory = common::testAndReturnString(obj, KeyWorkingDirectory);
     commandlineParameters = common::testAndReturnString(obj, KeyCommandlineArguments);
 }
 
@@ -36,7 +35,7 @@ QJsonDocument TrayCommand::toJson() const {
     obj[KeyCommand] = command;
     obj[KeyExecutable] = executable;
     obj[KeyBaseDirectory] = baseDirectory;
-    obj[KeyCurrentWorkingDirectory] = currentWorkingDirectory;
+    obj[KeyWorkingDirectory] = currentWorkingDirectory;
     obj[KeyCommandlineArguments] = commandlineParameters;
 
     return QJsonDocument(obj);

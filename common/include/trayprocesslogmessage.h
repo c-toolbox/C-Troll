@@ -6,9 +6,10 @@
 
 namespace common {
     
-/// This struct is the data structure that gets send from the Core to the Tray
-/// to signal that the Tray should perform a task
+/// This struct is the data structure that gets send from the Core to the Tray to signal
+/// that the Tray should perform a task
 struct TrayProcessLogMessage {
+    /// The string representing this command type, for usage in the common::GenericMessage
     static const QString Type;
     
     /// Default constructor
@@ -28,7 +29,8 @@ struct TrayProcessLogMessage {
     TrayProcessLogMessage(const QJsonDocument& document);
     
     /**
-     * Converts the TrayProcessLogMessage into a valid QJsonDocument object and returns it.
+     * Converts the TrayProcessLogMessage into a valid QJsonDocument object and returns
+     * it.
      * \return The QJsonDocument representing this TrayProcessLogMessage
      */
     QJsonDocument toJson() const;

@@ -9,6 +9,7 @@ namespace common {
 /// This struct is the data structure that gets send from the GUI to the Core
 /// to signal that the Core should perform a task for a specific cluster
 struct GuiCommand {
+    /// The string representing this command type, for usage in the common::GenericMessage
     static const QString Type;
     
     /// Default constructor

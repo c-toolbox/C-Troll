@@ -26,7 +26,6 @@ QJsonDocument TrayProcessStatus::toJson() const {
     obj[KeyStatus] = status;
     
     return QJsonDocument(obj);
-    
 }
     
 } // namespace common

@@ -24,7 +24,6 @@ QJsonDocument GenericMessage::toJson() const {
     obj[KeyPayload] = payload;
     
     return QJsonDocument(obj);
-
 }
     
 } // namespace common

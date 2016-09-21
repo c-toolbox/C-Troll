@@ -9,10 +9,10 @@ namespace common {
 /**
  * This static class provides the ability to log information to both the console and a
  * persistent file. The file will be created in working directory of the application will
- * is partially determined by the \c application variable that is passed to the
- * initialize function. Every following call to logMessage will be relegated to both a
- * file that is called <code>log_{application}.txt</code.> as well as the console. Every
- * time the log file is created, the old contents will be silently overwritten.
+ * is partially determined by the \c application variable that is passed to the initialize
+ * function. Every following call to logMessage will be relegated to both a file that is
+ * called <code>log_{application}.txt</code.> as well as the console. Every time the log
+ * file is created, the old contents will be silently overwritten.
  */
 class Log {
 public:

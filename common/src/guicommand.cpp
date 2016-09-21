@@ -4,7 +4,6 @@
 
 #include <QJsonObject>
 
-
 namespace {
     const QString KeyCommand = "command";
     const QString KeyApplicationId = "application_identifier";

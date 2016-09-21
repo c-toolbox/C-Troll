@@ -6,17 +6,18 @@
 
 namespace common {
 
-/// This struct is the data structure that gets send from the Core to the Tray
-/// to signal that the Tray should perform a task
+/// This struct is the data structure that gets send from the Core to the Tray to signal
+/// that the Tray should perform a task
 struct TrayCommand {
+    /// The string representing this command type, for usage in the common::GenericMessage
     static const QString Type;
     
     /// Default constructor
     TrayCommand() = default;
 
     /**
-     * Creates a TrayCommand from the passed \p document. The \p document must 
-     * contain the following keys, all of type string:
+     * Creates a TrayCommand from the passed \p document. The \p document must  contain
+     * the following keys, all of type string:
      * \c identifier
      * \c command
      * \c executable
