@@ -34,7 +34,10 @@ void ProcessHandler::handleSocketMessage(QString message) {
     qDebug() << "Received TrayCommand";
     qDebug() << "Command: " << command.command;
     qDebug() << "Identifier: " << command.identifier;
-    
+    qDebug() << "Executable: " << command.executable;
+    qDebug() << "CommandLineParameters: " << command.commandlineParameters;
+    qDebug() << "BaseDirectory: " << command.baseDirectory;
+    qDebug() << "CurrentWorkingDirectory: " << command.currentWorkingDirectory;
     
     // Check if identifer of traycommand already is tied to a process
     // We don't allow the same identifier for multiple processes

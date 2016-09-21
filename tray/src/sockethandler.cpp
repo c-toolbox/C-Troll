@@ -20,7 +20,7 @@ void SocketHandler::initialize() {
 void SocketHandler::readyRead(QTcpSocket* socket) {
     QByteArray byteArray = socket->readAll();
     QString message = QString::fromUtf8(byteArray);
-    qDebug() << "Message received: " << message;
+    //qDebug() << "Message received: " << message;
     emit messageRecieved(message);
 }
 
