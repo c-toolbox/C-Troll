@@ -26,15 +26,19 @@ namespace {
 }
 
 Program loadProgram(QString jsonFile, QString baseDirectory) {
-    QDir dir(baseDirectory);
-    dir.cdUp();
+    QString identifier = QDir(baseDirectory).relativeFilePath(jsonFile);
+    
+    // relativeFilePath will have the baseDirectory in the beginning of the relative path
+    // and we want to remove it:  baseDirectory.length() + 1
+    // then, we want to remove the extension of 5 characters (.json)
+    // So we take the middle part of the string:
+    identifier = identifier.mid(
+        // length of the base directory + '/'
+        baseDirectory.length() + 1,
+        // total length - (stuff we removed in the beginning) - length('.json')
+        identifier.size() - (baseDirectory.length() + 1) - 5
+    );
 
-    QString identifier = dir.relativeFilePath(jsonFile);
-    // The extension is only 5 characters ('.json')
-    // so we can just remove it
-    identifier = identifier.left(identifier.size() - 5);
-
-    qDebug() << "Loading application from file" << jsonFile;
     QFile f(jsonFile);
     f.open(QFile::ReadOnly);
 
@@ -92,7 +96,9 @@ Programs loadProgramsFromDirectory(QString directory) {
         QDirIterator::Subdirectories
     );
     while (it.hasNext()) {
-        Program a = loadProgram(it.next(), directory);
+        QString file = it.next();
+        qDebug() << "Loading application file " << file;
+        Program a = loadProgram(file, directory);
         programs.push_back(a);
     }
     return programs;

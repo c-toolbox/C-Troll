@@ -10,7 +10,7 @@
 #include "traycommand.h"
 
 namespace common {
-    struct CoreCommand;
+    struct GuiCommand;
 } // namespace common
 
 class Application : public QObject {
@@ -20,7 +20,7 @@ public:
 private:
     void incomingMessage(QString message);
     
-    void handleIncomingCommand(common::CoreCommand cmd);
+    void handleIncomingCommand(common::GuiCommand cmd);
     
     void sendInitializationInformation(QTcpSocket* socket);
 

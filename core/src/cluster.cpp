@@ -10,6 +10,7 @@
 
 namespace {
     const QString KeyName = "name";
+    const QString KeyIdentifier = "id";
     const QString KeyNodes = "nodes";
 
     const QString KeyNodeName = "name";
@@ -19,6 +20,8 @@ namespace {
 
 Cluster::Cluster(const QJsonObject& jsonObject) {
     _name = common::testAndReturnString(jsonObject, KeyName);
+    
+    _identifier = common::testAndReturnString(jsonObject, KeyIdentifier);
     
     QJsonArray nodesArray = common::testAndReturnArray(jsonObject, KeyNodes);
     _nodes.clear();
@@ -34,19 +37,37 @@ Cluster::Cluster(const QJsonObject& jsonObject) {
     }
 }
 
-const QString& Cluster::name() const {
+QString Cluster::name() const {
     return _name;
 }
 
-const QList<Cluster::Node>& Cluster::nodes() const {
+QString Cluster::identifier() const {
+    return _identifier;
+}
+
+QList<Cluster::Node> Cluster::nodes() const {
     return _nodes;
 }
 
-Cluster loadCluster(QString jsonFile) {
+Cluster loadCluster(QString jsonFile, QString baseDirectory) {
+    QString identifier = QDir(baseDirectory).relativeFilePath(jsonFile);
+    
+    // relativeFilePath will have the baseDirectory in the beginning of the relative path
+    // and we want to remove it:  baseDirectory.length() + 1
+    // then, we want to remove the extension of 5 characters (.json)
+    // So we take the middle part of the string:
+    identifier = identifier.mid(
+        // length of the base directory + '/'
+        baseDirectory.length() + 1,
+        // total length - (stuff we removed in the beginning) - length('.json')
+        identifier.size() - (baseDirectory.length() + 1) - 5
+    );
+    
     QFile f(jsonFile);
     f.open(QFile::ReadOnly);
     QJsonDocument d = QJsonDocument::fromJson(f.readAll());
     QJsonObject obj = d.object();
+    obj[KeyIdentifier] = identifier;
     return Cluster(obj);
 }
 
@@ -60,9 +81,19 @@ Clusters loadClustersFromDirectory(QString directory) {
         QDirIterator::Subdirectories
     );
     while (it.hasNext()) {
-        Cluster c = loadCluster(it.next());
+        QString file = it.next();
+        qDebug() << "Loading cluster file " << file;
+        Cluster c = loadCluster(file, directory);
         result.push_back(c);
     }
 
     return result;
 }
+
+common::GuiInitialization::Cluster clusterToGuiInitializationCluster(Cluster c) {
+    common::GuiInitialization::Cluster cluster;
+    cluster.name = c.name();
+    cluster.identifier = c.identifier();
+    return cluster;
+}
+

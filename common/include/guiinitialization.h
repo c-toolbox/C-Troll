@@ -30,14 +30,14 @@ struct GuiInitialization {
          * (Array of pairs of strings, \c name and \c identifier)
          * \param application The JSON object that contains all of the values for this
          * application
-         * \throws std::runtime_error If one of the keys is missing or has the wrong
+         * \throw std::runtime_error If one of the keys is missing or has the wrong
          * type
          */
          Application(QJsonObject application);
         
         /**
          * Returns the JSON object representation of this application. See the 
-         * constructor for a list of keys and their types
+         * constructor for a list of keys and their types.
          * \return The JSON object representation of this application
          */
         QJsonObject toJson() const;
@@ -52,6 +52,35 @@ struct GuiInitialization {
             QString identifier;
         };
         QList<Configuration> configurations;
+    };
+    
+    /// This struct represents the information about the clusters that are registered
+    /// with the Core library
+    struct Cluster {
+        /// Default constructor
+        Cluster() = default;
+        
+        /**
+         * Creates a Cluster from the passed \p cluster. The \p cluster must contain 
+         * both of the following keys; both of type string:
+         * \c name The human-readable name of the cluster
+         * \c identifier The identifier used for this cluster
+         * \param cluster The JSON object that contains all of the values for this
+         * cluster
+         * \throw std::runtime_error If one of the keys is missing or has the wrong
+         * type
+         */
+        Cluster(QJsonObject cluster);
+        
+        /**
+         * Returns the JSON object representation of this application. See the 
+         * constructor for a list of keys and their types.
+         * \return The JSON object representation of this application
+         */
+        QJsonObject toJson() const;
+        
+        QString name;
+        QString identifier;
     };
     
     /// Default constructor
@@ -79,7 +108,7 @@ struct GuiInitialization {
     /// All applications that are registered with the Core
     QList<Application> applications;
     /// All clusters that the Core is responsible for
-    QStringList clusters;
+    QList<Cluster> clusters;
 };
 
 } // namespace

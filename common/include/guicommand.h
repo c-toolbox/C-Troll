@@ -1,5 +1,5 @@
-#ifndef __CORECOMMAND_H__
-#define __CORECOMMAND_H__
+#ifndef __GUICOMMAND_H__
+#define __GUICOMMAND_H__
 
 #include <QJsonDocument>
 #include <QString>
@@ -8,14 +8,14 @@ namespace common {
 
 /// This struct is the data structure that gets send from the GUI to the Core
 /// to signal that the Core should perform a task for a specific cluster
-struct CoreCommand {
+struct GuiCommand {
     static const QString Type;
     
     /// Default constructor
-    CoreCommand() = default;
+    GuiCommand() = default;
 
     /**
-     * Creates a CoreCommand from the passed \p document. The \p document must contain
+     * Creates a GuiCommand from the passed \p document. The \p document must contain
      * all of the following keys, all of type string:
      * \c command
      * \c application_identifier
@@ -26,11 +26,11 @@ struct CoreCommand {
      * \throws std::runtime_error If one of the required keys were not present or of the
      * wrong type
      */
-    CoreCommand(const QJsonDocument& document);
+    GuiCommand(const QJsonDocument& document);
 
     /**
-     * Converts the CoreCommand into a valid QJsonDocument object and returns it.
-     * \return the QJsonDocument representing this CoreCommand
+     * Converts the GuiCommand into a valid QJsonDocument object and returns it.
+     * \return the QJsonDocument representing this GuiCommand
      */
     QJsonDocument toJson() const;
 
@@ -46,4 +46,4 @@ struct CoreCommand {
 
 } // namespace
 
-#endif // __CORECOMMAND_H__
+#endif // __GUICOMMAND_H__

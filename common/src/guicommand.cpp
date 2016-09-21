@@ -1,4 +1,4 @@
-#include "corecommand.h"
+#include "guicommand.h"
 
 #include "jsonsupport.h"
 
@@ -14,9 +14,9 @@ namespace {
 
 namespace common {
 
-const QString CoreCommand::Type = "Command";
+const QString GuiCommand::Type = "GuiCommand";
     
-CoreCommand::CoreCommand(const QJsonDocument& document) {
+GuiCommand::GuiCommand(const QJsonDocument& document) {
     QJsonObject obj = document.object();
 
     command = common::testAndReturnString(obj, KeyCommand);
@@ -25,7 +25,7 @@ CoreCommand::CoreCommand(const QJsonDocument& document) {
     clusterId = common::testAndReturnString(obj, KeyClusterId);
 }
 
-QJsonDocument CoreCommand::toJson() const {
+QJsonDocument GuiCommand::toJson() const {
     QJsonObject obj;
     obj[KeyCommand] = command;
     obj[KeyApplicationId] = applicationId;

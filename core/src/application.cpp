@@ -1,7 +1,7 @@
 #include "application.h"
 
 #include "command.h"
-#include <corecommand.h>
+#include <guicommand.h>
 #include <genericmessage.h>
 
 #include <QFile>
@@ -51,7 +51,7 @@ Application::Application(QString configurationFile) {
     );
 }
 
-void Application::handleIncomingCommand(common::CoreCommand cmd) {
+void Application::handleIncomingCommand(common::GuiCommand cmd) {
     qDebug() << "\tCommand: " << cmd.command;
     qDebug() << "\tApplication: " << cmd.applicationId;
     qDebug() << "\tConfiguration: " << cmd.configurationId;
@@ -79,7 +79,7 @@ void Application::handleIncomingCommand(common::CoreCommand cmd) {
             _clusters.begin(),
             _clusters.end(),
             [&](const Cluster& c) {
-                return c.name() == cmd.clusterId;
+                return c.identifier() == cmd.clusterId;
             }
         );
             
@@ -90,15 +90,22 @@ void Application::handleIncomingCommand(common::CoreCommand cmd) {
             return;
         }
         
-        bool clusterIsValidForApplication =
-            iProgram->clusters().empty() ||
-            std::find_if(
-                iProgram->clusters().begin(),
-                iProgram->clusters().end(),
-                [&](const QString& s) { return iCluster->name() == s; }
-             ) != iProgram->clusters().end();
-
-        if (!clusterIsValidForApplication) {
+        auto validCluster = [this](const Program& p, const Cluster& c) -> bool {
+            if (p.clusters().empty()) {
+                return true;
+            }
+            else {
+                const QStringList& clusters = p.clusters();
+                auto it = std::find_if(
+                    clusters.begin(),
+                    clusters.end(),
+                    [&](const QString& s) { return c.identifier() == s; }
+                );
+                return it != clusters.end();
+            }
+        };
+        
+        if (!validCluster(*iProgram, *iCluster)) {
             // We tried to start an application on a cluster for which the application
             // is not configured
             // TODO(alex): Signal this back to the GUI
@@ -137,19 +144,23 @@ void Application::handleIncomingCommand(common::CoreCommand cmd) {
 }
 
 void Application::incomingMessage(QString message) {
-    // The message contains a JSON object of the GenericMessage
-    common::GenericMessage msg = common::GenericMessage(
-        QJsonDocument::fromJson(message.toUtf8())
-    );
-    
-    qDebug() << "Received message of type '" << msg.type << "'";
+    try {
+        // The message contains a JSON object of the GenericMessage
+        common::GenericMessage msg = common::GenericMessage(
+            QJsonDocument::fromJson(message.toUtf8())
+        );
+        
+        qDebug() << "Received message of type " << msg.type;
 
-    if (msg.type == common::CoreCommand::Type) {
-        // We have received a message from the GUI to start a new application
-        handleIncomingCommand(common::CoreCommand(QJsonDocument(msg.payload)));
+        if (msg.type == common::GuiCommand::Type) {
+            // We have received a message from the GUI to start a new application
+            handleIncomingCommand(common::GuiCommand(QJsonDocument(msg.payload)));
+        }
+    } catch (const std::runtime_error& e) {
+        qDebug() << "Error with incoming message: " << e.what();
     }
 }
-                
+
 void Application::sendInitializationInformation(QTcpSocket* socket) {
     common::GenericMessage msg;
     msg.type = common::GuiInitialization::Type;
@@ -160,7 +171,7 @@ void Application::sendInitializationInformation(QTcpSocket* socket) {
     }
     
     for (const Cluster& c : _clusters) {
-        initMsg.clusters.push_back(c.name());
+        initMsg.clusters.push_back(clusterToGuiInitializationCluster(c));
     }
     
     msg.payload = initMsg.toJson().object();

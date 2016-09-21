@@ -16,6 +16,9 @@ namespace {
     const QString KeyApplicationConfigurations = "configurations";
     const QString KeyApplicationConfigurationName = "name";
     const QString KeyApplicationConfigurationIdentifier = "identifier";
+    
+    const QString KeyClusterName = "name";
+    const QString KeyClusterIdentifier = "id";
 }
 
 namespace common {
@@ -70,6 +73,18 @@ QJsonObject GuiInitialization::Application::toJson() const {
     return res;
 }
     
+GuiInitialization::Cluster::Cluster(QJsonObject cluster) {
+    name = common::testAndReturnString(cluster, KeyClusterName);
+    identifier = common::testAndReturnString(cluster, KeyClusterIdentifier);
+}
+    
+QJsonObject GuiInitialization::Cluster::toJson() const {
+    QJsonObject res;
+    res[KeyClusterName] = name;
+    res[KeyClusterIdentifier] = identifier;
+    return res;
+}
+
 GuiInitialization::GuiInitialization(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
@@ -77,12 +92,18 @@ GuiInitialization::GuiInitialization(const QJsonDocument& document) {
     QJsonArray applicationsJson = common::testAndReturnArray(obj, KeyApplications);
     for (const QJsonValue& val : applicationsJson) {
         if (!val.isObject()) {
-            throw std::runtime_error("Valid inside an application was not an object");
+            throw std::runtime_error("Value inside an application was not an object");
         }
         applications.push_back(Application(val.toObject()));
     }
     
-    clusters = common::testAndReturnStringList(obj, KeyClusters);
+    QJsonArray clustersJson = common::testAndReturnArray(obj, KeyClusters);
+    for (const QJsonValue& val : clustersJson) {
+        if (!val.isObject()) {
+            throw std::runtime_error("Value inside a cluster was not an object");
+        }
+        clusters.push_back(Cluster(val.toObject()));
+    }
 }
 
 QJsonDocument GuiInitialization::toJson() const {
@@ -93,7 +114,12 @@ QJsonDocument GuiInitialization::toJson() const {
         apps.append(app.toJson());
     }
     obj[KeyApplications] = apps;
-    obj[KeyClusters] = QJsonArray::fromStringList(clusters);
+    
+    QJsonArray cls;
+    for (const Cluster& c : clusters) {
+        cls.append(c.toJson());
+    }
+    obj[KeyClusters] = cls;
     
     return QJsonDocument(obj);
 }

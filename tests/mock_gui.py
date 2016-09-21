@@ -8,14 +8,19 @@ s.connect(( "127.0.0.1", 5000))
 # Get enough data after connecting
 data = s.recv(8192)
 
+print(data.decode("utf-8"))
 # Parsing the GuiInit data into JSON and printing
-print(json.loads(data.decode("utf-8")))
+json.loads(data.decode("utf-8"))
 
-# data = {}
-# data['type'] = 'GuiInit'
-# json_data = json.dumps(data)
-# s.send(bytearray(json_data, 'UTF-8'))
+data = {}
+data['type'] = "GuiCommand"
 
+payload = {}
+payload['command'] = "Start"
+payload['application_identifier'] = "test"
+payload['configuration_identifier'] = ""
+payload['cluster_identifier'] = "alpha"
+data['payload'] = payload
+s.send(bytearray(json.dumps(data), 'utf-8'))
 
 s.close()
-
