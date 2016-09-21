@@ -48,6 +48,20 @@ QJsonArray testAndReturnArray(const QJsonObject& obj, const QString& key) {
 
     return obj[key].toArray();
 }
+    
+QStringList testAndReturnStringList(const QJsonObject& obj, const QString& key) {
+    QStringList result;
+    QJsonArray array = testAndReturnArray(obj, key);
+    for (const QJsonValue& value : array) {
+        if (!value.isString()) {
+            throw std::runtime_error(
+                "Array '" + key.toStdString() + "' is not an array of strings"
+            );
+        }
+        result.push_back(value.toString());
+    }
+    return result;
+}
 
 QJsonObject testAndReturnObject(const QJsonObject& obj, const QString& key) {
     if (!obj.contains(key)) {
