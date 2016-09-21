@@ -13,7 +13,12 @@ struct CoreCommand {
     CoreCommand() = default;
 
     /**
-     * Creates a CoreCommand from the passed \p document.
+     * Creates a CoreCommand from the passed \p document. The \p document must contain
+     * all of the following keys, all of type string:
+     * \c command
+     * \c application_identifier
+     * \c configuration_identifier
+     * \c cluster_identifier
      * \param document The QJsonDocument that contains the information about this
      * CoreCommand
      * \throws std::runtime_error If one of the required keys were not present or of the

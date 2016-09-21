@@ -13,7 +13,14 @@ struct TrayCommand {
     TrayCommand() = default;
 
     /**
-     * Creates a TrayCommand from the passed \p document.
+     * Creates a TrayCommand from the passed \p document. The \p document must 
+     * contain the following keys, all of type string:
+     * \c command
+     * \c executable
+     * \c baseDirectory
+     * \c currentWorkingDirectory
+     * \c commandlineArguments
+     * \c identifier
      * \param document The QJsonDocument that contains the information about this
      * TrayCommand
      * \throws std::runtime_error If one of the required keys were not present or of the
@@ -41,6 +48,6 @@ struct TrayCommand {
     QString identifier;
 };
 
-} // namespace
+} // namespace commmon
 
 #endif // __TRAYCOMMAND_H__
