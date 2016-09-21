@@ -3,12 +3,12 @@ import json
 
 # Connect to the Core on localhost
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(( "127.0.0.1", 5000))
+s.connect(( "127.0.0.1", 19850))
 
 # Get enough data after connecting
 data = s.recv(8192)
 
-print(data.decode("utf-8"))
+#print(data.decode("utf-8"))
 # Parsing the GuiInit data into JSON and printing
 json.loads(data.decode("utf-8"))
 
