@@ -179,6 +179,12 @@ void Application::sendInitializationInformation(QTcpSocket* socket) {
 }
 
 void Application::sendMessage(const Cluster& cluster, common::TrayCommand command) {
+    // Generate identifier
+    
+    qDebug() << "Sending Message: ";
+    qDebug() << "Cluster:" << cluster.name() << cluster.identifier();
+    qDebug() << "Executable: " << command.executable;
+    
     // We have to wrap the TrayCommand into a GenericMessage first
     common::GenericMessage msg;
     msg.type = common::TrayCommand::Type;

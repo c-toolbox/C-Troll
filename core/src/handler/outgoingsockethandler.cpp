@@ -24,6 +24,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
 
 void OutgoingSocketHandler::sendMessage(const Cluster& cluster, QString msg) const {
     for (const Cluster::Node& node : cluster.nodes()) {
+        qDebug() << "Node: " << node.name << node.ipAddress << node.port;
         HashValue h = hash(cluster, node);
 
         auto it = _sockets.find(h);
