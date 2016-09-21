@@ -9,6 +9,8 @@ namespace common {
 /// This struct is the data structure that gets send from the Core to the Tray
 /// to signal that the Tray should perform a task
 struct TrayCommand {
+    static const QString Type;
+    
     /// Default constructor
     TrayCommand() = default;
 

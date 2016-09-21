@@ -16,6 +16,8 @@ namespace {
 
 namespace common {
 
+const QString TrayCommand::Type = "Command";
+    
 TrayCommand::TrayCommand(const QJsonDocument& document) {
     QJsonObject obj = document.object();
 

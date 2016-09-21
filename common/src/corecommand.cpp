@@ -14,6 +14,8 @@ namespace {
 
 namespace common {
 
+const QString CoreCommand::Type = "Command";
+    
 CoreCommand::CoreCommand(const QJsonDocument& document) {
     QJsonObject obj = document.object();
 

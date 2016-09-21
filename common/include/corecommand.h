@@ -9,6 +9,8 @@ namespace common {
 /// This struct is the data structure that gets send from the GUI to the Core
 /// to signal that the Core should perform a task for a specific cluster
 struct CoreCommand {
+    static const QString Type;
+    
     /// Default constructor
     CoreCommand() = default;
 
