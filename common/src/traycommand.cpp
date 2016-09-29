@@ -45,6 +45,7 @@ namespace {
     const QString KeyBaseDirectory = "baseDirectory";
     const QString KeyWorkingDirectory = "currentWorkingDirectory";
     const QString KeyCommandlineArguments = "commandlineArguments";
+    const QString KeyEnvironmentVariables = "environmentVariables";
 }
 
 namespace common {
@@ -61,6 +62,7 @@ TrayCommand::TrayCommand(const QJsonDocument& document) {
     baseDirectory = common::testAndReturnString(obj, KeyBaseDirectory);
     currentWorkingDirectory = common::testAndReturnString(obj, KeyWorkingDirectory);
     commandlineParameters = common::testAndReturnString(obj, KeyCommandlineArguments);
+    environmentVariables = common::testAndReturnString(obj, KeyEnvironmentVariables);
 }
 
 QJsonDocument TrayCommand::toJson() const {
@@ -71,6 +73,7 @@ QJsonDocument TrayCommand::toJson() const {
     obj[KeyBaseDirectory] = baseDirectory;
     obj[KeyWorkingDirectory] = currentWorkingDirectory;
     obj[KeyCommandlineArguments] = commandlineParameters;
+    obj[KeyCommandlineArguments] = environmentVariables;
 
     return QJsonDocument(obj);
 }

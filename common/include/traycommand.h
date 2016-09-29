@@ -58,6 +58,7 @@ struct TrayCommand {
      * \c baseDirectory
      * \c currentWorkingDirectory
      * \c commandlineArguments
+     * \c environmentVariables
      * \param document The QJsonDocument that contains the information about this
      * TrayCommand
      * \throws std::runtime_error If one of the required keys were not present or of the
@@ -81,8 +82,10 @@ struct TrayCommand {
     QString baseDirectory;
     /// The location that should be set as the working directory prior to execution
     QString currentWorkingDirectory;
-    /// The list of commandline parameters to be passed to the executable
+    /// The list of commandline parameters to be passed to executable
     QString commandlineParameters;
+    /// The list of environment variables to be passed to executable, syntax: "NAME,VALUE;NAME,VALUE"
+    QString environmentVariables;
 };
 
 } // namespace commmon

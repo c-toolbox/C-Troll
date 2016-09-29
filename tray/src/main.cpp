@@ -52,11 +52,6 @@ int main(int argc, char** argv) {
                      &processHandler, SLOT(handleSocketMessage(QString)));
     QObject::connect(&processHandler, SIGNAL(sendSocketMessage(QString)),
                      &socketHandler, SLOT(sendMessage(QString)));
-    
-    /*QObject::connect(&socketHandler, &SocketHandler::messageRecieved, [&](std::string message) {
-        std::cout << "message recieved: " << message;
-        socketHandler.sendMessage("I feel you bro. I also say " + message + " all the time.");
-    });*/
 
     app.exec();
     qDebug() << "Application finished";

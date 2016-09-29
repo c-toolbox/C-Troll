@@ -73,6 +73,7 @@ void ProcessHandler::handleSocketMessage(QString message) {
     qDebug() << "CommandLineParameters: " << command.commandlineParameters;
     qDebug() << "BaseDirectory: " << command.baseDirectory;
     qDebug() << "CurrentWorkingDirectory: " << command.currentWorkingDirectory;
+    qDebug() << "EnvironmentVariables: " << command.environmentVariables;
     
     // Check if identifer of traycommand already is tied to a process
     // We don't allow the same identifier for multiple processes
@@ -220,6 +221,20 @@ void ProcessHandler::handleReadyReadStandardOutput(){
 
 void ProcessHandler::executeProcessWithTrayCommand(QProcess* process, const common::TrayCommand& command) {    
     if(command.command == "start"){
+        if(!command.environmentVariables.isEmpty()){
+            QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+            // First split per variable, such that each string contains "name,value"
+            QStringList envVariables = command.environmentVariables.split(';');
+            foreach (QString var, envVariables) {
+                // Split name and value
+                QStringList envVariableNameValue = var.split(',');
+                if(envVariableNameValue.size() == 2){
+                    env.insert(envVariableNameValue[0], envVariableNameValue[1]);
+                }
+            }
+            process->setProcessEnvironment(env);
+        }
+        
         if(!command.currentWorkingDirectory.isEmpty()){
             process->setWorkingDirectory(command.currentWorkingDirectory);
         }
