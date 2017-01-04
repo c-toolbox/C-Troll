@@ -76,12 +76,12 @@ Application::Application(QString configurationFile) {
 
     QObject::connect(
         &_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
-        [this](QString message) { incomingMessage(message); }
+        [this](const QJsonDocument& message) { incomingMessage(message); }
     );
     
     QObject::connect(
         &_incomingSocketHandler, &IncomingSocketHandler::newConnectionEstablished,
-        [this](QTcpSocket* socket) { sendInitializationInformation(socket); }
+        [this](common::JsonSocket* socket) { sendInitializationInformation(socket); }
     );
 }
 
@@ -92,8 +92,8 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
     Log("Cluster: " + cmd.clusterId);
 
     auto iProgram = std::find_if(
-        _programs.begin(),
-        _programs.end(),
+        _programs.cbegin(),
+        _programs.cend(),
             [&](const Program& p) {
                 return p.id() == cmd.applicationId;
             }
@@ -108,8 +108,8 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
     
     // Get the correct Cluster
     auto iCluster = std::find_if(
-        _clusters.begin(),
-        _clusters.end(),
+        _clusters.cbegin(),
+        _clusters.cend(),
         [&](const Cluster& c) {
             return c.identifier() == cmd.clusterId;
         }
@@ -129,8 +129,8 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
         else {
             const QStringList& clusters = p.clusters();
             auto it = std::find_if(
-                clusters.begin(),
-                clusters.end(),
+                clusters.cbegin(),
+                clusters.cend(),
                 [&](const QString& s) { return c.identifier() == s; }
             );
             return it != clusters.end();
@@ -154,8 +154,8 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
     }
     else {
         auto iConfiguration = std::find_if(
-            iProgram->configurations().begin(),
-            iProgram->configurations().end(),
+            iProgram->configurations().cbegin(),
+            iProgram->configurations().cend(),
             [&](const Program::Configuration& c) {
                 return c.identifier == cmd.configurationId;
             }
@@ -178,13 +178,11 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
     }
 }
 
-void Application::incomingMessage(QString message) {
+void Application::incomingMessage(const QJsonDocument& message) {
     try {
         // The message contains a JSON object of the GenericMessage
-        common::GenericMessage msg = common::GenericMessage(
-            QJsonDocument::fromJson(message.toUtf8())
-        );
-        
+        common::GenericMessage msg = common::GenericMessage(message);
+            
         qDebug() << "Received message of type " << msg.type;
 
         if (msg.type == common::GuiCommand::Type) {
@@ -196,7 +194,7 @@ void Application::incomingMessage(QString message) {
     }
 }
 
-void Application::sendInitializationInformation(QTcpSocket* socket) {
+void Application::sendInitializationInformation(common::JsonSocket* socket) {
     common::GenericMessage msg;
     msg.type = common::GuiInitialization::Type;
     
@@ -210,7 +208,7 @@ void Application::sendInitializationInformation(QTcpSocket* socket) {
     }
     
     msg.payload = initMsg.toJson().object();
-    _incomingSocketHandler.sendMessage(socket, msg.toJson().toJson());
+    _incomingSocketHandler.sendMessage(socket, msg.toJson());
 }
 int i = 0;
 void Application::sendMessage(const Cluster& cluster, common::TrayCommand command, QString cmd) {
@@ -235,5 +233,5 @@ void Application::sendMessage(const Cluster& cluster, common::TrayCommand comman
     msg.type = common::TrayCommand::Type;
     msg.payload = command.toJson().object();
     
-    _outgoingSocketHandler.sendMessage(cluster, msg.toJson().toJson());
+    _outgoingSocketHandler.sendMessage(cluster, msg.toJson());
 }

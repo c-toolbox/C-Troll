@@ -2,6 +2,7 @@ set(HEADER_FILES
     include/genericmessage.h
     include/guicommand.h
     include/guiinitialization.h
+    include/jsonsocket.h
     include/jsonsupport.h
     include/logging.h
     include/traycommand.h
@@ -13,6 +14,7 @@ set(SOURCE_FILES
     src/genericmessage.cpp
     src/guicommand.cpp
     src/guiinitialization.cpp
+    src/jsonsocket.cpp
     src/jsonsupport.cpp
     src/logging.cpp
     src/traycommand.cpp
@@ -25,6 +27,7 @@ find_package(Qt5Network)
 
 set(MOC_FILES "")
 qt5_wrap_cpp(MOC_FILES 
+    include/jsonsocket.h
 )
 
 qt5_wrap_cpp(MOC_FILES)

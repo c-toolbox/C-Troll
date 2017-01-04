@@ -43,8 +43,7 @@
 
 #include <map>
 #include <memory>
-
-class QTcpSocket;
+#include <jsonsocket.h>
 
 class OutgoingSocketHandler : public QObject {
 Q_OBJECT
@@ -53,7 +52,7 @@ public:
 
     void initialize(const QList<Cluster>& clusters);
 
-    void sendMessage(const Cluster& cluster, QString message) const;
+    void sendMessage(const Cluster& cluster, QJsonDocument message) const;
 
 private:
     using HashValue = QString;
@@ -61,7 +60,7 @@ private:
     HashValue hash(const Cluster& cluster, const Cluster::Node& node) const;
 
     QList<Cluster> _clusters;
-    std::map<HashValue, std::unique_ptr<QTcpSocket>> _sockets;
+    std::map<HashValue, std::unique_ptr<common::JsonSocket>> _sockets;
  
 };
 

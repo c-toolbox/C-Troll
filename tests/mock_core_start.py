@@ -17,6 +17,12 @@ payload['baseDirectory'] = ""
 payload['currentWorkingDirectory'] = ""
 payload['commandlineArguments'] = ""
 data['payload'] = payload
-s.send(bytearray(json.dumps(data), 'utf-8'))
+
+jsonData = bytearray(json.dumps(data), 'utf-8')
+jsonLen = len(jsonData);
+
+s.send(bytearray(str(jsonLen), 'utf-8'))
+s.send(bytearray('#', 'utf-8'));
+s.send(jsonData)
 
 s.close()

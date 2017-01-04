@@ -9,6 +9,5 @@ endif ()
 add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(tray)
-add_subdirectory(webgui)
 
 message(STATUS "Generating C-Troll project")

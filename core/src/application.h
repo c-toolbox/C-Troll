@@ -43,6 +43,7 @@
 
 namespace common {
     struct GuiCommand;
+    class JsonSocket;
 } // namespace common
 
 class Application {
@@ -50,11 +51,11 @@ public:
     Application(QString configurationFile);
 
 private:
-    void incomingMessage(QString message);
+    void incomingMessage(const QJsonDocument& message);
     
     void handleIncomingCommand(common::GuiCommand cmd);
     
-    void sendInitializationInformation(QTcpSocket* socket);
+    void sendInitializationInformation(common::JsonSocket* socket);
 
     void sendMessage(const Cluster& cluster, common::TrayCommand command, QString cmd);
 

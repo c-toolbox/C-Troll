@@ -34,7 +34,7 @@
 
 #include "outgoingsockethandler.h"
 
-#include <QTcpSocket>
+#include <jsonsocket.h>
 #include <QTimer>
 
 #include <assert.h>
@@ -70,18 +70,21 @@ void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
                     }
                 }
             );
+
+            std::unique_ptr<common::JsonSocket> jsonSocket = std::make_unique<common::JsonSocket>(std::move(socket));
+
             connect(
-                socket.get(), &QTcpSocket::readyRead,
-                [s = socket.get()]() {
-                    QByteArray data = s->readAll();
-                    QString message = QString::fromUtf8(data);
+                jsonSocket.get(), &common::JsonSocket::readyRead,
+                [s = jsonSocket.get()]() {
+                    QJsonDocument data = s->read();
+                    QString message = data.toJson();
                     qDebug() << message;
                 }
             );
 
             
-            socket->connectToHost(node.ipAddress, node.port);
-            _sockets[h] = std::move(socket);
+            jsonSocket->socket()->connectToHost(node.ipAddress, node.port);
+            _sockets[h] = std::move(jsonSocket);
         }
     }
     
@@ -96,10 +99,12 @@ void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
 
                         auto it = _sockets.find(h);
                         assert(it != _sockets.end());
+
+                        auto socket = it->second->socket();
                                
-                        if (it->second->state() == QAbstractSocket::SocketState::UnconnectedState) {
+                        if (socket->state() == QAbstractSocket::SocketState::UnconnectedState) {
                             qDebug() << "Unconnected: " << node.ipAddress << node.port;
-                            it->second->connectToHost(node.ipAddress, node.port);
+                            socket->connectToHost(node.ipAddress, node.port);
                         }
                     }
                 }
@@ -110,7 +115,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
     timer->start(2500);
 }
 
-void OutgoingSocketHandler::sendMessage(const Cluster& cluster, QString msg) const {
+void OutgoingSocketHandler::sendMessage(const Cluster& cluster, QJsonDocument msg) const {
     assert(!msg.isEmpty());
 
     for (const Cluster::Node& node : cluster.nodes()) {
@@ -120,11 +125,9 @@ void OutgoingSocketHandler::sendMessage(const Cluster& cluster, QString msg) con
         auto it = _sockets.find(h);
         assert(it != _sockets.end());
 
-        it->second->dumpObjectInfo();
+        it->second->socket()->dumpObjectInfo();
 
-        it->second->write(msg.toUtf8());
-        it->second->flush();
-
+        it->second->write(msg);
     }
 }
 

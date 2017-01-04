@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016                                                                    *
- * Alexander Bock, Erik SundÃ©n, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -32,12 +32,63 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include <iostream>
-#include <QCoreApplication>
+#include <jsonsocket.h>
 
+namespace common {
 
-int main(int argc, char** argv) {
-    QCoreApplication app(argc, argv);
-    
-    app.exec();
+JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject *parent)
+    : QObject(parent)
+    , _socket(std::move(socket))
+    , _payloadSize(-1)
+{
+
+    QObject::connect(_socket.get(), &QTcpSocket::readyRead,
+        [this]() { readToBuffer(); });
+}
+
+JsonSocket::~JsonSocket() {}
+
+void JsonSocket::write(QJsonDocument jsonDocument) {
+    QByteArray json = jsonDocument.toJson();
+    QByteArray length = QString::number(json.size()).toUtf8();
+    _socket->write(length);
+    _socket->write("#");
+    _socket->write(json);
+    _socket->flush();
+}
+
+void JsonSocket::readToBuffer() {
+    QByteArray incomingData = _socket->readAll();
+    std::copy(incomingData.begin(), incomingData.end(), std::back_inserter(_buffer));
+    if (_payloadSize == -1) {
+        auto it = std::find(_buffer.begin(), _buffer.end(), '#');
+        if (it != _buffer.end()) {
+            std::string sizeString;
+            std::copy(_buffer.begin(), it, std::back_inserter(sizeString));
+            _payloadSize = QString::fromStdString(sizeString).toInt();
+            _buffer.erase(_buffer.begin(), it + 1);
+        }
+    }
+
+    if (_payloadSize > 0 && _payloadSize <= _buffer.size()) {
+        emit readyRead();
+    }
+}
+
+QJsonDocument JsonSocket::read() {
+    if (_payloadSize <= _buffer.size()) {
+        std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
+        QByteArray json(data.data(), _payloadSize);       
+        _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
+        return QJsonDocument::fromJson(json);
+    }
+    else {
+        return QJsonDocument::fromJson("");
+    }
+}
+
+QTcpSocket* JsonSocket::socket() {
+    return _socket.get();
+}
+
 }

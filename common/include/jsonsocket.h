@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016                                                                    *
- * Alexander Bock, Erik SundÃ©n, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -32,63 +32,35 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "incomingsockethandler.h"
+#ifndef __JSONSOCKET_H__
+#define __JSONSOCKET_H__
 
 #include <QTcpSocket>
-#include <jsonsocket.h>
+#include <QObject>
+#include <QJsonDocument>
 
-#include <assert.h>
+#include <deque>
 #include <memory>
 
-void IncomingSocketHandler::initialize(quint16 port) {
-    _server.listen(QHostAddress::Any, port);
+namespace common {
 
-    QObject::connect(
-        &_server, &QTcpServer::newConnection,
-        [this]() { newConnection(); }
-    );
+class JsonSocket : public QObject {
+Q_OBJECT
+public:
+    JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject *parent = Q_NULLPTR);
+    virtual ~JsonSocket();
+    void write(QJsonDocument json);
+    QJsonDocument read();
+    QTcpSocket* socket();
+signals:
+    void readyRead();
+
+private: 
+    void readToBuffer();
+    std::unique_ptr<QTcpSocket> _socket;
+    std::deque<char> _buffer;
+    int _payloadSize;
+};
+
 }
-
-void IncomingSocketHandler::newConnection() {
-    while (_server.hasPendingConnections()) {
-        std::unique_ptr<QTcpSocket> socket = std::unique_ptr<QTcpSocket>(_server.nextPendingConnection());
-        common::JsonSocket *jsonSocket = new common::JsonSocket(std::move(socket));
-
-        _sockets.push_back(jsonSocket);
-
-        QObject::connect(
-            jsonSocket->socket(), &QTcpSocket::disconnected,
-            [this, jsonSocket]() { disconnectedConnection(jsonSocket); }
-        );
-
-        QObject::connect(
-            jsonSocket, &common::JsonSocket::readyRead,
-            [this, jsonSocket]() { readyRead(jsonSocket); }
-        );
-
-        emit newConnectionEstablished(jsonSocket);
-    }
-}
-
-void IncomingSocketHandler::readyRead(common::JsonSocket* jsonSocket) {
-    assert(jsonSocket);
-    QJsonDocument message = jsonSocket->read();
-    emit messageReceived(message);
-}
-
-void IncomingSocketHandler::disconnectedConnection(common::JsonSocket* socket) {
-    socket->disconnect();
-    assert(socket);
-    auto it = std::find(_sockets.begin(), _sockets.end(), socket);
-    assert(it != _sockets.end());
-    (*it)->deleteLater();
-    _sockets.erase(it);
-}
-
-void IncomingSocketHandler::sendMessage(common::JsonSocket* socket, QJsonDocument message) {
-    assert(socket);
-    assert(std::find(_sockets.begin(), _sockets.end(), socket) != _sockets.end());
-    assert(!message.isEmpty());
-
-    socket->write(message);
-}
+#endif // __JSONSOCKET_H__

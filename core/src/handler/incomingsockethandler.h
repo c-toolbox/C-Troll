@@ -37,26 +37,31 @@
 
 #include <QObject>
 #include <QTcpServer>
+#include <QJsonDocument>
+
+namespace common {
+class JsonSocket;
+}
 
 class IncomingSocketHandler : public QObject {
 Q_OBJECT
 public:
     void initialize(quint16 port);
     
-    void sendMessage(QTcpSocket* socket, QString message);
+    void sendMessage(common::JsonSocket* socket, QJsonDocument message);
 
 signals:
-    void newConnectionEstablished(QTcpSocket* socket);
-    void messageReceived(QString message);
+    void newConnectionEstablished(common::JsonSocket* socket);
+    void messageReceived(QJsonDocument message);
 
 private:
     void newConnection();
-    void readyRead(QTcpSocket* socket);
-    void disconnectedConnection(QTcpSocket* socket);
+    void readyRead(common::JsonSocket* socket);
+    void disconnectedConnection(common::JsonSocket* socket);
 
     QTcpServer _server;
 
-    QVector<QTcpSocket*> _sockets;
+    std::vector<common::JsonSocket*> _sockets;
 };
 
 #endif // __INCOMINGSOCKETHANDLER_H__
