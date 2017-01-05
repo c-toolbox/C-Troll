@@ -37,8 +37,11 @@
 
 #include <QObject.h>
 #include <QTcpServer.h>
+#include <QJsonDocument>
 
-class QTcpSocket;
+namespace common {
+class JsonSocket;
+}
 
 class SocketHandler : public QObject {
     Q_OBJECT
@@ -46,16 +49,16 @@ public:
     SocketHandler();
     ~SocketHandler();
     void newConnection();
-    void disconnected(QTcpSocket*);
-    void readyRead(QTcpSocket*);
+    void disconnected(common::JsonSocket*);
+    void readyRead(common::JsonSocket*);
     void initialize();
 public slots:    
-    void sendMessage(QString message);
+    void sendMessage(const QJsonDocument& message);
 signals:
-    void messageRecieved(QString message);
+    void messageRecieved(const QJsonDocument& message);
  private:
     QTcpServer _server;
-    std::vector<QTcpSocket*> _sockets;
+    std::vector<common::JsonSocket*> _sockets;
 };
 
 #endif

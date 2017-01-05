@@ -40,6 +40,7 @@
 #include <traycommand.h>
 #include <QObject>
 #include <QProcess>
+#include <QJsonDocument>
 
 class ProcessHandler : public QObject {
     Q_OBJECT
@@ -47,7 +48,7 @@ public:
     ProcessHandler();
     ~ProcessHandler();
 public slots:
-    void handleSocketMessage(QString message);
+    void handleSocketMessage(const QJsonDocument& message);
     // Process slots
     void handlerErrorOccurred(QProcess::ProcessError error);
     void handleFinished(int exitCode);
@@ -56,7 +57,7 @@ public slots:
     void handleReadyReadStandardOutput();
     void handleStarted();
 signals:
-    void sendSocketMessage(QString message);
+    void sendSocketMessage(const QJsonDocument& message);
 private:
     void executeProcessWithTrayCommand(QProcess* process, const common::TrayCommand& command);
     void createAndRunProcessFromTrayCommand(const common::TrayCommand& command);

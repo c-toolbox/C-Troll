@@ -60,11 +60,9 @@ ProcessHandler::ProcessHandler() {}
 
 ProcessHandler::~ProcessHandler() {}
 
-void ProcessHandler::handleSocketMessage(QString message) {
-    // Create new traycommand
-    QJsonDocument messageDoc = QJsonDocument::fromJson(message.toUtf8());
+void ProcessHandler::handleSocketMessage(const QJsonDocument& message) {
     // qDebug() << messageDoc;
-    common::TrayCommand command(messageDoc);
+    common::TrayCommand command(message);
     
     qDebug() << "Received TrayCommand";
     qDebug() << "Command: " << command.command;
@@ -124,7 +122,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
             common::GenericMessage msg;
             msg.type = common::TrayProcessStatus::Type;
             msg.payload = ps.toJson().object();
-            emit sendSocketMessage(msg.toJson().toJson());
+            emit sendSocketMessage(msg.toJson());
         }
     }
 }
@@ -143,7 +141,7 @@ void ProcessHandler::handleStarted(){
         common::GenericMessage msg;
         msg.type = common::TrayProcessStatus::Type;
         msg.payload = ps.toJson().object();
-        emit sendSocketMessage(msg.toJson().toJson());
+        emit sendSocketMessage(msg.toJson());
     }
 }
 
@@ -175,7 +173,7 @@ void ProcessHandler::handleFinished(int exitCode, QProcess::ExitStatus exitStatu
         common::GenericMessage msg;
         msg.type = common::TrayProcessStatus::Type;
         msg.payload = ps.toJson().object();
-        emit sendSocketMessage(msg.toJson().toJson());
+        emit sendSocketMessage(msg.toJson());
         
         // Remove this process from the list as we consider it finsihed
         _processes.erase(p2T);
@@ -197,7 +195,7 @@ void ProcessHandler::handleReadyReadStandardError(){
         common::GenericMessage msg;
         msg.type = common::TrayProcessLogMessage::Type;
         msg.payload = pm.toJson().object();
-        emit sendSocketMessage(msg.toJson().toJson());
+        emit sendSocketMessage(msg.toJson());
     }
 }
 
@@ -215,7 +213,7 @@ void ProcessHandler::handleReadyReadStandardOutput(){
         common::GenericMessage msg;
         msg.type = common::TrayProcessLogMessage::Type;
         msg.payload = pm.toJson().object();
-        emit sendSocketMessage(msg.toJson().toJson());
+        emit sendSocketMessage(msg.toJson());
     }
 }
 
