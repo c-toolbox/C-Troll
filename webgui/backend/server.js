@@ -64,6 +64,13 @@ guiSocketServer.on('connection', (guiSocket) => {
     console.log(('New incoming gui connection (#' + connectionId + ').').green);
 
     const coreSocket = new JsonSocket(rawSocket);
+
+    rawSocket.on('error', function (err) {
+        console.log(('Connection #' + connectionId +
+            ': Error detected in connection to core.').red);
+        guiSocket.close();
+    });
+
     coreSocket.connect(19850, '127.0.0.1');
 
     coreSocket.on('connect', () => {
