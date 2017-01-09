@@ -80,7 +80,13 @@ QJsonDocument JsonSocket::read() {
         std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
         QByteArray json(data.data(), _payloadSize);       
         _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
-        return QJsonDocument::fromJson(json);
+        _payloadSize = -1;
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(json, &error);
+        if (error.error != QJsonParseError::NoError) {
+            qDebug() << "\nJson parse error:\n" << error.errorString() << "\nJson string:\n" << json;
+        }
+        return doc;
     }
     else {
         return QJsonDocument::fromJson("");
