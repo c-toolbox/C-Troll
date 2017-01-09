@@ -94,7 +94,7 @@ guiSocketServer.on('connection', (guiSocket) => {
     });
 
     guiSocket.on('data', (message) => {
-        coreSocket.sendMessage(message);
+        coreSocket.sendMessage(JSON.parse(message));
         console.log('Connection #' + connectionId +
             ': Forwarding message from gui to core:\n', message);
     });
