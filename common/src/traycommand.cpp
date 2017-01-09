@@ -73,7 +73,7 @@ QJsonDocument TrayCommand::toJson() const {
     obj[KeyBaseDirectory] = baseDirectory;
     obj[KeyWorkingDirectory] = currentWorkingDirectory;
     obj[KeyCommandlineArguments] = commandlineParameters;
-    obj[KeyCommandlineArguments] = environmentVariables;
+    obj[KeyEnvironmentVariables] = environmentVariables;
 
     return QJsonDocument(obj);
 }
