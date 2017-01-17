@@ -6,7 +6,7 @@ import { browserHistory } from 'react-router';
 @observer
 class ClusterButton extends React.Component {
     render() {
-        const icon = (<svg className="cluster-icon" xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 64 64">
+        const icon = (<svg className="cluster-icon" xmlns="http://www.w3.org/2000/svg" viewBox="-6 -2 64 64">
             <polygon points="25.42 0 50.83 14.67 50.83 44.02 25.42 58.7 0 44.02 0 14.67 25.42 0"/>
         </svg>);
 

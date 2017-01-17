@@ -285,6 +285,7 @@ p {
     padding: 0.5em;
     color: #fff;
     width: calc(100% - 1em);
+    outline: none;
 
     :placeholder {
         color: #888;
