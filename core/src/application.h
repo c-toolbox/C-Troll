@@ -43,6 +43,8 @@
 
 namespace common {
     struct GuiCommand;
+    struct TrayProcessStatus;
+    struct TrayProcessLogMessage;
     class JsonSocket;
 } // namespace common
 
@@ -51,13 +53,16 @@ public:
     Application(QString configurationFile);
 
 private:
-    void incomingMessage(const QJsonDocument& message);
+    void incomingGuiMessage(const QJsonDocument& message);
+    void incomingTrayMessage(const QJsonDocument& message);
     
-    void handleIncomingCommand(common::GuiCommand cmd);
+    void handleTrayProcessStatus(common::TrayProcessStatus status);
+    void handleTrayProcessLogMessage(common::TrayProcessLogMessage status);
+    void handleIncomingGuiCommand(common::GuiCommand cmd);
     
     void sendInitializationInformation(common::JsonSocket* socket);
 
-    void sendMessage(const Cluster& cluster, common::TrayCommand command, QString cmd);
+    void sendTrayCommand(const Cluster& cluster, common::TrayCommand command, QString cmd);
 
     Programs _programs;
     QList<Cluster> _clusters;

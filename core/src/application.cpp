@@ -35,6 +35,8 @@
 #include "application.h"
 
 #include <guicommand.h>
+#include <trayprocessstatus.h>
+#include <trayprocesslogmessage.h>
 #include <logging.h>
 #include <genericmessage.h>
 
@@ -76,16 +78,31 @@ Application::Application(QString configurationFile) {
 
     QObject::connect(
         &_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
-        [this](const QJsonDocument& message) { incomingMessage(message); }
+        [this](const QJsonDocument& message) { incomingGuiMessage(message); }
     );
     
+    QObject::connect(
+        &_outgoingSocketHandler, &OutgoingSocketHandler::messageReceived,
+        [this](const QJsonDocument& message) { incomingTrayMessage(message); }
+    );
+
     QObject::connect(
         &_incomingSocketHandler, &IncomingSocketHandler::newConnectionEstablished,
         [this](common::JsonSocket* socket) { sendInitializationInformation(socket); }
     );
 }
 
-void Application::handleIncomingCommand(common::GuiCommand cmd) {
+void Application::handleTrayProcessStatus(common::TrayProcessStatus status) {
+    Log("Status: " + status.status);
+}
+
+void Application::handleTrayProcessLogMessage(common::TrayProcessLogMessage logMessage) {
+    Log("Std out: " + logMessage.stdOutLog);
+    Log("Std err: " + logMessage.stdErrorLog);
+}
+
+
+void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
     Log("Command: " + cmd.command);
     Log("Application: " + cmd.applicationId);
     Log("Configuration: " + cmd.configurationId);
@@ -150,7 +167,7 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
             
     // Get the correct configuration, if it exists
     if (cmd.configurationId.isEmpty()) {
-        sendMessage(*iCluster, programToTrayCommand(*iProgram), cmd.command);
+        sendTrayCommand(*iCluster, programToTrayCommand(*iProgram), cmd.command);
     }
     else {
         auto iConfiguration = std::find_if(
@@ -171,14 +188,14 @@ void Application::handleIncomingCommand(common::GuiCommand cmd) {
             return;
                 
         }
-        sendMessage(
+        sendTrayCommand(
             *iCluster,
             programToTrayCommand(*iProgram, iConfiguration->commandlineParameters), cmd.command
         );
     }
 }
 
-void Application::incomingMessage(const QJsonDocument& message) {
+void Application::incomingGuiMessage(const QJsonDocument& message) {
     try {
         // The message contains a JSON object of the GenericMessage
         common::GenericMessage msg = common::GenericMessage(message);
@@ -187,9 +204,29 @@ void Application::incomingMessage(const QJsonDocument& message) {
 
         if (msg.type == common::GuiCommand::Type) {
             // We have received a message from the GUI to start a new application
-            handleIncomingCommand(common::GuiCommand(QJsonDocument(msg.payload)));
+            handleIncomingGuiCommand(common::GuiCommand(QJsonDocument(msg.payload)));
         }
     } catch (const std::runtime_error& e) {
+        Log(QString("Error with incoming message: ") + e.what());
+    }
+}
+
+void Application::incomingTrayMessage(const QJsonDocument& message) {
+    try {
+        // The message contains a JSON object of the GenericMessage
+        common::GenericMessage msg = common::GenericMessage(message);
+
+        qDebug() << "Received message of type " << msg.type;
+
+        if (msg.type == common::TrayProcessStatus::Type) {
+            // We have received a message from the GUI to start a new application
+            handleTrayProcessStatus(common::TrayProcessStatus(QJsonDocument(msg.payload)));
+        } else if (msg.type == common::TrayProcessLogMessage::Type) {
+            // We have received a message from the GUI to start a new application
+            handleTrayProcessLogMessage(common::TrayProcessLogMessage(QJsonDocument(msg.payload)));
+        }
+    }
+    catch (const std::runtime_error& e) {
         Log(QString("Error with incoming message: ") + e.what());
     }
 }
@@ -211,7 +248,7 @@ void Application::sendInitializationInformation(common::JsonSocket* socket) {
     _incomingSocketHandler.sendMessage(socket, msg.toJson());
 }
 int i = 0;
-void Application::sendMessage(const Cluster& cluster, common::TrayCommand command, QString cmd) {
+void Application::sendTrayCommand(const Cluster& cluster, common::TrayCommand command, QString cmd) {
     // Generate identifier
     
     qDebug() << "Sending Message: ";

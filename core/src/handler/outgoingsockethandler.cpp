@@ -72,17 +72,13 @@ void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
             );
 
             std::unique_ptr<common::JsonSocket> jsonSocket = std::make_unique<common::JsonSocket>(std::move(socket));
+            common::JsonSocket* s = jsonSocket.get();
 
             connect(
                 jsonSocket.get(), &common::JsonSocket::readyRead,
-                [s = jsonSocket.get()]() {
-                    QJsonDocument data = s->read();
-                    QString message = data.toJson();
-                    qDebug() << message;
-                }
+                [this, s]() { readyRead(s); }
             );
 
-            
             jsonSocket->socket()->connectToHost(node.ipAddress, node.port);
             _sockets[h] = std::move(jsonSocket);
         }
@@ -114,6 +110,13 @@ void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
     );
     timer->start(2500);
 }
+
+void OutgoingSocketHandler::readyRead(common::JsonSocket* jsonSocket) {
+    assert(jsonSocket);
+    QJsonDocument message = jsonSocket->read();
+    emit messageReceived(message);
+}
+
 
 void OutgoingSocketHandler::sendMessage(const Cluster& cluster, QJsonDocument msg) const {
     assert(!msg.isEmpty());
