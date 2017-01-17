@@ -1,13 +1,14 @@
 {
-    "id": "identifier2",
-    "name": "Application name 2",
+    "id": "openspace",
+    "name": "OpenSpace",
     "executable": "executable name 2",
     "baseDirectory": "base directory 2",
     "commandlineParameters": "commandline parameters 2",
     "currentWorkingDirectory": "current working directory 2",
     "tags": [
-        "tag12",
-        "tag22"
+        "Research demos",
+        "OpenSpace",
+        "sgct"
     ],
     "configurations": [
         {
@@ -20,5 +21,8 @@
             "identifier": "configuration identifier 22",
             "commandlineParameters": "commandline parameter 22"
         }
+    ],
+    "clusters": [
+        "emil"
     ]
 }

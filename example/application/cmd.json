@@ -1,0 +1,8 @@
+{
+    "id": "cmd",
+    "name": "Cmd",
+    "executable": "cmd.exe",
+    "clusters": [
+        "emil"
+    ]
+}

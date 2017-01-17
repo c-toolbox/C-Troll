@@ -1,6 +1,6 @@
 {
     "name": "Erik Mac",
-    "enabled": true,
+    "enabled": false,
     "nodes": [
         { "name": "erik", "ip": "130.236.112.76", "port": 5000 }
     ]

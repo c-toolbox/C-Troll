@@ -23,5 +23,8 @@
             "identifier": "configuration identifier 2",
             "commandlineParameters": "commandline parameter 2"
         }
+    ],
+    "clusters": [
+        "emil"
     ]
 }

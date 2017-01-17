@@ -1,0 +1,7 @@
+{
+    "name": "Emil's Office",
+    "enabled": false,
+    "nodes": [
+        { "name": "emil", "ip": "130.236.243.213", "port": 5000 }
+    ]
+}

@@ -58,7 +58,7 @@ guiSocketServer.on('connection', (guiSocket) => {
     const connectionId = nextId++;
     const rawSocket = new net.Socket();
 
-    let closedCore = false;
+    let closedCore = true;
     let closedGui = false;
 
     console.log(('New incoming gui connection (#' + connectionId + ').').green);
@@ -76,6 +76,7 @@ guiSocketServer.on('connection', (guiSocket) => {
     coreSocket.on('connect', () => {
         console.log(('Connection established to core for connection #' +
             connectionId + '.').green);
+        closedCore = false;
         nConnections++;
         logNConnections();
     });

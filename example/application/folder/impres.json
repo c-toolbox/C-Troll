@@ -1,13 +1,13 @@
 {
-    "id": "identifier13",
-    "name": "Application name3",
+    "id": "impres",
+    "name": "Impres",
     "executable": "executable name3",
     "baseDirectory": "base directory3",
     "commandlineParameters": "commandline parameters3",
     "currentWorkingDirectory": "current working directory3",
     "tags": [
-        "tag13",
-        "tag23"
+        "sgct",
+        "Presentation"
     ],
     "configurations": [
         {
@@ -20,5 +20,9 @@
             "identifier": "configuration identifier 23",
             "commandlineParameters": "commandline parameter 23"
         }
-    ]
+    ],
+    "clusters": [
+        "alpha",
+        "emil"
+    ]    
 }
