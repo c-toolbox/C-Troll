@@ -57,12 +57,12 @@ struct GuiInitialization {
          * Creates an Application from the passed \p application. The \p application must
          * contain all of the following keys with the associated types:
          * \c name The name of the application (String)
-         * \c identifier The identifier of the application (String)
+         * \c id The identifier of the application (String)
          * \c tags The tags that the application is associated with (Array of Strings)
          * \c clusters The clusters that this application is supporting (Array of 
          * Strings)
          * \c configurations The configurations that are supported by this application 
-         * (Array of pairs of strings, \c name and \c identifier)
+         * (Array of pairs of strings, \c name and \c id)
          * \param application The JSON object that contains all of the values for this
          * application
          * \throw std::runtime_error If one of the keys is missing or has the wrong type
@@ -77,13 +77,13 @@ struct GuiInitialization {
         QJsonObject toJson() const;
         
         QString name;
-        QString identifier;
+        QString id;
         QStringList tags;
         QStringList clusters;
         
         struct Configuration {
             QString name;
-            QString identifier;
+            QString id;
         };
         QList<Configuration> configurations;
     };
@@ -114,7 +114,7 @@ struct GuiInitialization {
         /// The human-readable name of the cluster
         QString name;
         /// The unique identifier for the cluster
-        QString identifier;
+        QString id;
         /// Whether the cluster is currently enabled or not
         bool enabled;
     };

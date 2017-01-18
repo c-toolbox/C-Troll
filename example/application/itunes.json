@@ -1,5 +1,4 @@
 {
-    "id": "safari",
     "name": "Safari",
     "executable": "/Applications/Safari.app/Contents/MacOS/Safari",
     "clusters": [

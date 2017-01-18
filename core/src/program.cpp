@@ -114,14 +114,14 @@ common::GuiInitialization::Application programToGuiInitializationApplication(
 {
     common::GuiInitialization::Application app;
     app.name = program.name();
-    app.identifier = program.id();
+    app.id = program.id();
     app.tags = program.tags();
     app.clusters = program.clusters();
     
     for (const Program::Configuration& conf : program.configurations()) {
         common::GuiInitialization::Application::Configuration c;
         c.name = conf.name;
-        c.identifier = conf.identifier;
+        c.id = conf.id;
         app.configurations.push_back(c);
     }
     
@@ -173,7 +173,7 @@ Program::Program(const QJsonObject& jsonObject) {
         
         conf.name = common::testAndReturnString(obj, KeyConfigurationName);
         
-        conf.identifier = common::testAndReturnString(
+        conf.id = common::testAndReturnString(
             obj, KeyConfigurationIdentifier
         );
         conf.commandlineParameters = common::testAndReturnString(

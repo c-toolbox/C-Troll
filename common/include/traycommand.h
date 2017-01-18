@@ -73,7 +73,7 @@ struct TrayCommand {
     QJsonDocument toJson() const;
 
     /// The unique identifier for the process that will be created
-    QString identifier;
+    QString id;
     /// The kind of command that is to be executed
     QString command;
     /// The name of the executable

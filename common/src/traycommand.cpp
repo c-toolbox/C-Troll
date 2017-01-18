@@ -39,7 +39,7 @@
 #include <QJsonObject>
 
 namespace {
-    const QString KeyIdentifier = "identifier";
+    const QString KeyId = "id";
     const QString KeyCommand = "command";
     const QString KeyExecutable = "executable";
     const QString KeyBaseDirectory = "baseDirectory";
@@ -56,7 +56,7 @@ TrayCommand::TrayCommand(const QJsonDocument& document) {
     QJsonObject payload = document.object();
     QJsonObject obj = common::testAndReturnObject(payload, "payload");
 
-    identifier = common::testAndReturnString(obj, KeyIdentifier);
+    id = common::testAndReturnString(obj, KeyId);
     command = common::testAndReturnString(obj, KeyCommand);
     executable = common::testAndReturnString(obj, KeyExecutable);
     baseDirectory = common::testAndReturnString(obj, KeyBaseDirectory);
@@ -67,7 +67,7 @@ TrayCommand::TrayCommand(const QJsonDocument& document) {
 
 QJsonDocument TrayCommand::toJson() const {
     QJsonObject obj;
-    obj[KeyIdentifier] = identifier;
+    obj[KeyId] = id;
     obj[KeyCommand] = command;
     obj[KeyExecutable] = executable;
     obj[KeyBaseDirectory] = baseDirectory;

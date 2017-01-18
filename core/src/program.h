@@ -50,7 +50,7 @@ public:
     
     struct Configuration {
         QString name;
-        QString identifier;
+        QString id;
         QString commandlineParameters;
     };
 

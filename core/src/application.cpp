@@ -128,7 +128,7 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
         _clusters.cbegin(),
         _clusters.cend(),
         [&](const Cluster& c) {
-            return c.identifier() == cmd.clusterId;
+            return c.id() == cmd.clusterId;
         }
     );
             
@@ -148,7 +148,7 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
             auto it = std::find_if(
                 clusters.cbegin(),
                 clusters.cend(),
-                [&](const QString& s) { return c.identifier() == s; }
+                [&](const QString& s) { return c.id() == s; }
             );
             return it != clusters.end();
         }
@@ -174,7 +174,7 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
             iProgram->configurations().cbegin(),
             iProgram->configurations().cend(),
             [&](const Program::Configuration& c) {
-                return c.identifier == cmd.configurationId;
+                return c.id == cmd.configurationId;
             }
         );
             
@@ -252,15 +252,15 @@ void Application::sendTrayCommand(const Cluster& cluster, common::TrayCommand co
     // Generate identifier
     
     qDebug() << "Sending Message: ";
-    qDebug() << "Cluster:" << cluster.name() << cluster.identifier();
+    qDebug() << "Cluster:" << cluster.name() << cluster.id();
     
     command.command = cmd;
-    command.identifier = "Hello" + QString::fromStdString(std::to_string(i));
+    command.id = "Hello" + QString::fromStdString(std::to_string(i));
     i++;
 
     qDebug() << "\tCommand: " << command.command;
     qDebug() << "Executable: " << command.executable;
-    qDebug() << "\tIdentifier: " << command.identifier;
+    qDebug() << "\tIdentifier: " << command.id;
     qDebug() << "\t:Base Directory:  " << command.baseDirectory;
     qDebug() << "\tCommandline Parameters: " << command.commandlineParameters;
     qDebug() << "\tCWD: " << command.currentWorkingDirectory;

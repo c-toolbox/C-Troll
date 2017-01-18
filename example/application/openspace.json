@@ -1,5 +1,4 @@
 {
-    "id": "openspace",
     "name": "OpenSpace",
     "executable": "executable name 2",
     "baseDirectory": "base directory 2",
@@ -15,7 +14,7 @@
             "name": "Configuration 21",
             "identifier": "configuration identifier 12",
             "commandlineParameters": "commandline parameter 12"
-        },        
+        },
         {
             "name": "Configuration 22",
             "identifier": "configuration identifier 22",

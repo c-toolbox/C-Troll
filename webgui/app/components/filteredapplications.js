@@ -22,7 +22,7 @@ class FilteredApplications extends React.Component {
                     </div>
                     <div className="row button-container">
                         {filteredApplications.map((app) =>
-                            <ApplicationButton key={app.identifier} application={app}/>
+                            <ApplicationButton key={app.id} application={app}/>
                         )}
                     </div>
                 </div>

@@ -66,7 +66,7 @@ void ProcessHandler::handleSocketMessage(const QJsonDocument& message) {
     
     qDebug() << "Received TrayCommand";
     qDebug() << "Command: " << command.command;
-    qDebug() << "Identifier: " << command.identifier;
+    qDebug() << "Id: " << command.id;
     qDebug() << "Executable: " << command.executable;
     qDebug() << "CommandLineParameters: " << command.commandlineParameters;
     qDebug() << "BaseDirectory: " << command.baseDirectory;
@@ -74,8 +74,8 @@ void ProcessHandler::handleSocketMessage(const QJsonDocument& message) {
     qDebug() << "EnvironmentVariables: " << command.environmentVariables;
     
     // Check if identifer of traycommand already is tied to a process
-    // We don't allow the same identifier for multiple processes
-    std::map<QString, QProcess*>::iterator p = _processes.find(command.identifier);
+    // We don't allow the same id for multiple processes
+    std::map<QString, QProcess*>::iterator p = _processes.find(command.id);
     if (p == _processes.end() ) {
         // Not Found, create and run a process with it
         createAndRunProcessFromTrayCommand(command);
@@ -95,14 +95,14 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     
     if (p2T != _processes.end() ) {
         common::TrayProcessStatus ps;
-        ps.identifier = p2T->first;
+        ps.id = p2T->first;
         bool sendError = true;
         switch (error) {
             case QProcess::FailedToStart:
                 ps.status = "FailedToStart";
                 break;
             case QProcess::Timedout:
-                ps.status = "Timedout";
+                ps.status = "TimedOut";
                 break;
             case QProcess::WriteError:
                 ps.status = "WriteError";
@@ -136,7 +136,7 @@ void ProcessHandler::handleStarted(){
     if (p2T != _processes.end() ) {
         // Send out the TrayProcessStatus with the status string
         common::TrayProcessStatus ps;
-        ps.identifier = p2T->first;
+        ps.id = p2T->first;
         ps.status = "Running";
         common::GenericMessage msg;
         msg.type = common::TrayProcessStatus::Type;
@@ -158,7 +158,7 @@ void ProcessHandler::handleFinished(int exitCode, QProcess::ExitStatus exitStatu
     
     if (p2T != _processes.end() ) {
         common::TrayProcessStatus ps;
-        ps.identifier = p2T->first;
+        ps.id = p2T->first;
         switch (exitStatus) {
             case QProcess::NormalExit:
                 ps.status = "NormalExit";
@@ -189,7 +189,7 @@ void ProcessHandler::handleReadyReadStandardError(){
     if (p2T != _processes.end() ) {
         // Send out the TrayProcessLogMessage with the stderror key
         common::TrayProcessLogMessage pm;
-        pm.identifier = p2T->first;
+        pm.id = p2T->first;
         pm.stdOutLog = "";
         pm.stdErrorLog = QString::fromUtf8(process->readAllStandardError());
         common::GenericMessage msg;
@@ -207,7 +207,7 @@ void ProcessHandler::handleReadyReadStandardOutput(){
     
     if (p2T != _processes.end() ) {
         common::TrayProcessLogMessage pm;
-        pm.identifier = p2T->first;
+        pm.id = p2T->first;
         pm.stdOutLog = QString::fromUtf8(process->readAllStandardOutput());
         pm.stdErrorLog = "";
         common::GenericMessage msg;
@@ -218,7 +218,7 @@ void ProcessHandler::handleReadyReadStandardOutput(){
 }
 
 void ProcessHandler::executeProcessWithTrayCommand(QProcess* process, const common::TrayCommand& command) {    
-    if(command.command == "start"){
+    if(command.command == "Start"){
         if(!command.environmentVariables.isEmpty()){
             QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
             // First split per variable, such that each string contains "name,value"
@@ -247,10 +247,10 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process, const comm
             process->start(command.executable + " " + command.commandlineParameters);
         }
     }
-    else if(command.command == "kill"){
+    else if(command.command == "Kill"){
         process->kill();
     }
-    else if(command.command == "exit"){
+    else if(command.command == "Exit"){
         process->terminate();
     }
 }
@@ -273,7 +273,7 @@ void ProcessHandler::createAndRunProcessFromTrayCommand(const common::TrayComman
                      this, SLOT(handleStarted()));
     
     // Insert command identifier and process into out lists
-    _processes.insert(std::pair<QString, QProcess*>(command.identifier, newProcess));
+    _processes.insert(std::pair<QString, QProcess*>(command.id, newProcess));
     
     // Run the process with the command
     executeProcessWithTrayCommand(newProcess, command);

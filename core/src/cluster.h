@@ -44,7 +44,7 @@ class JsonObject;
 /**
  * This class represents a cluster setup, that is, a collection of computers that are
  * addressed as a unit. Each cluster has a human readable \m _name, a unique
- * \m _identifier, a setting whether or not it is \m _enabled and a list of computer
+ * \m _id, a setting whether or not it is \m _enabled and a list of computer
  * \m _nodes.
  */
 class Cluster {
@@ -74,6 +74,8 @@ public:
      * Tray application is listening.
      */
     struct Node {
+        /// Unique identifier for the cluster node
+        QString id;
         /// The human readable name of the computer node
         QString name;
         /// The IP address at which the computer is reachable; this can also be a
@@ -93,7 +95,7 @@ public:
      * Returns the unique identifier of the cluster.
      * \return The unique identifier of the cluster
      */
-    QString identifier() const;
+    QString id() const;
     
     /**
      * Returns whether the cluster is currently enabled or disabled. 
@@ -111,7 +113,7 @@ private:
     /// The human readable name of this Cluster
     QString _name;
     /// The unique identifier of this Cluster
-    QString _identifier;
+    QString _id;
     /// A flag whether this Cluster is enabled or disabled
     bool _enabled;
     /// A list of all nodes belonging to this cluster

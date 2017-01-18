@@ -39,7 +39,7 @@
 #include <QJsonObject>
 
 namespace {
-    const QString KeyIdentifier = "identifier";
+    const QString KeyIdentifier = "id";
     const QString KeyStdOut = "stdout";
     const QString KeyStdError = "stderror";
 }
@@ -51,14 +51,14 @@ const QString TrayProcessLogMessage::Type = "TrayProcessLogMessage";
 TrayProcessLogMessage::TrayProcessLogMessage(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
-    identifier = common::testAndReturnString(obj, KeyIdentifier);
+    id = common::testAndReturnString(obj, KeyIdentifier);
     stdOutLog = common::testAndReturnString(obj, KeyStdOut, Optional::Yes);
     stdErrorLog = common::testAndReturnString(obj, KeyStdError, Optional::Yes);
 }
 
 QJsonDocument TrayProcessLogMessage::toJson() const {
     QJsonObject obj;
-    obj[KeyIdentifier] = identifier;
+    obj[KeyIdentifier] = id;
     if (!stdOutLog.isEmpty()) {
         obj[KeyStdOut] = stdOutLog;
     }

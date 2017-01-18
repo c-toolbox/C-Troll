@@ -12,7 +12,7 @@ class ApplicationButton extends React.Component {
     render() {
         const application = this.props.application;
 
-        const appUrl = '/applications/' + application.identifier.replace('/', '>');
+        const appUrl = '/applications/' + application.id.replace('/', '>');
         let buttons = [];
 
         if (application.clusters.length > 0) {

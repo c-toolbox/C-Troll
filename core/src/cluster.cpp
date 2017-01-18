@@ -46,7 +46,7 @@
 
 namespace {
     const QString KeyName = "name";
-    const QString KeyIdentifier = "id";
+    const QString KeyId = "id";
     const QString KeyEnabled = "enabled";
     const QString KeyNodes = "nodes";
 
@@ -57,29 +57,32 @@ namespace {
 
 Cluster::Cluster(const QJsonObject& jsonObject) {
     _name = common::testAndReturnString(jsonObject, KeyName);
-    _identifier = common::testAndReturnString(jsonObject, KeyIdentifier);
+    _id = common::testAndReturnString(jsonObject, KeyId);
     _enabled = common::testAndReturnBool(jsonObject, KeyEnabled, Optional::Yes, true);
     
-    QJsonArray nodesArray = common::testAndReturnArray(jsonObject, KeyNodes);
+    QJsonObject nodes = common::testAndReturnObject(jsonObject, KeyNodes);
     _nodes.clear();
-    for (const QJsonValue& v : nodesArray) {
-        QJsonObject obj = v.toObject();
+
+    for (auto iter = nodes.begin(); iter != nodes.end(); iter++) {
+        QString id = iter.key();
+        QJsonObject obj = iter.value().toObject();
         assert(obj.size() == 3);
 
         QString name = common::testAndReturnString(obj, KeyNodeName);
         QString ipAddress = common::testAndReturnString(obj, KeyNodeIpAddress);
         int port = common::testAndReturnInt(obj, KeyNodePort);
-        
-        _nodes.push_back({ name, ipAddress, port });
+
+        _nodes.push_back({ id, name, ipAddress, port });
     }
+
 }
 
 QString Cluster::name() const {
     return _name;
 }
 
-QString Cluster::identifier() const {
-    return _identifier;
+QString Cluster::id() const {
+    return _id;
 }
 
 bool Cluster::enabled() const {
@@ -91,24 +94,24 @@ QList<Cluster::Node> Cluster::nodes() const {
 }
 
 Cluster loadCluster(QString jsonFile, QString baseDirectory) {
-    QString identifier = QDir(baseDirectory).relativeFilePath(jsonFile);
+    QString id = QDir(baseDirectory).relativeFilePath(jsonFile);
     
     // relativeFilePath will have the baseDirectory in the beginning of the relative path
     // and we want to remove it:  baseDirectory.length() + 1
     // then, we want to remove the extension of 5 characters (.json)
     // So we take the middle part of the string:
-    identifier = identifier.mid(
+    id = id.mid(
         // length of the base directory + '/'
         baseDirectory.length() + 1,
         // total length - (stuff we removed in the beginning) - length('.json')
-        identifier.size() - (baseDirectory.length() + 1) - 5
+        id.size() - (baseDirectory.length() + 1) - 5
     );
     
     QFile f(jsonFile);
     f.open(QFile::ReadOnly);
     QJsonDocument d = QJsonDocument::fromJson(f.readAll());
     QJsonObject obj = d.object();
-    obj[KeyIdentifier] = identifier;
+    obj[KeyId] = id;
     return Cluster(obj);
 }
 
@@ -135,7 +138,7 @@ QList<Cluster> loadClustersFromDirectory(QString directory) {
 common::GuiInitialization::Cluster clusterToGuiInitializationCluster(Cluster c) {
     common::GuiInitialization::Cluster cluster;
     cluster.name = c.name();
-    cluster.identifier = c.identifier();
+    cluster.id = c.id();
     cluster.enabled = c.enabled();
     return cluster;
 }

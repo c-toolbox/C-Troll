@@ -44,15 +44,15 @@ namespace {
     const QString KeyClusters = "clusters";
     
     const QString KeyApplicationName = "name";
-    const QString KeyApplicationIdentifier = "identifier";
+    const QString KeyApplicationId = "id";
     const QString KeyApplicationTags = "tags";
     const QString KeyApplicationClusters = "clusters";
     const QString KeyApplicationConfigurations = "configurations";
     const QString KeyApplicationConfigurationName = "name";
-    const QString KeyApplicationConfigurationIdentifier = "identifier";
+    const QString KeyApplicationConfigurationId = "id";
     
     const QString KeyClusterName = "name";
-    const QString KeyClusterIdentifier = "id";
+    const QString KeyClusterId = "id";
     const QString KeyClusterEnabled = "enabled";
 }
 
@@ -62,7 +62,7 @@ const QString GuiInitialization::Type = "GuiInit";
     
 GuiInitialization::Application::Application(QJsonObject obj) {
     name = common::testAndReturnString(obj, KeyApplicationName);
-    identifier = common::testAndReturnString(obj, KeyApplicationIdentifier);
+    id = common::testAndReturnString(obj, KeyApplicationId);
 
     tags = common::testAndReturnStringList(obj, KeyApplicationTags);
     clusters = common::testAndReturnStringList(obj, KeyApplicationClusters);
@@ -80,8 +80,8 @@ GuiInitialization::Application::Application(QJsonObject obj) {
         configuration.name = common::testAndReturnString(
             valObj, KeyApplicationConfigurationName
         );
-        configuration.identifier = common::testAndReturnString(
-            valObj, KeyApplicationConfigurationIdentifier
+        configuration.id = common::testAndReturnString(
+            valObj, KeyApplicationConfigurationId
         );
         
         configurations.push_back(configuration);
@@ -92,7 +92,7 @@ QJsonObject GuiInitialization::Application::toJson() const {
     QJsonObject res;
     
     res[KeyApplicationName] = name;
-    res[KeyApplicationIdentifier] = identifier;
+    res[KeyApplicationId] = id;
     res[KeyApplicationTags] = QJsonArray::fromStringList(tags);
     res[KeyApplicationClusters] = QJsonArray::fromStringList(clusters);
     
@@ -100,7 +100,7 @@ QJsonObject GuiInitialization::Application::toJson() const {
     for (const Configuration& conf : configurations) {
         QJsonObject obj;
         obj[KeyApplicationConfigurationName] = conf.name;
-        obj[KeyApplicationConfigurationIdentifier] = conf.identifier;
+        obj[KeyApplicationConfigurationId] = conf.id;
         confs.append(obj);
     }
     res[KeyApplicationConfigurations] = confs;
@@ -110,14 +110,14 @@ QJsonObject GuiInitialization::Application::toJson() const {
     
 GuiInitialization::Cluster::Cluster(QJsonObject cluster) {
     name = common::testAndReturnString(cluster, KeyClusterName);
-    identifier = common::testAndReturnString(cluster, KeyClusterIdentifier);
+    id = common::testAndReturnString(cluster, KeyClusterId);
     enabled = common::testAndReturnBool(cluster, KeyClusterEnabled);
 }
     
 QJsonObject GuiInitialization::Cluster::toJson() const {
     QJsonObject res;
     res[KeyClusterName] = name;
-    res[KeyClusterIdentifier] = identifier;
+    res[KeyClusterId] = id;
     res[KeyClusterEnabled] = enabled;
     return res;
 }

@@ -49,10 +49,10 @@ class ApplicationList {
         }
         return apps.filter((app) => {
             const lowerName = app.name.toLowerCase();
-            const lowerIdentifier = app.identifier.toLowerCase();
+            const lowerId = app.id.toLowerCase();
 
             const inName = lowerName.indexOf(lowerFilterString) !== -1;
-            const inIdentifier = lowerIdentifier.indexOf(lowerFilterString) !== -1;
+            const inId = lowerId.indexOf(lowerFilterString) !== -1;
             let inTags = false;
 
             app.tags.forEach((tag) => {
@@ -64,7 +64,7 @@ class ApplicationList {
                 return true;
             });
 
-            return inName || inIdentifier || inTags;
+            return inName || inId || inTags;
         });
     }
 }

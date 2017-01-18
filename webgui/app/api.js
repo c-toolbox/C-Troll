@@ -61,9 +61,9 @@ class Api {
 
         const data = {
             command: 'start',
-            application_identifier: applicationId,
-            configuration_identifier: configurationId,
-            cluster_identifier: clusterId
+            applicationId: applicationId,
+            configurationId: configurationId,
+            clusterId: clusterId
         };
         this.sendCommand(data);
     }

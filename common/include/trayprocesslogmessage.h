@@ -70,7 +70,7 @@ struct TrayProcessLogMessage {
     QJsonDocument toJson() const;
     
     /// The unique identifier for the process that will be created
-    QString identifier;
+    QString id;
     /// The process stdout line
     QString stdOutLog;
     /// The process stderror line

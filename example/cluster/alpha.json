@@ -1,12 +1,12 @@
 {
     "name": "Alpha Cluster",
     "enabled": false,
-    "nodes": [
-        { "name": "alpha1", "ip": "172.19.1.11", "port": 30001 },
-        { "name": "alpha2", "ip": "172.19.1.12", "port": 30002 },
-        { "name": "alpha3", "ip": "172.19.1.13", "port": 30003 },
-        { "name": "alpha4", "ip": "172.19.1.14", "port": 30004 },
-        { "name": "alpha5", "ip": "172.19.1.15", "port": 30005 },
-        { "name": "alpha6", "ip": "172.19.1.16", "port": 30006 }
-    ]
+    "nodes": {
+        "alpha1": { "name": "Alpha 1", "ip": "172.19.1.11", "port": 30001 },
+        "alpha2": { "name": "Alpha 2", "ip": "172.19.1.12", "port": 30002 },
+        "alpha3": { "name": "Alpha 3", "ip": "172.19.1.13", "port": 30003 },
+        "alpha4": { "name": "Alpha 4", "ip": "172.19.1.14", "port": 30004 },
+        "alpha5": { "name": "Alpha 5", "ip": "172.19.1.15", "port": 30005 },
+        "alpha6": { "name": "Alpha 6", "ip": "172.19.1.16", "port": 30006 }
+    }
 }

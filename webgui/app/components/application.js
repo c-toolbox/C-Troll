@@ -17,7 +17,7 @@ class Appplication extends React.Component {
 
     render() {
         const application = api.applications.find((app) => {
-            return app.identifier === this._appId;
+            return app.id === this._appId;
         });
 
         const pageName = application ? (<span>{application.name}</span>) : (<span>{this._appId}</span>);
@@ -52,7 +52,7 @@ class Appplication extends React.Component {
 
             application.configurations.forEach((c) => {
                 configurations.push(
-                    <ConfigurationButton key={c.identifier} configuration={c.name}/>
+                    <ConfigurationButton key={c.id} configuration={c.name}/>
                 );
             });
 

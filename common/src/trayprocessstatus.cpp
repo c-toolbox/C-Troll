@@ -39,7 +39,7 @@
 #include <QJsonObject>
 
 namespace {
-    const QString KeyIdentifier = "identifier";
+    const QString KeyIdentifier = "id";
     const QString KeyStatus = "status";
 }
 
@@ -50,13 +50,13 @@ const QString TrayProcessStatus::Type = "TrayProcessStatus";
 TrayProcessStatus::TrayProcessStatus(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
-    identifier = common::testAndReturnString(obj, KeyIdentifier);
+    id = common::testAndReturnString(obj, KeyIdentifier);
     status = common::testAndReturnString(obj, KeyStatus);
 }
 
 QJsonDocument TrayProcessStatus::toJson() const {
     QJsonObject obj;
-    obj[KeyIdentifier] = identifier;
+    obj[KeyIdentifier] = id;
     obj[KeyStatus] = status;
     
     return QJsonDocument(obj);

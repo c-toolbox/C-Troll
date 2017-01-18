@@ -69,7 +69,7 @@ struct TrayProcessStatus {
     QJsonDocument toJson() const;
     
     /// The unique identifier for the process that will be created
-    QString identifier;
+    QString id;
     /// The process status
     QString status;
 };
