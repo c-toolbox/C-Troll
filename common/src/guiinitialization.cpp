@@ -42,6 +42,7 @@
 namespace {
     const QString KeyApplications = "applications";
     const QString KeyClusters = "clusters";
+    const QString KeyProcesses = "processes";
     
     const QString KeyApplicationName = "name";
     const QString KeyApplicationId = "id";
@@ -54,6 +55,11 @@ namespace {
     const QString KeyClusterName = "name";
     const QString KeyClusterId = "id";
     const QString KeyClusterEnabled = "enabled";
+
+    const QString KeyProcessId = "id";
+    const QString KeyProcessApplicationId = "applicationId";
+    const QString KeyProcessConfigurationId = "configurationId";
+    const QString KeyProcessClusterId = "clusterId";
 }
 
 namespace common {
@@ -122,6 +128,22 @@ QJsonObject GuiInitialization::Cluster::toJson() const {
     return res;
 }
 
+GuiInitialization::Process::Process(QJsonObject process) {
+    id = common::testAndReturnInt(process, KeyProcessId);
+    applicationId = common::testAndReturnString(process, KeyProcessApplicationId);
+    configurationId = common::testAndReturnString(process, KeyProcessConfigurationId);
+    clusterId = common::testAndReturnString(process, KeyProcessClusterId);
+}
+
+QJsonObject GuiInitialization::Process::toJson() const {
+    QJsonObject res;
+    res[KeyProcessId] = id;
+    res[KeyProcessApplicationId] = applicationId;
+    res[KeyProcessConfigurationId] = configurationId;
+    res[KeyProcessClusterId] = clusterId;
+    return res;
+}
+
 GuiInitialization::GuiInitialization(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
@@ -157,6 +179,12 @@ QJsonDocument GuiInitialization::toJson() const {
     }
     obj[KeyClusters] = cls;
     
+    QJsonArray procs;
+    for (const Process& p : processes) {
+        procs.append(p.toJson());
+    }
+    obj[KeyProcesses] = procs;
+
     return QJsonDocument(obj);
 }
 

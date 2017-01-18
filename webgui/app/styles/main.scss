@@ -148,9 +148,9 @@ p {
     margin-bottom: 0.4em;
     display: inline-block;
     position: relative;
+    background-color: #383838;
 
     .click-area {
-        background-color: #383838;
         position: absolute;
         z-index: 0;
         width: 100%;

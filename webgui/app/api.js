@@ -5,6 +5,7 @@ class Api {
     @observable _state = {
         applications: [],
         clusters: [],
+        processes: [],
         loading: true
     }
 
@@ -14,6 +15,10 @@ class Api {
 
     @computed get clusters() {
         return this._state.clusters;
+    }
+
+    @computed get processes() {
+        return this._state.processes;
     }
 
     @computed get loading() {
@@ -43,8 +48,9 @@ class Api {
     }
 
     initializeGui(data) {
-        this._state.applications = data.applications;
-        this._state.clusters = data.clusters;
+        this._state.applications = data.applications || [];
+        this._state.clusters = data.clusters || [];
+        this._state.processes = data.processes || [];
         this._state.loading = false;
     }
 

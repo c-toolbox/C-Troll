@@ -98,7 +98,7 @@ struct GuiInitialization {
          * Creates a Cluster from the passed \p cluster. The \p cluster must contain both
          * of the following keys; both of type string:
          * \c name The human-readable name of the cluster
-         * \c identifier The identifier used for this cluster
+         * \c id The identifier used for this cluster
          * \param cluster The JSON object that contains all of the values for this cluster
          * \throw std::runtime_error If one of the keys is missing or has the wrong type
          */
@@ -117,6 +117,42 @@ struct GuiInitialization {
         QString id;
         /// Whether the cluster is currently enabled or not
         bool enabled;
+    };
+
+    /// This struct represents the information about the processes that are registered with
+    /// the Core library
+    struct Process {
+        /// Default constructor
+        Process() = default;
+
+        /**
+        * Creates a Process from the passed \p process. The \p process must contain both
+        * of the following keys; both of type string:
+        * \c id The identifier used for this process
+        * \c applicationId The application id associated with this process
+        * \c configurationId The configuration id of the application
+        * \c clusterId The cluster id associated with this process
+        * \param process The JSON object that contains all of the values for this process
+        * \throw std::runtime_error If one of the keys is missing or has the wrong type
+        */
+        Process(QJsonObject process);
+
+        /**
+        * Returns the JSON object representation of this process. See the constructor
+        * for a list of keys and their types.
+        * \return The JSON object representation of this process
+        */
+        QJsonObject toJson() const;
+
+        /// The unique identifier for the process
+        int id;
+
+        QString applicationId;
+
+        QString configurationId;
+
+        QString clusterId;
+
     };
     
     /// Default constructor
@@ -144,6 +180,8 @@ struct GuiInitialization {
     QList<Application> applications;
     /// All clusters that the Core is responsible for
     QList<Cluster> clusters;
+    /// All current processes
+    QList<Process> processes;
 };
 
 } // namespace
