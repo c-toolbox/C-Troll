@@ -1,6 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { browserHistory } from 'react-router';
+import MoreButton from './morebutton';
 
 
 @observer
@@ -24,6 +25,7 @@ class ClusterButton extends React.Component {
                 <div className="main">{cluster.name}</div>
                 <div className="sub">Running OpenSpace Develop</div>
                 {this.props.children}
+                <MoreButton to={clusterUrl} key="more"/>
             </div>);
     }
 }

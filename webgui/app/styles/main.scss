@@ -159,7 +159,7 @@ p {
         color: #ddd;
 
         &:active {
-            background-color: #333;
+            background-color: #222;
         }
     }
 
@@ -236,6 +236,7 @@ p {
     display: block;
     color: #fff;
     padding: 0.5em;
+    margin: 0.3em;
 
     &:active {
         background-color: #a7c13d;
@@ -255,16 +256,21 @@ p {
 
 .more-button {
     position: absolute;
-    top: 0.2em;
-    right: 0.6em;
+    top: 0.4em;
+    right: 0.4em;
 
-    &:active {
-        background-color: #555;
+    :hover {
+        background-color: #333;
     }
+    :active {
+        background-color: #222;
+    }
+
 
     .more-icon {
         width: 1.3em;
         height: 1.3em;
+        padding: 0.2em;
 
         .more-icon-circle {
             fill: #fff;
