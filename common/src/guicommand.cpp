@@ -40,9 +40,9 @@
 
 namespace {
     const QString KeyCommand = "command";
-    const QString KeyApplicationId = "application_identifier";
-    const QString KeyConfigurationId = "configuration_identifier";
-    const QString KeyClusterId = "cluster_identifier";
+    const QString KeyApplicationId = "applicationId";
+    const QString KeyConfigurationId = "configurationId";
+    const QString KeyClusterId = "clusterId";
 }
 
 namespace common {

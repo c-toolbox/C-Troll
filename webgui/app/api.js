@@ -66,7 +66,7 @@ class Api {
         console.log('launching application ' + applicationId);
 
         const data = {
-            command: 'start',
+            command: 'Start',
             applicationId: applicationId,
             configurationId: configurationId,
             clusterId: clusterId

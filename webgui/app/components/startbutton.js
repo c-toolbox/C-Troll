@@ -1,4 +1,5 @@
 import React from 'react';
+import api from '../api';
 
 class StartButton extends React.Component {
     render() {
@@ -9,7 +10,9 @@ class StartButton extends React.Component {
         </svg>);
 
         const start = (evt) => {
-            console.log('starting app!');
+            const config = this.props.configuration;
+            const configId = config ? config.id : '';
+            api.startApplication(this.props.application.id, configId, this.props.cluster.id);
             evt.stopPropagation();
         };
 
@@ -32,8 +35,9 @@ class StartButton extends React.Component {
 }
 
 StartButton.propTypes = {
-    application: React.PropTypes.object,
-    cluster: React.PropTypes.object,
+    application: React.PropTypes.object.isRequired,
+    cluster: React.PropTypes.object.isRequired,
+    configuration: React.PropTypes.object,
     type: React.PropTypes.string
 };
 
