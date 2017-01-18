@@ -235,7 +235,6 @@ p {
     background-color: #91b71a;
     display: block;
     color: #fff;
-    margin: 0.5em;
     padding: 0.5em;
 
     &:active {
@@ -255,12 +254,9 @@ p {
 }
 
 .more-button {
-    text-align: center;
-    background-color: #49494a;
-    display: block;
-    color: #fff;
-    margin: 0.5em;
-    padding: 0.5em;
+    position: absolute;
+    top: 0.2em;
+    right: 0.6em;
 
     &:active {
         background-color: #555;
@@ -269,8 +265,6 @@ p {
     .more-icon {
         width: 1.3em;
         height: 1.3em;
-        vertical-align: middle;
-        margin-right: 0.5em;
 
         .more-icon-circle {
             fill: #fff;

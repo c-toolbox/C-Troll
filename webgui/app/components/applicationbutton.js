@@ -29,6 +29,8 @@ class ApplicationButton extends React.Component {
             buttons.push(<MoreButton key="disabled"/>);
         }
 
+        buttons.push(<MoreButton to={appUrl} key="more"/>);
+
         const open = () => {
             browserHistory.push(appUrl);
         };
