@@ -108,7 +108,25 @@ public:
      * \return A list of all computer nodes that belong to this Cluster
      */
     QList<Node> nodes() const;
-    
+
+    /**
+    * This method converts a Cluster information into the common::GuiInitialization::Cluster
+    * format so that it can be send to connected GUIs.
+    * \param cluster The Cluster information that is to be converte
+    * \return A common::GuiInitialization::Cluster structure that contains all relevant
+    * information for the GUI initialization step
+    */
+    common::GuiInitialization::Cluster toGuiInitializationCluster() const;
+
+    /**
+    * This method walks the passed \p directory and looks for all <code>*.json</code>
+    * files in it. Any \c JSON file in it will be interpreted as a cluster configuration and
+    * returned.
+    * \param directory The directory that is walked in search for <code>*.json</code> files
+    * \return A list of all Cluster%s that were found by walking the \p directory
+    */
+    static QList<Cluster> loadClustersFromDirectory(QString directory);
+
 private:
     /// The human readable name of this Cluster
     QString _name;
@@ -120,22 +138,5 @@ private:
     QList<Node> _nodes;
 };
 
-/**
- * This method walks the passed \p directory and looks for all <code>*.json</code>
- * files in it. Any \c JSON file in it will be interpreted as a cluster configuration and
- * returned.
- * \param directory The directory that is walked in search for <code>*.json</code> files
- * \return A list of all Cluster%s that were found by walking the \p directory
- */
-QList<Cluster> loadClustersFromDirectory(QString directory);
-
-/**
- * This method converts a Cluster information into the common::GuiInitialization::Cluster
- * format so that it can be send to connected GUIs.
- * \param cluster The Cluster information that is to be converte
- * \return A common::GuiInitialization::Cluster structure that contains all relevant
- * information for the GUI initialization step
- */
-common::GuiInitialization::Cluster clusterToGuiInitializationCluster(Cluster cluster);
 
 #endif // __CLUSTER_H__

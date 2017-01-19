@@ -32,34 +32,48 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "trayprocessstatus.h"
+#ifndef __GUIPROCESSSTATUS_H__
+#define __GUIPROCESSSTATUS_H__
 
-#include "jsonsupport.h"
-
-#include <QJsonObject>
-
-namespace {
-    const QString KeyProcessId = "processId";
-    const QString KeyStatus = "status";
-}
+#include <QJsonDocument>
+#include <QString>
 
 namespace common {
     
-const QString TrayProcessStatus::Type = "TrayProcessStatus";
-
-TrayProcessStatus::TrayProcessStatus(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
+/// This struct is the data structure that gets send from the Core to the GUI to 
+/// inform the GUI about a change in process status
+struct GuiProcessStatus {
+    /// The string representing this command type, for usage in the common::GenericMessage
+    static const QString Type;
     
-    processId = common::testAndReturnString(obj, KeyProcessId);
-    status = common::testAndReturnString(obj, KeyStatus);
-}
-
-QJsonDocument TrayProcessStatus::toJson() const {
-    QJsonObject obj;
-    obj[KeyProcessId] = processId;
-    obj[KeyStatus] = status;
+    /// Default constructor
+    GuiProcessStatus() = default;
     
-    return QJsonDocument(obj);
-}
+    /**
+     * Creates a GuiProcessStatus from the passed \p document. The \p document must
+     * contain the following keys, all of type string:
+     * \c identifier
+     * \c status
+     * \param document The QJsonDocument that contains the information about this
+     * GuiProcessStatus
+     * \throws std::runtime_error If one of the required keys were not present or of the
+     * wrong type
+     */
+    GuiProcessStatus(const QJsonDocument& document);
+    
+    /**
+     * Converts the GuiProcessStatus into a valid QJsonDocument object and returns
+     * it.
+     * \return The QJsonDocument representing this GuiProcessStatus
+     */
+    QJsonDocument toJson() const;
+    
+    /// The unique identifier for the process that will be created
+    QString processId;
+    /// The process status
+    QString status;
+};
     
 } // namespace common
+
+#endif // __GUIPROCESSSTATUS_H__

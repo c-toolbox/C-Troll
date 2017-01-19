@@ -55,12 +55,12 @@ public:
     void sendMessage(const Cluster& cluster, QJsonDocument message) const;
 
 signals:
-    void messageReceived(QJsonDocument message);
+    void messageReceived(const Cluster& cluster, const Cluster::Node& node, QJsonDocument message);
 
 private:
     using HashValue = QString;
 
-    void readyRead(common::JsonSocket* socket);
+    void readyRead(const Cluster& cluster, const Cluster::Node& node);
     HashValue hash(const Cluster& cluster, const Cluster::Node& node) const;
 
     QList<Cluster> _clusters;

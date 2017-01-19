@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016                                                                    *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -32,34 +32,27 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "trayprocessstatus.h"
+#include "process.h"
+#include "program.h"
+#include "cluster.h"
+
+#include <QDebug>
+#include <QDirIterator>
+#include <QJsonArray>
+#include <QJsonParseError>
+
+#include <cassert>
+#include <logging.h>
 
 #include "jsonsupport.h"
 
-#include <QJsonObject>
-
 namespace {
-    const QString KeyProcessId = "processId";
-    const QString KeyStatus = "status";
 }
 
-namespace common {
+Process::Process(int id, Program* program, Program::Configuration* configuration, Cluster* cluster) {
     
-const QString TrayProcessStatus::Type = "TrayProcessStatus";
-
-TrayProcessStatus::TrayProcessStatus(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
-    
-    processId = common::testAndReturnString(obj, KeyProcessId);
-    status = common::testAndReturnString(obj, KeyStatus);
 }
 
-QJsonDocument TrayProcessStatus::toJson() const {
-    QJsonObject obj;
-    obj[KeyProcessId] = processId;
-    obj[KeyStatus] = status;
-    
-    return QJsonDocument(obj);
+common::GuiInitialization::Process Process::toGuiInitializationProcess() const {
+    return common::GuiInitialization::Process();
 }
-    
-} // namespace common

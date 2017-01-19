@@ -35,6 +35,7 @@
 #include "application.h"
 
 #include <guicommand.h>
+#include <guiprocessstatus.h>
 #include <trayprocessstatus.h>
 #include <trayprocesslogmessage.h>
 #include <logging.h>
@@ -66,9 +67,9 @@ Application::Application(QString configurationFile) {
     int listeningPort = jsonObject.value("listeningPort").toInt();
 
     // Load all program descriptions from the path provided by the configuration file
-    _programs = loadProgramsFromDirectory(programPath);
+    _programs = Program::loadProgramsFromDirectory(programPath);
     // Load all cluster descriptions from the path provided by the configuration file
-    _clusters = loadClustersFromDirectory(clusterPath);
+    _clusters = Cluster::loadClustersFromDirectory(clusterPath);
 
     // The incoming socket handler takes care of messages from the GUI
     _incomingSocketHandler.initialize(listeningPort);
@@ -83,7 +84,7 @@ Application::Application(QString configurationFile) {
     
     QObject::connect(
         &_outgoingSocketHandler, &OutgoingSocketHandler::messageReceived,
-        [this](const QJsonDocument& message) { incomingTrayMessage(message); }
+        [this](const Cluster& cluster, const Cluster::Node& node, const QJsonDocument& message) { incomingTrayMessage(cluster, node, message); }
     );
 
     QObject::connect(
@@ -92,11 +93,12 @@ Application::Application(QString configurationFile) {
     );
 }
 
-void Application::handleTrayProcessStatus(common::TrayProcessStatus status) {
+void Application::handleTrayProcessStatus(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessStatus status) {
     Log("Status: " + status.status);
+    
 }
 
-void Application::handleTrayProcessLogMessage(common::TrayProcessLogMessage logMessage) {
+void Application::handleTrayProcessLogMessage(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessLogMessage logMessage) {
     Log("Std out: " + logMessage.stdOutLog);
     Log("Std err: " + logMessage.stdErrorLog);
 }
@@ -167,7 +169,7 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
             
     // Get the correct configuration, if it exists
     if (cmd.configurationId.isEmpty()) {
-        sendTrayCommand(*iCluster, programToTrayCommand(*iProgram), cmd.command);
+        sendTrayCommand(*iCluster, Program::programToTrayCommand(*iProgram), cmd.command);
     }
     else {
         auto iConfiguration = std::find_if(
@@ -190,7 +192,7 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
         }
         sendTrayCommand(
             *iCluster,
-            programToTrayCommand(*iProgram, iConfiguration->commandlineParameters), cmd.command
+            Program::programToTrayCommand(*iProgram, iConfiguration->commandlineParameters), cmd.command
         );
     }
 }
@@ -211,7 +213,7 @@ void Application::incomingGuiMessage(const QJsonDocument& message) {
     }
 }
 
-void Application::incomingTrayMessage(const QJsonDocument& message) {
+void Application::incomingTrayMessage(const Cluster& cluster, const Cluster::Node& node, const QJsonDocument& message) {
     try {
         // The message contains a JSON object of the GenericMessage
         common::GenericMessage msg = common::GenericMessage(message);
@@ -220,10 +222,10 @@ void Application::incomingTrayMessage(const QJsonDocument& message) {
 
         if (msg.type == common::TrayProcessStatus::Type) {
             // We have received a message from the GUI to start a new application
-            handleTrayProcessStatus(common::TrayProcessStatus(QJsonDocument(msg.payload)));
+            handleTrayProcessStatus(cluster, node, common::TrayProcessStatus(QJsonDocument(msg.payload)));
         } else if (msg.type == common::TrayProcessLogMessage::Type) {
             // We have received a message from the GUI to start a new application
-            handleTrayProcessLogMessage(common::TrayProcessLogMessage(QJsonDocument(msg.payload)));
+            handleTrayProcessLogMessage(cluster, node, common::TrayProcessLogMessage(QJsonDocument(msg.payload)));
         }
     }
     catch (const std::runtime_error& e) {
@@ -237,16 +239,35 @@ void Application::sendInitializationInformation(common::JsonSocket* socket) {
     
     common::GuiInitialization initMsg;
     for (const Program& p : _programs) {
-        initMsg.applications.push_back(programToGuiInitializationApplication(p));
+        initMsg.applications.push_back(p.toGuiInitializationApplication());
     }
     
     for (const Cluster& c : _clusters) {
-        initMsg.clusters.push_back(clusterToGuiInitializationCluster(c));
+        initMsg.clusters.push_back(c.toGuiInitializationCluster());
+    }
+
+    for (const Process& p : _processes) {
+        initMsg.processes.push_back(p.toGuiInitializationProcess());
     }
     
     msg.payload = initMsg.toJson().object();
     _incomingSocketHandler.sendMessage(socket, msg.toJson());
 }
+
+
+void Application::sendGuiProcessStatus(const Process& process, const common::TrayProcessStatus& trayProcessStatus) {
+    common::GenericMessage msg;
+    msg.type = common::GuiProcessStatus::Type;
+
+    common::GuiProcessStatus statusMsg;
+
+    // TODO: Fill process status with data from process and new message from tray.
+
+    msg.payload = statusMsg.toJson().object();
+    _incomingSocketHandler.sendMessageToAll(msg.toJson());
+}
+
+
 int i = 0;
 void Application::sendTrayCommand(const Cluster& cluster, common::TrayCommand command, QString cmd) {
     // Generate identifier

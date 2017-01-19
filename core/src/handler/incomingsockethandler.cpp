@@ -92,3 +92,10 @@ void IncomingSocketHandler::sendMessage(common::JsonSocket* socket, QJsonDocumen
 
     socket->write(message);
 }
+
+void IncomingSocketHandler::sendMessageToAll(QJsonDocument message) {
+    assert(!message.isEmpty());
+    for (auto& socket : _sockets) {
+        socket->write(message);
+    }
+}

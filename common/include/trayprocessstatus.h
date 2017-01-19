@@ -62,14 +62,14 @@ struct TrayProcessStatus {
     TrayProcessStatus(const QJsonDocument& document);
     
     /**
-     * Converts the TrayProcessLogMessage into a valid QJsonDocument object and returns
+     * Converts the TrayProcessStatus into a valid QJsonDocument object and returns
      * it.
-     * \return The QJsonDocument representing this TrayProcessLogMessage
+     * \return The QJsonDocument representing this TrayProcessStatus
      */
     QJsonDocument toJson() const;
     
     /// The unique identifier for the process that will be created
-    QString id;
+    QString processId;
     /// The process status
     QString status;
 };

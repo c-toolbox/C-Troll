@@ -37,6 +37,7 @@
 
 #include "cluster.h"
 #include "program.h"
+#include "process.h"
 #include "handler/incomingsockethandler.h"
 #include "handler/outgoingsockethandler.h"
 #include "traycommand.h"
@@ -54,18 +55,20 @@ public:
 
 private:
     void incomingGuiMessage(const QJsonDocument& message);
-    void incomingTrayMessage(const QJsonDocument& message);
+    void incomingTrayMessage(const Cluster& cluster, const Cluster::Node& node, const QJsonDocument& message);
     
-    void handleTrayProcessStatus(common::TrayProcessStatus status);
-    void handleTrayProcessLogMessage(common::TrayProcessLogMessage status);
+    void handleTrayProcessStatus(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessStatus status);
+    void handleTrayProcessLogMessage(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessLogMessage status);
     void handleIncomingGuiCommand(common::GuiCommand cmd);
     
     void sendInitializationInformation(common::JsonSocket* socket);
+    void sendGuiProcessStatus(const Process& process, const common::TrayProcessStatus& trayProcessStatus);
 
     void sendTrayCommand(const Cluster& cluster, common::TrayCommand command, QString cmd);
 
-    Programs _programs;
+    QVector<Program> _programs;
     QList<Cluster> _clusters;
+    QList<Process> _processes;
     IncomingSocketHandler _incomingSocketHandler;
     OutgoingSocketHandler _outgoingSocketHandler;
 };

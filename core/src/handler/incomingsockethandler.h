@@ -49,6 +49,7 @@ public:
     void initialize(quint16 port);
     
     void sendMessage(common::JsonSocket* socket, QJsonDocument message);
+    void sendMessageToAll(QJsonDocument message);
 
 signals:
     void newConnectionEstablished(common::JsonSocket* socket);

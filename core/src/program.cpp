@@ -60,7 +60,7 @@ namespace {
     const QString KeyConfigurationParameters = "commandlineParameters";
 }
 
-Program loadProgram(QString jsonFile, QString baseDirectory) {
+Program Program::loadProgram(QString jsonFile, QString baseDirectory) {
     QString identifier = QDir(baseDirectory).relativeFilePath(jsonFile);
     
     // relativeFilePath will have the baseDirectory in the beginning of the relative path
@@ -93,7 +93,7 @@ Program loadProgram(QString jsonFile, QString baseDirectory) {
 }
 
 
-common::TrayCommand programToTrayCommand(const Program& program, QString configuration) {
+common::TrayCommand Program::programToTrayCommand(const Program& program, QString configuration) {
     common::TrayCommand t;
     t.executable = program.executable();
     t.baseDirectory = program.baseDirectory();
@@ -109,16 +109,14 @@ common::TrayCommand programToTrayCommand(const Program& program, QString configu
     return t;
 }
 
-common::GuiInitialization::Application programToGuiInitializationApplication(
-    const Program& program)
-{
+common::GuiInitialization::Application Program::toGuiInitializationApplication() const {
     common::GuiInitialization::Application app;
-    app.name = program.name();
-    app.id = program.id();
-    app.tags = program.tags();
-    app.clusters = program.clusters();
+    app.name = name();
+    app.id = id();
+    app.tags = tags();
+    app.clusters = clusters();
     
-    for (const Program::Configuration& conf : program.configurations()) {
+    for (const Program::Configuration& conf : configurations()) {
         common::GuiInitialization::Application::Configuration c;
         c.name = conf.name;
         c.id = conf.id;
@@ -128,8 +126,8 @@ common::GuiInitialization::Application programToGuiInitializationApplication(
     return app;
 }
 
-Programs loadProgramsFromDirectory(QString directory) {
-    Programs programs;
+QVector<Program> Program::loadProgramsFromDirectory(QString directory) {
+    QVector<Program> programs;
     // First, get all the *.json files from the directory and subdirectories
     QDirIterator it(
         directory,

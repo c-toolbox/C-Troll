@@ -76,7 +76,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
 
             connect(
                 jsonSocket.get(), &common::JsonSocket::readyRead,
-                [this, s]() { readyRead(s); }
+                [this, c, node]() { readyRead(c, node); }
             );
 
             jsonSocket->socket()->connectToHost(node.ipAddress, node.port);
@@ -111,10 +111,9 @@ void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
     timer->start(2500);
 }
 
-void OutgoingSocketHandler::readyRead(common::JsonSocket* jsonSocket) {
-    assert(jsonSocket);
-    QJsonDocument message = jsonSocket->read();
-    emit messageReceived(message);
+void OutgoingSocketHandler::readyRead(const Cluster& cluster, const Cluster::Node& node) {
+    QJsonDocument message = _sockets[hash(cluster, node)]->read();
+    emit messageReceived(cluster, node, message);
 }
 
 

@@ -32,34 +32,32 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "trayprocessstatus.h"
+#ifndef __PROCESS_H__
+#define __PROCESS_H__
 
-#include "jsonsupport.h"
-
-#include <QJsonObject>
-
-namespace {
-    const QString KeyProcessId = "processId";
-    const QString KeyStatus = "status";
-}
+#include "cluster.h"
+#include "program.h"
+#include "handler/incomingsockethandler.h"
+#include "handler/outgoingsockethandler.h"
+#include "traycommand.h"
+#include "guiinitialization.h"
 
 namespace common {
-    
-const QString TrayProcessStatus::Type = "TrayProcessStatus";
-
-TrayProcessStatus::TrayProcessStatus(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
-    
-    processId = common::testAndReturnString(obj, KeyProcessId);
-    status = common::testAndReturnString(obj, KeyStatus);
-}
-
-QJsonDocument TrayProcessStatus::toJson() const {
-    QJsonObject obj;
-    obj[KeyProcessId] = processId;
-    obj[KeyStatus] = status;
-    
-    return QJsonDocument(obj);
-}
-    
+    struct GuiCommand;
+    struct TrayProcessStatus;
+    struct TrayProcessLogMessage;
+    class JsonSocket;
 } // namespace common
+
+class Process {
+public:
+    Process(int id, Program* program, Program::Configuration* configuraion, Cluster* cluster);
+
+
+    common::GuiInitialization::Process toGuiInitializationProcess() const;
+private:
+    QString applicationId;
+    QString clusterId;
+};
+
+#endif // __PROCESS_H__

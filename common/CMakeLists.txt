@@ -2,6 +2,7 @@ set(HEADER_FILES
     include/genericmessage.h
     include/guicommand.h
     include/guiinitialization.h
+    include/guiprocessstatus.h
     include/jsonsocket.h
     include/jsonsupport.h
     include/logging.h
@@ -14,6 +15,7 @@ set(SOURCE_FILES
     src/genericmessage.cpp
     src/guicommand.cpp
     src/guiinitialization.cpp
+    src/guiprocessstatus.cpp
     src/jsonsocket.cpp
     src/jsonsupport.cpp
     src/logging.cpp

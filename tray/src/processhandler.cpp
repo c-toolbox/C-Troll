@@ -95,7 +95,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     
     if (p2T != _processes.end() ) {
         common::TrayProcessStatus ps;
-        ps.id = p2T->first;
+        ps.processId = p2T->first;
         bool sendError = true;
         switch (error) {
             case QProcess::FailedToStart:
@@ -136,7 +136,7 @@ void ProcessHandler::handleStarted(){
     if (p2T != _processes.end() ) {
         // Send out the TrayProcessStatus with the status string
         common::TrayProcessStatus ps;
-        ps.id = p2T->first;
+        ps.processId = p2T->first;
         ps.status = "Running";
         common::GenericMessage msg;
         msg.type = common::TrayProcessStatus::Type;
@@ -158,7 +158,7 @@ void ProcessHandler::handleFinished(int exitCode, QProcess::ExitStatus exitStatu
     
     if (p2T != _processes.end() ) {
         common::TrayProcessStatus ps;
-        ps.id = p2T->first;
+        ps.processId = p2T->first;
         switch (exitStatus) {
             case QProcess::NormalExit:
                 ps.status = "NormalExit";

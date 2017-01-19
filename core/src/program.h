@@ -113,6 +113,14 @@ public:
      */
     QList<Configuration> configurations() const;
 
+    common::GuiInitialization::Application toGuiInitializationApplication() const;
+
+    static common::TrayCommand programToTrayCommand(const Program& program, QString configuration = "");
+
+    static QVector<Program> loadProgramsFromDirectory(QString directory);
+
+    static Program Program::loadProgram(QString jsonFile, QString baseDirectory);
+
 private:
     /// A unique identifier
     QString _id;
@@ -134,12 +142,5 @@ private:
     QList<Configuration> _configurations; // List of all configurations
 };
 
-common::TrayCommand programToTrayCommand(const Program& program, QString configuration = "");
-
-common::GuiInitialization::Application programToGuiInitializationApplication(const Program& program);
-
-using Programs = QVector<Program>;
-
-Programs loadProgramsFromDirectory(QString directory);
 
 #endif // __PROGRAM_H__

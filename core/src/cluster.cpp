@@ -115,7 +115,7 @@ Cluster loadCluster(QString jsonFile, QString baseDirectory) {
     return Cluster(obj);
 }
 
-QList<Cluster> loadClustersFromDirectory(QString directory) {
+QList<Cluster> Cluster::loadClustersFromDirectory(QString directory) {
     QList<Cluster> result;
     // First, get all the *.json files from the directory and subdirectories
     QDirIterator it(
@@ -135,10 +135,10 @@ QList<Cluster> loadClustersFromDirectory(QString directory) {
     return result;
 }
 
-common::GuiInitialization::Cluster clusterToGuiInitializationCluster(Cluster c) {
+common::GuiInitialization::Cluster Cluster::toGuiInitializationCluster() const {
     common::GuiInitialization::Cluster cluster;
-    cluster.name = c.name();
-    cluster.id = c.id();
-    cluster.enabled = c.enabled();
+    cluster.name = name();
+    cluster.id = id();
+    cluster.enabled = enabled();
     return cluster;
 }

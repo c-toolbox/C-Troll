@@ -32,7 +32,7 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "trayprocessstatus.h"
+#include "guiprocessstatus.h"
 
 #include "jsonsupport.h"
 
@@ -45,16 +45,16 @@ namespace {
 
 namespace common {
     
-const QString TrayProcessStatus::Type = "TrayProcessStatus";
+const QString GuiProcessStatus::Type = "TrayProcessStatus";
 
-TrayProcessStatus::TrayProcessStatus(const QJsonDocument& document) {
+GuiProcessStatus::GuiProcessStatus(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
     processId = common::testAndReturnString(obj, KeyProcessId);
     status = common::testAndReturnString(obj, KeyStatus);
 }
 
-QJsonDocument TrayProcessStatus::toJson() const {
+QJsonDocument GuiProcessStatus::toJson() const {
     QJsonObject obj;
     obj[KeyProcessId] = processId;
     obj[KeyStatus] = status;
