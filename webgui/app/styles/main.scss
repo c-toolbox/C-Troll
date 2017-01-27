@@ -17,7 +17,7 @@
 }
 
 html, body {
-    background-color: #49494A;
+    background-color: #49494a;
     padding: 0;
     margin: 0;
     color: #eee;
@@ -331,4 +331,68 @@ p {
             fill: #fff;
         }
     }
+}
+
+#initializing-screen {
+    z-index: 100;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: #49494a;
+    text-align: center;
+
+    p {
+        padding-top: 40vh;
+    }
+}
+
+.reconnecting-notifier {
+    overflow: hidden;
+    transition: all 400ms ease-out;
+    max-height: 5em;
+}
+
+.reconnecting-notifier-enter {
+    max-height: 0em;
+}
+
+.reconnecting-notifier-enter-active {
+    max-height: 5em;
+}
+
+.reconnecting-notifier-leave {
+    transition-delay: 2s;
+    max-height: 5em;
+}
+
+.reconnecting-notifier-leave-active {
+    max-height: 0em;
+}
+
+.reconnecting-notifier div {
+    padding: 1em 2em;
+}
+
+.reconnecting-notifier div.reconnecting {
+    background-color: #e57455;
+    color: #fff;
+    animation: reconnection 5s infinite;
+
+}
+
+@keyframes reconnection {
+    0% {
+        background-color: #e57455;
+    }
+    50% {
+        background-color: #ba543c;
+    }
+    100% {
+        background-color: #e57455;
+    }
+}
+
+.reconnecting-notifier div.connected {
+    background-color: #91b71a;
+    color: #fff;
 }

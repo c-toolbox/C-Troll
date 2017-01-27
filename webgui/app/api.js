@@ -6,7 +6,21 @@ class Api {
         applications: [],
         clusters: [],
         processes: [],
-        loading: true
+        reconnecting: false,
+        initialized: false,
+        connected: false,
+    }
+
+    @computed get connected() {
+        return this._state.connected;
+    }
+
+    @computed get initialized() {
+        return this._state.initialized;
+    }
+
+    @computed get reconnecting() {
+        return this._state.reconnecting;
     }
 
     @computed get applications() {
@@ -21,11 +35,17 @@ class Api {
         return this._state.processes;
     }
 
-    @computed get loading() {
-        return this._state.loading;
+    tryReconnect() {
+        console.log('try reconnect');
+        if (this._state.connected) {
+            return;
+        }
+        this._state.reconnecting = true;
+        this.initialize();
     }
 
     initialize() {
+        console.log('Connecting to host');
         const sock = this._sock = new SockJS('http://localhost:3001/ws');
         sock.onopen = () => {
             console.log('Connection established to GUI backend.');
@@ -33,6 +53,8 @@ class Api {
 
         sock.onclose = () => {
             console.log('Connection closed to GUI backend.');
+            this._state.connected = false;
+            this.tryReconnect();
         };
 
         sock.onmessage = (message) => {
@@ -51,7 +73,9 @@ class Api {
         this._state.applications = data.applications || [];
         this._state.clusters = data.clusters || [];
         this._state.processes = data.processes || [];
-        this._state.loading = false;
+        this._state.reconnecting = false;
+        this._state.initialized = true;
+        this._state.connected = true;
     }
 
     sendCommand(data) {

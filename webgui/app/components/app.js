@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router';
 import api from '../api';
+import ReconnectingNotifier from './reconnectingnotifier';
+import InitializingScreen from './initializingscreen';
 
 class App extends React.Component {
     componentDidMount() {
@@ -27,12 +29,16 @@ class App extends React.Component {
 
         return (
             <div>
-                <nav id="side-bar">
-                    <Link className={appsActive ? 'active' : ''} to="/applications">{appsIcon}Applications</Link>
-                    <Link className={clustersActive ? 'active' : ''} to="/clusters">{clustersIcon}Clusters</Link>
-                </nav>
-                <div id="main-container">
-                    {this.props.children}
+                <ReconnectingNotifier/>
+                <div>
+                    <nav id="side-bar">
+                        <Link className={appsActive ? 'active' : ''} to="/applications">{appsIcon}Applications</Link>
+                        <Link className={clustersActive ? 'active' : ''} to="/clusters">{clustersIcon}Clusters</Link>
+                    </nav>
+                    <div id="main-container">
+                        <InitializingScreen/>
+                        {this.props.children}
+                    </div>
                 </div>
             </div>
         );
