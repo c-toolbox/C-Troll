@@ -62,9 +62,9 @@ private:
     void handleIncomingGuiCommand(common::GuiCommand cmd);
     
     void sendInitializationInformation(common::JsonSocket* socket);
-    void sendGuiProcessStatus(const Process& process, const common::TrayProcessStatus& trayProcessStatus);
+    void sendGuiProcessStatus(const Process& process, const QString& nodeId);
 
-    void sendTrayCommand(const Cluster& cluster, common::TrayCommand command, QString cmd);
+    void sendTrayCommand(const Cluster& cluster, const common::TrayCommand& command);
 
     QVector<Program> _programs;
     QList<Cluster> _clusters;

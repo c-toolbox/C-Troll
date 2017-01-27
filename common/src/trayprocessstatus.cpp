@@ -50,14 +50,14 @@ const QString TrayProcessStatus::Type = "TrayProcessStatus";
 TrayProcessStatus::TrayProcessStatus(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
-    processId = common::testAndReturnString(obj, KeyProcessId);
-    status = common::testAndReturnString(obj, KeyStatus);
+    processId = common::testAndReturnInt(obj, KeyProcessId);
+    status = static_cast<common::TrayProcessStatus::Status>(common::testAndReturnInt(obj, KeyStatus));
 }
 
 QJsonDocument TrayProcessStatus::toJson() const {
     QJsonObject obj;
     obj[KeyProcessId] = processId;
-    obj[KeyStatus] = status;
+    obj[KeyStatus] = static_cast<int>(status);
     
     return QJsonDocument(obj);
 }

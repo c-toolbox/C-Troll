@@ -43,10 +43,13 @@
 #include "guiinitialization.h"
 #include "traycommand.h"
 
+class Process;
+
 class Program {
 public:
     Program() = default;
     Program(const QJsonObject& jsonObject);
+    ~Program();
     
     struct Configuration {
         QString name;
@@ -115,7 +118,7 @@ public:
 
     common::GuiInitialization::Application toGuiInitializationApplication() const;
 
-    static common::TrayCommand programToTrayCommand(const Program& program, QString configuration = "");
+    //static common::TrayCommand programToTrayCommand(const Program& program, QString configuration = "");
 
     static QVector<Program> loadProgramsFromDirectory(QString directory);
 
@@ -140,6 +143,8 @@ private:
     QList<QString> _clusters; // Supported clusters
 
     QList<Configuration> _configurations; // List of all configurations
+    /// A vector of processes that derive from this program.
+    QVector<Process*> _processes;
 };
 
 

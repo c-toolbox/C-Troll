@@ -43,6 +43,19 @@ namespace common {
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
 struct TrayProcessStatus {
+
+    enum class Status {
+        Starting,
+        Running,
+        NormalExit,
+        CrashExit,
+        FailedToStart,
+        TimedOut,
+        WriteError,
+        ReadError,
+        UnknownError,
+    };
+
     /// The string representing this command type, for usage in the common::GenericMessage
     static const QString Type;
     
@@ -69,9 +82,9 @@ struct TrayProcessStatus {
     QJsonDocument toJson() const;
     
     /// The unique identifier for the process that will be created
-    QString processId;
+    int processId;
     /// The process status
-    QString status;
+    Status status;
 };
     
 } // namespace common

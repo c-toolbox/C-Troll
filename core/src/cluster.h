@@ -38,8 +38,10 @@
 #include "guiinitialization.h"
 
 #include <QList>
+#include <QVector>
 
 class JsonObject;
+class Process;
 
 /**
  * This class represents a cluster setup, that is, a collection of computers that are
@@ -136,6 +138,8 @@ private:
     bool _enabled;
     /// A list of all nodes belonging to this cluster
     QList<Node> _nodes;
+    /// A vector of processes that are active on this cluster
+    QVector<Process*> _processes;
 };
 
 

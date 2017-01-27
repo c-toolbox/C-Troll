@@ -50,7 +50,7 @@ const QString GuiProcessStatus::Type = "TrayProcessStatus";
 GuiProcessStatus::GuiProcessStatus(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
-    processId = common::testAndReturnString(obj, KeyProcessId);
+    processId = common::testAndReturnInt(obj, KeyProcessId);
     status = common::testAndReturnString(obj, KeyStatus);
 }
 

@@ -42,7 +42,7 @@ class Api {
                     this.initializeGui(data.payload);
                     break;
                 default:
-                    console.log('unknown message type: "' + data.type + '"');
+                    console.log('unknown message type: "' + data.type + '"', data.payload);
             }
         };
     }

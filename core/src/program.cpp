@@ -92,23 +92,6 @@ Program Program::loadProgram(QString jsonFile, QString baseDirectory) {
     return Program(obj);
 }
 
-
-common::TrayCommand Program::programToTrayCommand(const Program& program, QString configuration) {
-    common::TrayCommand t;
-    t.executable = program.executable();
-    t.baseDirectory = program.baseDirectory();
-    t.currentWorkingDirectory = program.currentWorkingDirectory();
-    
-    if (program.commandlineParameters().isEmpty() && configuration.isEmpty()) {
-        t.commandlineParameters = "";
-    }
-    else {
-        t.commandlineParameters = program.commandlineParameters() + " " + configuration;
-    }
-
-    return t;
-}
-
 common::GuiInitialization::Application Program::toGuiInitializationApplication() const {
     common::GuiInitialization::Application app;
     app.name = name();
@@ -180,6 +163,10 @@ Program::Program(const QJsonObject& jsonObject) {
         
         _configurations.push_back(conf);
     }
+}
+
+Program::~Program() {
+    assert(_processes.empty());
 }
 
 QString Program::id() const {

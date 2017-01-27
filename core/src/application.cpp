@@ -51,9 +51,9 @@
 #include <assert.h>
 
 namespace {
-    const QString KeyApplicationPath = "applicationPath";
-    const QString KeyClusterPath = "clusterPath";
-    const QString KeyListeningPort = "listeningPort";
+const QString KeyApplicationPath = "applicationPath";
+const QString KeyClusterPath = "clusterPath";
+const QString KeyListeningPort = "listeningPort";
 }
 
 Application::Application(QString configurationFile) {
@@ -73,7 +73,7 @@ Application::Application(QString configurationFile) {
 
     // The incoming socket handler takes care of messages from the GUI
     _incomingSocketHandler.initialize(listeningPort);
-    
+
     // The outgoing socket handler takes care of messages to the Tray
     _outgoingSocketHandler.initialize(_clusters);
 
@@ -81,7 +81,7 @@ Application::Application(QString configurationFile) {
         &_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
         [this](const QJsonDocument& message) { incomingGuiMessage(message); }
     );
-    
+
     QObject::connect(
         &_outgoingSocketHandler, &OutgoingSocketHandler::messageReceived,
         [this](const Cluster& cluster, const Cluster::Node& node, const QJsonDocument& message) { incomingTrayMessage(cluster, node, message); }
@@ -94,8 +94,50 @@ Application::Application(QString configurationFile) {
 }
 
 void Application::handleTrayProcessStatus(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessStatus status) {
-    Log("Status: " + status.status);
-    
+    auto iProcess = std::find_if(_processes.begin(), _processes.end(), [&status](Process& p) {
+        return p.id() == status.processId;
+    });
+    if (iProcess == _processes.end()) {
+        return;
+    }
+
+    QString nodeId = node.id;
+
+    switch (status.status) {
+    case common::TrayProcessStatus::Status::Starting:
+        iProcess->pushNodeStatus(nodeId, Process::NodeStatus::Status::Starting);
+        sendGuiProcessStatus(*iProcess, nodeId);
+        break;
+    case common::TrayProcessStatus::Status::Running:
+        iProcess->pushNodeStatus(nodeId, Process::NodeStatus::Status::Running);
+        sendGuiProcessStatus(*iProcess, nodeId);
+        break;
+    case common::TrayProcessStatus::Status::NormalExit:
+        iProcess->pushNodeStatus(nodeId, Process::NodeStatus::Status::NormalExit);
+        sendGuiProcessStatus(*iProcess, nodeId);
+        break;
+    case common::TrayProcessStatus::Status::FailedToStart:
+        iProcess->pushNodeStatus(nodeId, Process::NodeStatus::Status::FailedToStart);
+        sendGuiProcessStatus(*iProcess, nodeId);
+        break;
+    case common::TrayProcessStatus::Status::CrashExit:
+        iProcess->pushNodeStatus(nodeId, Process::NodeStatus::Status::CrashExit);
+        sendGuiProcessStatus(*iProcess, nodeId);
+        break;
+    case common::TrayProcessStatus::Status::WriteError:
+        iProcess->pushNodeError(nodeId, Process::NodeError::Error::WriteError);
+        break;
+    case common::TrayProcessStatus::Status::ReadError:
+        iProcess->pushNodeError(nodeId, Process::NodeError::Error::ReadError);
+        break;
+    case common::TrayProcessStatus::Status::TimedOut:
+        iProcess->pushNodeError(nodeId, Process::NodeError::Error::TimedOut);
+        break;
+    case common::TrayProcessStatus::Status::UnknownError:
+        iProcess->pushNodeError(nodeId, Process::NodeError::Error::UnknownError);
+        break;
+    }
+   
 }
 
 void Application::handleTrayProcessLogMessage(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessLogMessage logMessage) {
@@ -111,8 +153,8 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
     Log("Cluster: " + cmd.clusterId);
 
     auto iProgram = std::find_if(
-        _programs.cbegin(),
-        _programs.cend(),
+        _programs.begin(),
+        _programs.end(),
             [&](const Program& p) {
                 return p.id() == cmd.applicationId;
             }
@@ -127,8 +169,8 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
     
     // Get the correct Cluster
     auto iCluster = std::find_if(
-        _clusters.cbegin(),
-        _clusters.cend(),
+        _clusters.begin(),
+        _clusters.end(),
         [&](const Cluster& c) {
             return c.id() == cmd.clusterId;
         }
@@ -148,8 +190,8 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
         else {
             const QStringList& clusters = p.clusters();
             auto it = std::find_if(
-                clusters.cbegin(),
-                clusters.cend(),
+                clusters.begin(),
+                clusters.end(),
                 [&](const QString& s) { return c.id() == s; }
             );
             return it != clusters.end();
@@ -166,36 +208,41 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
         );
         return;
     }
-            
-    // Get the correct configuration, if it exists
-    if (cmd.configurationId.isEmpty()) {
-        sendTrayCommand(*iCluster, Program::programToTrayCommand(*iProgram), cmd.command);
-    }
-    else {
+    
+    QString commandLineParameters = "";
+    QString configurationId = "";
+
+    if (!cmd.configurationId.isEmpty()) {
         auto iConfiguration = std::find_if(
-            iProgram->configurations().cbegin(),
-            iProgram->configurations().cend(),
+            iProgram->configurations().begin(),
+            iProgram->configurations().end(),
             [&](const Program::Configuration& c) {
-                return c.id == cmd.configurationId;
-            }
+            return c.id == cmd.configurationId;
+        }
         );
-            
+
         if (iConfiguration == iProgram->configurations().end()) {
             // The requested configuration does not exist for the application
             // TODO(alex): Signal this back to the GUI
             Log(
                 "The configuration " + cmd.configurationId +
                 " does not exist for the application id " + cmd.applicationId
-            );
+                );
             return;
-                
+
         }
-        sendTrayCommand(
-            *iCluster,
-            Program::programToTrayCommand(*iProgram, iConfiguration->commandlineParameters), cmd.command
-        );
+        configurationId = cmd.configurationId;
+        commandLineParameters = iConfiguration->commandlineParameters;
     }
+
+    Process process(&(*iProgram), configurationId, &(*iCluster));
+    _processes.push_back(process);
+
+    common::TrayCommand trayCommand = process.startProcessCommand();
+
+    sendTrayCommand(*iCluster, trayCommand);
 }
+
 
 void Application::incomingGuiMessage(const QJsonDocument& message) {
     try {
@@ -255,30 +302,23 @@ void Application::sendInitializationInformation(common::JsonSocket* socket) {
 }
 
 
-void Application::sendGuiProcessStatus(const Process& process, const common::TrayProcessStatus& trayProcessStatus) {
+void Application::sendGuiProcessStatus(const Process& process, const QString& nodeId) {
+    common::GuiProcessStatus statusMsg = process.toGuiProcessStatus(nodeId);
+
     common::GenericMessage msg;
     msg.type = common::GuiProcessStatus::Type;
-
-    common::GuiProcessStatus statusMsg;
-
-    // TODO: Fill process status with data from process and new message from tray.
-
     msg.payload = statusMsg.toJson().object();
+
     _incomingSocketHandler.sendMessageToAll(msg.toJson());
 }
 
 
-int i = 0;
-void Application::sendTrayCommand(const Cluster& cluster, common::TrayCommand command, QString cmd) {
+void Application::sendTrayCommand(const Cluster& cluster, const common::TrayCommand& command) {
     // Generate identifier
     
     qDebug() << "Sending Message: ";
     qDebug() << "Cluster:" << cluster.name() << cluster.id();
     
-    command.command = cmd;
-    command.id = "Hello" + QString::fromStdString(std::to_string(i));
-    i++;
-
     qDebug() << "\tCommand: " << command.command;
     qDebug() << "Executable: " << command.executable;
     qDebug() << "\tIdentifier: " << command.id;

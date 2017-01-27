@@ -41,9 +41,11 @@
 #include "handler/outgoingsockethandler.h"
 #include "traycommand.h"
 #include "guiinitialization.h"
+#include <chrono>
 
 namespace common {
     struct GuiCommand;
+    struct GuiProcessStatus;
     struct TrayProcessStatus;
     struct TrayProcessLogMessage;
     class JsonSocket;
@@ -51,13 +53,79 @@ namespace common {
 
 class Process {
 public:
-    Process(int id, Program* program, Program::Configuration* configuraion, Cluster* cluster);
+    struct NodeStatus {
+        enum class Status {
+            Starting = 0,
+            FailedToStart,
+            Running,
+            NormalExit,
+            CrashExit,
+            Unknown
+        } status;
+        std::chrono::system_clock::time_point time;
+    };
 
+    struct NodeError {
+        enum class Error {
+            TimedOut,
+            WriteError,
+            ReadError,
+            UnknownError
+        } error;
+        std::chrono::system_clock::time_point time;
+    };
+
+    struct NodeLogMessage {
+        QString message;
+        std::chrono::system_clock::time_point time;
+    };
+
+    struct NodeLog {
+        QVector<NodeStatus> statuses;
+        QVector<NodeError> errors;
+        QVector<NodeLogMessage> stdOut;
+        QVector<NodeLogMessage> stdErr;
+    };
+
+    struct ClusterStatus {
+        enum class Status {
+            Starting = 0,
+            FailedToStart,
+            Running,
+            Exit,
+            PartialExit,
+            CrashExit,
+            Unknown
+        } status;
+        std::chrono::system_clock::time_point time;
+    };
+
+    Process::Process(Program* program, const QString& configurationId, Cluster* cluster);
+
+    int id() const;
+    Program* application() const;
+    QString configurationId() const;
+    Cluster* cluster() const;
 
     common::GuiInitialization::Process toGuiInitializationProcess() const;
+    common::GuiProcessStatus toGuiProcessStatus(const QString& nodeId) const;
+    common::TrayCommand startProcessCommand() const;
+    common::TrayCommand exitProcessCommand() const;
+
+    void pushNodeStatus(QString nodeId, NodeStatus::Status status);
+    void pushNodeError(QString nodeId, NodeError::Error error);
+    NodeStatus latestNodeStatus(QString nodeId) const;
 private:
-    QString applicationId;
-    QString clusterId;
+    bool allNodesHasStatus(NodeStatus::Status status);
+    bool anyNodeHasStatus(NodeStatus::Status status);
+
+    int _id;
+    Program* _application;
+    QString _configurationId;
+    Cluster* _cluster;
+    static int _nextId;
+    QMap<QString, Process::NodeLog> _nodeLogs;
+    Process::ClusterStatus _clusterStatus;
 };
 
 #endif // __PROCESS_H__

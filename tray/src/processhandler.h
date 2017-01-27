@@ -64,7 +64,7 @@ private:
     
     // The key of this map is a unique id (recieved from core)
     // The value is the process which is running
-    typedef std::map<QString, QProcess*> ProcessMap;
+    typedef std::map<int, QProcess*> ProcessMap;
     ProcessMap _processes;
 };
 

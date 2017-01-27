@@ -56,7 +56,7 @@ TrayCommand::TrayCommand(const QJsonDocument& document) {
     QJsonObject payload = document.object();
     QJsonObject obj = common::testAndReturnObject(payload, "payload");
 
-    id = common::testAndReturnString(obj, KeyId);
+    id = common::testAndReturnInt(obj, KeyId);
     command = common::testAndReturnString(obj, KeyCommand);
     executable = common::testAndReturnString(obj, KeyExecutable);
     baseDirectory = common::testAndReturnString(obj, KeyBaseDirectory);

@@ -69,7 +69,7 @@ struct GuiProcessStatus {
     QJsonDocument toJson() const;
     
     /// The unique identifier for the process that will be created
-    QString processId;
+    int processId;
     /// The process status
     QString status;
 };
