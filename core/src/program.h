@@ -122,7 +122,7 @@ public:
 
     static QVector<Program> loadProgramsFromDirectory(QString directory);
 
-    static Program Program::loadProgram(QString jsonFile, QString baseDirectory);
+    static Program loadProgram(QString jsonFile, QString baseDirectory);
 
 private:
     /// A unique identifier
