@@ -120,8 +120,6 @@ public:
 
     common::GuiInitialization::Application toGuiInitializationApplication() const;
 
-    //static common::TrayCommand programToTrayCommand(const Program& program, QString configuration = "");
-
     static std::unique_ptr<std::vector<std::unique_ptr<Program>>> loadProgramsFromDirectory(QString directory);
 
     static std::unique_ptr<Program> loadProgram(QString jsonFile, QString baseDirectory);

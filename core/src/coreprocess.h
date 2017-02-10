@@ -100,8 +100,7 @@ public:
         std::chrono::system_clock::time_point time;
     };
 
-    CoreProcess::CoreProcess(Program* program, const QString& configurationId, Cluster* cluster);
-
+    CoreProcess(Program* program, const QString& configurationId, Cluster* cluster);
     int id() const;
     Program* application() const;
     QString configurationId() const;
