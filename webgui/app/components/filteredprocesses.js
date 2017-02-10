@@ -29,12 +29,8 @@ class FilteredProcesses extends React.Component {
                 </div>
             );
         }
-        if (api.loading) {
-            return (
-                <div className="row">
-                    <p className="no-hits">Loading processes...</p>
-                </div>
-            );
+        if (!api.initialized) {
+            return null;
         }
         if (processes.length === 0) {
             return (

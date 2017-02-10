@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router';
 import api from '../api';
 import ReconnectingNotifier from './reconnectingnotifier';
-import InitializingScreen from './initializingscreen';
 
 class App extends React.Component {
     componentDidMount() {
@@ -36,7 +35,6 @@ class App extends React.Component {
                         <Link className={clustersActive ? 'active' : ''} to="/clusters">{clustersIcon}Clusters</Link>
                     </nav>
                     <div id="main-container">
-                        <InitializingScreen/>
                         {this.props.children}
                     </div>
                 </div>

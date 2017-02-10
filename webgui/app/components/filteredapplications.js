@@ -28,15 +28,12 @@ class FilteredApplications extends React.Component {
                 </div>
             );
         }
-        if (api.loading) {
-            return (
-                <div className="row">
-                    <p className="no-hits">Loading applications...</p>
-                </div>
-            );
+        if (!api.initialized) {
+            return null;
         }
         return (
             <div className="row">
+                <h2>Applications</h2>
                 <p className="no-hits">No applications were found.</p>
             </div>
         );

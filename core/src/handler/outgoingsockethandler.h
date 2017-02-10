@@ -50,12 +50,13 @@ Q_OBJECT
 public:
     ~OutgoingSocketHandler();
 
-    void initialize(const QList<Cluster>& clusters);
+    void initialize(const QList<Cluster*>& clusters);
 
     void sendMessage(const Cluster& cluster, QJsonDocument message) const;
 
 signals:
     void messageReceived(const Cluster& cluster, const Cluster::Node& node, QJsonDocument message);
+    void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);
 
 private:
     using HashValue = QString;
@@ -63,7 +64,7 @@ private:
     void readyRead(const Cluster& cluster, const Cluster::Node& node);
     HashValue hash(const Cluster& cluster, const Cluster::Node& node) const;
 
-    QList<Cluster> _clusters;
+    QList<Cluster*> _clusters;
     std::map<HashValue, std::unique_ptr<common::JsonSocket>> _sockets;
  
 };

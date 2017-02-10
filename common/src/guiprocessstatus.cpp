@@ -40,6 +40,9 @@
 
 namespace {
     const QString KeyProcessId = "processId";
+    const QString KeyApplicationId = "applicationId";
+    const QString KeyClusterId = "clusterId";
+    const QString KeyConfigurationId = "configurationId";
     const QString KeyStatus = "status";
 }
 
@@ -57,6 +60,9 @@ GuiProcessStatus::GuiProcessStatus(const QJsonDocument& document) {
 QJsonDocument GuiProcessStatus::toJson() const {
     QJsonObject obj;
     obj[KeyProcessId] = processId;
+    obj[KeyApplicationId] = applicationId;
+    obj[KeyClusterId] = clusterId;
+    obj[KeyConfigurationId] = configurationId;
     obj[KeyStatus] = status;
     
     return QJsonDocument(obj);

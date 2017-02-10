@@ -37,10 +37,11 @@
 
 #include "cluster.h"
 #include "program.h"
-#include "process.h"
+#include "coreprocess.h"
 #include "handler/incomingsockethandler.h"
 #include "handler/outgoingsockethandler.h"
 #include "traycommand.h"
+#include "genericmessage.h"
 
 namespace common {
     struct GuiCommand;
@@ -61,14 +62,15 @@ private:
     void handleTrayProcessLogMessage(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessLogMessage status);
     void handleIncomingGuiCommand(common::GuiCommand cmd);
     
-    void sendInitializationInformation(common::JsonSocket* socket);
-    void sendGuiProcessStatus(const Process& process, const QString& nodeId);
+    common::GenericMessage initializationInformation();
+    //void sendInitializationInformation(common::JsonSocket* socket);
+    void sendGuiProcessStatus(const CoreProcess& process, const QString& nodeId);
 
     void sendTrayCommand(const Cluster& cluster, const common::TrayCommand& command);
 
-    QVector<Program> _programs;
-    QList<Cluster> _clusters;
-    QList<Process> _processes;
+    std::vector<std::unique_ptr<Program>> _programs;
+    std::vector<std::unique_ptr<Cluster>> _clusters;
+    std::vector<std::unique_ptr<CoreProcess>> _processes;
     IncomingSocketHandler _incomingSocketHandler;
     OutgoingSocketHandler _outgoingSocketHandler;
 };

@@ -55,6 +55,7 @@ namespace {
     const QString KeyClusterName = "name";
     const QString KeyClusterId = "id";
     const QString KeyClusterEnabled = "enabled";
+    const QString KeyClusterConnected = "connected";
 
     const QString KeyProcessId = "id";
     const QString KeyProcessApplicationId = "applicationId";
@@ -118,6 +119,7 @@ GuiInitialization::Cluster::Cluster(QJsonObject cluster) {
     name = common::testAndReturnString(cluster, KeyClusterName);
     id = common::testAndReturnString(cluster, KeyClusterId);
     enabled = common::testAndReturnBool(cluster, KeyClusterEnabled);
+    connected = false;
 }
     
 QJsonObject GuiInitialization::Cluster::toJson() const {
@@ -125,6 +127,7 @@ QJsonObject GuiInitialization::Cluster::toJson() const {
     res[KeyClusterName] = name;
     res[KeyClusterId] = id;
     res[KeyClusterEnabled] = enabled;
+    res[KeyClusterConnected] = connected;
     return res;
 }
 

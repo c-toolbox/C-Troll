@@ -36,7 +36,7 @@ class ApplicationButton extends React.Component {
         };
 
         return (
-            <div  className="button-square no-select">
+            <div  className="square button no-select">
                 <div className="click-area" onClick={open}></div>
                 <div className="tags">
                 {application.tags.map((tag) => {
@@ -45,6 +45,7 @@ class ApplicationButton extends React.Component {
                 </div>
                 <div className="application-icon"></div>
                 <div className="main">{application.name}</div>
+                <div className="sub"></div>
                 {buttons}
             </div>);
     }

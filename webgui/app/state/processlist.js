@@ -50,38 +50,53 @@ class ProcessList {
     }
 
     filterByString(processes) {
-        const lowerFilterString = this.filterString.toLowerCase();
-
         if (this.filterString.length === 0) {
             return processes;
         }
-        return processes.filter((process) => {
-            const app = this.getApplication(process);
-            if (!app) return false;
 
-            const cluster = this.getCluster(process);
-            if (!cluster) return false;
+        const filterByWord = (procs, word) => {
+            return procs.filter((process) => {
+                const app = this.getApplication(process);
+                if (!app) return false;
 
-            const lowerClusterName = cluster.name.toLowerCase();
-            const lowerApplicationName = app.name.toLowerCase();
-            const lowerApplicationId = app.id.toLowerCase();
+                const cluster = this.getCluster(process);
+                if (!cluster) return false;
 
-            const inApplicationName = lowerApplicationName.indexOf(lowerFilterString) !== -1;
-            const inClusterName = lowerClusterName.indexOf(lowerFilterString) !== -1;
-            const inApplicationId = lowerApplicationId.indexOf(lowerFilterString) !== -1;
-            let inTags = false;
+                const lowerClusterName = cluster.name.toLowerCase();
+                const lowerApplicationName = app.name.toLowerCase();
+                const lowerApplicationId = app.id.toLowerCase();
 
-            app.tags.forEach((tag) => {
-                const lowerTag = tag.toLowerCase();
-                if (lowerTag.indexOf(lowerFilterString) !== -1) {
-                    inTags = true;
-                    return false;
-                }
-                return true;
+                const inApplicationName = this.nameMatchesFilter(lowerApplicationName, word);
+                const inClusterName = this.nameMatchesFilter(lowerClusterName, word);
+                const inApplicationId = this.nameMatchesFilter(lowerApplicationId, word);
+                let inTags = false;
+
+                app.tags.forEach((tag) => {
+                    const lowerTag = tag.toLowerCase();
+                    if (this.nameMatchesFilter(lowerTag, word)) {
+                        inTags = true;
+                        return false;
+                    }
+                    return true;
+                });
+
+                return inApplicationName || inApplicationId || inClusterName || inTags;
             });
+        };
 
-            return inApplicationName || inApplicationId || inClusterName || inTags;
+        const lowerFilterString = this.filterString.toLowerCase();
+        const filters = lowerFilterString.split(' ');
+
+        let filtered = processes.slice(0);
+        filters.forEach((filter) => {
+            filtered = filterByWord(filtered, filter);
         });
+
+        return filtered;
+    }
+
+    nameMatchesFilter(word, filter) {
+        return !!word.match(new RegExp('^' + filter));
     }
 }
 

@@ -40,6 +40,8 @@
 #include <QString>
 #include <QVector>
 
+#include <memory>
+
 #include "guiinitialization.h"
 #include "traycommand.h"
 
@@ -120,9 +122,9 @@ public:
 
     //static common::TrayCommand programToTrayCommand(const Program& program, QString configuration = "");
 
-    static QVector<Program> loadProgramsFromDirectory(QString directory);
+    static std::unique_ptr<std::vector<std::unique_ptr<Program>>> loadProgramsFromDirectory(QString directory);
 
-    static Program Program::loadProgram(QString jsonFile, QString baseDirectory);
+    static std::unique_ptr<Program> loadProgram(QString jsonFile, QString baseDirectory);
 
 private:
     /// A unique identifier

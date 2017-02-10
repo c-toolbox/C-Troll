@@ -139,8 +139,7 @@ p {
 }
 
 
-.button-square {
-    cursor: pointer;
+.square {
     font-size: 1.2em;
     vertical-align: top;
     width: 10em;
@@ -149,6 +148,32 @@ p {
     display: inline-block;
     position: relative;
     background-color: #383838;
+    transition: 0.2s all;
+
+    &.button {
+        cursor: pointer;
+    }
+
+    &.error {
+        background-color: #BA543C;
+        color: #FFEEDE;
+
+        .cluster-icon polygon {
+            stroke: #e57455;
+        }
+
+        .click-area:active {
+            background-color: #CF694D;
+        }
+
+        .more-button :hover {
+            background-color: #CF694D;
+        }
+
+        .more-button :active {
+            background-color: #e57455;
+        }
+    }
 
     .click-area {
         position: absolute;
@@ -173,7 +198,7 @@ p {
         z-index: 1;
         text-align: center;
         font-weight: bold;
-        margin: 1em;
+        margin: 0.2em;
         pointer-events: none;
     }
 
@@ -206,10 +231,11 @@ p {
     .sub {
         position: relative;
         z-index: 1;
-        margin: 1em;
+        margin: 0.2em;
         font-size: 0.7em;
         pointer-events: none;
         text-align: center;
+        margin-bottom: 1em;
     }
 
 
@@ -228,18 +254,51 @@ p {
         }
         pointer-events: none;        
     }
+
+
+    .more-button {
+        position: absolute;
+        top: 0.4em;
+        right: 0.4em;
+
+        :hover {
+            background-color: #333;
+        }
+        :active {
+            background-color: #222;
+        }
+
+        .more-icon {
+            width: 1.3em;
+            height: 1.3em;
+            padding: 0.2em;
+
+            .more-icon-circle {
+                fill: #fff;
+            }
+        }
+    }
 }
 
 .start-button {
+    cursor: pointer;
     text-align: center;
     background-color: #91b71a;
     display: block;
     color: #fff;
     padding: 0.5em;
     margin: 0.3em;
+    transition: 0.2s all;
 
     &:active {
+        transition: none;
         background-color: #a7c13d;
+    }
+
+    &.inactive {
+        background-color: #aaa;
+        opacity: 0.15;
+        cursor: default;
     }
 
     .start-icon {
@@ -254,29 +313,84 @@ p {
     }
 }
 
-.more-button {
-    position: absolute;
-    top: 0.4em;
-    right: 0.4em;
+.stop-button {
+    cursor: pointer;
+    text-align: center;
+    background-color: #E57455;
+    display: block;
+    color: #fff;
+    padding: 0.5em;
+    margin: 0.3em;
+    transition: 0.2s all;
 
-    :hover {
-        background-color: #333;
+    &:active {
+        transition: none;
+        background-color: #E87C62;
     }
-    :active {
-        background-color: #222;
+
+    &.inactive {
+        background-color: #aaa;
+        opacity: 0.15;
+        cursor: default;
     }
 
-
-    .more-icon {
+    .stop-icon {
         width: 1.3em;
         height: 1.3em;
-        padding: 0.2em;
+        vertical-align: middle;
+        margin-right: 0.5em;
 
-        .more-icon-circle {
+        .stop-icon-rect {
             fill: #fff;
         }
     }
 }
+
+.restart-button {
+    cursor: pointer;
+    text-align: center;
+    background-color: #66B0D1;
+    display: block;
+    color: #fff;
+    padding: 0.5em;
+    margin: 0.3em;
+    transition: 0.2s all;
+
+    &:active {
+        transition: none;
+        background-color: #77C1DB;
+    }
+
+    &.inactive {
+        background-color: #aaa;
+        opacity: 0.15;
+        cursor: default;
+    }
+
+    .restart-icon {
+        position: relative;
+        top: -0.1em;
+        width: 1.3em;
+        height: 1.3em;
+        vertical-align: middle;
+        margin-right: 0.5em;
+
+        .restart-icon-path {
+            stroke: #fff;
+            fill: none;
+            stroke-width: 10px;
+        }
+
+        .restart-icon-arrow {
+            fill: #fff;
+            stroke: none;
+        }
+    }
+}
+
+
+
+
 
 .search {
     background-color: #353535;
@@ -293,8 +407,8 @@ p {
 }
 
 .no-hits {
-    font-size: 2em;
-    font-variant: italic;
+    font-size: 1.0em;
+    font-style: italic;
 }
 
 .no-select {
@@ -330,19 +444,6 @@ p {
         polygon {
             fill: #fff;
         }
-    }
-}
-
-#initializing-screen {
-    z-index: 100;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    background-color: #49494a;
-    text-align: center;
-
-    p {
-        padding-top: 40vh;
     }
 }
 

@@ -117,6 +117,8 @@ struct GuiInitialization {
         QString id;
         /// Whether the cluster is currently enabled or not
         bool enabled;
+        /// Whether the cluster is currently connected or not
+        bool connected;
     };
 
     /// This struct represents the information about the processes that are registered with

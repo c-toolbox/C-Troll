@@ -60,7 +60,7 @@ namespace {
     const QString KeyConfigurationParameters = "commandlineParameters";
 }
 
-Program Program::loadProgram(QString jsonFile, QString baseDirectory) {
+std::unique_ptr<Program> Program::loadProgram(QString jsonFile, QString baseDirectory) {
     QString identifier = QDir(baseDirectory).relativeFilePath(jsonFile);
     
     // relativeFilePath will have the baseDirectory in the beginning of the relative path
@@ -89,7 +89,7 @@ Program Program::loadProgram(QString jsonFile, QString baseDirectory) {
     
     QJsonObject obj = d.object();
     obj["id"] = identifier;
-    return Program(obj);
+    return std::make_unique<Program>(obj);
 }
 
 common::GuiInitialization::Application Program::toGuiInitializationApplication() const {
@@ -109,8 +109,9 @@ common::GuiInitialization::Application Program::toGuiInitializationApplication()
     return app;
 }
 
-QVector<Program> Program::loadProgramsFromDirectory(QString directory) {
-    QVector<Program> programs;
+std::unique_ptr<std::vector<std::unique_ptr<Program>>> Program::loadProgramsFromDirectory(QString directory) {
+    std::unique_ptr<std::vector<std::unique_ptr<Program>>> programs
+        = std::make_unique<std::vector<std::unique_ptr<Program>>>();
     // First, get all the *.json files from the directory and subdirectories
     QDirIterator it(
         directory,
@@ -121,9 +122,9 @@ QVector<Program> Program::loadProgramsFromDirectory(QString directory) {
     while (it.hasNext()) {
         QString file = it.next();
         Log("Loading application file " + file);
-        programs.push_back(loadProgram(file, directory));
+        programs->push_back(loadProgram(file, directory));
     }
-    return programs;
+    return std::move(programs);
 }
 
 Program::Program(const QJsonObject& jsonObject) {

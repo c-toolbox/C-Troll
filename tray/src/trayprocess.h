@@ -32,54 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GUIPROCESSSTATUS_H__
-#define __GUIPROCESSSTATUS_H__
+#ifndef __TRAYPROCESS_H__
+#define __TRAYPROCESS_H__
 
-#include <QJsonDocument>
-#include <QString>
 
-namespace common {
-    
-/// This struct is the data structure that gets send from the Core to the GUI to 
-/// inform the GUI about a change in process status
-struct GuiProcessStatus {
-    /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
-    
-    /// Default constructor
-    GuiProcessStatus() = default;
-    
-    /**
-     * Creates a GuiProcessStatus from the passed \p document. The \p document must
-     * contain the following keys, all of type string:
-     * \c identifier
-     * \c status
-     * \param document The QJsonDocument that contains the information about this
-     * GuiProcessStatus
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    GuiProcessStatus(const QJsonDocument& document);
-    
-    /**
-     * Converts the GuiProcessStatus into a valid QJsonDocument object and returns
-     * it.
-     * \return The QJsonDocument representing this GuiProcessStatus
-     */
-    QJsonDocument toJson() const;
-    
-    /// The unique identifier for the process that will be created
-    int processId;
-    /// The application identifier
-    QString applicationId;
-    /// The cluster identifier
-    QString clusterId;
-    /// The configuration identifier
-    int configurationId;
-    /// The process status
-    QString status;
-};
-    
-} // namespace common
-
-#endif // __GUIPROCESSSTATUS_H__
+#endif

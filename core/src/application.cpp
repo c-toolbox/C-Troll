@@ -39,7 +39,6 @@
 #include <trayprocessstatus.h>
 #include <trayprocesslogmessage.h>
 #include <logging.h>
-#include <genericmessage.h>
 
 #include <QFile>
 #include <QJsonDocument>
@@ -67,15 +66,27 @@ Application::Application(QString configurationFile) {
     int listeningPort = jsonObject.value("listeningPort").toInt();
 
     // Load all program descriptions from the path provided by the configuration file
-    _programs = Program::loadProgramsFromDirectory(programPath);
+    auto programs = Program::loadProgramsFromDirectory(programPath);
+    std::transform(programs->begin(), programs->end(), std::back_inserter(_programs), [] (std::unique_ptr<Program>& program) {
+        return std::move(program);
+    });
+
     // Load all cluster descriptions from the path provided by the configuration file
-    _clusters = Cluster::loadClustersFromDirectory(clusterPath);
+    auto uniqueClisters = Cluster::loadClustersFromDirectory(clusterPath);
+    std::transform(uniqueClisters->begin(), uniqueClisters->end(), std::back_inserter(_clusters), [](std::unique_ptr<Cluster>& cluster) {
+        return std::move(cluster);
+    });
+
 
     // The incoming socket handler takes care of messages from the GUI
     _incomingSocketHandler.initialize(listeningPort);
 
     // The outgoing socket handler takes care of messages to the Tray
-    _outgoingSocketHandler.initialize(_clusters);
+    QList<Cluster*> clusters;
+    std::transform(_clusters.begin(), _clusters.end(), std::back_inserter(clusters), [] (auto& cluster) {
+        return cluster.get();
+    });
+    _outgoingSocketHandler.initialize(clusters);
 
     QObject::connect(
         &_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
@@ -88,14 +99,23 @@ Application::Application(QString configurationFile) {
     );
 
     QObject::connect(
+        &_outgoingSocketHandler, &OutgoingSocketHandler::connectedStatusChanged,
+        [this](const Cluster& cluster, const Cluster::Node& node) {
+            _incomingSocketHandler.sendMessageToAll(initializationInformation().toJson());
+        }
+    );
+
+    QObject::connect(
         &_incomingSocketHandler, &IncomingSocketHandler::newConnectionEstablished,
-        [this](common::JsonSocket* socket) { sendInitializationInformation(socket); }
+        [this](common::JsonSocket* socket) {
+            _incomingSocketHandler.sendMessage(socket, initializationInformation().toJson());
+        }
     );
 }
 
 void Application::handleTrayProcessStatus(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessStatus status) {
-    auto iProcess = std::find_if(_processes.begin(), _processes.end(), [&status](Process& p) {
-        return p.id() == status.processId;
+    auto iProcess = std::find_if(_processes.begin(), _processes.end(), [&status](auto& p) {
+        return p->id() == status.processId;
     });
     if (iProcess == _processes.end()) {
         return;
@@ -105,36 +125,36 @@ void Application::handleTrayProcessStatus(const Cluster& cluster, const Cluster:
 
     switch (status.status) {
     case common::TrayProcessStatus::Status::Starting:
-        iProcess->pushNodeStatus(nodeId, Process::NodeStatus::Status::Starting);
-        sendGuiProcessStatus(*iProcess, nodeId);
+        (*iProcess)->pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::Starting);
+        sendGuiProcessStatus(*iProcess->get(), nodeId);
         break;
     case common::TrayProcessStatus::Status::Running:
-        iProcess->pushNodeStatus(nodeId, Process::NodeStatus::Status::Running);
-        sendGuiProcessStatus(*iProcess, nodeId);
+        (*iProcess)->pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::Running);
+        sendGuiProcessStatus(*iProcess->get(), nodeId);
         break;
     case common::TrayProcessStatus::Status::NormalExit:
-        iProcess->pushNodeStatus(nodeId, Process::NodeStatus::Status::NormalExit);
-        sendGuiProcessStatus(*iProcess, nodeId);
+        (*iProcess)->pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::NormalExit);
+        sendGuiProcessStatus(*iProcess->get(), nodeId);
         break;
     case common::TrayProcessStatus::Status::FailedToStart:
-        iProcess->pushNodeStatus(nodeId, Process::NodeStatus::Status::FailedToStart);
-        sendGuiProcessStatus(*iProcess, nodeId);
+        (*iProcess)->pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::FailedToStart);
+        sendGuiProcessStatus(*iProcess->get(), nodeId);
         break;
     case common::TrayProcessStatus::Status::CrashExit:
-        iProcess->pushNodeStatus(nodeId, Process::NodeStatus::Status::CrashExit);
-        sendGuiProcessStatus(*iProcess, nodeId);
+        (*iProcess)->pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::CrashExit);
+        sendGuiProcessStatus(*iProcess->get(), nodeId);
         break;
     case common::TrayProcessStatus::Status::WriteError:
-        iProcess->pushNodeError(nodeId, Process::NodeError::Error::WriteError);
+        (*iProcess)->pushNodeError(nodeId, CoreProcess::NodeError::Error::WriteError);
         break;
     case common::TrayProcessStatus::Status::ReadError:
-        iProcess->pushNodeError(nodeId, Process::NodeError::Error::ReadError);
+        (*iProcess)->pushNodeError(nodeId, CoreProcess::NodeError::Error::ReadError);
         break;
     case common::TrayProcessStatus::Status::TimedOut:
-        iProcess->pushNodeError(nodeId, Process::NodeError::Error::TimedOut);
+        (*iProcess)->pushNodeError(nodeId, CoreProcess::NodeError::Error::TimedOut);
         break;
     case common::TrayProcessStatus::Status::UnknownError:
-        iProcess->pushNodeError(nodeId, Process::NodeError::Error::UnknownError);
+        (*iProcess)->pushNodeError(nodeId, CoreProcess::NodeError::Error::UnknownError);
         break;
     }
    
@@ -155,8 +175,8 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
     auto iProgram = std::find_if(
         _programs.begin(),
         _programs.end(),
-            [&](const Program& p) {
-                return p.id() == cmd.applicationId;
+            [&](const auto& p) {
+                return p->id() == cmd.applicationId;
             }
     );
         
@@ -171,8 +191,8 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
     auto iCluster = std::find_if(
         _clusters.begin(),
         _clusters.end(),
-        [&](const Cluster& c) {
-            return c.id() == cmd.clusterId;
+        [&](const auto& c) {
+            return c->id() == cmd.clusterId;
         }
     );
             
@@ -198,7 +218,7 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
         }
     };
         
-    if (!validCluster(*iProgram, *iCluster)) {
+    if (!validCluster(*iProgram->get(), *iCluster->get())) {
         // We tried to start an application on a cluster for which the application
         // is not configured
         // TODO(alex): Signal this back to the GUI
@@ -214,14 +234,14 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
 
     if (!cmd.configurationId.isEmpty()) {
         auto iConfiguration = std::find_if(
-            iProgram->configurations().begin(),
-            iProgram->configurations().end(),
+            (*iProgram)->configurations().begin(),
+            (*iProgram)->configurations().end(),
             [&](const Program::Configuration& c) {
             return c.id == cmd.configurationId;
         }
         );
 
-        if (iConfiguration == iProgram->configurations().end()) {
+        if (iConfiguration == (*iProgram)->configurations().end()) {
             // The requested configuration does not exist for the application
             // TODO(alex): Signal this back to the GUI
             Log(
@@ -235,12 +255,11 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
         commandLineParameters = iConfiguration->commandlineParameters;
     }
 
-    Process process(&(*iProgram), configurationId, &(*iCluster));
-    _processes.push_back(process);
+    std::unique_ptr<CoreProcess> process = std::make_unique<CoreProcess>(iProgram->get(), configurationId, iCluster->get());
+    common::TrayCommand trayCommand = process->startProcessCommand();
+    _processes.push_back(std::move(process));
 
-    common::TrayCommand trayCommand = process.startProcessCommand();
-
-    sendTrayCommand(*iCluster, trayCommand);
+    sendTrayCommand(*(iCluster->get()), trayCommand);
 }
 
 
@@ -280,29 +299,51 @@ void Application::incomingTrayMessage(const Cluster& cluster, const Cluster::Nod
     }
 }
 
+
+common::GenericMessage Application::initializationInformation() {
+    common::GenericMessage msg;
+    msg.type = common::GuiInitialization::Type;
+
+    common::GuiInitialization initMsg;
+    for (const auto& p : _programs) {
+        initMsg.applications.push_back(p->toGuiInitializationApplication());
+    }
+
+    for (const auto& c : _clusters) {
+        initMsg.clusters.push_back(c->toGuiInitializationCluster());
+    }
+
+    for (const auto& p : _processes) {
+        initMsg.processes.push_back(p->toGuiInitializationProcess());
+    }
+
+    msg.payload = initMsg.toJson().object();
+    return msg;
+}
+/*
 void Application::sendInitializationInformation(common::JsonSocket* socket) {
     common::GenericMessage msg;
     msg.type = common::GuiInitialization::Type;
     
     common::GuiInitialization initMsg;
-    for (const Program& p : _programs) {
-        initMsg.applications.push_back(p.toGuiInitializationApplication());
+    for (const auto& p : _programs) {
+        initMsg.applications.push_back(p->toGuiInitializationApplication());
     }
     
-    for (const Cluster& c : _clusters) {
-        initMsg.clusters.push_back(c.toGuiInitializationCluster());
+    for (const auto& c : _clusters) {
+        initMsg.clusters.push_back(c->toGuiInitializationCluster());
     }
 
-    for (const Process& p : _processes) {
-        initMsg.processes.push_back(p.toGuiInitializationProcess());
+    for (const auto& p : _processes) {
+        initMsg.processes.push_back(p->toGuiInitializationProcess());
     }
     
     msg.payload = initMsg.toJson().object();
     _incomingSocketHandler.sendMessage(socket, msg.toJson());
-}
+}*/
 
 
-void Application::sendGuiProcessStatus(const Process& process, const QString& nodeId) {
+void Application::sendGuiProcessStatus(const CoreProcess& process, const QString& nodeId) {
     common::GuiProcessStatus statusMsg = process.toGuiProcessStatus(nodeId);
 
     common::GenericMessage msg;

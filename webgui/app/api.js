@@ -1,11 +1,12 @@
 import SockJS from 'sockjs-client';
 import { observable, computed } from 'mobx';
+import Map from 'es6-map';
 
 class Api {
     @observable _state = {
         applications: [],
         clusters: [],
-        processes: [],
+        processes: new Map(),
         reconnecting: false,
         initialized: false,
         connected: false,
@@ -32,7 +33,7 @@ class Api {
     }
 
     @computed get processes() {
-        return this._state.processes;
+        return this._state.processes.values();
     }
 
     tryReconnect() {
@@ -63,6 +64,9 @@ class Api {
                 case 'GuiInit':
                     this.initializeGui(data.payload);
                     break;
+                case 'TrayProcessStatus':
+                    this.processStatus(data.payload);
+                    break;
                 default:
                     console.log('unknown message type: "' + data.type + '"', data.payload);
             }
@@ -72,10 +76,38 @@ class Api {
     initializeGui(data) {
         this._state.applications = data.applications || [];
         this._state.clusters = data.clusters || [];
-        this._state.processes = data.processes || [];
+        this._state.processes.clear();
+
+        if (data.processes) {
+            data.processes.forEach((p) => {
+                this._state.processes.set(p.id, p);
+            });
+        }
+
         this._state.reconnecting = false;
         this._state.initialized = true;
         this._state.connected = true;
+    }
+
+    processStatus(data) {
+        let process = null;
+        if (this._state.processes.has(data.processId)) {
+            process = this._state.processes.get(data.processId);
+        } else {
+            process = {
+                id: data.processId,
+                applicationId: data.applicationId,
+                clusterId: data.clusterId,
+                configurationId: data.configurationId,
+                statuses: []
+            };
+            this._state.processes.set(data.processId, process);
+        }
+
+        if (!process) {
+            console.error('Incoming data about unknown process');
+        }
+        process.statuses.push(data.status);
     }
 
     sendCommand(data) {
@@ -98,8 +130,12 @@ class Api {
         this.sendCommand(data);
     }
 
-    quitApplication(applicationId) {
-        console.log('quitting application ' + applicationId);
+    stopProcess(processId) {
+        console.log('stopping application' + processId);
+    }
+
+    restartProcess(processId) {
+        console.log('restarting application' + processId);
     }
 }
 

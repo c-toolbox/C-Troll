@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 import api from '../api';
 import Breadcrumbs from './breadcrumbs';
 import NodeButton from './nodebutton';
+import ProcessButton from './processbutton';
 
 @observer
 class Cluster extends React.Component {
@@ -38,6 +39,20 @@ class Cluster extends React.Component {
             });
         }
 
+        let activeProcesses = [];
+
+        const processes = api.processes.filter((process) => {
+            return process.clusterId === cluster.id;
+        });
+
+        processes.forEach((process) => {
+            activeProcesses.push(<ProcessButton key={process.id} type="application" process={process}/>);
+        });
+
+        if (activeProcesses.length === 0) {
+            activeProcesses.push(<span key="empty" className="no-hits">There are no applications running on this cluster.</span>);
+        }
+
         return (
             <div>
                 {breadcrumbs}
@@ -45,7 +60,8 @@ class Cluster extends React.Component {
                     <h1>{cluster.name}</h1>
                 </div>
                 <div className="row">
-                    No applications running
+                    <h2>Active Processes</h2>
+                    {activeProcesses}
                 </div>
                 <div className="row">
                     <h2>Actions</h2>

@@ -89,11 +89,21 @@ bool Cluster::enabled() const {
     return _enabled;
 }
 
-QList<Cluster::Node> Cluster::nodes() const {
+QList<Cluster::Node>& Cluster::nodes() {
     return _nodes;
 }
 
-Cluster loadCluster(QString jsonFile, QString baseDirectory) {
+const QList<Cluster::Node>& Cluster::nodes() const {
+    return _nodes;
+}
+
+bool Cluster::connected() const {
+    return std::accumulate(_nodes.begin(), _nodes.end(), true, [](bool othersConnected, const Node& node) {
+        return othersConnected && node.connected;
+    });
+}
+
+std::unique_ptr<Cluster> Cluster::loadCluster(QString jsonFile, QString baseDirectory) {
     QString id = QDir(baseDirectory).relativeFilePath(jsonFile);
     
     // relativeFilePath will have the baseDirectory in the beginning of the relative path
@@ -112,11 +122,13 @@ Cluster loadCluster(QString jsonFile, QString baseDirectory) {
     QJsonDocument d = QJsonDocument::fromJson(f.readAll());
     QJsonObject obj = d.object();
     obj[KeyId] = id;
-    return Cluster(obj);
+    return std::make_unique<Cluster>(obj);
 }
 
-QList<Cluster> Cluster::loadClustersFromDirectory(QString directory) {
-    QList<Cluster> result;
+std::unique_ptr<std::vector<std::unique_ptr<Cluster>>> Cluster::loadClustersFromDirectory(QString directory) {
+    std::unique_ptr<std::vector<std::unique_ptr<Cluster>>> result =
+        std::make_unique<std::vector<std::unique_ptr<Cluster>>>();
+
     // First, get all the *.json files from the directory and subdirectories
     QDirIterator it(
         directory,
@@ -128,11 +140,10 @@ QList<Cluster> Cluster::loadClustersFromDirectory(QString directory) {
         QString file = it.next();
         
         Log("Loading cluster file " + file);
-        Cluster c = loadCluster(file, directory);
-        result.push_back(c);
+        result->push_back(loadCluster(file, directory));
     }
 
-    return result;
+    return std::move(result);
 }
 
 common::GuiInitialization::Cluster Cluster::toGuiInitializationCluster() const {
@@ -140,5 +151,6 @@ common::GuiInitialization::Cluster Cluster::toGuiInitializationCluster() const {
     cluster.name = name();
     cluster.id = id();
     cluster.enabled = enabled();
+    cluster.connected = connected();
     return cluster;
 }

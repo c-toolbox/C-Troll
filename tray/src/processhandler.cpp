@@ -76,9 +76,14 @@ void ProcessHandler::handleSocketMessage(const QJsonDocument& message) {
     // Check if identifer of traycommand already is tied to a process
     // We don't allow the same id for multiple processes
     auto p = _processes.find(command.id);
-    if (p == _processes.end() ) {
-        // Not Found, create and run a process with it
-        createAndRunProcessFromTrayCommand(command);
+    if (p == _processes.end()) {
+        if (command.command == "Start") {
+            // Not Found, create and run a process with it
+            createAndRunProcessFromTrayCommand(command);
+        }
+        else {
+            handlerErrorOccurred(QProcess::ProcessError::FailedToStart);
+        }
     } else {
         // Found
         executeProcessWithTrayCommand(p->second, command);

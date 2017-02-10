@@ -1,6 +1,8 @@
 import React from 'react';
 import api from '../api';
+import { observer } from 'mobx-react';
 
+@observer
 class StartButton extends React.Component {
     render() {
         const classNames = ['start-button', 'no-select', 'sub-button'];
@@ -9,12 +11,19 @@ class StartButton extends React.Component {
             <path className="start-icon-path" d="M61.83,35.49L5.65,63.58A3.91,3.91,0,0,1,0,60.09V3.91A3.91,3.91,0,0,1,5.65.42L61.83,28.51A3.91,3.91,0,0,1,61.83,35.49Z"/>
         </svg>);
 
-        const start = (evt) => {
-            const config = this.props.configuration;
-            const configId = config ? config.id : '';
-            api.startApplication(this.props.application.id, configId, this.props.cluster.id);
-            evt.stopPropagation();
-        };
+        const cluster = this.props.cluster;
+
+        let start = () => {};
+        if (api.connected && cluster.enabled && cluster.connected) {
+            start = (evt) => {
+                const config = this.props.configuration;
+                const configId = config ? config.id : '';
+                api.startApplication(this.props.application.id, configId, this.props.cluster.id);
+                evt.stopPropagation();
+            };
+        } else {
+            classNames.push('inactive');
+        }
 
         switch (this.props.type) {
             case 'application':

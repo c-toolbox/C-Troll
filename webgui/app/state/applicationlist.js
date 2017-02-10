@@ -41,31 +41,46 @@ class ApplicationList {
         });
     }
 
-    filterByString(apps) {
-        const lowerFilterString = this.filterString.toLowerCase();
-
+    filterByString(applications) {
         if (this.filterString.length === 0) {
-            return apps;
+            return applications;
         }
-        return apps.filter((app) => {
-            const lowerName = app.name.toLowerCase();
-            const lowerId = app.id.toLowerCase();
 
-            const inName = lowerName.indexOf(lowerFilterString) !== -1;
-            const inId = lowerId.indexOf(lowerFilterString) !== -1;
-            let inTags = false;
+        const filterByWord = (apps, word) => {
+            return apps.filter((app) => {
+                const lowerName = app.name.toLowerCase();
+                const lowerId = app.id.toLowerCase();
 
-            app.tags.forEach((tag) => {
-                const lowerTag = tag.toLowerCase();
-                if (lowerTag.indexOf(lowerFilterString) !== -1) {
-                    inTags = true;
-                    return false;
-                }
-                return true;
+                const inName = this.nameMatchesFilter(lowerName, word);
+                const inId = this.nameMatchesFilter(lowerId, word);
+                let inTags = false;
+
+                app.tags.forEach((tag) => {
+                    const lowerTag = tag.toLowerCase();
+                    if (this.nameMatchesFilter(lowerTag, word)) {
+                        inTags = true;
+                        return false;
+                    }
+                    return true;
+                });
+
+                return inName || inId || inTags;
             });
+        };
 
-            return inName || inId || inTags;
+        const lowerFilterString = this.filterString.toLowerCase();
+        const filters = lowerFilterString.split(' ');
+
+        let filtered = applications.slice(0);
+        filters.forEach((filter) => {
+            filtered = filterByWord(filtered, filter);
         });
+
+        return filtered;
+    }
+
+    nameMatchesFilter(word, filter) {
+        return !!word.match(new RegExp('^' + filter));
     }
 }
 

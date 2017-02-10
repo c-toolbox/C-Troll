@@ -32,7 +32,7 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "process.h"
+#include "coreprocess.h"
 #include "program.h"
 #include "cluster.h"
 
@@ -50,34 +50,34 @@
 namespace {
 }
 
-int Process::_nextId = 0;
+int CoreProcess::_nextId = 0;
 
-Process::Process(Program* application, const QString& configurationId, Cluster* cluster)
+CoreProcess::CoreProcess(Program* application, const QString& configurationId, Cluster* cluster)
     : _id(_nextId++)
     , _application(application)
     , _configurationId(configurationId)
     , _cluster(cluster)
-    , _clusterStatus({ Process::ClusterStatus::Status::Starting })
+    , _clusterStatus({ CoreProcess::ClusterStatus::Status::Starting })
 {
 }
 
-
-int Process::id() const {
+int CoreProcess::id() const {
     return _id;
 }
-Program* Process::application() const {
+
+Program* CoreProcess::application() const {
     return _application;
 }
 
-QString Process::configurationId() const {
+QString CoreProcess::configurationId() const {
     return _configurationId;
 }
 
-Cluster* Process::cluster() const {
+Cluster* CoreProcess::cluster() const {
     return _cluster;
 }
 
-bool Process::allNodesHasStatus(Process::NodeStatus::Status status) {
+bool CoreProcess::allNodesHasStatus(CoreProcess::NodeStatus::Status status) {
     bool allHasStatus = true;
     if (_nodeLogs.size() == 0) return false;
 
@@ -94,7 +94,7 @@ bool Process::allNodesHasStatus(Process::NodeStatus::Status status) {
     return allHasStatus;
 }
 
-bool Process::anyNodeHasStatus(Process::NodeStatus::Status status) {
+bool CoreProcess::anyNodeHasStatus(CoreProcess::NodeStatus::Status status) {
     for (auto iNode = _nodeLogs.begin(); iNode != _nodeLogs.end(); iNode++) {
         if (iNode->statuses.size() == 0) {
             continue;
@@ -106,32 +106,32 @@ bool Process::anyNodeHasStatus(Process::NodeStatus::Status status) {
     return false;
 }
 
-void Process::pushNodeStatus(QString nodeId, Process::NodeStatus::Status nodeStatus) {
-    Process::ClusterStatus::Status clusterStatus = _clusterStatus.status;
+void CoreProcess::pushNodeStatus(QString nodeId, CoreProcess::NodeStatus::Status nodeStatus) {
+    CoreProcess::ClusterStatus::Status clusterStatus = _clusterStatus.status;
     _nodeLogs[nodeId].statuses.append({ nodeStatus, std::chrono::system_clock::now() });
 
     switch (nodeStatus) {
-    case Process::NodeStatus::Status::Starting:
-        clusterStatus = Process::ClusterStatus::Status::Starting;
+    case CoreProcess::NodeStatus::Status::Starting:
+        clusterStatus = CoreProcess::ClusterStatus::Status::Starting;
         break;
-    case Process::NodeStatus::Status::Running:
-        if (allNodesHasStatus(Process::NodeStatus::Status::Running)) {
-            clusterStatus = Process::ClusterStatus::Status::Running;
+    case CoreProcess::NodeStatus::Status::Running:
+        if (allNodesHasStatus(CoreProcess::NodeStatus::Status::Running)) {
+            clusterStatus = CoreProcess::ClusterStatus::Status::Running;
         }
         break;
-    case Process::NodeStatus::Status::NormalExit:
-        if (allNodesHasStatus(Process::NodeStatus::Status::NormalExit)) {
-            clusterStatus = Process::ClusterStatus::Status::Exit;
+    case CoreProcess::NodeStatus::Status::NormalExit:
+        if (allNodesHasStatus(CoreProcess::NodeStatus::Status::NormalExit)) {
+            clusterStatus = CoreProcess::ClusterStatus::Status::Exit;
         }
-        else if (!anyNodeHasStatus(Process::NodeStatus::Status::CrashExit)) {
-            clusterStatus = Process::ClusterStatus::Status::PartialExit;
+        else if (!anyNodeHasStatus(CoreProcess::NodeStatus::Status::CrashExit)) {
+            clusterStatus = CoreProcess::ClusterStatus::Status::PartialExit;
         }
         break;
-    case Process::NodeStatus::Status::CrashExit:
-        clusterStatus = Process::ClusterStatus::Status::CrashExit;
+    case CoreProcess::NodeStatus::Status::CrashExit:
+        clusterStatus = CoreProcess::ClusterStatus::Status::CrashExit;
         break;
-    case Process::NodeStatus::Status::FailedToStart:
-        clusterStatus = Process::ClusterStatus::Status::FailedToStart;
+    case CoreProcess::NodeStatus::Status::FailedToStart:
+        clusterStatus = CoreProcess::ClusterStatus::Status::FailedToStart;
         break;
     }
 
@@ -140,41 +140,48 @@ void Process::pushNodeStatus(QString nodeId, Process::NodeStatus::Status nodeSta
     }
 }
 
-Process::NodeStatus Process::latestNodeStatus(QString nodeId) const {
+CoreProcess::NodeStatus CoreProcess::latestNodeStatus(QString nodeId) const {
     auto iNodeLog = _nodeLogs.find(nodeId);
     if (iNodeLog == _nodeLogs.end()) {
-        return { Process::NodeStatus::Status::Unknown, std::chrono::system_clock::now() };
+        return { CoreProcess::NodeStatus::Status::Unknown, std::chrono::system_clock::now() };
     }
     return iNodeLog->statuses.back();
 }
 
-void Process::pushNodeError(QString nodeId, Process::NodeError::Error nodeError) {
+void CoreProcess::pushNodeError(QString nodeId, CoreProcess::NodeError::Error nodeError) {
     _nodeLogs[nodeId].errors.append({ nodeError, std::chrono::system_clock::now() });
 }
 
-common::GuiInitialization::Process Process::toGuiInitializationProcess() const {
-    return common::GuiInitialization::Process();
+common::GuiInitialization::Process CoreProcess::toGuiInitializationProcess() const {
+    common::GuiInitialization::Process p;
+    p.id = _id;
+    p.applicationId = _application->id();
+    p.clusterId = _cluster->id();
+    p.configurationId = _configurationId;
+    return p;
 }
 
-common::GuiProcessStatus Process::toGuiProcessStatus(const QString& nodeId) const {
+common::GuiProcessStatus CoreProcess::toGuiProcessStatus(const QString& nodeId) const {
     common::GuiProcessStatus g;
     g.processId = _id;
-    Process::NodeStatus nodeStatus = latestNodeStatus(nodeId);
+    g.applicationId = _application->id();
+    g.clusterId = _cluster->id();
+    CoreProcess::NodeStatus nodeStatus = latestNodeStatus(nodeId);
     switch (nodeStatus.status) {
-    case Process::NodeStatus::Status::Starting:
+    case CoreProcess::NodeStatus::Status::Starting:
         g.status = "Starting";
         break;
-    case Process::NodeStatus::Status::Running:
+    case CoreProcess::NodeStatus::Status::Running:
         g.status = "Running";
         break;
-    case Process::NodeStatus::Status::FailedToStart:
+    case CoreProcess::NodeStatus::Status::FailedToStart:
         g.status = "FailedToStart";
         break;
     }
     return g;
 }
 
-common::TrayCommand Process::startProcessCommand() const {
+common::TrayCommand CoreProcess::startProcessCommand() const {
     common::TrayCommand t;
     t.id = _id;
     t.executable = _application->executable();
@@ -202,7 +209,7 @@ common::TrayCommand Process::startProcessCommand() const {
     return t;
 }
 
-common::TrayCommand Process::exitProcessCommand() const {
+common::TrayCommand CoreProcess::exitProcessCommand() const {
     common::TrayCommand t;
     t.id = _id;
     t.command = "Exit";

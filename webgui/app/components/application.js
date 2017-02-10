@@ -4,9 +4,12 @@ import { Link } from 'react-router';
 import api from '../api';
 import ClusterButton from './clusterbutton';
 import StartButton from './startbutton';
+import StopButton from './stopbutton';
+import RestartButton from './restartbutton';
 import TagLink from './taglink';
 import Breadcrumbs from './breadcrumbs';
 import ConfigurationButton from './configurationbutton';
+// import ProcessButton from './processbutton';
 
 @observer
 class Appplication extends React.Component {
@@ -74,6 +77,63 @@ class Appplication extends React.Component {
             );
         }
 
+        const clusters = application.clusters.map((clusterId) => {
+            const cluster = api.clusters.find((c) => {
+                return c.id === clusterId;
+            });
+            if (!cluster) {
+                return null;
+            }
+
+            let contents = [];
+
+            const clusterProcesses = api.processes.filter((process) => {
+                return process.clusterId === clusterId;
+            });
+
+            let running = false;
+            clusterProcesses.forEach((process) => {
+                if (process.applicationId === application.id) {
+                    running = true;
+                    contents.unshift(<StopButton key={'stop' + process.id} type="application" process={process}/>);
+                    contents.unshift(<RestartButton key={'restart#' + process.id} type="application" process={process}/>);
+                } else {
+                    contents.push(<StopButton key={'stop' + process.id} type="application" process={process}/>);
+                }
+            });
+
+            if (!running) {
+                contents.unshift(<StartButton key="start" type="application" application={application} cluster={cluster}/>);
+            }
+
+            return (
+                <ClusterButton key={cluster.id} cluster={cluster}>
+                    {contents}
+                </ClusterButton>
+            );
+        });
+
+
+/*
+        const processes = api.processes.filter((process) => {
+            return process.applicationId === application.id;
+        });
+
+        const activeProcesses = processes.map((process) => {
+            return <ProcessButton key={process.id} process={process}/>;
+        });
+
+
+        if (activeProcesses.length === 0) {
+            activeProcesses.push(<span key="no-hits" className="no-hits">{application.name} is not running anywhere right now.</span>);
+        }
+
+         <div className="row">
+                    <h2>Active Processes</h2>
+                    {activeProcesses}
+                </div>
+*/
+
         return (
             <div>
                 {breadcrumbs}
@@ -87,23 +147,7 @@ class Appplication extends React.Component {
                 {configurationRow}
                 <div className="row">
                     <h2>Clusters</h2>
-                </div>
-                <div className="row">
-                    {
-                        application.clusters.map((clusterId) => {
-                            const cluster = api.clusters.find((c) => {
-                                return c.id === clusterId;
-                            });
-                            if (!cluster) {
-                                return null;
-                            }
-                            return (
-                                <ClusterButton key={cluster.id} cluster={cluster}>
-                                    <StartButton type="application" application={application} cluster={cluster}/>
-                                </ClusterButton>
-                            );
-                        })
-                    }
+                    {clusters}
                 </div>
             </div>
         );

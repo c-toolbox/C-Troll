@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __PROCESS_H__
-#define __PROCESS_H__
+#ifndef __COREPROCESS_H__
+#define __COREPROCESS_H__
 
 #include "cluster.h"
 #include "program.h"
@@ -51,7 +51,7 @@ namespace common {
     class JsonSocket;
 } // namespace common
 
-class Process {
+class CoreProcess {
 public:
     struct NodeStatus {
         enum class Status {
@@ -100,7 +100,7 @@ public:
         std::chrono::system_clock::time_point time;
     };
 
-    Process::Process(Program* program, const QString& configurationId, Cluster* cluster);
+    CoreProcess::CoreProcess(Program* program, const QString& configurationId, Cluster* cluster);
 
     int id() const;
     Program* application() const;
@@ -124,8 +124,8 @@ private:
     QString _configurationId;
     Cluster* _cluster;
     static int _nextId;
-    QMap<QString, Process::NodeLog> _nodeLogs;
-    Process::ClusterStatus _clusterStatus;
+    QMap<QString, CoreProcess::NodeLog> _nodeLogs;
+    CoreProcess::ClusterStatus _clusterStatus;
 };
 
-#endif // __PROCESS_H__
+#endif // __COREPROCESS_H__

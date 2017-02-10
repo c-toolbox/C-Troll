@@ -2,6 +2,7 @@ import React from 'react';
 import TagButton from './tagbutton';
 import TagLink from './taglink';
 import { observer } from 'mobx-react';
+import api from '../api';
 
 @observer
 class TagButtons extends React.Component {
@@ -20,6 +21,10 @@ class TagButtons extends React.Component {
     }
 
     render() {
+        if (!api.initialized) {
+            return null;
+        }
+
         const filterTags = this._applicationList.filterTags;
 
         let ClearTags = () => null;

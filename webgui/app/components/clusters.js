@@ -2,6 +2,8 @@ import React from 'react';
 import api from '../api';
 import { observer } from 'mobx-react';
 import ClusterButton from './clusterbutton';
+import StopButton from './stopbutton';
+import RestartButton from './restartbutton';
 
 @observer
 class Clusters extends React.Component {
@@ -12,9 +14,21 @@ class Clusters extends React.Component {
                     <h2>Clusters</h2>
                 </div>
                 <div className="row button-container">
-                    {api.clusters.map((cluster) =>
-                        <ClusterButton key={cluster.id} cluster={cluster}/>
-                    )}
+                    {
+                        api.clusters.map((cluster) => {
+                            const contents = [];
+                            const clusterProcesses = api.processes.filter((process) => {
+                                return process.clusterId === cluster.id;
+                            });
+
+                            clusterProcesses.forEach((process) => {
+                                contents.unshift(<StopButton key={'stop' + process.id} type="application" process={process}/>);
+                                contents.unshift(<RestartButton key={'restart#' + process.id} type="application" process={process}/>);
+                            });
+
+                            return <ClusterButton key={cluster.id} cluster={cluster}>{contents}</ClusterButton>;
+                        })
+                    }
                 </div>
             </div>
         );

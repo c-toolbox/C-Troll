@@ -18,12 +18,22 @@ class ClusterButton extends React.Component {
             browserHistory.push(clusterUrl);
         };
 
+        const classNames = ['square', 'button', 'no-select'];
+
+        const subs = [];
+        if (!cluster.connected) {
+            classNames.push('error');
+            subs.push(<span key="0">Disconnected</span>);
+        }
+
         return (
-            <div to={'/clusters/' + cluster.id.replace('/', '>')} className="button-square dark no-select">
+            <div to={'/clusters/' + cluster.id.replace('/', '>')} className={classNames.join(' ')}>
                 {icon}
                 <div className="click-area" onClick={open}></div>
                 <div className="main">{cluster.name}</div>
-                <div className="sub">Running OpenSpace Develop</div>
+                <div className="sub">
+                    {subs}
+                </div>
                 {this.props.children}
                 <MoreButton to={clusterUrl} key="more"/>
             </div>);
@@ -31,7 +41,7 @@ class ClusterButton extends React.Component {
 }
 
 ClusterButton.propTypes = {
-    children: React.PropTypes.object,
+    children: React.PropTypes.array,
     cluster: React.PropTypes.object.isRequired
 };
 

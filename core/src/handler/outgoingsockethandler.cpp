@@ -48,25 +48,39 @@ OutgoingSocketHandler::HashValue OutgoingSocketHandler::hash(
     return cluster.name() + "::" + node.name;
 }
 
-void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
-    _clusters = std::move(clusters);
-    for (const Cluster& c : _clusters) {
-        for (const Cluster::Node& node : c.nodes()) {
-            HashValue h = hash(c, node);
+void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
+    std::copy_if(
+        clusters.cbegin(),
+        clusters.cend(),
+        std::back_inserter(_clusters),
+        [](const Cluster* cluster) {
+            return cluster->enabled();
+    });
+
+    for (Cluster* c : _clusters) {
+        for (Cluster::Node& node : c->nodes()) {
+            HashValue h = hash(*c, node);
 
             // This handler keeps the sockets to the tray applications open
             std::unique_ptr<QTcpSocket> socket = std::make_unique<QTcpSocket>();
             connect(
                 socket.get(), &QAbstractSocket::stateChanged,
-                [node](QAbstractSocket::SocketState state) {
+                [this, c, &node](QAbstractSocket::SocketState state) {
                     if (state == QAbstractSocket::SocketState::ConnectedState) {
                         qDebug() << "Socket state change: "
                             << node.ipAddress << node.port << state;
+                        if (!node.connected) {
+                            node.connected = true;
+                            emit connectedStatusChanged(*c, node);
+                        }
                     }
                     else if (state == QAbstractSocket::SocketState::ClosingState) {
                         qDebug() << "Socket state change: "
                             << node.ipAddress << node.port << state;
-   
+                        if (node.connected) {
+                            node.connected = false;
+                            emit connectedStatusChanged(*c, node);
+                        }
                     }
                 }
             );
@@ -76,7 +90,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
 
             connect(
                 jsonSocket.get(), &common::JsonSocket::readyRead,
-                [this, c, node]() { readyRead(c, node); }
+                [this, c, node]() { readyRead(*c, node); }
             );
 
             jsonSocket->socket()->connectToHost(node.ipAddress, node.port);
@@ -88,20 +102,22 @@ void OutgoingSocketHandler::initialize(const QList<Cluster>& clusters) {
     connect(
         timer, &QTimer::timeout,
         [this](){
-            for (const Cluster& c : _clusters) {
-                if (c.enabled()) {
-                    for (const Cluster::Node& node : c.nodes()) {
-                        HashValue h = hash(c, node);
+            for (Cluster* c : _clusters) {
+                for (Cluster::Node& node : c->nodes()) {
+                    HashValue h = hash(*c, node);
 
-                        auto it = _sockets.find(h);
-                        assert(it != _sockets.end());
+                    auto it = _sockets.find(h);
+                    assert(it != _sockets.end());
 
-                        auto socket = it->second->socket();
+                    auto socket = it->second->socket();
                                
-                        if (socket->state() == QAbstractSocket::SocketState::UnconnectedState) {
-                            qDebug() << "Unconnected: " << node.ipAddress << node.port;
-                            socket->connectToHost(node.ipAddress, node.port);
+                    if (socket->state() == QAbstractSocket::SocketState::UnconnectedState) {
+                        qDebug() << "Unconnected: " << node.ipAddress << node.port;
+                        if (node.connected) {
+                            node.connected = false;
+                            emit connectedStatusChanged(*c, node);
                         }
+                        socket->connectToHost(node.ipAddress, node.port);
                     }
                 }
             }

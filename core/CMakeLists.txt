@@ -2,7 +2,7 @@ set(HEADER_FILES
     src/cluster.h
     src/handler/incomingsockethandler.h
     src/handler/outgoingsockethandler.h
-    src/process.h
+    src/coreprocess.h
     src/program.h
     src/application.h
 )
@@ -11,7 +11,7 @@ set(SOURCE_FILES
     src/cluster.cpp
     src/handler/incomingsockethandler.cpp
     src/handler/outgoingsockethandler.cpp
-    src/process.cpp
+    src/coreprocess.cpp
     src/program.cpp
     src/application.cpp
     src/main.cpp
