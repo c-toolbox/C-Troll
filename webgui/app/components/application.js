@@ -87,7 +87,7 @@ class Appplication extends React.Component {
             let contents = [];
 
             const clusterProcesses = api.processes.filter((process) => {
-                return process.clusterId === clusterId;
+                return process.clusterId === clusterId && process.clusterStatus !== 'Exit';
             });
 
             let running = false;

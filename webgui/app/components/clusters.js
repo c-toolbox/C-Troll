@@ -18,7 +18,7 @@ class Clusters extends React.Component {
                         api.clusters.map((cluster) => {
                             const contents = [];
                             const clusterProcesses = api.processes.filter((process) => {
-                                return process.clusterId === cluster.id;
+                                return process.clusterId === cluster.id && process.clusterStatus !== 'Exit';
                             });
 
                             clusterProcesses.forEach((process) => {

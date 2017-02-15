@@ -42,7 +42,7 @@ class Cluster extends React.Component {
         let activeProcesses = [];
 
         const processes = api.processes.filter((process) => {
-            return process.clusterId === cluster.id;
+            return process.clusterId === cluster.id && process.clusterStatus !== 'Exit';
         });
 
         processes.forEach((process) => {
