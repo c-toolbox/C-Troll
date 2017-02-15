@@ -44,7 +44,8 @@
 #include "genericmessage.h"
 
 namespace common {
-    struct GuiCommand;
+    struct GuiStartCommand;
+    struct GuiProcessCommand;
     struct TrayProcessStatus;
     struct TrayProcessLogMessage;
     class JsonSocket;
@@ -60,7 +61,8 @@ private:
     
     void handleTrayProcessStatus(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessStatus status);
     void handleTrayProcessLogMessage(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessLogMessage status);
-    void handleIncomingGuiCommand(common::GuiCommand cmd);
+    void handleIncomingGuiStartCommand(common::GuiStartCommand cmd);
+    void handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd);
     
     common::GenericMessage initializationInformation();
     //void sendInitializationInformation(common::JsonSocket* socket);

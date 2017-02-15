@@ -65,7 +65,7 @@ class Api {
                     this.initializeGui(data.payload);
                     break;
                 case 'TrayProcessStatus':
-                    this.processStatus(data.payload);
+                    this.handleProcessStatus(data.payload);
                     break;
                 default:
                     console.log('unknown message type: "' + data.type + '"', data.payload);
@@ -80,7 +80,7 @@ class Api {
 
         if (data.processes) {
             data.processes.forEach((p) => {
-                this._state.processes.set(p.id, p);
+                this._state.processes.set(p.id, observable(p));
             });
         }
 
@@ -89,30 +89,44 @@ class Api {
         this._state.connected = true;
     }
 
-    processStatus(data) {
+    handleProcessStatus(data) {
         let process = null;
         if (this._state.processes.has(data.processId)) {
             process = this._state.processes.get(data.processId);
         } else {
-            process = {
+            process = observable({
                 id: data.processId,
                 applicationId: data.applicationId,
                 clusterId: data.clusterId,
                 configurationId: data.configurationId,
-                statuses: []
-            };
+                clusterStatus: data.clusterStatus,
+                clusterStatusTime: data.time,
+                nodeStatusHistory: []
+            });
             this._state.processes.set(data.processId, process);
         }
 
         if (!process) {
             console.error('Incoming data about unknown process');
         }
-        process.statuses.push(data.status);
+        if (process.clusterStatus !== data.clusterStatus) {
+            process.clusterStatus = data.clusterStatus;
+            process.clusterStatusTime = data.time;
+        }
+
+        Object.keys(data.nodeStatus).forEach((node) => {
+            const status = data.nodeStatus[node];
+            process.nodeStatusHistory.push({
+                time: data.time,
+                node: node,
+                status: status
+            });
+        });
     }
 
-    sendCommand(data) {
+    sendCommand(type, data) {
         const message = {
-            type: 'GuiCommand',
+            type: type,
             payload: data
         };
         this._sock.send(JSON.stringify(message));
@@ -122,20 +136,29 @@ class Api {
         console.log('launching application ' + applicationId);
 
         const data = {
-            command: 'Start',
             applicationId: applicationId,
             configurationId: configurationId,
             clusterId: clusterId
         };
-        this.sendCommand(data);
+        this.sendCommand('GuiStartCommand', data);
     }
 
     stopProcess(processId) {
-        console.log('stopping application' + processId);
+        console.log('stopping process ' + processId);
+        const data = {
+            command: 'Stop',
+            processId: processId
+        };
+        this.sendCommand('GuiProcessCommand', data);
     }
 
     restartProcess(processId) {
-        console.log('restarting application' + processId);
+        console.log('restarting process ' + processId);
+        const data = {
+            command: 'Restart',
+            processId: processId
+        };
+        this.sendCommand('GuiProcessCommand', data);
     }
 }
 

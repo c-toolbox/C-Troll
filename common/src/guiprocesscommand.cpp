@@ -32,7 +32,7 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "guicommand.h"
+#include "guiprocesscommand.h"
 
 #include "jsonsupport.h"
 
@@ -40,30 +40,24 @@
 
 namespace {
     const QString KeyCommand = "command";
-    const QString KeyApplicationId = "applicationId";
-    const QString KeyConfigurationId = "configurationId";
-    const QString KeyClusterId = "clusterId";
+    const QString KeyProcessId = "processId";
 }
 
 namespace common {
 
-const QString GuiCommand::Type = "GuiCommand";
+const QString GuiProcessCommand::Type = "GuiProcessCommand";
     
-GuiCommand::GuiCommand(const QJsonDocument& document) {
+GuiProcessCommand::GuiProcessCommand(const QJsonDocument& document) {
     QJsonObject obj = document.object();
 
+    processId = common::testAndReturnInt(obj, KeyProcessId);
     command = common::testAndReturnString(obj, KeyCommand);
-    applicationId = common::testAndReturnString(obj, KeyApplicationId);
-    configurationId = common::testAndReturnString(obj, KeyConfigurationId);
-    clusterId = common::testAndReturnString(obj, KeyClusterId);
 }
 
-QJsonDocument GuiCommand::toJson() const {
+QJsonDocument GuiProcessCommand::toJson() const {
     QJsonObject obj;
+    obj[KeyProcessId] = processId;
     obj[KeyCommand] = command;
-    obj[KeyApplicationId] = applicationId;
-    obj[KeyConfigurationId] = configurationId;
-    obj[KeyClusterId] = clusterId;
 
     return QJsonDocument(obj);
 }

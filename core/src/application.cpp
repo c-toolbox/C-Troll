@@ -34,7 +34,8 @@
 
 #include "application.h"
 
-#include <guicommand.h>
+#include <guistartcommand.h>
+#include <guiprocesscommand.h>
 #include <guiprocessstatus.h>
 #include <trayprocessstatus.h>
 #include <trayprocesslogmessage.h>
@@ -166,8 +167,7 @@ void Application::handleTrayProcessLogMessage(const Cluster& cluster, const Clus
 }
 
 
-void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
-    Log("Command: " + cmd.command);
+void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     Log("Application: " + cmd.applicationId);
     Log("Configuration: " + cmd.configurationId);
     Log("Cluster: " + cmd.clusterId);
@@ -262,6 +262,37 @@ void Application::handleIncomingGuiCommand(common::GuiCommand cmd) {
     sendTrayCommand(*(iCluster->get()), trayCommand);
 }
 
+void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd) {
+    int processId = cmd.processId;
+    QString command = cmd.command;
+
+    auto iProcess = std::find_if(
+        _processes.begin(),
+        _processes.end(),
+        [&](const auto& p) {
+            return p->id() == processId;
+        }
+    );
+
+    if (iProcess == _processes.end()) {
+        Log(QString("There is no process with id ") + QString(processId));
+        return;
+    }
+
+    CoreProcess* process = iProcess->get();
+    Cluster* cluster = process->cluster();
+
+    sendTrayCommand(*cluster, process->exitProcessCommand());
+    
+    if (command == "Restart") {
+        sendTrayCommand(*cluster, process->startProcessCommand());
+    } else if (command == "Stop") {
+        //_processes.erase(iProcess);
+    } else {
+        Log("Unknown command '" + command + "'");
+    }
+}
+
 
 void Application::incomingGuiMessage(const QJsonDocument& message) {
     try {
@@ -270,9 +301,12 @@ void Application::incomingGuiMessage(const QJsonDocument& message) {
             
         qDebug() << "Received message of type " << msg.type;
 
-        if (msg.type == common::GuiCommand::Type) {
+        if (msg.type == common::GuiStartCommand::Type) {
             // We have received a message from the GUI to start a new application
-            handleIncomingGuiCommand(common::GuiCommand(QJsonDocument(msg.payload)));
+            handleIncomingGuiStartCommand(common::GuiStartCommand(QJsonDocument(msg.payload)));
+        } else if (msg.type == common::GuiProcessCommand::Type) {
+            // We have received a message from the GUI to start a new application
+            handleIncomingGuiProcessCommand(common::GuiProcessCommand(QJsonDocument(msg.payload)));
         }
     } catch (const std::runtime_error& e) {
         Log(QString("Error with incoming message: ") + e.what());

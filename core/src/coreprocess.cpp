@@ -158,8 +158,71 @@ common::GuiInitialization::Process CoreProcess::toGuiInitializationProcess() con
     p.applicationId = _application->id();
     p.clusterId = _cluster->id();
     p.configurationId = _configurationId;
+    p.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status);
+    p.clusterStatusTime = timeToGuiTime(_clusterStatus.time);
+
+    QVector<common::GuiInitialization::Process::NodeStatus> nodeStatusHistory;
+    for (const auto& node : _nodeLogs.keys()) {
+        const auto& nodeLog = _nodeLogs[node];
+        for (auto status : nodeLog.statuses) {
+            common::GuiInitialization::Process::NodeStatus nodeStatusObject;
+            nodeStatusObject.status = nodeStatusToGuiNodeStatus(status.status);
+            nodeStatusObject.time = timeToGuiTime(status.time);
+            nodeStatusObject.node = node;
+            nodeStatusHistory.push_back(nodeStatusObject);
+        }
+    }
+    std::sort(nodeStatusHistory.begin(), nodeStatusHistory.end(), [](auto& a, auto& b){
+        return a.time < b.time;
+    });
+    
+    p.nodeStatusHistory = nodeStatusHistory.toList();
+
     return p;
 }
+
+QString CoreProcess::nodeStatusToGuiNodeStatus(CoreProcess::NodeStatus::Status status) {
+    switch (status) {
+    case CoreProcess::NodeStatus::Status::Starting:
+        return "Starting";
+    case CoreProcess::NodeStatus::Status::Running:
+        return "Running";
+    case CoreProcess::NodeStatus::Status::FailedToStart:
+        return "FailedToStart";
+    case CoreProcess::NodeStatus::Status::NormalExit:
+        return "NormalExit";
+    case CoreProcess::NodeStatus::Status::CrashExit:
+        return "CrashExit";
+    case CoreProcess::NodeStatus::Status::Unknown:
+    default:
+        return "Unknown";
+    }
+}
+
+QString CoreProcess::clusterStatusToGuiClusterStatus(CoreProcess::ClusterStatus::Status status) {
+    switch (status) {
+    case CoreProcess::ClusterStatus::Status::Starting:
+        return "Starting";
+    case CoreProcess::ClusterStatus::Status::Running:
+        return "Running";
+    case CoreProcess::ClusterStatus::Status::FailedToStart:
+        return "FailedToStart";
+    case CoreProcess::ClusterStatus::Status::Exit:
+        return "Exit";
+    case CoreProcess::ClusterStatus::Status::CrashExit:
+        return "CrashExit";
+    case CoreProcess::ClusterStatus::Status::PartialExit:
+        return "PartialExit";
+    case CoreProcess::ClusterStatus::Status::Unknown:
+    default:
+        return "Unknown";
+    }
+}
+
+double CoreProcess::timeToGuiTime(std::chrono::system_clock::time_point time) {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count();
+}
+
 
 common::GuiProcessStatus CoreProcess::toGuiProcessStatus(const QString& nodeId) const {
     common::GuiProcessStatus g;
@@ -167,17 +230,9 @@ common::GuiProcessStatus CoreProcess::toGuiProcessStatus(const QString& nodeId) 
     g.applicationId = _application->id();
     g.clusterId = _cluster->id();
     CoreProcess::NodeStatus nodeStatus = latestNodeStatus(nodeId);
-    switch (nodeStatus.status) {
-    case CoreProcess::NodeStatus::Status::Starting:
-        g.status = "Starting";
-        break;
-    case CoreProcess::NodeStatus::Status::Running:
-        g.status = "Running";
-        break;
-    case CoreProcess::NodeStatus::Status::FailedToStart:
-        g.status = "FailedToStart";
-        break;
-    }
+    g.nodeStatus[nodeId] = nodeStatusToGuiNodeStatus(nodeStatus.status);
+    g.time = timeToGuiTime(nodeStatus.time);
+    g.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status);
     return g;
 }
 

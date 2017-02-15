@@ -9,7 +9,6 @@ import RestartButton from './restartbutton';
 import TagLink from './taglink';
 import Breadcrumbs from './breadcrumbs';
 import ConfigurationButton from './configurationbutton';
-// import ProcessButton from './processbutton';
 
 @observer
 class Appplication extends React.Component {

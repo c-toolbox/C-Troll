@@ -14,6 +14,7 @@ class Appplications extends React.Component {
         super();
         this._applicationList = new ApplicationList();
         this._processList = new ProcessList();
+        this._processList.hideOnExit = true;
 
         if (tag !== undefined) {
             this._applicationList.filterTags.push(tag);

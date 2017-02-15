@@ -251,12 +251,29 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process, const comm
         else {
             process->start(command.executable + " " + command.commandlineParameters);
         }
-    }
-    else if(command.command == "Kill"){
-        process->kill();
-    }
-    else if(command.command == "Exit"){
-        process->terminate();
+    } else if (command.command == "Kill" || command.command == "Exit") {
+        common::TrayProcessStatus ps;
+        if (command.command == "Kill") {
+            process->kill();
+            ps.status = common::TrayProcessStatus::Status::CrashExit;
+        }
+        else {
+            process->terminate();
+            ps.status = common::TrayProcessStatus::Status::NormalExit;
+        }
+        // Find specifc value in process map i.e. process
+        ProcessMap::iterator p2T = std::find_if(_processes.begin(), _processes.end(), std::bind2nd(map_data_compare<ProcessMap>(), process));
+
+        if (p2T != _processes.end()) {
+            ps.processId = p2T->first;
+            // Send out the TrayProcessStatus with the error/status string
+            common::GenericMessage msg;
+            msg.type = common::TrayProcessStatus::Type;
+            msg.payload = ps.toJson().object();
+            emit sendSocketMessage(msg.toJson());
+            // Remove this process from the list as we consider it finsihed
+            _processes.erase(p2T);
+        }
     }
 }
 

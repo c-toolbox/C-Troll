@@ -4,6 +4,8 @@ import api from '../api';
 
 import StopButton from './stopbutton';
 import RestartButton from './restartbutton';
+import MoreButton from './morebutton';
+import { browserHistory } from 'react-router';
 
 @observer
 class ProcessButton extends React.Component {
@@ -38,8 +40,18 @@ class ProcessButton extends React.Component {
                 break;
         }
 
+        const processUrl = '/processes/' + process.id;
+
+        const open = () => {
+            browserHistory.push(processUrl);
+        };
+
+        content.push(<MoreButton to={processUrl} key="more"/>);
+        content.push(<div key="clusterStatus" className="sub">{process.clusterStatus}</div>);
+
         return (
-            <div  className="square no-select">
+            <div className="square button no-select">
+                <div className="click-area" onClick={open}></div>
                 <div className="application-icon"></div>
                 {content}
                 <RestartButton process={process} type="none"/>

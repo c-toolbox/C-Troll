@@ -61,6 +61,13 @@ namespace {
     const QString KeyProcessApplicationId = "applicationId";
     const QString KeyProcessConfigurationId = "configurationId";
     const QString KeyProcessClusterId = "clusterId";
+    const QString KeyProcessNodeStatusHistory = "nodeStatusHistory";
+    const QString KeyProcessClusterStatus = "clusterStatus";
+    const QString KeyProcessClusterStatusTime = "clusterStatusTime";
+    
+    const QString KeyNodeStatusHistoryNode = "node";
+    const QString KeyNodeStatusHistoryStatus = "status";
+    const QString KeyNodeStatusHistoryTime = "time";
 }
 
 namespace common {
@@ -136,6 +143,14 @@ GuiInitialization::Process::Process(QJsonObject process) {
     applicationId = common::testAndReturnString(process, KeyProcessApplicationId);
     configurationId = common::testAndReturnString(process, KeyProcessConfigurationId);
     clusterId = common::testAndReturnString(process, KeyProcessClusterId);
+    QJsonArray statusHistory = common::testAndReturnArray(process, KeyProcessNodeStatusHistory);
+
+    for (int i = 0; i < statusHistory.size(); i++) {
+        nodeStatusHistory.push_back(GuiInitialization::Process::NodeStatus(common::testAndReturnObject(statusHistory, i)));
+    }
+
+    clusterStatus = common::testAndReturnString(process, KeyProcessClusterStatus);
+    clusterStatusTime = common::testAndReturnDouble(process, KeyProcessClusterStatusTime);
 }
 
 QJsonObject GuiInitialization::Process::toJson() const {
@@ -144,6 +159,29 @@ QJsonObject GuiInitialization::Process::toJson() const {
     res[KeyProcessApplicationId] = applicationId;
     res[KeyProcessConfigurationId] = configurationId;
     res[KeyProcessClusterId] = clusterId;
+
+    QJsonArray statusHistory;
+    for (auto it : nodeStatusHistory) {
+        statusHistory.push_back(it.toJson());
+    }
+
+    res[KeyProcessNodeStatusHistory] = statusHistory;
+    res[KeyProcessClusterStatus] = clusterStatus;
+    res[KeyProcessClusterStatusTime] = clusterStatusTime;
+    return res;
+}
+
+GuiInitialization::Process::NodeStatus::NodeStatus(QJsonObject nodeStatus) {
+    node = common::testAndReturnString(nodeStatus, KeyNodeStatusHistoryNode);
+    status = common::testAndReturnString(nodeStatus, KeyNodeStatusHistoryStatus);
+    time = common::testAndReturnDouble(nodeStatus, KeyNodeStatusHistoryTime);
+}
+
+QJsonObject GuiInitialization::Process::NodeStatus::toJson() const {
+    QJsonObject res;
+    res[KeyNodeStatusHistoryStatus] = status;
+    res[KeyNodeStatusHistoryTime] = time;
+    res[KeyNodeStatusHistoryNode] = node;
     return res;
 }
 
@@ -164,6 +202,14 @@ GuiInitialization::GuiInitialization(const QJsonDocument& document) {
             throw std::runtime_error("Value inside a cluster was not an object");
         }
         clusters.push_back(Cluster(val.toObject()));
+    }
+
+    QJsonArray processesJson = common::testAndReturnArray(obj, KeyProcesses);
+    for (const QJsonValue& val : processesJson) {
+        if (!val.isObject()) {
+            throw std::runtime_error("Value inside a process was not an object");
+        }
+        processes.push_back(Process(val.toObject()));
     }
 }
 

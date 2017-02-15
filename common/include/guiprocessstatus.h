@@ -37,6 +37,7 @@
 
 #include <QJsonDocument>
 #include <QString>
+#include <QMap>
 
 namespace common {
     
@@ -76,8 +77,12 @@ struct GuiProcessStatus {
     QString clusterId;
     /// The configuration identifier
     int configurationId;
+    /// The cluster status
+    QString clusterStatus;
     /// The process status
-    QString status;
+    QMap<QString, QString> nodeStatus;
+    /// The time
+    double time;
 };
     
 } // namespace common

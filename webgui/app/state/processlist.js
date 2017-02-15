@@ -28,7 +28,6 @@ class ProcessList {
         });
     }
 
-
     filterByTags(processes) {
         if (this.filterTags.length === 0) {
             return processes;

@@ -59,6 +59,27 @@ QString testAndReturnString(const QJsonObject& obj, const QString& key,
     return obj[key].toString();
 }
 
+QString testAndReturnString(const QJsonArray& arr, int key,
+    Optional optional, QString defaultValue)
+{
+    if (optional == Optional::Yes && !arr.contains(key)) {
+        return defaultValue;
+    }
+
+    if (!arr.contains(key)) {
+        throw std::runtime_error(
+            "Missing key '" + std::to_string(key) + "'"
+            );
+    }
+    if (!arr[key].isString()) {
+        throw std::runtime_error(
+            "Key '" + std::to_string(key) + "' is not a string"
+            );
+    }
+
+    return arr[key].toString();
+}
+
 int testAndReturnInt(const QJsonObject& obj, const QString& key,
                      Optional optional, int defaultValue)
 {
@@ -80,6 +101,68 @@ int testAndReturnInt(const QJsonObject& obj, const QString& key,
     return obj[key].toInt();
 }
 
+int testAndReturnInt(const QJsonArray& arr, int key,
+    Optional optional, int defaultValue)
+{
+    if (optional == Optional::Yes && !arr.contains(key)) {
+        return defaultValue;
+    }
+
+    if (!arr.contains(key)) {
+        throw std::runtime_error(
+            "Missing key '" + std::to_string(key) + "'"
+            );
+    }
+    if (!arr[key].isDouble()) {
+        throw std::runtime_error(
+            "Key '" + std::to_string(key) + "' is not an integer"
+            );
+    }
+
+    return arr[key].toInt();
+}
+
+double testAndReturnDouble(const QJsonObject& obj, const QString& key,
+    Optional optional, int defaultValue)
+{
+    if (optional == Optional::Yes && !obj.contains(key)) {
+        return defaultValue;
+    }
+
+    if (!obj.contains(key)) {
+        throw std::runtime_error(
+            "Missing key '" + key.toStdString() + "'"
+            );
+    }
+    if (!obj[key].isDouble()) {
+        throw std::runtime_error(
+            "Key '" + key.toStdString() + "' is not an integer"
+            );
+    }
+
+    return obj[key].toDouble();
+}
+
+double testAndReturnDouble(const QJsonArray& arr, int key,
+    Optional optional, int defaultValue)
+{
+    if (optional == Optional::Yes && !arr.contains(key)) {
+        return defaultValue;
+    }
+
+    if (!arr.contains(key)) {
+        throw std::runtime_error(
+            "Missing key '" + std::to_string(key) + "'"
+            );
+    }
+    if (!arr[key].isDouble()) {
+        throw std::runtime_error(
+            "Key '" + std::to_string(key) + "' is not an integer"
+            );
+    }
+
+    return arr[key].toDouble();
+}
 QJsonArray testAndReturnArray(const QJsonObject& obj, const QString& key,
                               Optional optional, QJsonArray defaultValue)
 {
@@ -99,6 +182,27 @@ QJsonArray testAndReturnArray(const QJsonObject& obj, const QString& key,
     }
 
     return obj[key].toArray();
+}
+
+QJsonArray testAndReturnArray(const QJsonArray& arr, int key,
+    Optional optional, QJsonArray defaultValue)
+{
+    if (optional == Optional::Yes && !arr.contains(key)) {
+        return defaultValue;
+    }
+
+    if (!arr.contains(key)) {
+        throw std::runtime_error(
+            "Missing key '" + std::to_string(key) + "'"
+            );
+    }
+    if (!arr[key].isArray()) {
+        throw std::runtime_error(
+            "Key '" + std::to_string(key) + "' is not an array"
+            );
+    }
+
+    return arr[key].toArray();
 }
     
 QStringList testAndReturnStringList(const QJsonObject& obj, const QString& key,
@@ -121,6 +225,26 @@ QStringList testAndReturnStringList(const QJsonObject& obj, const QString& key,
     return result;
 }
 
+QStringList testAndReturnStringList(const QJsonArray& arr, int index,
+    Optional optional, QStringList defaultValue)
+{
+    if (optional == Optional::Yes && !arr.contains(index)) {
+        return defaultValue;
+    }
+
+    QStringList result;
+    QJsonArray array = testAndReturnArray(arr, index);
+    for (const QJsonValue& value : array) {
+        if (!value.isString()) {
+            throw std::runtime_error(
+                "Array '" + std::to_string(index) + "' is not an array of strings"
+                );
+        }
+        result.push_back(value.toString());
+    }
+    return result;
+}
+
 QJsonObject testAndReturnObject(const QJsonObject& obj, const QString& key,
                                 Optional optional, QJsonObject defaultValue)
 {
@@ -130,8 +254,7 @@ QJsonObject testAndReturnObject(const QJsonObject& obj, const QString& key,
     
     if (!obj.contains(key)) {
         throw std::runtime_error(
-            "Missing key '" + key.toStdString() + "'"
-                                 );
+            "Missing key '" + key.toStdString() + "'");
     }
     if (!obj[key].isObject()) {
         throw std::runtime_error(
@@ -141,6 +264,29 @@ QJsonObject testAndReturnObject(const QJsonObject& obj, const QString& key,
     
     return obj[key].toObject();
 };
+
+
+QJsonObject testAndReturnObject(const QJsonArray& arr, int index,
+    Optional optional, QJsonObject defaultValue)
+{
+    if (optional == Optional::Yes && !arr.contains(index)) {
+        return defaultValue;
+    }
+
+    if (!arr.contains(index)) {
+        throw std::runtime_error(
+            "Missing key '" + std::to_string(index) + "'"
+            );
+    }
+    if (!arr[index].isObject()) {
+        throw std::runtime_error(
+            "Key '" + std::to_string(index) + "' is not an object"
+            );
+    }
+
+    return arr[index].toObject();
+};
+
 
 bool testAndReturnBool(const QJsonObject& obj, const QString& key,
                        Optional optional, bool defaultValue)
@@ -161,6 +307,28 @@ bool testAndReturnBool(const QJsonObject& obj, const QString& key,
     }
 
     return obj[key].toBool();
+}
+
+
+bool testAndReturnBool(const QJsonArray& arr, int index,
+    Optional optional, bool defaultValue)
+{
+    if (optional == Optional::Yes && !arr.contains(index)) {
+        return defaultValue;
+    }
+
+    if (!arr.contains(index)) {
+        throw std::runtime_error(
+            "Missing key '" + std::to_string(index) + "'"
+            );
+    }
+    if (!arr[index].isBool()) {
+        throw std::runtime_error(
+            "Key '" + std::to_string(index) + "' is not a boolean"
+            );
+    }
+
+    return arr[index].toBool();
 }
 
 } // namespace common

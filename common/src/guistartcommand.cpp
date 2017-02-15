@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016                                                                    *
- * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -32,53 +32,37 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GUICOMMAND_H__
-#define __GUICOMMAND_H__
+#include "guistartcommand.h"
 
-#include <QJsonDocument>
-#include <QString>
+#include "jsonsupport.h"
+
+#include <QJsonObject>
+
+namespace {
+    const QString KeyApplicationId = "applicationId";
+    const QString KeyConfigurationId = "configurationId";
+    const QString KeyClusterId = "clusterId";
+}
 
 namespace common {
 
-/// This struct is the data structure that gets send from the GUI to the Core
-/// to signal that the Core should perform a task for a specific cluster
-struct GuiCommand {
-    /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
+const QString GuiStartCommand::Type = "GuiStartCommand";
     
-    /// Default constructor
-    GuiCommand() = default;
+GuiStartCommand::GuiStartCommand(const QJsonDocument& document) {
+    QJsonObject obj = document.object();
 
-    /**
-     * Creates a GuiCommand from the passed \p document. The \p document must contain
-     * all of the following keys, all of type string:
-     * \c command
-     * \c application_identifier
-     * \c configuration_identifier
-     * \c cluster_identifier
-     * \param document The QJsonDocument that contains the information about this
-     * CoreCommand
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    GuiCommand(const QJsonDocument& document);
+    applicationId = common::testAndReturnString(obj, KeyApplicationId);
+    configurationId = common::testAndReturnString(obj, KeyConfigurationId);
+    clusterId = common::testAndReturnString(obj, KeyClusterId);
+}
 
-    /**
-     * Converts the GuiCommand into a valid QJsonDocument object and returns it.
-     * \return the QJsonDocument representing this GuiCommand
-     */
-    QJsonDocument toJson() const;
+QJsonDocument GuiStartCommand::toJson() const {
+    QJsonObject obj;
+    obj[KeyApplicationId] = applicationId;
+    obj[KeyConfigurationId] = configurationId;
+    obj[KeyClusterId] = clusterId;
 
-    /// The kind of command that is to be executed
-    QString command;
-    /// The unique identifier of the application that is to be started
-    QString applicationId;
-    /// The identifier of the application's configuration that is to be started
-    QString configurationId;
-    /// The identifier of the cluster on which the application is to be started
-    QString clusterId;
-};
+    return QJsonDocument(obj);
+}
 
-} // namespace
-
-#endif // __GUICOMMAND_H__
+} // namespace common

@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016                                                                    *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -32,103 +32,47 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __COREPROCESS_H__
-#define __COREPROCESS_H__
+#ifndef __GUIPROCESSCOMMAND_H__
+#define __GUIPROCESSCOMMAND_H__
 
-#include "cluster.h"
-#include "program.h"
-#include "handler/incomingsockethandler.h"
-#include "handler/outgoingsockethandler.h"
-#include "traycommand.h"
-#include "guiinitialization.h"
-#include <chrono>
+#include <QJsonDocument>
+#include <QString>
 
 namespace common {
-    struct GuiCommand;
-    struct GuiProcessStatus;
-    struct TrayProcessStatus;
-    struct TrayProcessLogMessage;
-    class JsonSocket;
-} // namespace common
 
-class CoreProcess {
-public:
-    struct NodeStatus {
-        enum class Status {
-            Starting = 0,
-            FailedToStart,
-            Running,
-            NormalExit,
-            CrashExit,
-            Unknown
-        } status;
-        std::chrono::system_clock::time_point time;
-    };
+/// This struct is the data structure that gets send from the GUI to the Core
+/// to signal that the Core should perform a command on a process with the given id.
+struct GuiProcessCommand {
+    /// The string representing this command type, for usage in the common::GenericMessage
+    static const QString Type;
+    
+    /// Default constructor
+    GuiProcessCommand() = default;
 
-    struct NodeError {
-        enum class Error {
-            TimedOut,
-            WriteError,
-            ReadError,
-            UnknownError
-        } error;
-        std::chrono::system_clock::time_point time;
-    };
+    /**
+     * Creates a GuiProcessCommand from the passed \p document. The \p document must contain
+     * all of the following keys:
+     * \c processId (int)
+     * \c command (string)
+     * \param document The QJsonDocument that contains the information about this
+     * GuiStartCommand
+     * \throws std::runtime_error If one of the required keys were not present or of the
+     * wrong type
+     */
+    GuiProcessCommand(const QJsonDocument& document);
 
-    struct NodeLogMessage {
-        QString message;
-        std::chrono::system_clock::time_point time;
-    };
+    /**
+     * Converts the GuiProcessCommand into a valid QJsonDocument object and returns it.
+     * \return the QJsonDocument representing this GuiProcessCommand
+     */
+    QJsonDocument toJson() const;
 
-    struct NodeLog {
-        QVector<NodeStatus> statuses;
-        QVector<NodeError> errors;
-        QVector<NodeLogMessage> stdOut;
-        QVector<NodeLogMessage> stdErr;
-    };
-
-    struct ClusterStatus {
-        enum class Status {
-            Starting = 0,
-            FailedToStart,
-            Running,
-            Exit,
-            PartialExit,
-            CrashExit,
-            Unknown
-        } status;
-        std::chrono::system_clock::time_point time;
-    };
-
-    CoreProcess(Program* program, const QString& configurationId, Cluster* cluster);
-    int id() const;
-    Program* application() const;
-    QString configurationId() const;
-    Cluster* cluster() const;
-
-    common::GuiInitialization::Process toGuiInitializationProcess() const;
-    common::GuiProcessStatus toGuiProcessStatus(const QString& nodeId) const;
-    common::TrayCommand startProcessCommand() const;
-    common::TrayCommand exitProcessCommand() const;
-
-    void pushNodeStatus(QString nodeId, NodeStatus::Status status);
-    void pushNodeError(QString nodeId, NodeError::Error error);
-    NodeStatus latestNodeStatus(QString nodeId) const;
-private:
-    bool allNodesHasStatus(NodeStatus::Status status);
-    bool anyNodeHasStatus(NodeStatus::Status status);
-
-    static QString nodeStatusToGuiNodeStatus(NodeStatus::Status status);
-    static QString clusterStatusToGuiClusterStatus(ClusterStatus::Status status);
-    static double timeToGuiTime(std::chrono::system_clock::time_point time);
-
-    int _id;
-    Program* _application;
-    QString _configurationId;
-    Cluster* _cluster;
-    static int _nextId;
-    QMap<QString, CoreProcess::NodeLog> _nodeLogs;
-    CoreProcess::ClusterStatus _clusterStatus;
+    /// The process to be controlled
+    int processId;
+    /// The command to be executed
+    QString command;
 };
 
-#endif // __COREPROCESS_H__
+} // namespace
+
+#endif // __GUIPROCESSCOMMAND_H__

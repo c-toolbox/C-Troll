@@ -43,7 +43,9 @@ namespace {
     const QString KeyApplicationId = "applicationId";
     const QString KeyClusterId = "clusterId";
     const QString KeyConfigurationId = "configurationId";
-    const QString KeyStatus = "status";
+    const QString KeyClusterStatus = "clusterStatus";
+    const QString KeyNodeStatus = "nodeStatus";
+    const QString KeyTime = "time";
 }
 
 namespace common {
@@ -54,7 +56,12 @@ GuiProcessStatus::GuiProcessStatus(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
     processId = common::testAndReturnInt(obj, KeyProcessId);
-    status = common::testAndReturnString(obj, KeyStatus);
+    clusterStatus = common::testAndReturnString(obj, KeyClusterStatus);
+    QJsonObject nodeStatusObject = common::testAndReturnObject(obj, KeyNodeStatus);
+    for (auto it = nodeStatusObject.begin(); it != nodeStatusObject.end(); it++) {
+        nodeStatus[it.key()] = common::testAndReturnString(nodeStatusObject, it.key());
+    }
+    time = common::testAndReturnDouble(nodeStatusObject, KeyTime);   
 }
 
 QJsonDocument GuiProcessStatus::toJson() const {
@@ -63,8 +70,16 @@ QJsonDocument GuiProcessStatus::toJson() const {
     obj[KeyApplicationId] = applicationId;
     obj[KeyClusterId] = clusterId;
     obj[KeyConfigurationId] = configurationId;
-    obj[KeyStatus] = status;
-    
+    obj[KeyClusterStatus] = clusterStatus;
+
+    QJsonObject nodeStatusObject;
+    for (auto it = nodeStatus.begin(); it != nodeStatus.end(); it++) {
+        nodeStatusObject[it.key()] = it.value();
+    }
+
+    obj[KeyNodeStatus] = nodeStatusObject;
+    obj[KeyTime] = time;
+
     return QJsonDocument(obj);
 }
     
