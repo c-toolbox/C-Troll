@@ -9,7 +9,7 @@ class App extends React.Component {
     }
 
     render() {
-        const clustersActive = this.context.router.location.pathname.indexOf('/clusters') === 0;
+        const clustersActive = this.context.router.location.pathname.indexOf('/clusters') === 0 || this.context.router.location.pathname.indexOf('/processes') === 0;
         const appsActive = !clustersActive;
 
         const appsIcon = (<svg className="icon" xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 68 68">

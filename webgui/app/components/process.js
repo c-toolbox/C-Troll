@@ -4,6 +4,8 @@ import api from '../api.js';
 import moment from 'moment';
 import StopButton from './stopbutton';
 import RestartButton from './restartbutton';
+import Breadcrumbs from './breadcrumbs';
+import { Link } from 'react-router';
 
 @observer
 class Process extends React.Component {
@@ -37,6 +39,15 @@ class Process extends React.Component {
             return null;
         }
 
+        const breadcrumbs = (
+            <Breadcrumbs>
+                <Link to="/clusters">Clusters</Link>
+                <Link to={'/clusters/' + cluster.id}>{cluster.name}</Link>
+                <span>{application.name}</span>
+            </Breadcrumbs>
+        );
+
+
         const nodeStatusHistory = process.nodeStatusHistory.map((status) => {
             return <p key={status.time}>{moment(status.time).format('YYYY MM DD HH:mm:ss')} : {status.node} {status.status}</p>;
         });
@@ -44,6 +55,7 @@ class Process extends React.Component {
 
         return (
             <div>
+                {breadcrumbs}
                 <div className="row">
                     <h1>{application.name}</h1>
                     <h2>Cluster: {cluster.name}</h2>
