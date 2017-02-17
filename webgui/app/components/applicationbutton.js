@@ -13,7 +13,7 @@ class ApplicationButton extends React.Component {
         const application = this.props.application;
 
         const appUrl = '/applications/' + application.id.replace('/', '>');
-        let buttons = [];
+        const buttons = [];
 
         if (application.clusters.length > 0) {
             const clusterId = application.clusters[0];
@@ -37,15 +37,15 @@ class ApplicationButton extends React.Component {
 
         return (
             <div  className="square button no-select">
-                <div className="click-area" onClick={open}></div>
+                <div className="click-area" onClick={open}/>
                 <div className="tags">
                 {application.tags.map((tag) => {
                     return (<TagBox key={tag} tag={tag}/>);
                 })}
                 </div>
-                <div className="application-icon"></div>
+                <div className="application-icon"/>
                 <div className="main">{application.name}</div>
-                <div className="sub"></div>
+                <div className="sub"/>
                 {buttons}
             </div>);
     }

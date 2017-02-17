@@ -9,8 +9,7 @@ class TagBox extends React.Component {
             <div
                 className="tag"
                 title={this.props.tag}
-                style={{backgroundColor: colorHash.hex(this.props.tag)}}>
-            </div>
+                style={{backgroundColor: colorHash.hex(this.props.tag)}}/>
         );
     }
 }

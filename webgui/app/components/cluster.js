@@ -31,7 +31,7 @@ class Cluster extends React.Component {
             return breadcrumbs;
         }
 
-        let nodes = [];
+        const nodes = [];
 
         if (cluster.nodes) {
             cluster.nodes.forEach(() => {
@@ -39,7 +39,7 @@ class Cluster extends React.Component {
             });
         }
 
-        let activeProcesses = [];
+        const activeProcesses = [];
 
         const processes = api.processes.filter((process) => {
             return process.clusterId === cluster.id && process.clusterStatus !== 'Exit';

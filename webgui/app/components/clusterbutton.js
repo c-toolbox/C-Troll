@@ -29,7 +29,7 @@ class ClusterButton extends React.Component {
         return (
             <div to={'/clusters/' + cluster.id.replace('/', '>')} className={classNames.join(' ')}>
                 {icon}
-                <div className="click-area" onClick={open}></div>
+                <div className="click-area" onClick={open}/>
                 <div className="main">{cluster.name}</div>
                 <div className="sub">
                     {subs}

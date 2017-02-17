@@ -23,7 +23,7 @@ class ProcessButton extends React.Component {
             return c.id === process.clusterId;
         }) || {name: 'Cluster'};
 
-        let content = [];
+        const content = [];
         switch (type) {
             case 'none':
                 break;
@@ -51,8 +51,8 @@ class ProcessButton extends React.Component {
 
         return (
             <div className="square button no-select">
-                <div className="click-area" onClick={open}></div>
-                <div className="application-icon"></div>
+                <div className="click-area" onClick={open}/>
+                <div className="application-icon"/>
                 {content}
                 <RestartButton process={process} type="none"/>
                 <StopButton process={process} type="none"/>
