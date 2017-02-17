@@ -130,7 +130,11 @@ guiSocketServer.on('connection', (guiSocket) => {
 
 
 const app = express();
-app.use(express.static('public'));
+app.use(express.static(config['public']));
+
+app.use( '/**', (req, res) => {
+    res.sendfile('./' + config['public'] + 'index.html');
+});
 
 let httpServer = http.createServer(app);
 guiSocketServer.installHandlers(httpServer, {prefix:'/api'});
