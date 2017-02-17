@@ -47,7 +47,7 @@ class Api {
 
     initialize() {
         console.log('Connecting to host');
-        const sock = this._sock = new SockJS('http://localhost:3001/ws');
+        const sock = this._sock = new SockJS('/api');
         sock.onopen = () => {
             console.log('Connection established to GUI backend.');
         };

@@ -13,7 +13,7 @@ module.exports = {
         path.join(__dirname, 'app/index.js')
     ],
     output: {
-        path: path.join(__dirname, '/dist/'),
+        path: path.join(__dirname, '/dist/public/'),
         filename: '[name].js',
         publicPath: '/'
     },
@@ -63,8 +63,8 @@ module.exports = {
     },
     devServer: {
         proxy: {
-            api: {
-                target: 'ws://localhost:3001/ws',
+            '/api/**': {
+                target: 'http://localhost:3001',
                 ws: true
             },
         },

@@ -32,12 +32,17 @@
  *                                                                                       *
  ****************************************************************************************/
 
+'use strict';
+
 const net = require('net');
+const fs = require('fs');
 const JsonSocket = require('json-socket');
 const sockjs = require('sockjs');
 const http = require('http');
 const pluralize = require('pluralize');
 const colors = require('colors');
+const express = require('express');
+const config = JSON.parse(fs.readFileSync('config.json', 'utf-8'));
 
 pluralize.addIrregularRule('is', 'are');
 
@@ -71,7 +76,7 @@ guiSocketServer.on('connection', (guiSocket) => {
         guiSocket.close();
     });
 
-    coreSocket.connect(19850, '127.0.0.1');
+    coreSocket.connect(config.corePort, config.coreAddress);
 
     coreSocket.on('connect', () => {
         console.log(('Connection established to core for connection #' +
@@ -83,8 +88,10 @@ guiSocketServer.on('connection', (guiSocket) => {
 
     coreSocket.on('message', (message) => {
         guiSocket.write(JSON.stringify(message));
-        console.log('Connection #' + connectionId +
-            ': Forwarding message from core to gui:\n', message);
+        if (config.verbose) {
+            console.log('Connection #' + connectionId +
+                ': Forwarding message from core to gui:\n', message);
+        }
     });
 
     coreSocket.on('end', () => {
@@ -103,8 +110,10 @@ guiSocketServer.on('connection', (guiSocket) => {
 
     guiSocket.on('data', (message) => {
         coreSocket.sendMessage(JSON.parse(message));
-        console.log('Connection #' + connectionId +
+        if (config.verbose) {
+            console.log('Connection #' + connectionId +
             ': Forwarding message from gui to core:\n', message);
+        }
     });
 
     guiSocket.on('close', () => {
@@ -119,8 +128,12 @@ guiSocketServer.on('connection', (guiSocket) => {
     });
 });
 
-let httpServer = http.createServer();
-guiSocketServer.installHandlers(httpServer, {prefix:'/ws'});
-httpServer.listen(3001, '127.0.0.1');
+
+const app = express();
+app.use(express.static('public'));
+
+let httpServer = http.createServer(app);
+guiSocketServer.installHandlers(httpServer, {prefix:'/api'});
+httpServer.listen(config.webPort, config.webAddress);
 
 logNConnections();
