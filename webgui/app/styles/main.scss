@@ -10,7 +10,7 @@
 }
 
 #main-container {
-    padding-left: 100px;
+    margin-left: 100px;
     background-color: #49494a;
     width: calc(100% - 100px);
     overflow: auto;
@@ -66,6 +66,26 @@ html, body {
                 stroke-width: 3px;
             } 
         }
+    }
+}
+
+@media (max-width: 600px) {
+    #side-bar {
+        position: static;
+        height: 100px;
+        width: 100%;
+
+        a {
+            display: inline-block;
+            width: 100px;
+            padding-top: 20px;
+        }
+
+    }
+
+    #main-container {
+        margin-left: 0;
+        width: 100%;
     }
 }
 
