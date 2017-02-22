@@ -41,6 +41,8 @@
 #include "handler/outgoingsockethandler.h"
 #include "traycommand.h"
 #include "guiinitialization.h"
+#include "guiprocesslogmessage.h"
+#include "guiprocesslogmessagehistory.h"
 #include <chrono>
 
 namespace common {
@@ -63,6 +65,7 @@ public:
             Unknown
         } status;
         std::chrono::system_clock::time_point time;
+        int id;
     };
 
     struct NodeError {
@@ -73,18 +76,24 @@ public:
             UnknownError
         } error;
         std::chrono::system_clock::time_point time;
+        int id;
     };
 
     struct NodeLogMessage {
+        enum class OutputType {
+            StdOut,
+            StdError
+        };
         QString message;
         std::chrono::system_clock::time_point time;
+        OutputType outputType;
+        int id;
     };
 
     struct NodeLog {
         QVector<NodeStatus> statuses;
         QVector<NodeError> errors;
-        QVector<NodeLogMessage> stdOut;
-        QVector<NodeLogMessage> stdErr;
+        QVector<NodeLogMessage> messages;
     };
 
     struct ClusterStatus {
@@ -108,12 +117,19 @@ public:
 
     common::GuiInitialization::Process toGuiInitializationProcess() const;
     common::GuiProcessStatus toGuiProcessStatus(const QString& nodeId) const;
+    common::GuiProcessLogMessage latestGuiProcessLogMessage(const QString& nodeId) const;
+    common::GuiProcessLogMessageHistory guiProcessLogMessageHistory() const;
     common::TrayCommand startProcessCommand() const;
     common::TrayCommand exitProcessCommand() const;
 
     void pushNodeStatus(QString nodeId, NodeStatus::Status status);
     void pushNodeError(QString nodeId, NodeError::Error error);
+    void pushNodeStdOut(QString nodeId, QString message);
+    void pushNodeStdError(QString nodeId, QString message);
+
     NodeStatus latestNodeStatus(QString nodeId) const;
+    NodeLogMessage latestLogMessage(QString nodeId) const;
+
 private:
     bool allNodesHasStatus(NodeStatus::Status status);
     bool anyNodeHasStatus(NodeStatus::Status status);
@@ -129,6 +145,10 @@ private:
     static int _nextId;
     QMap<QString, CoreProcess::NodeLog> _nodeLogs;
     CoreProcess::ClusterStatus _clusterStatus;
+
+    int _nextLogMessageId;
+    int _nextNodeErrorId;
+    int _nextNodeStatusId;
 };
 
 #endif // __COREPROCESS_H__

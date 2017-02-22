@@ -39,9 +39,9 @@
 #include <QJsonObject>
 
 namespace {
-    const QString KeyIdentifier = "id";
-    const QString KeyStdOut = "stdout";
-    const QString KeyStdError = "stderror";
+    const QString KeyIdentifier = "processId";
+    const QString KeyMessage = "message";
+    const QString KeyType = "type";
 }
 
 namespace common {
@@ -51,21 +51,16 @@ const QString TrayProcessLogMessage::Type = "TrayProcessLogMessage";
 TrayProcessLogMessage::TrayProcessLogMessage(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
-    id = common::testAndReturnString(obj, KeyIdentifier);
-    stdOutLog = common::testAndReturnString(obj, KeyStdOut, Optional::Yes);
-    stdErrorLog = common::testAndReturnString(obj, KeyStdError, Optional::Yes);
+    processId = common::testAndReturnInt(obj, KeyIdentifier);
+    message = common::testAndReturnString(obj, KeyMessage);
+    outputType = static_cast<OutputType>(common::testAndReturnInt(obj, KeyType));
 }
 
 QJsonDocument TrayProcessLogMessage::toJson() const {
     QJsonObject obj;
-    obj[KeyIdentifier] = id;
-    if (!stdOutLog.isEmpty()) {
-        obj[KeyStdOut] = stdOutLog;
-    }
-    if (!stdErrorLog.isEmpty()) {
-        obj[KeyStdError] = stdErrorLog;
-    }
-    
+    obj[KeyIdentifier] = processId;
+    obj[KeyMessage] = message;
+    obj[KeyType] = static_cast<int>(outputType);
     return QJsonDocument(obj);
 }
     

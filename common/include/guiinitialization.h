@@ -142,6 +142,7 @@ struct GuiInitialization {
             * \return The JSON object representation of this NodeStatus
             */
 
+            int id;
             QString node;
             QJsonObject toJson() const;
             QString status;

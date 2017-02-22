@@ -65,8 +65,10 @@ private:
     void handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd);
     
     common::GenericMessage initializationInformation();
-    //void sendInitializationInformation(common::JsonSocket* socket);
+    common::GenericMessage guiProcessLogMessageHistory(const CoreProcess& process);
+
     void sendGuiProcessStatus(const CoreProcess& process, const QString& nodeId);
+    void sendLatestLogMessage(const CoreProcess& process, const QString& nodeId);
 
     void sendTrayCommand(const Cluster& cluster, const common::TrayCommand& command);
 

@@ -4,6 +4,8 @@ set(HEADER_FILES
     include/guiprocesscommand.h
     include/guiinitialization.h
     include/guiprocessstatus.h
+    include/guiprocesslogmessage.h
+    include/guiprocesslogmessagehistory.h
     include/jsonsocket.h
     include/jsonsupport.h
     include/logging.h
@@ -18,6 +20,8 @@ set(SOURCE_FILES
     src/guiprocesscommand.cpp
     src/guiinitialization.cpp
     src/guiprocessstatus.cpp
+    src/guiprocesslogmessage.cpp
+    src/guiprocesslogmessagehistory.cpp
     src/jsonsocket.cpp
     src/jsonsupport.cpp
     src/logging.cpp

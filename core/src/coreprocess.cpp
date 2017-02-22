@@ -45,6 +45,8 @@
 #include <logging.h>
 
 #include "guiprocessstatus.h"
+#include "guiprocesslogmessage.h"
+#include "guiprocesslogmessagehistory.h"
 #include "jsonsupport.h"
 
 namespace {
@@ -58,6 +60,9 @@ CoreProcess::CoreProcess(Program* application, const QString& configurationId, C
     , _configurationId(configurationId)
     , _cluster(cluster)
     , _clusterStatus({ CoreProcess::ClusterStatus::Status::Starting })
+    , _nextLogMessageId(0)
+    , _nextNodeErrorId(0)
+    , _nextNodeStatusId(0)
 {
 }
 
@@ -108,7 +113,7 @@ bool CoreProcess::anyNodeHasStatus(CoreProcess::NodeStatus::Status status) {
 
 void CoreProcess::pushNodeStatus(QString nodeId, CoreProcess::NodeStatus::Status nodeStatus) {
     CoreProcess::ClusterStatus::Status clusterStatus = _clusterStatus.status;
-    _nodeLogs[nodeId].statuses.append({ nodeStatus, std::chrono::system_clock::now() });
+    _nodeLogs[nodeId].statuses.append({ nodeStatus, std::chrono::system_clock::now(), _nextNodeStatusId++ });
 
     switch (nodeStatus) {
     case CoreProcess::NodeStatus::Status::Starting:
@@ -148,8 +153,26 @@ CoreProcess::NodeStatus CoreProcess::latestNodeStatus(QString nodeId) const {
     return iNodeLog->statuses.back();
 }
 
+CoreProcess::NodeLogMessage CoreProcess::latestLogMessage(QString nodeId) const
+{
+    auto iNodeLog = _nodeLogs.find(nodeId);
+    if (iNodeLog == _nodeLogs.end()) {
+        return CoreProcess::NodeLogMessage();
+    }
+    return iNodeLog->messages.back();
+}
+
+
 void CoreProcess::pushNodeError(QString nodeId, CoreProcess::NodeError::Error nodeError) {
-    _nodeLogs[nodeId].errors.append({ nodeError, std::chrono::system_clock::now() });
+    _nodeLogs[nodeId].errors.append({ nodeError, std::chrono::system_clock::now(), _nextNodeErrorId++ });
+}
+
+void CoreProcess::pushNodeStdOut(QString nodeId, QString message) {
+    _nodeLogs[nodeId].messages.append({ message, std::chrono::system_clock::now(), CoreProcess::NodeLogMessage::OutputType::StdOut, _nextLogMessageId++ });
+}
+
+void CoreProcess::pushNodeStdError(QString nodeId, QString message) {
+    _nodeLogs[nodeId].messages.append({ message, std::chrono::system_clock::now(), CoreProcess::NodeLogMessage::OutputType::StdError, _nextLogMessageId++ });
 }
 
 common::GuiInitialization::Process CoreProcess::toGuiInitializationProcess() const {
@@ -169,6 +192,7 @@ common::GuiInitialization::Process CoreProcess::toGuiInitializationProcess() con
             nodeStatusObject.status = nodeStatusToGuiNodeStatus(status.status);
             nodeStatusObject.time = timeToGuiTime(status.time);
             nodeStatusObject.node = node;
+            nodeStatusObject.id = status.id;
             nodeStatusHistory.push_back(nodeStatusObject);
         }
     }
@@ -230,10 +254,59 @@ common::GuiProcessStatus CoreProcess::toGuiProcessStatus(const QString& nodeId) 
     g.applicationId = _application->id();
     g.clusterId = _cluster->id();
     CoreProcess::NodeStatus nodeStatus = latestNodeStatus(nodeId);
+    g.id = nodeStatus.id;
     g.nodeStatus[nodeId] = nodeStatusToGuiNodeStatus(nodeStatus.status);
     g.time = timeToGuiTime(nodeStatus.time);
     g.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status);
     return g;
+}
+
+common::GuiProcessLogMessage CoreProcess::latestGuiProcessLogMessage(const QString& nodeId) const {
+    common::GuiProcessLogMessage g;
+    g.processId = _id;
+    g.applicationId = _application->id();
+    g.clusterId = _cluster->id();
+    g.nodeId = nodeId;
+    CoreProcess::NodeLogMessage logMessage = latestLogMessage(nodeId);
+    g.id = logMessage.id;
+    g.logMessage = logMessage.message;
+    g.time = timeToGuiTime(logMessage.time);
+    g.outputType = (logMessage.outputType == CoreProcess::NodeLogMessage::OutputType::StdOut ? "stdout" : "stderr");
+    return g;
+}
+
+
+common::GuiProcessLogMessageHistory CoreProcess::guiProcessLogMessageHistory() const {
+    common::GuiProcessLogMessageHistory h;
+    h.processId = _id;
+    h.applicationId = _application->id();
+    h.clusterId = _cluster->id();
+
+    QList<common::GuiProcessLogMessageHistory::LogMessage> guiLog;
+    for (const auto& node : _nodeLogs.keys()) {
+        const auto& nodeLog = _nodeLogs[node];
+        for (const auto& logMessage : nodeLog.messages) {
+            common::GuiProcessLogMessageHistory::LogMessage guiMessage;
+            guiMessage.nodeId = node;
+            guiMessage.id = logMessage.id;
+            guiMessage.message = logMessage.message;
+            guiMessage.time = timeToGuiTime(logMessage.time);
+            guiMessage.outputType = (logMessage.outputType == CoreProcess::NodeLogMessage::OutputType::StdOut ? "stdout" : "stderr");
+            guiLog.push_back(guiMessage);
+        }
+    }
+
+    std::sort(
+        guiLog.begin(),
+        guiLog.end(),
+        [](const common::GuiProcessLogMessageHistory::LogMessage& a, const common::GuiProcessLogMessageHistory::LogMessage& b) {
+            return a.id < b.id;
+        }
+    );
+
+    h.logMessages = guiLog;
+
+    return h;
 }
 
 common::TrayCommand CoreProcess::startProcessCommand() const {

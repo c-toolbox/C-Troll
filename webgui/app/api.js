@@ -64,8 +64,14 @@ class Api {
                 case 'GuiInit':
                     this.initializeGui(data.payload);
                     break;
-                case 'TrayProcessStatus':
+                case 'GuiProcessStatus':
                     this.handleProcessStatus(data.payload);
+                    break;
+                case 'GuiProcessLogMessage':
+                    this.handleProcessLogMessage(data.payload);
+                    break;
+                case 'GuiProcessLogMessageHistory':
+                    this.handleProcessLogMessageHistory(data.payload);
                     break;
                 default:
                     console.log('unknown message type: "' + data.type + '"', data.payload);
@@ -80,7 +86,7 @@ class Api {
 
         if (data.processes) {
             data.processes.forEach((p) => {
-                this._state.processes.set(p.id, observable(p));
+                this.getOrCreateProcess(p);
             });
         }
 
@@ -89,26 +95,35 @@ class Api {
         this._state.connected = true;
     }
 
-    handleProcessStatus(data) {
-        let process = null;
+    /**
+     * Get or create process based on data object with keys
+     * processId
+     * applicationId
+     * clusterId
+     * configurationId
+     * clusterStatus
+     */
+    getOrCreateProcess(data) {
         if (this._state.processes.has(data.processId)) {
-            process = this._state.processes.get(data.processId);
-        } else {
-            process = observable({
-                id: data.processId,
-                applicationId: data.applicationId,
-                clusterId: data.clusterId,
-                configurationId: data.configurationId,
-                clusterStatus: data.clusterStatus,
-                clusterStatusTime: data.time,
-                nodeStatusHistory: []
-            });
-            this._state.processes.set(data.processId, process);
+            return this._state.processes.get(data.processId);
         }
+        const process = observable({
+            id: data.processId,
+            applicationId: data.applicationId,
+            clusterId: data.clusterId,
+            configurationId: data.configurationId,
+            clusterStatus: data.clusterStatus || 'Unknown',
+            clusterStatusTime: data.time,
+            nodeStatusHistory: data.nodeStatusHistory || [],
+            logMessages: null
+        });
+        this._state.processes.set(data.processId, process);
+        return process;
+    }
 
-        if (!process) {
-            console.error('Incoming data about unknown process');
-        }
+    handleProcessStatus(data) {
+        const process = this.getOrCreateProcess(data);
+
         if (process.clusterStatus !== data.clusterStatus) {
             process.clusterStatus = data.clusterStatus;
             process.clusterStatusTime = data.time;
@@ -116,12 +131,34 @@ class Api {
 
         Object.keys(data.nodeStatus).forEach((node) => {
             const status = data.nodeStatus[node];
-            process.nodeStatusHistory.push({
+            process.nodeStatusHistory.push(observable({
+                id: data.id,
                 time: data.time,
-                node: node,
+                nodeId: node,
                 status: status
-            });
+            }));
         });
+    }
+
+    handleProcessLogMessage(data) {
+        const process = this.getOrCreateProcess(data);
+
+        if (!process.logMessages) {
+            process.logMessages = observable([]);
+        }
+
+        process.logMessages.push(observable({
+            id: data.id,
+            nodeId: data.nodeId,
+            time: data.time,
+            outputType: data.outputType,
+            message: data.message
+        }));
+    }
+
+    handleProcessLogMessageHistory(data) {
+        const process = this.getOrCreateProcess(data);
+        process.logMessages = observable(data.messages);
     }
 
     sendCommand(type, data) {

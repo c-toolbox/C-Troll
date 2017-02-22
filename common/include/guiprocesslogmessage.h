@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GUIPROCESSSTATUS_H__
-#define __GUIPROCESSSTATUS_H__
+#ifndef __GUIPROCESSLOGMESSAGE_H__
+#define __GUIPROCESSLOGMESSAGE_H__
 
 #include <QJsonDocument>
 #include <QString>
@@ -43,24 +43,27 @@ namespace common {
     
 /// This struct is the data structure that gets send from the Core to the GUI to 
 /// inform the GUI about a change in process status
-struct GuiProcessStatus {
+struct GuiProcessLogMessage {
     /// The string representing this command type, for usage in the common::GenericMessage
     static const QString Type;
     
     /// Default constructor
-    GuiProcessStatus() = default;
+    GuiProcessLogMessage() = default;
     
     /**
-     * Creates a GuiProcessStatus from the passed \p document. The \p document must
-     * contain the following keys, all of type string:
-     * \c identifier
-     * \c status
+     * Creates a GuiProcessLogMessage from the passed \p document. The \p document must
+     * contain the following keys:
+     * \c processId (int)
+     * \c applicationId (string)
+     * \c clusterId (string)
+     * \c message (string)
+     * \c type (string)
      * \param document The QJsonDocument that contains the information about this
-     * GuiProcessStatus
+     * GuiProcessLogMessage
      * \throws std::runtime_error If one of the required keys were not present or of the
      * wrong type
      */
-    GuiProcessStatus(const QJsonDocument& document);
+    GuiProcessLogMessage(const QJsonDocument& document);
     
     /**
      * Converts the GuiProcessStatus into a valid QJsonDocument object and returns
@@ -68,8 +71,8 @@ struct GuiProcessStatus {
      * \return The QJsonDocument representing this GuiProcessStatus
      */
     QJsonDocument toJson() const;
-
-    /// The per-process unique identifier for this process status.
+    
+    /// The per-process unique id for this log message.
     int id;
     /// The unique identifier for the process that will be created
     int processId;
@@ -77,12 +80,14 @@ struct GuiProcessStatus {
     QString applicationId;
     /// The cluster identifier
     QString clusterId;
+    /// The node identifier
+    QString nodeId;
     /// The configuration identifier
     int configurationId;
-    /// The cluster status
-    QString clusterStatus;
-    /// The process status
-    QMap<QString, QString> nodeStatus;
+    /// The log message
+    QString logMessage;
+    /// The output type of log message ("stdout" or "stderr")
+    QString outputType;
     /// The time
     double time;
 };

@@ -57,7 +57,7 @@ namespace {
     const QString KeyClusterEnabled = "enabled";
     const QString KeyClusterConnected = "connected";
 
-    const QString KeyProcessId = "id";
+    const QString KeyProcessId = "processId";
     const QString KeyProcessApplicationId = "applicationId";
     const QString KeyProcessConfigurationId = "configurationId";
     const QString KeyProcessClusterId = "clusterId";
@@ -65,9 +65,10 @@ namespace {
     const QString KeyProcessClusterStatus = "clusterStatus";
     const QString KeyProcessClusterStatusTime = "clusterStatusTime";
     
-    const QString KeyNodeStatusHistoryNode = "node";
+    const QString KeyNodeStatusHistoryNodeId = "nodeId";
     const QString KeyNodeStatusHistoryStatus = "status";
     const QString KeyNodeStatusHistoryTime = "time";
+    const QString KeyNodeStatusHistoryId = "id";
 }
 
 namespace common {
@@ -172,16 +173,18 @@ QJsonObject GuiInitialization::Process::toJson() const {
 }
 
 GuiInitialization::Process::NodeStatus::NodeStatus(QJsonObject nodeStatus) {
-    node = common::testAndReturnString(nodeStatus, KeyNodeStatusHistoryNode);
+    node = common::testAndReturnString(nodeStatus, KeyNodeStatusHistoryNodeId);
     status = common::testAndReturnString(nodeStatus, KeyNodeStatusHistoryStatus);
     time = common::testAndReturnDouble(nodeStatus, KeyNodeStatusHistoryTime);
+    id = common::testAndReturnInt(nodeStatus, KeyNodeStatusHistoryId);
 }
 
 QJsonObject GuiInitialization::Process::NodeStatus::toJson() const {
     QJsonObject res;
     res[KeyNodeStatusHistoryStatus] = status;
     res[KeyNodeStatusHistoryTime] = time;
-    res[KeyNodeStatusHistoryNode] = node;
+    res[KeyNodeStatusHistoryNodeId] = node;
+    res[KeyNodeStatusHistoryId] = id;
     return res;
 }
 

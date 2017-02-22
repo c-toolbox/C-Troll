@@ -194,9 +194,9 @@ void ProcessHandler::handleReadyReadStandardError(){
     if (p2T != _processes.end() ) {
         // Send out the TrayProcessLogMessage with the stderror key
         common::TrayProcessLogMessage pm;
-        pm.id = p2T->first;
-        pm.stdOutLog = "";
-        pm.stdErrorLog = QString::fromUtf8(process->readAllStandardError());
+        pm.processId = p2T->first;
+        pm.outputType = common::TrayProcessLogMessage::OutputType::StdErr;
+        pm.message = QString::fromLatin1(process->readAllStandardError());
         common::GenericMessage msg;
         msg.type = common::TrayProcessLogMessage::Type;
         msg.payload = pm.toJson().object();
@@ -212,9 +212,9 @@ void ProcessHandler::handleReadyReadStandardOutput(){
     
     if (p2T != _processes.end() ) {
         common::TrayProcessLogMessage pm;
-        pm.id = p2T->first;
-        pm.stdOutLog = QString::fromUtf8(process->readAllStandardOutput());
-        pm.stdErrorLog = "";
+        pm.processId = p2T->first;
+        pm.message = QString::fromLatin1(process->readAllStandardOutput());
+        pm.outputType = common::TrayProcessLogMessage::OutputType::StdOut;
         common::GenericMessage msg;
         msg.type = common::TrayProcessLogMessage::Type;
         msg.payload = pm.toJson().object();

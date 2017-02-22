@@ -110,6 +110,9 @@ Application::Application(QString configurationFile) {
         &_incomingSocketHandler, &IncomingSocketHandler::newConnectionEstablished,
         [this](common::JsonSocket* socket) {
             _incomingSocketHandler.sendMessage(socket, initializationInformation().toJson());
+            for (auto& process : _processes) {
+                _incomingSocketHandler.sendMessage(socket, guiProcessLogMessageHistory(*process).toJson());
+            }
         }
     );
 }
@@ -162,8 +165,26 @@ void Application::handleTrayProcessStatus(const Cluster& cluster, const Cluster:
 }
 
 void Application::handleTrayProcessLogMessage(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessLogMessage logMessage) {
-    Log("Std out: " + logMessage.stdOutLog);
-    Log("Std err: " + logMessage.stdErrorLog);
+    auto iProcess = std::find_if(_processes.begin(), _processes.end(), [&logMessage](auto& p) {
+        return p->id() == logMessage.processId;
+    });
+
+    if (iProcess == _processes.end()) {
+        return;
+    }
+    
+    Log(logMessage.message);
+
+    QString nodeId = node.id;
+    if (logMessage.outputType == common::TrayProcessLogMessage::OutputType::StdOut) {
+        (*iProcess)->pushNodeStdOut(nodeId, logMessage.message);
+    } else if (logMessage.outputType == common::TrayProcessLogMessage::OutputType::StdErr) {
+        (*iProcess)->pushNodeStdError(nodeId, logMessage.message);
+    } else {
+        return;
+    }
+    
+    sendLatestLogMessage(*iProcess->get(), nodeId);
 }
 
 
@@ -309,7 +330,8 @@ void Application::incomingGuiMessage(const QJsonDocument& message) {
             handleIncomingGuiProcessCommand(common::GuiProcessCommand(QJsonDocument(msg.payload)));
         }
     } catch (const std::runtime_error& e) {
-        Log(QString("Error with incoming message: ") + e.what());
+        Log(QString("Error with incoming gui message: ") + e.what());
+        Log(message.toJson());
     }
 }
 
@@ -329,10 +351,10 @@ void Application::incomingTrayMessage(const Cluster& cluster, const Cluster::Nod
         }
     }
     catch (const std::runtime_error& e) {
-        Log(QString("Error with incoming message: ") + e.what());
+        Log(QString("Error with incoming tray message: ") + e.what());
+        Log(message.toJson());
     }
 }
-
 
 common::GenericMessage Application::initializationInformation() {
     common::GenericMessage msg;
@@ -354,28 +376,6 @@ common::GenericMessage Application::initializationInformation() {
     msg.payload = initMsg.toJson().object();
     return msg;
 }
-/*
-void Application::sendInitializationInformation(common::JsonSocket* socket) {
-    common::GenericMessage msg;
-    msg.type = common::GuiInitialization::Type;
-    
-    common::GuiInitialization initMsg;
-    for (const auto& p : _programs) {
-        initMsg.applications.push_back(p->toGuiInitializationApplication());
-    }
-    
-    for (const auto& c : _clusters) {
-        initMsg.clusters.push_back(c->toGuiInitializationCluster());
-    }
-
-    for (const auto& p : _processes) {
-        initMsg.processes.push_back(p->toGuiInitializationProcess());
-    }
-    
-    msg.payload = initMsg.toJson().object();
-    _incomingSocketHandler.sendMessage(socket, msg.toJson());
-}*/
-
 
 void Application::sendGuiProcessStatus(const CoreProcess& process, const QString& nodeId) {
     common::GuiProcessStatus statusMsg = process.toGuiProcessStatus(nodeId);
@@ -387,6 +387,24 @@ void Application::sendGuiProcessStatus(const CoreProcess& process, const QString
     _incomingSocketHandler.sendMessageToAll(msg.toJson());
 }
 
+void Application::sendLatestLogMessage(const CoreProcess& process, const QString& nodeId) {
+    common::GuiProcessLogMessage logMsg = process.latestGuiProcessLogMessage(nodeId);
+
+    common::GenericMessage msg;
+    msg.type = common::GuiProcessLogMessage::Type;
+    msg.payload = logMsg.toJson().object();
+
+    _incomingSocketHandler.sendMessageToAll(msg.toJson());
+}
+
+common::GenericMessage Application::guiProcessLogMessageHistory(const CoreProcess& process) {
+    common::GuiProcessLogMessageHistory historyMsg = process.guiProcessLogMessageHistory();
+
+    common::GenericMessage msg;
+    msg.type = common::GuiProcessLogMessageHistory::Type;
+    msg.payload = historyMsg.toJson().object();
+    return msg;
+}
 
 void Application::sendTrayCommand(const Cluster& cluster, const common::TrayCommand& command) {
     // Generate identifier

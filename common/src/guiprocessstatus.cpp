@@ -46,15 +46,17 @@ namespace {
     const QString KeyClusterStatus = "clusterStatus";
     const QString KeyNodeStatus = "nodeStatus";
     const QString KeyTime = "time";
+    const QString KeyId = "id";
 }
 
 namespace common {
     
-const QString GuiProcessStatus::Type = "TrayProcessStatus";
+const QString GuiProcessStatus::Type = "GuiProcessStatus";
 
 GuiProcessStatus::GuiProcessStatus(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
+    id = common::testAndReturnInt(obj, KeyId);
     processId = common::testAndReturnInt(obj, KeyProcessId);
     clusterStatus = common::testAndReturnString(obj, KeyClusterStatus);
     QJsonObject nodeStatusObject = common::testAndReturnObject(obj, KeyNodeStatus);
@@ -66,6 +68,7 @@ GuiProcessStatus::GuiProcessStatus(const QJsonDocument& document) {
 
 QJsonDocument GuiProcessStatus::toJson() const {
     QJsonObject obj;
+    obj[KeyId] = id;
     obj[KeyProcessId] = processId;
     obj[KeyApplicationId] = applicationId;
     obj[KeyClusterId] = clusterId;

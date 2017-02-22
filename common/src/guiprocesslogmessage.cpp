@@ -32,61 +32,53 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GUIPROCESSSTATUS_H__
-#define __GUIPROCESSSTATUS_H__
+#include "guiprocesslogmessage.h"
 
-#include <QJsonDocument>
-#include <QString>
-#include <QMap>
+#include "jsonsupport.h"
+
+#include <QJsonObject>
+
+namespace {
+    const QString KeyId = "id";
+    const QString KeyProcessId = "processId";
+    const QString KeyApplicationId = "applicationId";
+    const QString KeyClusterId = "clusterId";
+    const QString KeyNodeId = "nodeId";
+    const QString KeyConfigurationId = "configurationId";
+    const QString KeyMessage = "message";
+    const QString KeyOutputType = "outputType";
+    const QString KeyTime = "time";
+}
 
 namespace common {
-    
-/// This struct is the data structure that gets send from the Core to the GUI to 
-/// inform the GUI about a change in process status
-struct GuiProcessStatus {
-    /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
-    
-    /// Default constructor
-    GuiProcessStatus() = default;
-    
-    /**
-     * Creates a GuiProcessStatus from the passed \p document. The \p document must
-     * contain the following keys, all of type string:
-     * \c identifier
-     * \c status
-     * \param document The QJsonDocument that contains the information about this
-     * GuiProcessStatus
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    GuiProcessStatus(const QJsonDocument& document);
-    
-    /**
-     * Converts the GuiProcessStatus into a valid QJsonDocument object and returns
-     * it.
-     * \return The QJsonDocument representing this GuiProcessStatus
-     */
-    QJsonDocument toJson() const;
 
-    /// The per-process unique identifier for this process status.
-    int id;
-    /// The unique identifier for the process that will be created
-    int processId;
-    /// The application identifier
-    QString applicationId;
-    /// The cluster identifier
-    QString clusterId;
-    /// The configuration identifier
-    int configurationId;
-    /// The cluster status
-    QString clusterStatus;
-    /// The process status
-    QMap<QString, QString> nodeStatus;
-    /// The time
-    double time;
-};
-    
+const QString GuiProcessLogMessage::Type = "GuiProcessLogMessage";
+
+GuiProcessLogMessage::GuiProcessLogMessage(const QJsonDocument& document) {
+    QJsonObject obj = document.object();
+
+    id = common::testAndReturnInt(obj, KeyId);
+    processId = common::testAndReturnInt(obj, KeyProcessId);
+    applicationId = common::testAndReturnString(obj, KeyApplicationId);
+    clusterId = common::testAndReturnString(obj, KeyClusterId);
+    nodeId = common::testAndReturnString(obj, KeyNodeId);
+    logMessage = common::testAndReturnString(obj, KeyMessage);
+    outputType = common::testAndReturnString(obj, KeyOutputType);
+    time = common::testAndReturnDouble(obj, KeyTime);
+}
+
+QJsonDocument GuiProcessLogMessage::toJson() const {
+    QJsonObject obj;
+    obj[KeyId] = id;
+    obj[KeyProcessId] = processId;
+    obj[KeyApplicationId] = applicationId;
+    obj[KeyClusterId] = clusterId;
+    obj[KeyNodeId] = nodeId;
+    obj[KeyMessage] = logMessage;
+    obj[KeyOutputType] = outputType;
+    obj[KeyTime] = time;
+
+    return QJsonDocument(obj);
+}
+
 } // namespace common
-
-#endif // __GUIPROCESSSTATUS_H__

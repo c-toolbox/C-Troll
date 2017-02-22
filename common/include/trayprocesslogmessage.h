@@ -43,9 +43,15 @@ namespace common {
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
 struct TrayProcessLogMessage {
+
     /// The string representing this command type, for usage in the common::GenericMessage
     static const QString Type;
-    
+
+    enum class OutputType : int {
+        StdOut = 0,
+        StdErr
+    };
+
     /// Default constructor
     TrayProcessLogMessage() = default;
     
@@ -53,8 +59,8 @@ struct TrayProcessLogMessage {
      * Creates a TrayProcessLogMessage from the passed \p document. The \p document must
      * contain the following keys, all of type string:
      * \c identifier
-     * \c stdOutLog
-     * \c stdErrorLog
+     * \c message
+     * \c type
      * \param document The QJsonDocument that contains the information about this
      * TrayProcessLogMessage
      * \throws std::runtime_error If one of the required keys were not present or of the
@@ -69,12 +75,12 @@ struct TrayProcessLogMessage {
      */
     QJsonDocument toJson() const;
     
-    /// The unique identifier for the process that will be created
-    QString id;
-    /// The process stdout line
-    QString stdOutLog;
-    /// The process stderror line
-    QString stdErrorLog;
+    /// The unique identifier for the process
+    int processId;
+    /// The process stdout/stderr line
+    QString message;
+    /// The type of output
+    OutputType outputType;
 };
     
 } // namespace common

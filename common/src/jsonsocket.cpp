@@ -72,6 +72,7 @@ void JsonSocket::readToBuffer() {
 
     if (_payloadSize > 0 && _payloadSize <= _buffer.size()) {
         emit readyRead();
+        readToBuffer();
     }
 }
 

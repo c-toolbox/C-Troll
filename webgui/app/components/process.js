@@ -47,9 +47,13 @@ class Process extends React.Component {
             </Breadcrumbs>
         );
 
+        const logMessages = process.logMessages || [];
+        const logMessageHistory = logMessages.map((logMessage) => {
+            return <div key={logMessage.id}>{moment(logMessage.time).format('YYYY MM DD HH:mm:ss')} : {logMessage.node} <pre>{logMessage.message}</pre></div>;
+        });
 
         const nodeStatusHistory = process.nodeStatusHistory.map((status) => {
-            return <p key={status.time}>{moment(status.time).format('YYYY MM DD HH:mm:ss')} : {status.node} {status.status}</p>;
+            return <p key={status.id}>{moment(status.time).format('YYYY MM DD HH:mm:ss')} : {status.node} {status.status}</p>;
         });
 
 
@@ -73,6 +77,10 @@ class Process extends React.Component {
                 <div className="row">
                     <h2>Log</h2>
                     {nodeStatusHistory}
+                </div>
+                <div className="row">
+                    <h2>Output</h2>
+                    {logMessageHistory}
                 </div>
             </div>
         );
