@@ -120,6 +120,16 @@ public:
 
     common::GuiInitialization::Application toGuiInitializationApplication() const;
 
+    /**
+    * Return a JSON string that represents this program.
+    */
+    QJsonObject toJson() const;
+
+    /**
+    * Return a unique hash that represents this program configuration.
+    */
+    QByteArray hash() const;
+
     static std::unique_ptr<std::vector<std::unique_ptr<Program>>> loadProgramsFromDirectory(QString directory);
 
     static std::unique_ptr<Program> loadProgram(QString jsonFile, QString baseDirectory);

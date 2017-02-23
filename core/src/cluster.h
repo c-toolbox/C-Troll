@@ -135,6 +135,16 @@ public:
     bool connected() const;
    
     /**
+    * Return a JSON string that represents this cluster.
+    */
+    QJsonObject toJson() const;
+
+    /**
+    * Return a unique hash that represents this cluster configuration.
+    */
+    QByteArray hash() const;
+
+    /**
     * This method walks the passed \p directory and looks for all <code>*.json</code>
     * files in it. Any \c JSON file in it will be interpreted as a cluster configuration and
     * returned.

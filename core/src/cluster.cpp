@@ -41,6 +41,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QVector>
+#include <QCryptographicHash>
 
 #include <assert.h>
 
@@ -101,6 +102,31 @@ bool Cluster::connected() const {
     return std::accumulate(_nodes.begin(), _nodes.end(), true, [](bool othersConnected, const Node& node) {
         return othersConnected && node.connected;
     });
+}
+
+QJsonObject Cluster::toJson() const {
+    QJsonObject cluster;
+
+    cluster[KeyId] = _id;
+    cluster[KeyName] = _name;
+    cluster[KeyEnabled] = _enabled;
+
+    QJsonObject nodes;
+    for (const auto& node : _nodes) {
+        QJsonObject nodeObject;
+        nodeObject[KeyNodeName] = node.name;
+        nodeObject[KeyNodeIpAddress] = node.ipAddress;
+        nodeObject[KeyNodePort] = node.port;
+        nodes[node.id] = nodeObject;
+    }
+    cluster[KeyNodes] = nodes;
+    return cluster;
+}
+
+QByteArray Cluster::hash() const {
+    QJsonDocument doc(toJson());
+    QString input = doc.toJson();
+    return QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha1);
 }
 
 std::unique_ptr<Cluster> Cluster::loadCluster(QString jsonFile, QString baseDirectory) {

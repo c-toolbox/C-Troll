@@ -38,6 +38,7 @@
 #include <QDirIterator>
 #include <QJsonArray>
 #include <QJsonParseError>
+#include <QCryptographicHash>
 
 #include <cassert>
 #include <logging.h>
@@ -204,4 +205,56 @@ QStringList Program::clusters() const {
 
 QList<Program::Configuration> Program::configurations() const {
     return _configurations;
+}
+
+QJsonObject Program::toJson() const {
+    QJsonObject program;
+
+    program[KeyId] = _id;
+    program[KeyName] = _name;
+    program[KeyExecutable] = _executable;
+    if (_baseDirectory != "") {
+        program[KeyBaseDirectory] = _baseDirectory;
+    }
+    if (_commandlineParameters != "") {
+        program[KeyCommandlineParameters] = _commandlineParameters;
+    }
+    if (_currentWorkingDirectory != "") {
+        program[KeyCurrentWorkingDirectory] = _currentWorkingDirectory;
+    }
+
+    if (_tags.size() != 0) {
+        QJsonArray tags;
+        for (const auto& tag : _tags) {
+            tags.push_back(tag);
+        }
+        program[KeyTags] = tags;
+    }
+
+    if (_clusters.size() != 0) {
+        QJsonArray clusters;
+        for (const auto& cluster : _clusters) {
+            clusters.push_back(cluster);
+        }
+        program[KeyClusters] = clusters;
+    }
+    
+    if (_configurations.size() != 0) {
+        QJsonArray configurations;
+        for (const auto& configuration : _configurations) {
+            QJsonObject configurationObject;
+            configurationObject[KeyConfigurationName] = configuration.name;
+            configurationObject[KeyConfigurationIdentifier] = configuration.id;
+            configurationObject[KeyConfigurationParameters] = configuration.commandlineParameters;
+            configurations.push_back(configurationObject);
+        }
+        program[KeyConfigurations] = configurations;
+    }
+    return program;
+}
+
+QByteArray Program::hash() const {
+    QJsonDocument doc(toJson());
+    QString input = doc.toJson();
+    return QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha1);
 }
