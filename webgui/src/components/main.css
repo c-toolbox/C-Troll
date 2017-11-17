@@ -1,0 +1,546 @@
+/*@mixin placeholder {
+  ::-webkit-input-placeholder {@content}
+  :-moz-placeholder           {@content}
+  ::-moz-placeholder          {@content}
+  :-ms-input-placeholder      {@content}  
+}*/
+
+/*@include placeholder {
+    font-style:italic;
+}*/
+
+@font-face {
+font-family: 'Source Sans Pro';
+font-style: normal;
+font-weight: 400;
+src: local('Source Sans Pro'),
+  local('SourceSansPro-Regular'),
+  url(http://fonts.gstatic.com/s/sourcesanspro/v9/ODelI1aHBYDBqgeIAH2zlBBHWFfxJXS04xYOz0jw624.woff) format('woff');
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+
+#main-container {
+    margin-left: 100px;
+    background-color: #49494a;
+    width: calc(100% - 100px);
+    overflow: auto;
+}
+
+html, body {
+    background-color: #49494a;
+    padding: 0;
+    margin: 0;
+    color: #eee;
+    font-family: "Source Sans Pro";
+}
+
+#side-bar {
+    position: fixed;
+    height: 100vh;
+    background-color: #353535;
+    width: 100px;
+}
+
+#side-bar a {
+    opacity: 0.7;
+    color: #fff;
+    font-size: 0.8em;
+    text-decoration: none;
+    text-align: center;
+    display: block;
+    padding-top: 45px;
+}
+
+#side-bar a:active {
+   opacity: 1.0; 
+}
+
+#side-bar a:active {
+    opacity: 1.0;
+
+}
+
+
+#side-bar a:active .icon {
+    path, polygon {
+        fill: #fff;
+        stroke: none;
+    } 
+}
+
+#side-bar a .icon {
+    width: 40%;
+    display: block;
+    margin: auto;
+    margin-bottom: 1em;
+
+    path, polygon {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 3px;
+    } 
+}
+
+
+
+@media (max-width: 600px) {
+    #side-bar {
+        position: static;
+        height: 100px;
+        width: 100%;
+
+        a {
+            display: inline-block;
+            width: 100px;
+            padding-top: 20px;
+        }
+
+    }
+
+    #main-container {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+
+h2 {
+    font-size: 1.2em;
+    font-weight: 700;
+}
+
+p {
+    font-size: 1em;
+}
+.row {
+    clear: both;
+    margin: 0.8em;
+}
+
+.tag-link {
+    padding: 0.5em;
+    color: #fff;
+    text-decoration: none;
+    
+    margin-right: 0.2em;
+    .tag {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        margin-right: 0.5em;
+    }
+}
+
+.button-wide {
+    cursor: pointer;
+    font-size: 1.2em;
+    border: 3px solid #383838;
+    opacity: 0.7;
+
+    padding: 0.5em;
+    max-height: 1.2em;
+    height: 1.2em;
+    margin-right: 0.4em;
+    margin-bottom: 0.4em;
+    display: inline-block;
+}
+
+
+.button-wide.selected {
+    opacity: 1.0;
+    background-color: #383838;
+}
+
+.button-wide.dark {
+    color: #ddd;
+
+    &:active {
+        background-color: #333;
+        border: 3px solid #333;
+    }
+}
+.button-wide.light {
+    color: #222;
+}
+
+.tag {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: 1em;
+}
+
+
+.button-container {
+    margin-bottom: 1em;
+}
+
+.square {
+    font-size: 1.2em;
+    vertical-align: top;
+    width: 10em;
+    margin-right: 0.4em;
+    margin-bottom: 0.4em;
+    display: inline-block;
+    position: relative;
+    background-color: #383838;
+    transition: 0.2s all;
+}
+
+
+.square.button {
+    cursor: pointer;
+}
+
+.square.error {
+    background-color: #BA543C;
+    color: #FFEEDE;
+
+    .cluster-icon polygon {
+        stroke: #e57455;
+    }
+
+    .click-area:active {
+        background-color: #CF694D;
+    }
+
+    .more-button :hover {
+        background-color: #CF694D;
+    }
+
+    .more-button :active {
+        background-color: #e57455;
+    }
+}
+
+.square .click-area {
+    position: absolute;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    color: #ddd;
+
+    &:active {
+        background-color: #222;
+    }
+}
+
+.square .sub-button {
+    z-index: 1;
+    position: relative;
+}
+
+.square .main {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    font-weight: bold;
+    margin: 0.2em;
+    pointer-events: none;
+}
+
+.square .application-icon {
+    position: relative;
+    z-index: 1;
+    width: 3em;
+    height: 3em;
+    border: 3px solid #555;
+    border-radius: 0.8em;
+    margin: 0.5em auto;
+    pointer-events: none;
+}
+
+.square .cluster-icon {
+    display: block;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+    width: 2em;
+    margin: 1.5em auto;
+
+
+}
+
+.square .cluster-icon polygon {
+    stroke: #555;
+    stroke-width: 3px;
+    fill: none;
+}
+
+.square .sub {
+    position: relative;
+    z-index: 1;
+    margin: 0.2em;
+    font-size: 0.7em;
+    pointer-events: none;
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+
+.square .tags {
+    position: relative;
+    z-index: 1;
+    height: 1.4em;
+    margin: auto;
+    width: 100%;
+    pointer-events: none;        
+}
+
+.square .tags .tag {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-top: 0.2em;
+    margin-left: 0.2em;
+}
+
+
+.square .more-button {
+    position: absolute;
+    top: 0.4em;
+    right: 0.4em;
+}
+
+.square .more-button:hover {
+    background-color: #333;
+}
+.square .more-button:active {
+    background-color: #222;
+}
+
+.square .more-button .more-icon {
+    width: 1.3em;
+    height: 1.3em;
+    padding: 0.2em;
+}
+
+.square .more-button .more-icon .more-icon-circle {
+    fill: #fff;
+}
+
+
+.start-button {
+    cursor: pointer;
+    text-align: center;
+    background-color: #91b71a;
+    display: block;
+    color: #fff;
+    padding: 0.5em;
+    margin: 0.3em;
+    transition: 0.2s all;
+}
+
+.start-button:active {
+    transition: none;
+    background-color: #a7c13d;
+}
+
+.start-button.inactive {
+    background-color: #aaa;
+    opacity: 0.15;
+    cursor: default;
+}
+
+.start-button .start-icon {
+    width: 1.3em;
+    height: 1.3em;
+    vertical-align: middle;
+    margin-right: 0.5em;
+
+
+}
+
+.start-button .start-icon .start-icon-path {
+    fill: #fff;
+}
+
+.stop-button {
+    cursor: pointer;
+    text-align: center;
+    background-color: #E57455;
+    display: block;
+    color: #fff;
+    padding: 0.5em;
+    margin: 0.3em;
+    transition: 0.2s all;
+}
+
+
+.stop-button &:active {
+    transition: none;
+    background-color: #E87C62;
+}
+
+.stop-button &.inactive {
+    background-color: #aaa;
+    opacity: 0.15;
+    cursor: default;
+}
+
+.stop-button .stop-icon {
+    width: 1.3em;
+    height: 1.3em;
+    vertical-align: middle;
+    margin-right: 0.5em;
+}
+
+.stop-button .stop-icon .stop-icon-rect {
+    fill: #fff;
+}
+
+.restart-button {
+    cursor: pointer;
+    text-align: center;
+    background-color: #66B0D1;
+    display: block;
+    color: #fff;
+    padding: 0.5em;
+    margin: 0.3em;
+    transition: 0.2s all;
+}
+
+
+.restart-button:active {
+    transition: none;
+    background-color: #77C1DB;
+}
+
+.restart-button.inactive {
+    background-color: #aaa;
+    opacity: 0.15;
+    cursor: default;
+}
+
+.restart-button .restart-icon {
+    position: relative;
+    top: -0.1em;
+    width: 1.3em;
+    height: 1.3em;
+    vertical-align: middle;
+    margin-right: 0.5em;
+}
+
+.restart-button .restart-icon .restart-icon-path {
+    stroke: #fff;
+    fill: none;
+    stroke-width: 10px;
+}
+
+.restart-button .restart-icon .restart-icon-arrow {
+    fill: #fff;
+    stroke: none;
+}
+
+.search {
+    background-color: #353535;
+    border: none;
+    font-size: 1.2em;
+    padding: 0.5em;
+    color: #fff;
+    width: calc(100% - 1em);
+    outline: none;
+
+    :placeholder {
+        color: #888;
+    }
+}
+
+.no-hits {
+    font-size: 1.0em;
+    font-style: italic;
+}
+
+.no-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Chrome/Safari/Opera */
+     -khtml-user-select: none; /* Konqueror */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  not supported by any browser */
+}
+
+.breadcrumbs {
+    width: calc(100% - 2em);
+    background-color: #404040;
+    padding: 1em;
+    font-size: 1.2em;
+}
+
+.breadcrumbs>div {
+    display: inline-block;
+}
+
+.breadcrumbs a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.breadcrumbs .right-arrow {
+    height: 1.8em;
+    vertical-align: middle;
+    margin-left: 10px;
+
+    polygon {
+        fill: #fff;
+    }
+}
+
+.reconnecting-notifier {
+    overflow: hidden;
+    transition: all 400ms ease-out;
+    max-height: 5em;
+}
+
+.reconnecting-notifier-enter {
+    max-height: 0em;
+}
+
+.reconnecting-notifier-enter-active {
+    max-height: 5em;
+}
+
+.reconnecting-notifier-leave {
+    transition-delay: 2s;
+    max-height: 5em;
+}
+
+.reconnecting-notifier-leave-active {
+    max-height: 0em;
+}
+
+.reconnecting-notifier div {
+    padding: 1em 2em;
+}
+
+.reconnecting-notifier div.reconnecting {
+    background-color: #e57455;
+    color: #fff;
+    animation: reconnection 5s infinite;
+
+}
+
+@keyframes reconnection {
+    0% {
+        background-color: #e57455;
+    }
+    50% {
+        background-color: #ba543c;
+    }
+    100% {
+        background-color: #e57455;
+    }
+}
+
+.reconnecting-notifier div.connected {
+    background-color: #91b71a;
+    color: #fff;
+}

@@ -1,0 +1,44 @@
+import React from 'react';
+import ApplicationList from '../state/applicationlist';
+import ProcessList from '../state/processlist';
+import TagButtons from './tagbuttons';
+import FilteredApplications from './filteredapplications';
+import FilteredProcesses from './filteredprocesses';
+
+class Appplications extends React.Component {
+
+    constructor() {
+        super();
+        this._applicationList = new ApplicationList();
+        this._processList = new ProcessList();
+        this._processList.hideOnExit = true;
+
+/*
+        if (tag !== undefined) {
+            this._applicationList.filterTags.push(tag);
+            this._processList.filterTags.push(tag);
+        }
+*/
+    }
+
+    updateFilter(evt) {
+        this._applicationList.filterString = evt.target.value;
+        this._processList.filterString = evt.target.value;
+    }
+
+    render() {
+        return (
+            <div>
+                <div className="row">
+                    <input placeholder="Search applications..." className="search" onChange={this.updateFilter.bind(this)}/>
+                </div>
+                <TagButtons applicationList={this._applicationList}/>
+                <FilteredApplications applicationList={this._applicationList}/>
+                <FilteredProcesses processList={this._processList}/>
+            </div>
+        );
+    }
+}
+
+
+export default Appplications;
