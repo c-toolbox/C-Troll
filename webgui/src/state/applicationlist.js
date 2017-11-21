@@ -1,4 +1,3 @@
-import { observable, computed } from 'mobx';
 import api from '../api';
 
 class ApplicationList {

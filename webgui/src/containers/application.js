@@ -1,7 +1,6 @@
 import React from 'react';
-import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
-import api from '../api';
+import store from '../store';
 import ClusterButton from './clusterbutton';
 import StartButton from './startbutton';
 import StopButton from './stopbutton';
@@ -17,6 +16,7 @@ class Appplication extends React.Component {
     }
 
     render() {
+        
         const application = api.applications.find((app) => {
             return app.id === this._appId;
         });

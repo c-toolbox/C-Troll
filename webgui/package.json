@@ -4,15 +4,15 @@
   "private": true,
   "dependencies": {
     "color-hash": "^1.0.3",
-    "mobx": "^3.3.1",
-    "mobx-react": "^4.3.4",
     "moment": "^2.19.2",
     "prop-types": "^15.6.0",
     "react": "^16.1.1",
     "react-addons-css-transition-group": "^15.6.2",
     "react-dom": "^16.1.1",
+    "react-redux": "^5.0.6",
     "react-router-dom": "^4.2.2",
-    "react-scripts": "1.0.17"
+    "react-scripts": "1.0.17",
+    "redux": "^3.7.2"
   },
   "scripts": {
     "start": "react-scripts start",

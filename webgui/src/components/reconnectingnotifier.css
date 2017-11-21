@@ -1,0 +1,55 @@
+
+.reconnecting-notifier {
+    overflow: hidden;
+    transition: all 400ms ease-out;
+    max-height: 5em;
+}
+
+.reconnecting-notifier-enter {
+    max-height: 0em;
+}
+
+.reconnecting-notifier-enter-active {
+    max-height: 5em;
+}
+
+.reconnecting-notifier-leave {
+    transition-delay: 2s;
+    max-height: 5em;
+}
+
+.reconnecting-notifier-leave-active {
+    max-height: 0em;
+}
+
+.reconnecting-notifier div {
+    padding: 1em 2em;
+}
+
+.reconnecting-notifier div.reconnecting {
+    background-color: #e57455;
+    color: #fff;
+    animation: reconnection 5s infinite;
+}
+
+@keyframes reconnection {
+    0% {
+        background-color: #e57455;
+    }
+    50% {
+        background-color: #ba543c;
+    }
+    100% {
+        background-color: #e57455;
+    }
+}
+
+.reconnecting-notifier div.connected {
+    background-color: #91b71a;
+    color: #fff;
+}
+
+.reconnecting-notifier div.disconnected {
+    background-color: #e57455;
+    color: #fff;
+}

@@ -1,5 +1,4 @@
 import React from 'react';
-import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 
 class NodeButton extends React.Component {

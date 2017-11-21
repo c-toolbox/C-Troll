@@ -1,6 +1,5 @@
 import React from 'react';
 import api from '../api';
-import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 
 class StartButton extends React.Component {

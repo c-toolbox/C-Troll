@@ -1,9 +1,40 @@
 import React from 'react';
-import ReactCssTransitionGroup from 'react-addons-css-transition-group';
+//import ReactCssTransitionGroup from 'react-addons-css-transition-group';
+import PropTypes from 'prop-types';
+import './reconnectingnotifier.css';
 
-import api from '../api';
+const ReconnectingNotifier = (props) => {
+    if (props.connected) {
+        return [];
+    }
 
-class Content extends React.Component {
+    let content = null;
+    if (props.reconnecting) {
+        content = <div className="reconnecting">Connection lost. Reconnecting...</div>
+    } else if (props.connecting) {
+        content = <div className="reconnecting">Trying to connect...</div>
+    } else {
+        content = <div className="disconnected">Disconnected</div>
+    }
+
+    return (
+        <div className="reconnecting-notifier">
+            {content}
+        </div>
+    );
+};
+
+ReconnectingNotifier.propTypes = {
+    connected: PropTypes.bool.isRequired,
+    reconnecting: PropTypes.bool.isRequired,
+    connecting: PropTypes.bool.isRequired,
+};
+
+
+//import api from '../api';
+
+/*
+class Content {
     render() {
         if (!api.initialized && api.reconnecting) {
             return <div className="reconnecting">Trying to connect...</div>;
@@ -34,5 +65,5 @@ class ReconnectingNotifier extends React.Component {
         );
     }
 }
-
+*/
 export default ReconnectingNotifier;

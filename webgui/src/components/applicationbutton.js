@@ -1,57 +1,40 @@
 import React from 'react';
-import { observer } from 'mobx-react';
 import TagBox from './tagbox';
 // import { Link } from 'react-router';
-import StartButton from './startbutton';
-import MoreButton from './morebutton';
-import api from '../api';
+//import StartButton from './startbutton';
+//import MoreButton from './morebutton';
 import PropTypes from 'prop-types';
 
-class ApplicationButton extends React.Component {
-    render() {
-        const application = this.props.application;
+const ApplicationButton = props => {
+    const id = props.applicationId;
+    const name = props.applicationName;
+    const tags = props.tags;
+    const appUrl = '/applications/' + id.replace('/', '>');
+    
+    /*const open = () => {
+        browserHistory.push(appUrl);
+    };*/
 
-        const appUrl = '/applications/' + application.id.replace('/', '>');
-        const buttons = [];
-
-        if (application.clusters.length > 0) {
-            const clusterId = application.clusters[0];
-            const cluster = api.clusters.find((c) => {
-                return c.id === clusterId;
-            });
-            if (cluster) {
-                buttons.push((<StartButton key="start" type="cluster" application={application} cluster={cluster}/>));
-            } else {
-                buttons.push(<MoreButton key="disabled"/>);
-            }
-        } else {
-            buttons.push(<MoreButton key="disabled"/>);
-        }
-
-        buttons.push(<MoreButton to={appUrl} key="more"/>);
-
-        /*const open = () => {
-            browserHistory.push(appUrl);
-        };*/
-
-        return (
-            <div  className="square button no-select">
-                <div className="click-area"/>
-                <div className="tags">
-                {application.tags.map((tag) => {
-                    return (<TagBox key={tag} tag={tag}/>);
-                })}
-                </div>
-                <div className="application-icon"/>
-                <div className="main">{application.name}</div>
-                <div className="sub"/>
-                {buttons}
-            </div>);
-    }
+    return (
+        <div  className="square button no-select">
+            <div className="click-area"/>
+            <div className="tags">
+            {tags.map((tag) => {
+                return (<TagBox key={tag} tag={tag}/>);
+            })}
+            </div>
+            <div className="application-icon"/>
+            <div className="main">{name}</div>
+            <div className="sub"/>
+            {props.children}
+        </div>);
 }
 
 ApplicationButton.propTypes = {
-    application: PropTypes.object.isRequired
+    applicationId: PropTypes.string.isRequired,
+    applicationName: PropTypes.string.isRequired,
+    tags: PropTypes.array,
+    children: PropTypes.array
 };
 
 export default ApplicationButton;

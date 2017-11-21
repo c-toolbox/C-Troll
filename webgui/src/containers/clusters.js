@@ -1,6 +1,5 @@
 import React from 'react';
 import api from '../api';
-import { observer } from 'mobx-react';
 import ClusterButton from './clusterbutton';
 import StopButton from './stopbutton';
 import RestartButton from './restartbutton';

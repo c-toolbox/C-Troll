@@ -1,7 +1,6 @@
 import React from 'react';
 import api from '../api';
 import ProcessButton from './processbutton';
-import { observer } from 'mobx-react';
 
 class FilteredProcesses extends React.Component {
 

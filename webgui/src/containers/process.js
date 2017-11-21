@@ -1,5 +1,4 @@
 import React from 'react';
-import { observer } from 'mobx-react';
 import api from '../api.js';
 import moment from 'moment';
 import StopButton from './stopbutton';

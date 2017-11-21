@@ -1,44 +1,34 @@
 import React from 'react';
-import ApplicationList from '../state/applicationlist';
-import ProcessList from '../state/processlist';
+import PropTypes from 'prop-types';
+
+import SearchField from './searchfield';
 import TagButtons from './tagbuttons';
-import FilteredApplications from './filteredapplications';
-import FilteredProcesses from './filteredprocesses';
+import ApplicationList from './applicationlist';
+import ProcessList from './processlist';
 
-class Appplications extends React.Component {
+const Applications = (props) => (
+    <div>
+        <SearchField placeholder="Search applications..." onSearch={props.onSearch}/>
+        <TagButtons tags={props.tags}
+                    onAddTag={props.onAddTag}
+                    onRemoveTag={props.onRemoveTag}
+                    onClearTags={props.onClearTags} />
 
-    constructor() {
-        super();
-        this._applicationList = new ApplicationList();
-        this._processList = new ProcessList();
-        this._processList.hideOnExit = true;
+        <div className="row"><h2>Applications</h2></div>
+        <ApplicationList applicationIds={props.applicationIds}/>
+        <div className="row"><h2>Processes</h2></div>
+        <ProcessList processIds={props.processIds}/>
+    </div>
+);
 
-/*
-        if (tag !== undefined) {
-            this._applicationList.filterTags.push(tag);
-            this._processList.filterTags.push(tag);
-        }
-*/
-    }
+Applications.propTypes = {
+    applicationIds: PropTypes.array.isRequired,
+    processIds: PropTypes.array.isRequired,
+    tags: PropTypes.array.isRequired,
+    onSearch: PropTypes.func.isRequired,
+    onAddTag: PropTypes.func.isRequired,
+    onRemoveTag: PropTypes.func.isRequired,
+    onClearTags: PropTypes.func.isRequired
+};
 
-    updateFilter(evt) {
-        this._applicationList.filterString = evt.target.value;
-        this._processList.filterString = evt.target.value;
-    }
-
-    render() {
-        return (
-            <div>
-                <div className="row">
-                    <input placeholder="Search applications..." className="search" onChange={this.updateFilter.bind(this)}/>
-                </div>
-                <TagButtons applicationList={this._applicationList}/>
-                <FilteredApplications applicationList={this._applicationList}/>
-                <FilteredProcesses processList={this._processList}/>
-            </div>
-        );
-    }
-}
-
-
-export default Appplications;
+export default Applications;
