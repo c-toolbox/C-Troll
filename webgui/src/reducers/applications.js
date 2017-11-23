@@ -16,7 +16,7 @@ function addApplicationFilterTag(state, action) {
     if (state.indexOf(tag) !== -1) {
         return state;
     }
-    const newState = {...state};
+    const newState = [...state];
     newState.push(tag);
     return newState;
 }
@@ -27,7 +27,7 @@ function removeApplicationFilterTag(state, action) {
     if (index === -1) {
         return state;
     }
-    const newState = {...state};
+    const newState = [...state];
     newState.splice(index, 1);
     return newState;
 }

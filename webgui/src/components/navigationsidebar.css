@@ -16,21 +16,25 @@
     padding-top: 45px;
 }
 
-#side-bar a:active {
-   opacity: 1.0; 
-}
 
-#side-bar a:active {
+#side-bar a.active {
     opacity: 1.0;
 
 }
 
 
-#side-bar a:active .icon {
-    path, polygon {
-        fill: #fff;
-        stroke: none;
-    } 
+#side-bar a .icon path,
+#side-bar a .icon polygon {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 3px;
+} 
+
+#side-bar a.active .icon path,
+#side-bar a.active .icon polygon
+{
+    fill: #fff;
+    stroke: none;
 }
 
 #side-bar a .icon {
@@ -39,11 +43,7 @@
     margin: auto;
     margin-bottom: 1em;
 
-    path, polygon {
-        fill: none;
-        stroke: #fff;
-        stroke-width: 3px;
-    } 
+
 }
 
 

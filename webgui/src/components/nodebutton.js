@@ -1,13 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-class NodeButton extends React.Component {
-    render() {
-        const node = this.props.node;
-
-        return (
-            <div to={''} className="button-wide dark no-select">{node.name}</div>);
-    }
+const NodeButton = props => {
+    return (
+        <div to={''} className="button-wide dark no-select">{props.node.name}</div>
+    );
 }
 
 NodeButton.propTypes = {

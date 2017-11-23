@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import ApplicationButton from '../components/applicationbutton'
+import ApplicationButton from '../components/applicationbutton';
 
 const mapStateToProps = (state, ownProps) => {
     const applicationId = ownProps.applicationId;
@@ -15,8 +15,7 @@ const mapStateToProps = (state, ownProps) => {
 
     const applicationName = application.name;
     const tags = application.tags;
-
-
+    
     return {
         applicationId,
         applicationName,

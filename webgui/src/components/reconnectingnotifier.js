@@ -12,7 +12,7 @@ const ReconnectingNotifier = (props) => {
     if (props.reconnecting) {
         content = <div className="reconnecting">Connection lost. Reconnecting...</div>
     } else if (props.connecting) {
-        content = <div className="reconnecting">Trying to connect...</div>
+        content = <div className="reconnecting">Connecting...</div>
     } else {
         content = <div className="disconnected">Disconnected</div>
     }
@@ -31,21 +31,7 @@ ReconnectingNotifier.propTypes = {
 };
 
 
-//import api from '../api';
-
 /*
-class Content {
-    render() {
-        if (!api.initialized && api.reconnecting) {
-            return <div className="reconnecting">Trying to connect...</div>;
-        }
-        if (api.reconnecting) {
-            return <div className="reconnecting">Connection lost. Reconnecting...</div>;
-        }
-        return <div className="connected">Connected!</div>;
-    }
-}
-
 class ReconnectingNotifier extends React.Component {
     render() {
         const items = [];

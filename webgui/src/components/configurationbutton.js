@@ -1,18 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-class ConfigurationButton extends React.Component {
-    render() {
-        const classNames = ['button-wide', 'dark', 'no-select'];
+const ConfigurationButton = props => {
+    const classNames = ['button-wide', 'dark', 'no-select'];
 
-        if (this.props.selected) {
-            classNames.push('selected');
-        }
-
-        return (<a onClick={this.props.onClick} className={classNames.join(' ')}>
-            {this.props.configuration}
-        </a>);
+    if (props.selected) {
+        classNames.push('selected');
     }
+
+    return (<a onClick={props.onClick} className={classNames.join(' ')}>
+        {props.configuration}
+    </a>);
 }
 
 ConfigurationButton.propTypes = {

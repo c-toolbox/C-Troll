@@ -103,7 +103,7 @@ export function setApplicationSearchString(searchString) {
 
 export function addApplicationFilterTag(tag) {
     return {
-        type: SetApplicationSearchString,
+        type: AddApplicationFilterTag,
         payload: {
             tag
         }
@@ -112,7 +112,7 @@ export function addApplicationFilterTag(tag) {
 
 export function removeApplicationFilterTag(tag) {
     return {
-        type: SetApplicationSearchString,
+        type: RemoveApplicationFilterTag,
         payload: {
             tag
         }

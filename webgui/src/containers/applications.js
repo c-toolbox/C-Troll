@@ -1,3 +1,4 @@
+import React from 'react';
 import { connect } from 'react-redux';
 import {
 	setApplicationSearchString,
@@ -6,7 +7,13 @@ import {
 	clearApplicationFilterTags
 } from '../actions';
 
-import Applications from '../components/applications';
+import SearchField from '../components/searchfield';
+import TagButtons from '../components/tagbuttons';
+import List from '../components/list';
+
+import ApplicationButton from './applicationbutton';
+import ApplicationProcessButtons from './applicationprocessbuttons';
+
 
 const getTags = state => {
 	const filterTags = state.session.applications.filterTags;
@@ -14,18 +21,18 @@ const getTags = state => {
 	const tagMap = {};
 
     allApplications.forEach(application => {
-        application.tags.forEach(tag => {
-            tagMap[tag] = {
-            	tag,
-                inFilter: filterTags.indexOf(tag) !== -1
+        application.tags.forEach(name => {
+            tagMap[name] = {
+            	name,
+                selected: filterTags.indexOf(name) !== -1
             };
         });
     });
 
     const tags = Object.values(tagMap).map((v) => {
     	return {
-    		tag: v.tag,
-    		inFilter: v.inFilter
+    		name: v.name,
+    		selected: v.selected
     	}
     })
 
@@ -150,6 +157,37 @@ const mapDispatchToProps = dispatch => {
 	    onClearTags
 	}
 }
+
+const Applications = (props) => {
+	return (
+		<div>
+        <SearchField placeholder="Search applications..." onSearch={props.onSearch}/>
+        <TagButtons tags={props.tags}
+                    onAddTag={props.onAddTag}
+                    onRemoveTag={props.onRemoveTag}
+                    onClearTags={props.onClearTags} />
+
+        <div className="row"><h2>Applications</h2></div>
+        <List>
+            {
+                props.applicationIds.map((applicationId) => (
+                    <ApplicationButton applicationId={applicationId}
+                                       key={applicationId}>
+
+                        <ApplicationProcessButtons applicationId={applicationId}
+                                                   startButtons="default"/>
+                    </ApplicationButton>
+                ))
+            }
+        </List>
+
+
+        <div className="row"><h2>Processes</h2></div>
+        <List>
+        </List>
+    </div>
+	)
+};
 
 
 export default connect(mapStateToProps, mapDispatchToProps)(Applications);

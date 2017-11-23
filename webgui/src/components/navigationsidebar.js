@@ -7,7 +7,7 @@ import ClustersIcon from './clustersicon';
 
 import './navigationsidebar.css';
 
-const NavigationSidebar = (props) => (
+const NavigationSidebar = props => (
         <nav id="side-bar">
             <Link className={props.selected === 'applications' ? 'active' : ''} to="/applications">
                 <ApplicationsIcon/>

@@ -7,7 +7,9 @@ const SearchField = (props) => {
 	}
 
 	return (<div className="row">
-	    <input placeholder={props.placeholder || ""} className="search" onChange={onChange}/>
+	    <input placeholder={props.placeholder || ""}
+	           className="search"
+	           onChange={onChange}/>
 	</div>);
 };
 

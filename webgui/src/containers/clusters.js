@@ -1,9 +1,45 @@
 import React from 'react';
-import api from '../api';
+import { connect } from 'react-redux';
 import ClusterButton from './clusterbutton';
-import StopButton from './stopbutton';
-import RestartButton from './restartbutton';
+import ClusterProcessButtons from './clusterprocessbuttons';
+import List from '../components/list';
 
+const getClusterId = (cluster) => {
+    return cluster.id;
+}
+
+const getClusterIds = state => {
+    const allClusters = Object.values(state.model.clusters);
+    return allClusters.map(getClusterId);
+}
+
+const mapStateToProps = (state) => {
+    const clusterIds = getClusterIds(state);
+    return {
+        clusterIds
+    };
+}
+
+const Clusters = (props) => {
+    return (
+        <div>
+            <div className="row"><h2>Clusters</h2></div>
+            <List>
+                {
+                    props.clusterIds.map((clusterId) => (
+                        <ClusterButton clusterId={clusterId}
+                                       key={clusterId}>
+                            <ClusterProcessButtons clusterId={clusterId}/>
+                        </ClusterButton>
+                    ))
+                }
+            </List>
+        </div>
+    )
+};
+
+
+/*
 class Clusters extends React.Component {
     render() {
         return (
@@ -31,7 +67,7 @@ class Clusters extends React.Component {
             </div>
         );
     }
-}
+}*/
 
 
-export default Clusters;
+export default connect(mapStateToProps)(Clusters);

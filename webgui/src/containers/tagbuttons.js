@@ -1,7 +1,6 @@
 import React from 'react';
 import TagButton from './tagbutton';
 import TagLink from './taglink';
-import api from '../api';
 
 class TagButtons extends React.Component {
     constructor({applicationList}) {

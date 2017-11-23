@@ -52,7 +52,7 @@ function initializeGui(state, action) {
 }
 
 function startProcess(state, action) {
-	console.log('todo: implement this');
+	return state;
 }
 
 export default (state = initialModelState, action) => {

@@ -440,8 +440,9 @@ p {
     height: 1.8em;
     vertical-align: middle;
     margin-left: 10px;
+}
 
-    polygon {
-        fill: #fff;
-    }
+
+.breadcrumbs .right-arrow polygon {
+    fill: #fff;
 }
