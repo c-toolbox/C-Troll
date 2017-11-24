@@ -8,11 +8,14 @@ const icon = (<svg className="restart-icon" xmlns="http://www.w3.org/2000/svg" v
 
 const RestartButton = props => {
     const classNames = ['restart-button', 'no-select', 'sub-button'];
-    if (props.enabled === false) {
+    if (props.enabled === false || !props.onClick) {
         classNames.push('inactive');
     }
 
     const restart = (evt) => {
+        if (!props.enabled) {
+            return;
+        }
         props.onClick()
         evt.stopPropagation();
     }
@@ -29,7 +32,7 @@ const RestartButton = props => {
     return (<div onClick={restart} className={classNames.join(' ')}>{icon}{text}</div>);
 }
 
-StopButton.propTypes = {
+RestartButton.propTypes = {
     cluster: PropTypes.string,
     application: PropTypes.string,
     onClick: PropTypes.func.isRequired,

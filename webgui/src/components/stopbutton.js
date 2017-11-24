@@ -7,11 +7,14 @@ const icon = (<svg className="stop-icon" xmlns="http://www.w3.org/2000/svg" view
 
 const StopButton = props => {
     const classNames = ['stop-button', 'no-select', 'sub-button'];
-    if (props.enabled === false) {
+    if (props.enabled === false || !props.onClick) {
         classNames.push('inactive');
     }
 
     const stop = (evt) => {
+        if (!props.enabled) {
+            return;
+        }
         props.onClick()
         evt.stopPropagation();
     }

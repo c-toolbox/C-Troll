@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "color-hash": "^1.0.3",
+    "deep-freeze": "0.0.1",
     "moment": "^2.19.2",
     "prop-types": "^15.6.0",
     "react": "^16.1.1",

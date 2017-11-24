@@ -5,17 +5,17 @@ import PropTypes from 'prop-types';
 import StopButton from '../containers/stopbutton';
 import RestartButton from '../containers/restartbutton';
 
+import { isProcessActive } from '../query';
+
 const ClusterProcessButtons = props => (
     <div>
         {
             // Stop and restart buttons
             props.processIds && props.processIds.map(processId => (
-                <div>
+                <div key={processId}>
                     <StopButton processId={processId}
-                                key={'stop-' + processId}
                                 appliction />
                     <RestartButton processId={processId}
-                                   key={'restart-' + processId}
                                    appliction/>
                 </div>
             ))
@@ -40,6 +40,8 @@ const mapStateToProps = (state, ownProps) => {
 
     const processIds = Object.values(state.model.processes).filter(process => {
         return process.clusterId === clusterId;
+    }).filter(process => {
+        return isProcessActive(process)
     }).map(process => {
         return process.id;
     });

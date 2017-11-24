@@ -21,11 +21,9 @@ export const ClearApplicationFilterTags = "ClearApplicationFilterTags";
 export const ServerConnected = "ServerConnected";
 export const ServerDisconnected = "ServerDisconnected";
 export const InitializeGui = 'InitializeGui';
-export const SetProcessLogHistory = 'SetProcessLogHistory';
+export const SetProcessLogMessageHistory = 'SetProcessLogMessageHistory';
 export const AddProcessLogMessage = 'AddProcessLogMessage';
 export const SetProcessStatus = 'SetProcessStatus';
-
-    
 
 /**
  * Action creators
@@ -89,7 +87,32 @@ export function serverDisconnected() {
     };
 }
 
+export function setProcessStatus(data) {
+    return {
+        type: SetProcessStatus,
+        payload: {
+            data
+        }
+    }
+}
 
+export function addProcessLogMessage(data) {
+    return {
+        type: AddProcessLogMessage,
+        payload: {
+            data
+        }
+    }
+}
+
+export function setProcessLogMessageHistory(data) {
+    return {
+        type: SetProcessLogMessageHistory,
+        payload: {
+            data
+        }
+    }
+}
 
   // Session
 export function setApplicationSearchString(searchString) {

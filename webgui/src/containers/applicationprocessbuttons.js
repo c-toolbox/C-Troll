@@ -6,32 +6,17 @@ import StopButton from '../containers/stopbutton';
 import RestartButton from '../containers/restartbutton';
 import StartButton from '../containers/startbutton';
 
+import { isProcessActive } from '../query';
+
 const ApplicationProcessButtons = props => (
     <div>
         {
-            // Start buttons
-            props.startButtons && props.startButtons.map(startButton => {
-                const key = 'start-' + startButton.applicationId +
-                    '-' + startButton.clusterId + 
-                    '-' + startButton.configutarionId;
-                return (
-                    <StartButton key={key}
-                                 applicationId={startButton.applicationId}
-                                 clusterId={startButton.clusterId}
-                                 configutarionId={startButton.configurationId}
-                                 cluster/>
-                );
-            })
-        }
-        {
             // Stop and restart buttons
             props.processIds && props.processIds.map(processId => (
-                <div>
+                <div key={ processId}>
                     <StopButton processId={processId}
-                                key={'stop-' + processId}
                                 cluster />
                     <RestartButton processId={processId}
-                                   key={'restart-' + processId}
                                    cluster/>
                 </div>
             ))
@@ -58,6 +43,8 @@ const mapStateToProps = (state, ownProps) => {
 
     const processIds = Object.values(state.model.processes).filter(process => {
         return process.applicationId === applicationId;
+    }).filter(process => {
+        return isProcessActive(process);
     }).map(process => {
         return process.id;
     });

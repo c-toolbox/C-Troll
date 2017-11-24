@@ -5,8 +5,13 @@ import {
     RestartProcess,
     StopProcess,
     initializeGui,
+    setProcessStatus,
+    addProcessLogMessage,
+    setProcessLogMessageHistory,
     serverConnected,
     serverDisconnected } from './actions';
+
+import deepFreeze from 'deep-freeze';
 
 let socket = null;
 
@@ -58,18 +63,20 @@ function serverConnect(dispatch) {
 
     socket.onmessage = (message) => {
         const data = JSON.parse(message.data);
+        deepFreeze(data);
         switch (data.type) {
             case 'GuiInit':
+                console.log(data);
                 dispatch(initializeGui(data.payload));
                 break;
             case 'GuiProcessStatus':
-                //this.handleProcessStatus(data.payload);
+                dispatch(setProcessStatus(data.payload));
                 break;
             case 'GuiProcessLogMessage':
-                //this.handleProcessLogMessage(data.payload);
+                dispatch(addProcessLogMessage(data.payload));
                 break;
             case 'GuiProcessLogMessageHistory':
-                //this.handleProcessLogMessageHistory(data.payload);
+                dispatch(setProcessLogMessageHistory(data.payload));
                 break;
             default:
                 console.log('unknown message type: "' + data.type + '"', data.payload);
@@ -79,6 +86,7 @@ function serverConnect(dispatch) {
 
 const apiMiddleware = store => next => action => {
     const payload = action.payload;
+
     switch (action.type) {
         case ServerConnect:
             serverConnect(store.dispatch);
@@ -92,16 +100,12 @@ const apiMiddleware = store => next => action => {
         break;
         case RestartProcess:
             sendRestartProcessCommand(
-                payload.applicationId,
-                payload.configurationId,
-                payload.clusterId,
+                payload.processId
             );
         break;
         case StopProcess:
             sendStopProcessCommand(
-                payload.applicationId,
-                payload.configurationId,
-                payload.clusterId,
+                payload.processId
             );
         break;
         default: break;

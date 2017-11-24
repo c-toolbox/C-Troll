@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import {
-	setApplicationSearchString,
-	addApplicationFilterTag,
-	removeApplicationFilterTag, 
-	clearApplicationFilterTags
+    setApplicationSearchString,
+    addApplicationFilterTag,
+    removeApplicationFilterTag, 
+    clearApplicationFilterTags
 } from '../actions';
 
 import SearchField from '../components/searchfield';
@@ -12,28 +12,29 @@ import TagButtons from '../components/tagbuttons';
 import List from '../components/list';
 
 import ApplicationButton from './applicationbutton';
+import StartButton from './startbutton';
 import ApplicationProcessButtons from './applicationprocessbuttons';
-
+import { defaultApplicationCluster, defaultApplicationConfiguration } from '../query';
 
 const getTags = state => {
-	const filterTags = state.session.applications.filterTags;
+    const filterTags = state.session.applications.filterTags;
     const allApplications = Object.values(state.model.applications);
-	const tagMap = {};
+    const tagMap = {};
 
     allApplications.forEach(application => {
         application.tags.forEach(name => {
             tagMap[name] = {
-            	name,
+                name,
                 selected: filterTags.indexOf(name) !== -1
             };
         });
     });
 
     const tags = Object.values(tagMap).map((v) => {
-    	return {
-    		name: v.name,
-    		selected: v.selected
-    	}
+        return {
+            name: v.name,
+            selected: v.selected
+        }
     })
 
     return tags;
@@ -44,18 +45,18 @@ const nameMatchesFilter = (word, filter) => {
 }
 
 const getApplicationId = application => {
-	return application.id;
+    return application.id;
 }
 
 const getProcessId = process => {
-	return process.id;
+    return process.id;
 }
 
 const applicationTagFilter = filterTags => application => {
-	if (filterTags.length === 0) {
-		return true;
-	}
-	let found = false;
+    if (filterTags.length === 0) {
+        return true;
+    }
+    let found = false;
     filterTags.forEach((filterTag) => {
         if (application.tags.indexOf(filterTag) !== -1) {
             found = true;
@@ -87,106 +88,130 @@ const filterApplicationByWord = (application, word) => {
 };
 
 const applicationStringFilter = filterString => application => {
-	const lowerFilterString = filterString.toLowerCase();
+    const lowerFilterString = filterString.toLowerCase();
     const filters = lowerFilterString.split(' ');
 
-	if (filters.length === 0) {
-		return true;
-	}
+    if (filters.length === 0) {
+        return true;
+    }
 
-	let found = false;
-	filters.forEach((filter) => {
+    let found = false;
+    filters.forEach((filter) => {
         found = filterApplicationByWord(application, filter);
         if (!found) {
-        	return false;
+            return false;
         }
     });
     return found;
 }
 
 function getApplicationIds(state) {
-	const tags = state.session.applications.filterTags;
-	const searchString = state.session.applications.searchString;
+    const tags = state.session.applications.filterTags;
+    const searchString = state.session.applications.searchString;
 
-	const allApplications = Object.values(state.model.applications);
-	return allApplications
-		.filter(applicationStringFilter(searchString))
-		.filter(applicationTagFilter(tags))
-		.map(getApplicationId);
+    const allApplications = Object.values(state.model.applications);
+    return allApplications
+        .filter(applicationStringFilter(searchString))
+        .filter(applicationTagFilter(tags))
+        .map(getApplicationId);
 }
 
 function getProcessIds(state) {
-	const allProcesses = Object.values(state.model.processes);
-	return allProcesses.map(getProcessId);
+    const allProcesses = Object.values(state.model.processes);
+    return allProcesses.map(getProcessId);
 }
 
 
 const mapStateToProps = (state) => {
-	const applicationIds = getApplicationIds(state);
-	const processIds = getProcessIds(state);
-	const tags = getTags(state);
+    const applicationIds = getApplicationIds(state);
+    const processIds = getProcessIds(state);
+    const tags = getTags(state);
 
-	return {
-		applicationIds,
-	    processIds,
-	    tags
-	}
+    const defaultApplicationConfigurations = {};
+
+    applicationIds.forEach((applicationId) => {
+        const clusterId = defaultApplicationCluster(state, applicationId);
+        const configurationId = defaultApplicationConfiguration(state, applicationId);
+
+        if (clusterId && configurationId) {
+            defaultApplicationConfigurations[applicationId] = {
+                clusterId,
+                configurationId
+            }
+        }
+    });
+
+    return {
+        applicationIds,
+        processIds,
+        tags,
+        defaultApplicationConfigurations
+    }
 }
 
 const mapDispatchToProps = dispatch => {
-	const onSearch = searchString => {
-		dispatch(setApplicationSearchString(searchString));
-	};
+    const onSearch = searchString => {
+        dispatch(setApplicationSearchString(searchString));
+    };
 
-	const onAddTag = tag => {
-		dispatch(addApplicationFilterTag(tag))
-	};
+    const onAddTag = tag => {
+        dispatch(addApplicationFilterTag(tag))
+    };
 
-	const onRemoveTag = tag => {
-		dispatch(removeApplicationFilterTag(tag))
-	};
+    const onRemoveTag = tag => {
+        dispatch(removeApplicationFilterTag(tag))
+    };
 
-	const onClearTags = tag => {
-		dispatch(clearApplicationFilterTags(tag))
-	};
+    const onClearTags = tag => {
+        dispatch(clearApplicationFilterTags(tag))
+    };
 
-	return {
-		onSearch,
-	    onAddTag,
-	    onRemoveTag,
-	    onClearTags
-	}
+    return {
+        onSearch,
+        onAddTag,
+        onRemoveTag,
+        onClearTags
+    }
 }
 
 const Applications = (props) => {
-	return (
-		<div>
-        <SearchField placeholder="Search applications..." onSearch={props.onSearch}/>
-        <TagButtons tags={props.tags}
-                    onAddTag={props.onAddTag}
-                    onRemoveTag={props.onRemoveTag}
-                    onClearTags={props.onClearTags} />
+    return (
+        <div>
+            <SearchField placeholder="Search applications..." onSearch={props.onSearch}/>
+            <TagButtons tags={props.tags}
+                        onAddTag={props.onAddTag}
+                        onRemoveTag={props.onRemoveTag}
+                        onClearTags={props.onClearTags} />
 
-        <div className="row"><h2>Applications</h2></div>
-        <List>
-            {
-                props.applicationIds.map((applicationId) => (
-                    <ApplicationButton applicationId={applicationId}
-                                       key={applicationId}>
+            <div className="row"><h2>Applications</h2></div>
+            <List>
+                {
+                    props.applicationIds.map((applicationId) => {
+                        const conf = props.defaultApplicationConfigurations[applicationId];
 
-                        <ApplicationProcessButtons applicationId={applicationId}
-                                                   startButtons="default"/>
-                    </ApplicationButton>
-                ))
-            }
-        </List>
+                        const startButton = conf ? (
+                            <StartButton applicationId={applicationId}
+                                             clusterId={conf.clusterId}
+                                             configurationId={conf.configurationId}
+                                             cluster/>
+                                             ) : null;
+                        return (
+                            <ApplicationButton applicationId={applicationId}
+                                               key={applicationId}>
+                                {startButton}
+                                <ApplicationProcessButtons applicationId={applicationId}/>
+                            </ApplicationButton>
+                        );
+                    })
+                }
+            </List>
 
 
-        <div className="row"><h2>Processes</h2></div>
-        <List>
-        </List>
-    </div>
-	)
+            <div className="row"><h2>Processes</h2></div>
+            <List>
+            </List>
+        </div>
+    )
 };
 
 

@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
-import StopButton from '../components/stopbutton';
-import { stopProcess } from '../actions';
+import RestartButton from '../components/restartbutton';
+import { restartProcess } from '../actions';
 import { applicationNameByProcessId,
          clusterNameByProcessId } from '../query';
 
@@ -23,7 +23,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     const onClick = () => {
-        dispatch(stopProcess(ownProps.processId));
+        dispatch(restartProcess(ownProps.processId));
     }
 
     return {
@@ -31,4 +31,4 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(StopButton);
+export default connect(mapStateToProps, mapDispatchToProps)(RestartButton);

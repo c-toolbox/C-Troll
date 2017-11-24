@@ -1,11 +1,12 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import ApplicationDetails from '../components/applicationdetails';
+import ApplicationClusterButtons from './applicationclusterbuttons';
 
 const ApplicationDetailsContainer = props => {
 
-    const clusterButtons = [];
-    const configurationButtons = [];
+    const clusterButtons = <ApplicationClusterButtons applicationId={props.id} />;
+    const configurationButtons = []; //<ApplicationConfigurationButtons applicationId={props.id} />;
 
     return (
         <ApplicationDetails tags={props.tags}
@@ -28,12 +29,14 @@ const mapStateToProps = (state, ownProps) => {
         }
     }
 
+    const id = application.id;
     const name = application.name;
     const tags = application.tags;
     const description = application.description;
     const clusterIds = application.clusters || [];
    
     return {
+        id,
         name,
         description,
         tags,

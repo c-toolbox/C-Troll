@@ -7,19 +7,22 @@ const icon = (<svg className="start-icon" xmlns="http://www.w3.org/2000/svg" vie
 
 const StartButton = props => {
     const classNames = ['start-button', 'no-select', 'sub-button'];
-    if (props.enabled === false) {
+    if (props.enabled === false || !props.onClick) {
         classNames.push('inactive');
     }
 
     const start = (evt) => {
-        props.onClick()
+        if (!props.enabled) {
+            return;
+        }
+        props.onClick && props.onClick();
         evt.stopPropagation();
     }
 
     let text = null;
-    if (props.applicaiton && props.cluster) {
+    if (props.application && props.cluster) {
         text = (<span>{props.application} on {props.cluster}</span>);
-    } else if (props.applicaiton) {
+    } else if (props.application) {
         text = (<span>{props.application}</span>);
     } else if (props.cluster) {
         text = (<span>{props.cluster}</span>);

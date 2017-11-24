@@ -2,7 +2,7 @@ import {
     ServerConnect,
     ServerConnected
 
-} from '../actions';
+} from '../../actions';
 
 const initialConnectionState = {
     connecting: false,

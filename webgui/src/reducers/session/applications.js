@@ -5,7 +5,7 @@ import {
     AddApplicationFilterTag,
     RemoveApplicationFilterTag,
     ClearApplicationFilterTags
-} from '../actions';
+} from '../../actions';
 
 function setApplicationSearchString(state, action) {
     return action.payload.searchString;

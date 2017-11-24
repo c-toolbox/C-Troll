@@ -73,8 +73,8 @@ ApplicationDetails.propTypes = {
     name: PropTypes.string,
     description: PropTypes.string,
     tags: PropTypes.array,
-    configurationButtons: PropTypes.array,
-    clusterButtons: PropTypes.array
+    configurationButtons: PropTypes.node,
+    clusterButtons: PropTypes.node
 };
 
 export default ApplicationDetails;

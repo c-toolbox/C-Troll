@@ -7,8 +7,11 @@ const mapStateToProps = (state, ownProps) => {
     const clusterId = ownProps.clusterId;
     const configurationId = ownProps.configurationId;
 
+    const clusterConnected = state.model.clusters[clusterId] &&
+        state.model.clusters[clusterId].connected;
+
     const props = {
-        enabled: state.connection.connected
+        enabled: state.connection.connected && clusterConnected
     };
 
     if (ownProps.application) {
@@ -30,7 +33,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
     const onClick = () => {
         dispatch(
-            startProcess(ownProps.applicaitonId,
+            startProcess(ownProps.applicationId,
                          ownProps.configurationId,
                          ownProps.clusterId)
             );

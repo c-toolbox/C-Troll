@@ -1,7 +1,24 @@
+import { combineReducers } from 'redux';
+import applications from './applications';
+import processes from './processes';
+import clusters from './clusters'
+
+export default combineReducers({
+    applications,
+    processes,
+    clusters
+})
+
+/*
+
+
 import {
     InitializeGui,
     StartProcess,
-} from '../actions';
+    SetProcessStatus,
+    AddProcessLogMessage,
+    SetProcessLogMessageHistory
+} from '../../actions';
 
 const initialModelState = {
     applications: {},
@@ -51,16 +68,20 @@ function initializeGui(state, action) {
     return newState;
 }
 
-function startProcess(state, action) {
-	return state;
-}
-
 export default (state = initialModelState, action) => {
     switch (action.type) {
         case InitializeGui:
             return initializeGui(state, action);
         case StartProcess:
         	return startProcess(state, action);
+        case SetProcessStatus:
+            return setProcessStatus(state, action);
+        case SetProcessLogMessageHistory:
+            return setProcessLogMessageHistory(state, action);
+        case AddProcessLogMessage:
+            return addProcessLogMessage(state, action);
+
        	default: return state;
     }
 };
+*/
