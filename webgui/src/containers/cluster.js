@@ -1,4 +1,58 @@
+import { connect } from 'react-redux';
+
 import React from 'react';
+import ClusterDetails from './clusterdetails';
+import Breadcrumbs from '../components/breadcrumbs';
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
+
+const Cluster = props => {
+    if (props.loading) {
+        return null;
+    } else if (props.found) {
+        return <ClusterDetails clusterId={props.clusterId}/>
+    } else {
+        return (
+            <Breadcrumbs>
+                <Link to="clusters">Clusters</Link>
+                Not found
+            </Breadcrumbs>
+        )
+    }
+};
+
+Cluster.propTypes = {
+    loading: PropTypes.bool.isRequired,
+    found: PropTypes.bool.isRequired,
+    clusterId: PropTypes.string
+};
+
+const mapStateToProps = (state, ownProps) => {
+    const clusterId = ownProps.match.params.clusterId.replace('>', '/');
+    const cluster = state.model.clusters[clusterId];
+
+    if (cluster) {
+        return {
+            loading: false,
+            found: true,
+            clusterId
+        }
+    } else {
+        return {
+            loading: state.connection.connecting,
+            found: false
+        }
+    }
+};
+
+export default connect(mapStateToProps)(Cluster);
+
+
+
+
+
+
+/*import React from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
 import Breadcrumbs from './breadcrumbs';
@@ -74,3 +128,4 @@ class Cluster extends React.Component {
 }
 
 export default Cluster;
+*/

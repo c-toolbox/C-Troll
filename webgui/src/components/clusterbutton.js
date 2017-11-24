@@ -25,8 +25,8 @@ const ClusterButton = props => {
 }
 
 ClusterButton.propTypes = {
-    applicationId: PropTypes.string.isRequired,
-    applicationName: PropTypes.string.isRequired,
+    clusterId: PropTypes.string.isRequired,
+    clusterName: PropTypes.string.isRequired,
     tags: PropTypes.array,
 };
 

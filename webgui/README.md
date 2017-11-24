@@ -9,6 +9,7 @@ Start the webpack dev server:
 Start the backend server (connects web backend to core)
 
 - ```cd backend```
+- ```npm install```
 - ```npm start```
 
 Visit  ```localhost:<port> ``` in a browser

@@ -4,8 +4,8 @@ import { Route } from 'react-router-dom';
 import Applications from './applications';
 import Application from './application';
 import Clusters from './clusters';
+import Cluster from './cluster';
 
-//import Cluster from './cluster';
 //import Process from './process';
 
 
@@ -16,6 +16,7 @@ const MainWindow = () => {
 		    <Route path="/applications" component={Applications} />
 		    <Route path="/application/:applicationId" component={Application}/>
 		    <Route path="/clusters" component={Clusters} />
+		    <Route path="/cluster/:clusterId" component={Cluster}/>
 		</div>
 	)
 
