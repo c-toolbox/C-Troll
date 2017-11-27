@@ -16,6 +16,7 @@ export const SetApplicationSearchString = "SetApplicationSearchString";
 export const AddApplicationFilterTag = "AddApplicationFilterTag";
 export const RemoveApplicationFilterTag = "RemoveApplicationFilterTag";
 export const ClearApplicationFilterTags = "ClearApplicationFilterTags";
+export const SetApplicationFilterTagsVisibility = "SetApplicationFilterTagsVisibility";
 
 // Server actions
 export const ServerConnected = "ServerConnected";
@@ -148,3 +149,12 @@ export function clearApplicationFilterTags() {
         payload: {}
     }
 };
+
+export function setApplicationFilterTagsVisibility(visible) {
+    return {
+        type: SetApplicationFilterTagsVisibility,
+        payload: {
+            visible
+        }
+    };
+}

@@ -4,8 +4,13 @@ import {
     SetApplicationSearchString,
     AddApplicationFilterTag,
     RemoveApplicationFilterTag,
-    ClearApplicationFilterTags
+    ClearApplicationFilterTags,
+    SetApplicationFilterTagsVisibility,
 } from '../../actions';
+
+function setApplicationFilterTagsVisibility(state, action) {
+    return action.payload.visible
+}
 
 function setApplicationSearchString(state, action) {
     return action.payload.searchString;
@@ -52,7 +57,15 @@ const filterTags = (state = [], action) => {
     }
 };
 
+const filterTagsVisibility = (state = false, action) => {
+    switch (action.type) {
+        case SetApplicationFilterTagsVisibility: return setApplicationFilterTagsVisibility(state, action);
+        default: return state;
+    }
+}
+
 export default combineReducers({
     filterTags,
-    searchString
+    searchString,
+    filterTagsVisibility
 });

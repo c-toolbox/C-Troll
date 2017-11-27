@@ -1,0 +1,12 @@
+
+.expandable-icon {
+    height: 0.6em;
+    vertical-align: middle;
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
+
+.expandable-icon polygon {
+    fill: #fff;
+}

@@ -4,11 +4,13 @@ import {
     setApplicationSearchString,
     addApplicationFilterTag,
     removeApplicationFilterTag, 
-    clearApplicationFilterTags
+    clearApplicationFilterTags,
+    setApplicationFilterTagsVisibility
 } from '../actions';
 
 import SearchField from '../components/searchfield';
 import TagButtons from '../components/tagbuttons';
+import {Expandable, ExpandIcon} from '../components/expandable';
 import List from '../components/list';
 
 import ApplicationButton from './applicationbutton';
@@ -150,12 +152,15 @@ const mapStateToProps = (state) => {
 
     const initialSearchText = state.session.applications.searchString;
 
+    const tagsVisibility = state.session.applications.filterTagsVisibility;
+
     return {
         applicationIds,
         processIds,
         tags,
         defaultApplicationConfigurations,
-        initialSearchText
+        initialSearchText,
+        tagsVisibility
     }
 }
 
@@ -176,22 +181,33 @@ const mapDispatchToProps = dispatch => {
         dispatch(clearApplicationFilterTags(tag))
     };
 
+    const onSetTagsVisibility = visibility => {
+        dispatch(setApplicationFilterTagsVisibility(visibility));
+    };
+
     return {
         onSearch,
         onAddTag,
         onRemoveTag,
-        onClearTags
+        onClearTags,
+        onSetTagsVisibility
     }
 }
 
 const Applications = (props) => {
+    const tagHeader = <h2>Tags<ExpandIcon expand={!props.tagsVisibility}/></h2>
+
     return (
         <div>
             <SearchField initialText={props.initialSearchText} placeholder="Search applications..." onSearch={props.onSearch}/>
-            <TagButtons tags={props.tags}
-                        onAddTag={props.onAddTag}
-                        onRemoveTag={props.onRemoveTag}
-                        onClearTags={props.onClearTags} />
+            <div className="row">
+                <Expandable expanded={props.tagsVisibility} header={tagHeader} onToggle={props.onSetTagsVisibility}>
+                    <TagButtons tags={props.tags}
+                            onAddTag={props.onAddTag}
+                            onRemoveTag={props.onRemoveTag}
+                            onClearTags={props.onClearTags} />
+                </Expandable>
+            </div>    
 
             <div className="row"><h2>Applications</h2></div>
             <List>

@@ -23,7 +23,7 @@ const tagButton = (tag, props) => {
 }
 
 const TagButtons = (props) => {
-	return (<div className="row">
+	return (<div>
         {
             props.tags.map(tag => tagButton(tag, props))
         }
