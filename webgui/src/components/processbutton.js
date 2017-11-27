@@ -1,4 +1,37 @@
 import React from 'react';
+import TagBox from './tagbox';
+import { Link } from 'react-router-dom';
+import MoreButton from './morebutton';
+import PropTypes from 'prop-types';
+
+const ProcessButton = props => {
+    const id = '' + props.processId;
+    const name = props.applicationName;
+    const tags = props.tags;
+    const processUrl = '/process/' + id.replace('/', '>');
+    
+    return (
+        <div className="square button no-select">
+            <Link className="click-area" to={processUrl}/>
+            <div className="application-icon"/>
+            <div className="main">{name}</div>
+            <div className="sub"/>
+            {props.children}
+            <MoreButton to={processUrl}/>
+        </div>);
+}
+
+ProcessButton.propTypes = {
+    processId: PropTypes.number.isRequired,
+    applicationName: PropTypes.string.isRequired,
+    tags: PropTypes.array,
+};
+
+export default ProcessButton;
+
+
+/*
+import React from 'react';
 import api from '../api';
 
 import StopButton from './stopbutton';
@@ -42,10 +75,6 @@ class ProcessButton extends React.Component {
 
         const processUrl = '/processes/' + process.id;
 
-        /*const open = () => {
-            browserHistory.push(processUrl);
-        };*/
-
         content.push(<MoreButton to={processUrl} key="more"/>);
         content.push(<div key="clusterStatus" className="sub">{process.clusterStatus}</div>);
 
@@ -66,3 +95,4 @@ ProcessButton.propTypes = {
 };
 
 export default ProcessButton;
+*/

@@ -12,9 +12,12 @@ import TagButtons from '../components/tagbuttons';
 import List from '../components/list';
 
 import ApplicationButton from './applicationbutton';
+import ProcessButton from './processbutton';
 import StartButton from './startbutton';
 import ApplicationProcessButtons from './applicationprocessbuttons';
-import { defaultApplicationCluster, defaultApplicationConfiguration } from '../query';
+import { defaultApplicationCluster,
+         defaultApplicationConfiguration,
+         isProcessActive } from '../query';
 
 const getTags = state => {
     const filterTags = state.session.applications.filterTags;
@@ -118,7 +121,9 @@ function getApplicationIds(state) {
 
 function getProcessIds(state) {
     const allProcesses = Object.values(state.model.processes);
-    return allProcesses.map(getProcessId);
+    return allProcesses.filter(process => {
+        return isProcessActive(process);
+    }).map(getProcessId);
 }
 
 
@@ -209,6 +214,16 @@ const Applications = (props) => {
 
             <div className="row"><h2>Processes</h2></div>
             <List>
+                {
+                    props.processIds.map((processId) => {
+                        return (
+                            <ProcessButton processId={processId}
+                                               key={processId}>
+                            </ProcessButton>
+                        );
+                    })
+                }
+
             </List>
         </div>
     )

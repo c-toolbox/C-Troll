@@ -24,25 +24,3 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 export default connect(mapStateToProps)(ApplicationButton);
-
-
-/*
-
-const buttons = [];
-
-        if (application.clusters.length > 0) {
-            const clusterId = application.clusters[0];
-            const cluster = api.clusters.find((c) => {
-                return c.id === clusterId;
-            });
-            if (cluster) {
-                buttons.push((<StartButton key="start" type="cluster" application={application} cluster={cluster}/>));
-            } else {
-                buttons.push(<MoreButton key="disabled"/>);
-            }
-        } else {
-            buttons.push(<MoreButton key="disabled"/>);
-        }
-
-        buttons.push(<MoreButton to={appUrl} key="more"/>);
-*/
