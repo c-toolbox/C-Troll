@@ -45,13 +45,12 @@ html, body {
         position: static;
         height: 100px;
         width: 100%;
+    }
 
-        a {
-            display: inline-block;
-            width: 100px;
-            padding-top: 20px;
-        }
-
+    #side-bar a {
+        display: inline-block;
+        width: 100px;
+        padding-top: 20px;
     }
 
     #main-container {
