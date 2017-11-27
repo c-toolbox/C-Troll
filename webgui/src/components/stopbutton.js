@@ -15,7 +15,7 @@ const StopButton = props => {
         if (!props.enabled) {
             return;
         }
-        props.onClick()
+        props.onClick && props.onClick()
         evt.stopPropagation();
     }
 

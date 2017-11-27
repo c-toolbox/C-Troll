@@ -14,6 +14,8 @@ import List from '../components/list';
 import ApplicationButton from './applicationbutton';
 import ProcessButton from './processbutton';
 import StartButton from './startbutton';
+import StopButton from './stopbutton';
+import RestartButton from './restartbutton';
 import ApplicationProcessButtons from './applicationprocessbuttons';
 import { defaultApplicationCluster,
          defaultApplicationConfiguration,
@@ -219,6 +221,10 @@ const Applications = (props) => {
                         return (
                             <ProcessButton processId={processId}
                                                key={processId}>
+
+                                <StopButton processId={processId} />
+                                <RestartButton processId={processId} />
+
                             </ProcessButton>
                         );
                     })

@@ -1,11 +1,18 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import ClusterDetails from '../components/clusterdetails';
+import ProcessButton from './processbutton';
+import NodeButton from './nodebutton';
+import { isProcessActive } from '../query';
 
 const ClusterDetailsContainer = props => {
 
-    const processButtons = [];
-    const nodeButtons = [];
+    const processButtons = props.processIds.map(processId => (
+        <ProcessButton key={processId} processId={processId}/>
+    ));
+    const nodeButtons = props.nodeIds.map(nodeId => (
+        <NodeButton key={nodeId} clusterId={props.clusterId} nodeId={nodeId}/>
+    ));
 
     return (
         <ClusterDetails name={props.name}
@@ -26,13 +33,24 @@ const mapStateToProps = (state, ownProps) => {
         }
     }
 
+    const processIds = Object.values(state.model.processes).filter(process => {
+        return process.clusterId === clusterId;
+    }).filter(process => {
+        return isProcessActive(process);
+    }).map(process => process.id);
+
+
+    const nodeIds = [];
 
     const name = cluster.name;
     const description = cluster.description;
    
     return {
         name,
-        description
+        description,
+        clusterId,
+        processIds,
+        nodeIds
     }
 };
 

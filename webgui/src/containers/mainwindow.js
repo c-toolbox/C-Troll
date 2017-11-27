@@ -5,8 +5,7 @@ import Applications from './applications';
 import Application from './application';
 import Clusters from './clusters';
 import Cluster from './cluster';
-
-//import Process from './process';
+import Process from './process';
 
 
 const MainWindow = () => {
@@ -15,6 +14,7 @@ const MainWindow = () => {
 		    <Route exact path="/" component={Applications}/>
 		    <Route path="/applications" component={Applications} />
 		    <Route path="/application/:applicationId" component={Application}/>
+		    <Route path="/process/:processId" component={Process}/>
 		    <Route path="/clusters" component={Clusters} />
 		    <Route path="/cluster/:clusterId" component={Cluster}/>
 		</div>

@@ -1,7 +1,7 @@
 import { InitializeGui,
 		 SetProcessStatus,
 		 AddProcessLogMessage,
-		 SetProcessLogMessageHistory } from '../../actions'
+		 SetProcessLogMessageHistory } from '../../actions';
 
 const initialProcessState = {};
 
@@ -40,16 +40,41 @@ const setProcessStatus = (state, action) => {
 		newProcess = createProcess(data);
 	}
 
+	console.log(newProcess);
+
 	newState[newProcess.id] = newProcess;
 	return newState;
 }
 
-const addProcessLogMessage = (state, action) => { 
-	return state;
+const addProcessLogMessage = (state, action) => {
+	const data = action.payload.data;
+
+	const newState = {
+		...state,
+		[data.processId]: {
+			...state[data.processId],
+			logMessages: [
+				...state[data.processId].logMessages || [],
+				{...data}
+			]
+		}
+	};
+	return newState;
 }
 
 const setProcessLogMessageHistory = (state, action) => {
-	return state;
+	const data = action.payload.data;
+	const processId = data.processId;
+	const message = data.message;
+	const time = data.time;
+	const newState = {
+		...state,
+		[data.processId]: {
+			...state[data.processId],
+			logMessages: data.messages
+		}
+	};
+	return newState;
 }
 
 export default (state = initialProcessState, action) => {

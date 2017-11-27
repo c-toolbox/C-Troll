@@ -39,7 +39,9 @@ const processes = (props) => {
             <div className="row">
                 <h2>Processes</h2>
             </div>
+            <div className="row">
             {buttons}
+            </div>
         </div>
     );
 }
