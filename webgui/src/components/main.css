@@ -31,6 +31,12 @@ body {
     width: calc(100% - 100px);
     overflow: auto;
 }
+@media (max-width: 600px) {
+    #main-container {
+        margin-left: 0;
+        width: 100%;
+    }
+}
 
 html, body {
     background-color: #49494a;
@@ -38,25 +44,6 @@ html, body {
     margin: 0;
     color: #eee;
     font-family: "Source Sans Pro";
-}
-
-@media (max-width: 600px) {
-    #side-bar {
-        position: static;
-        height: 100px;
-        width: 100%;
-    }
-
-    #side-bar a {
-        display: inline-block;
-        width: 100px;
-        padding-top: 20px;
-    }
-
-    #main-container {
-        margin-left: 0;
-        width: 100%;
-    }
 }
 
 
@@ -152,22 +139,22 @@ p {
 .square.error {
     background-color: #BA543C;
     color: #FFEEDE;
+}
 
-    .cluster-icon polygon {
-        stroke: #e57455;
-    }
+.square.error .cluster-icon polygon {
+    stroke: #e57455;
+}
 
-    .click-area:active {
-        background-color: #CF694D;
-    }
+.square.error .click-area:active {
+    background-color: #CF694D;
+}
 
-    .more-button :hover {
-        background-color: #CF694D;
-    }
+.square.error .more-button :hover {
+    background-color: #CF694D;
+}
 
-    .more-button :active {
-        background-color: #e57455;
-    }
+.square.error .more-button :active {
+    background-color: #e57455;
 }
 
 .square .click-area {
@@ -177,10 +164,10 @@ p {
     height: 100%;
     top: 0;
     color: #ddd;
+}
 
-    &:active {
-        background-color: #222;
-    }
+.square .click-area:active {
+    background-color: #222;
 }
 
 .square .sub-button {
@@ -215,8 +202,6 @@ p {
     pointer-events: none;
     width: 2em;
     margin: 1.5em auto;
-
-
 }
 
 .square .cluster-icon polygon {
@@ -324,13 +309,12 @@ p {
     transition: 0.2s all;
 }
 
-
-.stop-button &:active {
+.stop-button:active {
     transition: none;
     background-color: #E87C62;
 }
 
-.stop-button &.inactive {
+.stop-button .inactive {
     background-color: #aaa;
     opacity: 0.15;
     cursor: default;
@@ -398,10 +382,10 @@ p {
     color: #fff;
     width: calc(100% - 1em);
     outline: none;
+}
 
-    :placeholder {
-        color: #888;
-    }
+.search :placeholder {
+    color: #888;
 }
 
 .no-hits {
@@ -417,32 +401,4 @@ p {
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
                                   not supported by any browser */
-}
-
-.breadcrumbs {
-    width: calc(100% - 2em);
-    background-color: #404040;
-    padding: 1em;
-    font-size: 1.2em;
-}
-
-.breadcrumbs>div {
-    display: inline-block;
-}
-
-.breadcrumbs a {
-    color: #fff;
-    text-decoration: none;
-}
-
-.breadcrumbs .right-arrow {
-    height: 0.6em;
-    vertical-align: middle;
-    margin-left: 10px;
-    margin-right: 5px;
-}
-
-
-.breadcrumbs .right-arrow polygon {
-    fill: #fff;
 }

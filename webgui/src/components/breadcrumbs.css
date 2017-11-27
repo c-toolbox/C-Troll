@@ -1,0 +1,28 @@
+
+.breadcrumbs {
+    width: calc(100% - 2em);
+    background-color: #404040;
+    padding: 1em;
+    font-size: 1.2em;
+}
+
+.breadcrumbs>div {
+    display: inline-block;
+}
+
+.breadcrumbs a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.breadcrumbs .right-arrow {
+    height: 0.6em;
+    vertical-align: middle;
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
+
+.breadcrumbs .right-arrow polygon {
+    fill: #fff;
+}

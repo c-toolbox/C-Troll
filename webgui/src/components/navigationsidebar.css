@@ -42,8 +42,21 @@
     display: block;
     margin: auto;
     margin-bottom: 1em;
+}
 
 
+@media (max-width: 600px) {
+    #side-bar {
+        position: static;
+        height: 100px;
+        width: 100%;
+    }
+
+    #side-bar a {
+        display: inline-block;
+        width: 100px;
+        padding-top: 20px;
+    }
 }
 
 

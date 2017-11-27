@@ -11,9 +11,15 @@ const ClusterButton = props => {
     const name = props.clusterName;
     const appUrl = '/cluster/' + id.replace('/', '>');
     const clusterStatus = props.clusterStatus;
-    
+
+    const classNames = ['square', 'button', 'no-select'];
+
+    if (clusterStatus === 'Disconnected') {
+        classNames.push('error');
+    }
+
     return (
-        <div className="square button no-select">
+        <div className={classNames.join(' ')}>
             {icon}
             <Link className="click-area" to={appUrl}/>
             <div className="cluster-icon"/>

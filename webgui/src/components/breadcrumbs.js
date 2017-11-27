@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import './breadcrumbs.css';
 
 const rightArrowIcon = (<svg className="right-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
     <polygon points="8.53 64 0 55.47 23.47 32 0 8.53 8.53 0 40.53 32 8.53 64"/>
