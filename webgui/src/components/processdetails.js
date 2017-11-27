@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Breadcrumbs from './breadcrumbs';
-import TagLink from './taglink';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 

@@ -65,12 +65,10 @@ const addProcessLogMessage = (state, action) => {
 const setProcessLogMessageHistory = (state, action) => {
 	const data = action.payload.data;
 	const processId = data.processId;
-	const message = data.message;
-	const time = data.time;
 	const newState = {
 		...state,
-		[data.processId]: {
-			...state[data.processId],
+		[processId]: {
+			...state[processId],
 			logMessages: data.messages
 		}
 	};

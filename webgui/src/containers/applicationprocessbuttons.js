@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import StopButton from '../containers/stopbutton';
 import RestartButton from '../containers/restartbutton';
-import StartButton from '../containers/startbutton';
 
 import { isProcessActive } from '../query';
 

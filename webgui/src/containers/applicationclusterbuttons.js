@@ -5,10 +5,6 @@ import ClusterProcessButtons from './clusterprocessbuttons';
 import StartButton from './startbutton';
 import List from '../components/list';
 
-const getClusterId = (cluster) => {
-    return cluster.id;
-}
-
 const getConfigurationId = (state, applicationId) => {
     return state.model.applications[applicationId].configurations[0] ? 
             state.model.applications[applicationId].configurations[0].id :

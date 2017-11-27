@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import MoreButton from './morebutton';
 import PropTypes from 'prop-types';
 
 const icon = (<svg className="cluster-icon" xmlns="http://www.w3.org/2000/svg" viewBox="-6 -2 64 64">
@@ -11,6 +10,7 @@ const ClusterButton = props => {
     const id = props.clusterId;
     const name = props.clusterName;
     const appUrl = '/cluster/' + id.replace('/', '>');
+    const clusterStatus = props.clusterStatus;
     
     return (
         <div className="square button no-select">
@@ -18,9 +18,8 @@ const ClusterButton = props => {
             <Link className="click-area" to={appUrl}/>
             <div className="cluster-icon"/>
             <div className="main">{name}</div>
-            <div className="sub"/>
+            <div className="sub">{clusterStatus}</div>
             {props.children}
-            <MoreButton to={appUrl}/>
         </div>);
 }
 
@@ -28,6 +27,7 @@ ClusterButton.propTypes = {
     clusterId: PropTypes.string.isRequired,
     clusterName: PropTypes.string.isRequired,
     tags: PropTypes.array,
+    clusterStatus: PropTypes.string
 };
 
 export default ClusterButton;

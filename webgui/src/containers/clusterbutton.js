@@ -9,14 +9,17 @@ const mapStateToProps = (state, ownProps) => {
         return {
             clusterId,
             clusterName: 'Unknown',
+            clusterStatus: ''
         }
     }
 
     const clusterName = cluster.name;
+    const clusterStatus = cluster.connected ? "Connected" : "Disconnected";
     
     return {
         clusterId,
-        clusterName
+        clusterName,
+        clusterStatus
     }
 };
 

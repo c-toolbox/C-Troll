@@ -140,7 +140,7 @@ const mapStateToProps = (state) => {
         const clusterId = defaultApplicationCluster(state, applicationId);
         const configurationId = defaultApplicationConfiguration(state, applicationId);
 
-        if (clusterId && configurationId) {
+        if (clusterId !== undefined && configurationId !== undefined) {
             defaultApplicationConfigurations[applicationId] = {
                 clusterId,
                 configurationId

@@ -436,9 +436,10 @@ p {
 }
 
 .breadcrumbs .right-arrow {
-    height: 1.8em;
+    height: 0.6em;
     vertical-align: middle;
     margin-left: 10px;
+    margin-right: 5px;
 }
 
 

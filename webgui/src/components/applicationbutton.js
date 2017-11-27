@@ -1,7 +1,6 @@
 import React from 'react';
 import TagBox from './tagbox';
 import { Link } from 'react-router-dom';
-import MoreButton from './morebutton';
 import PropTypes from 'prop-types';
 
 const ApplicationButton = props => {
@@ -20,9 +19,7 @@ const ApplicationButton = props => {
             </div>
             <div className="application-icon"/>
             <div className="main">{name}</div>
-            <div className="sub"/>
             {props.children}
-            <MoreButton to={appUrl}/>
         </div>);
 }
 

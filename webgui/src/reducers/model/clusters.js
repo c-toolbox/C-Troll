@@ -4,11 +4,9 @@ const initialClusterState = {};
 
 const initializeGui = (state, action) => {
 	const newState = {};
-    console.log(action.payload.data.clusters);
     action.payload.data.clusters.forEach((c) => {
 		newState[c.id] = c;
 	});
-    console.log(newState);
 	return newState;
 }
 

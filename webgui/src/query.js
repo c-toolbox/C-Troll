@@ -29,7 +29,7 @@ export const defaultApplicationCluster = (state, applicationId) => {
 export const defaultApplicationConfiguration = (state, applicationId) => {
     const application = state.model.applications[applicationId];
     const configurations = application.configurations;
-    return configurations[0] && configurations[0].id;
+    return configurations[0] ? configurations[0].id : '';
 }
 
 export const isProcessActive = (process) => {
