@@ -148,11 +148,14 @@ const mapStateToProps = (state) => {
         }
     });
 
+    const initialSearchText = state.session.applications.searchString;
+
     return {
         applicationIds,
         processIds,
         tags,
-        defaultApplicationConfigurations
+        defaultApplicationConfigurations,
+        initialSearchText
     }
 }
 
@@ -184,7 +187,7 @@ const mapDispatchToProps = dispatch => {
 const Applications = (props) => {
     return (
         <div>
-            <SearchField placeholder="Search applications..." onSearch={props.onSearch}/>
+            <SearchField initialText={props.initialSearchText} placeholder="Search applications..." onSearch={props.onSearch}/>
             <TagButtons tags={props.tags}
                         onAddTag={props.onAddTag}
                         onRemoveTag={props.onRemoveTag}
