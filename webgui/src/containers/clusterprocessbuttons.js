@@ -14,9 +14,9 @@ const ClusterProcessButtons = props => (
             props.processIds && props.processIds.map(processId => (
                 <div key={processId}>
                     <StopButton processId={processId}
-                                appliction />
+                                application />
                     <RestartButton processId={processId}
-                                   appliction/>
+                                   application/>
                 </div>
             ))
         }

@@ -20,9 +20,9 @@ const StopButton = props => {
     }
 
     let text = null;
-    if (props.applicaiton && props.cluster) {
+    if (props.application && props.cluster) {
         text = (<span>{props.application} on {props.cluster}</span>);
-    } else if (props.applicaiton) {
+    } else if (props.application) {
         text = (<span>{props.application}</span>);
     } else if (props.cluster) {
         text = (<span>{props.cluster}</span>);
