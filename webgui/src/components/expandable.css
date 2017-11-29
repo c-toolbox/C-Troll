@@ -10,3 +10,7 @@
 .expandable-icon polygon {
     fill: #fff;
 }
+
+.expandable-button {
+	cursor: pointer;
+}

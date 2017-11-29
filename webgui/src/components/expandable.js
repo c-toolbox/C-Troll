@@ -24,13 +24,13 @@ const Expandable = props => {
     if (props.expanded) {
         return (
             <div>
-                <div onClick={onToggle}>{props.header}</div>
+                <div onClick={onToggle} className="expandable-button">{props.header}</div>
                 <div>{props.children}</div>
             </div>
         );
     } else {
         return (<div>
-            <div onClick={onToggle}>{props.header}</div>
+            <div onClick={onToggle} className="expandable-button">{props.header}</div>
         </div>);
     }
 }
