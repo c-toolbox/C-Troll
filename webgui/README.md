@@ -14,8 +14,8 @@ Start the backend server (connects web backend to core)
 
 Visit  ```localhost:<port> ``` in a browser
 
-## Build the app
-- ```npm run build``` (Bundles the whole web application into the `dist` folder.)
+## Build & distribute the app
+- ```npm run dist``` (Bundles the whole web application into the `dist` folder.)
 
 Distribute the contents of the dist folder.
 

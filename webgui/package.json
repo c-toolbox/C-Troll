@@ -19,7 +19,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dist": "mkdir dist && cp -r backend/* dist && npm run build && cp -r build dist/public"
   },
   "proxy": {
     "/api": {
