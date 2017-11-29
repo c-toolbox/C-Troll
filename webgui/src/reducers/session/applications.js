@@ -57,7 +57,7 @@ const filterTags = (state = [], action) => {
     }
 };
 
-const filterTagsVisibility = (state = false, action) => {
+const filterTagsVisibility = (state = true, action) => {
     switch (action.type) {
         case SetApplicationFilterTagsVisibility: return setApplicationFilterTagsVisibility(state, action);
         default: return state;

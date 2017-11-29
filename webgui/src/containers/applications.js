@@ -195,7 +195,14 @@ const mapDispatchToProps = dispatch => {
 }
 
 const Applications = (props) => {
-    const tagHeader = <h2>Tags<ExpandIcon expand={!props.tagsVisibility}/></h2>
+    const nSelectedTags = props.tags.filter(t => t.selected).length;
+    const nSelectedTagsInfo = props.tagsVisibility || nSelectedTags === 0 ?
+        null :
+        '(' + nSelectedTags + ' in filter)';
+
+    const tagHeader = (<h2>
+        Tags {nSelectedTagsInfo}<ExpandIcon expand={!props.tagsVisibility}/>
+    </h2>)
 
     return (
         <div>
