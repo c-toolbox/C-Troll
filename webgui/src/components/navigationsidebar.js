@@ -4,11 +4,18 @@ import { Link } from 'react-router-dom';
 
 import ApplicationsIcon from './applicationsicon';
 import ClustersIcon from './clustersicon';
+import ReloadConfigIcon from './reloadconfigicon';
 
 import './navigationsidebar.css';
 
-const NavigationSidebar = props => (
-        <nav id="side-bar">
+const NavigationSidebar = props => {
+    const reloadConfigStyles = ['reload-config'];
+    if (props.isReloadingConfig) {
+        reloadConfigStyles.push('reloading');
+    }
+
+    return (<div id="side-bar">
+        <nav>
             <Link className={props.selected === 'applications' ? 'active' : ''} to="/applications">
                 <ApplicationsIcon/>
                 Applications
@@ -18,11 +25,17 @@ const NavigationSidebar = props => (
                 Clusters
             </Link>
         </nav>
-    );
+        <div className={reloadConfigStyles.join(' ')} onClick={props.onReloadConfig}>
+            <ReloadConfigIcon/>
+            Reload Configuration
+        </div>
+    </div>
+)};
 
 
 NavigationSidebar.propTypes = {
-    selected: propTypes.string
+    selected: propTypes.string,
+    isReloadingConfig: propTypes.bool.isRequired
 }
 
 export default NavigationSidebar;

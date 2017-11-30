@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import NavigationSidebar from '../components/navigationsidebar'
 import { withRouter } from 'react-router-dom';
+import { reloadConfig } from '../actions'
 
 const mapStateToProps = (state, ownProps) => {
     let selected = '';
@@ -14,9 +15,18 @@ const mapStateToProps = (state, ownProps) => {
         selected = 'applications';
     }
 
+    const isReloadingConfig = state.session.isReloadingConfig;
+
     return {
-        selected
+        selected,
+        isReloadingConfig
     };
 }
 
-export default withRouter(connect(mapStateToProps)(NavigationSidebar));
+const mapDispatchToProps = dispatch => {
+    return {
+        onReloadConfig: () => { console.log('heh'); dispatch(reloadConfig()) }
+    }
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(NavigationSidebar));
