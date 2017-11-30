@@ -49,6 +49,15 @@ void IncomingSocketHandler::initialize(quint16 port) {
     );
 }
 
+void IncomingSocketHandler::deinitialize() {
+	disconnect();
+
+	for (common::JsonSocket* socket : _sockets) {
+		delete socket;
+	}
+	_sockets.clear();
+}
+
 void IncomingSocketHandler::newConnection() {
     while (_server.hasPendingConnections()) {
         std::unique_ptr<QTcpSocket> socket = std::unique_ptr<QTcpSocket>(_server.nextPendingConnection());

@@ -56,6 +56,9 @@ public:
     Application(QString configurationFile);
 
 private:
+	void initalize();
+	void deinitalize();
+
     void incomingGuiMessage(const QJsonDocument& message);
     void incomingTrayMessage(const Cluster& cluster, const Cluster::Node& node, const QJsonDocument& message);
     
@@ -63,6 +66,7 @@ private:
     void handleTrayProcessLogMessage(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessLogMessage status);
     void handleIncomingGuiStartCommand(common::GuiStartCommand cmd);
     void handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd);
+	void handleIncomingGuiReloadConfigCommand();
     
     common::GenericMessage initializationInformation();
     common::GenericMessage guiProcessLogMessageHistory(const CoreProcess& process);
@@ -77,6 +81,8 @@ private:
     std::vector<std::unique_ptr<CoreProcess>> _processes;
     IncomingSocketHandler _incomingSocketHandler;
     OutgoingSocketHandler _outgoingSocketHandler;
+
+	QString _configurationFile;
 };
 
 #endif // __APPLICATION_H__
