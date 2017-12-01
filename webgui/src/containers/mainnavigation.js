@@ -25,7 +25,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onReloadConfig: () => { console.log('heh'); dispatch(reloadConfig()) }
+        onReloadConfig: () => { dispatch(reloadConfig()) }
     }
 }
 
