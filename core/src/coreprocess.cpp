@@ -331,7 +331,7 @@ common::TrayCommand CoreProcess::startProcessCommand() const {
         });
     
     if (iConfiguration != _application->configurations().cend()) {
-        t.commandlineParameters = t.commandlineParameters + " " + iConfiguration->commandlineParameters;
+        t.commandlineParameters = t.commandlineParameters + " " + iConfiguration->clusterCommanlineParameters[_cluster->id()];
     }
 
     return t;

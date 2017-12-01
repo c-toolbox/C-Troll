@@ -80,11 +80,11 @@ struct GuiInitialization {
         QString name;
         QString id;
         QStringList tags;
-        QStringList clusters;
         
         struct Configuration {
             QString name;
             QString id;
+            QStringList clusters;
         };
         QList<Configuration> configurations;
     };

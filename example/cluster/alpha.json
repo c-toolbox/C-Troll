@@ -2,6 +2,7 @@
     "name": "Alpha Cluster",
     "enabled": false,
     "nodes": {
+        "alpha0": { "name": "Alpha 0", "ip": "172.19.1.10", "port": 30000 },
         "alpha1": { "name": "Alpha 1", "ip": "172.19.1.11", "port": 30001 },
         "alpha2": { "name": "Alpha 2", "ip": "172.19.1.12", "port": 30002 },
         "alpha3": { "name": "Alpha 3", "ip": "172.19.1.13", "port": 30003 },

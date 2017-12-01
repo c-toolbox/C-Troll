@@ -1,7 +1,12 @@
 {
     "name": "Safari",
     "executable": "/Applications/Safari.app/Contents/MacOS/Safari",
-    "clusters": [
-        "emil"
-    ]
+    "configurations": {
+        "default": {
+            "name": "Default",
+            "clusters": {
+                "emil": ""
+            }
+        }
+    }
 }

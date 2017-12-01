@@ -1,7 +1,17 @@
 {
     "name": "Cmd",
     "executable": "cmd.exe",
-    "clusters": [
-        "emil"
-    ]
+    "configurations": {
+        "default": {
+            "name": "Default",
+            "clusters": {
+                "emil": "",
+                "local": ""
+            }
+        }
+    },
+    "defaults": {
+        "configuration": "default",
+        "cluster": "emil"
+    }
 }

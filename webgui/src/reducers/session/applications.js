@@ -6,6 +6,7 @@ import {
     RemoveApplicationFilterTag,
     ClearApplicationFilterTags,
     SetApplicationFilterTagsVisibility,
+    SetApplicationConfiguration
 } from '../../actions';
 
 function setApplicationFilterTagsVisibility(state, action) {
@@ -64,8 +65,19 @@ const filterTagsVisibility = (state = true, action) => {
     }
 }
 
+const selectedConfigurations = (state = {}, action) => {
+        switch (action.type) {
+        case SetApplicationConfiguration: return {
+            ...state,
+            [action.payload.applicationId]: action.payload.configurationId
+        };
+        default: return state;
+    }
+}
+
 export default combineReducers({
     filterTags,
     searchString,
-    filterTagsVisibility
+    filterTagsVisibility,
+    selectedConfigurations
 });

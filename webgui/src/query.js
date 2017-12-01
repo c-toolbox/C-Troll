@@ -22,14 +22,26 @@ export const clusterNameByProcessId = (state, processId) => {
 
 
 export const defaultApplicationCluster = (state, applicationId) => {
+    console.log(state, applicationId);
     const application = state.model.applications[applicationId];
-    return application.clusters[0];
+    const configurations = application.configurations;
+
+
+    // Todo: add default configuration to application config.
+    // For now, just pick the first key (baiscally random)
+    const firstConfig = Object.values(application.configurations)[0];
+    const firstCluster = Object.values(firstConfig.clusters)[0];
+
+    return firstCluster;
 }
 
 export const defaultApplicationConfiguration = (state, applicationId) => {
     const application = state.model.applications[applicationId];
     const configurations = application.configurations;
-    return configurations[0] ? configurations[0].id : '';
+
+    // Todo: add default configuration to application config.
+    // For now, just pick the first key (baiscally random)
+    return Object.keys(application.configurations)[0];
 }
 
 export const isProcessActive = (process) => {

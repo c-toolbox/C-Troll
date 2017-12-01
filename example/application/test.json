@@ -2,28 +2,24 @@
     "name": "Application name",
     "executable": "executable name",
     "baseDirectory": "base directory",
-    "commandlineParameters": "commandline parameters",
+    "commandlineParameters": "--",
     "currentWorkingDirectory": "current working directory",
     "tags": [
-        "tag1",
-        "tag2"
+        "test"
     ],
-    "clusters": [
-        "alpha"
-    ],
-    "configurations": [
-        {
-            "name": "Configuration 1",
-            "identifier": "configuration identifier 1",
-            "commandlineParameters": "commandline parameter 1"
-        },        
-        {
-            "name": "Configuration 2",
-            "identifier": "configuration identifier 2",
-            "commandlineParameters": "commandline parameter 2"
+    "configurations": {
+        "stereo": {
+            "name": "Stereo",
+            "clusters": {
+                "alpha0": "--stereo"
+            }
+        },
+        "mono": {
+            "name": "Mono",
+            "clusters": {
+                "alpha0": "--mono",
+                "alpha": "--mono"
+            }
         }
-    ],
-    "clusters": [
-        "emil"
-    ]
+    }
 }

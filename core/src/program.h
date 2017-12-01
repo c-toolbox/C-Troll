@@ -39,6 +39,7 @@
 #include <QList>
 #include <QString>
 #include <QVector>
+#include <QMap>
 
 #include <memory>
 
@@ -54,9 +55,9 @@ public:
     ~Program();
     
     struct Configuration {
-        QString name;
         QString id;
-        QString commandlineParameters;
+        QString name;
+        QMap<QString, QString> clusterCommanlineParameters;
     };
 
     /**
@@ -103,14 +104,6 @@ public:
     QStringList tags() const;
     
     /**
-     * Returns a list of clusters on which this application is available. This list
-     * might be empty, which corresponds to no limitation as to where the Program can
-     * be executed.
-     * \return A list of clusters on which this application is available
-     */
-    QStringList clusters() const;
-    
-    /**
      * Returns A list of (potentially empty) configurations for this Program. A 
      * Configuration is a set of extra commandline arguments that can toggle parts of 
      * the program as the configurator desires.
@@ -149,10 +142,12 @@ private:
     QString _currentWorkingDirectory;
     /// A list of tags that are associated with this Program
     QList<QString> _tags;
-
-    QList<QString> _clusters; // Supported clusters
-
-    QList<Configuration> _configurations; // List of all configurations
+    // List of all configurations
+    QList<Configuration> _configurations;
+    // Default configuration id
+    QString _defaultConfiguration;
+    // Default cluster id
+    QString _defaultCluster;
     /// A vector of processes that derive from this program.
     QVector<Process*> _processes;
 };

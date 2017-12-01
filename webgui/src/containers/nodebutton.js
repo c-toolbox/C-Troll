@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import ClusterButton from '../components/clusterbutton';
+import ClusterButton from '../components/largeclusterbutton';
 
 const mapStateToProps = (state, ownProps) => {
     const clusterId = ownProps.clusterId;

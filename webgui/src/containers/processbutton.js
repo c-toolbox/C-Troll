@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import ProcessButton from '../components/processbutton';
+import ProcessButton from '../components/largeprocessbutton';
 
 const mapStateToProps = (state, ownProps) => {
     const processId = ownProps.processId;

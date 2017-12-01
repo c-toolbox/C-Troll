@@ -223,48 +223,23 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
         Log("Could not find cluster id " + cmd.clusterId);
         return;
     }
-        
-    auto validCluster = [this](const Program& p, const Cluster& c) -> bool {
-        if (p.clusters().empty()) {
-            return true;
-        }
-        else {
-            const QStringList& clusters = p.clusters();
-            auto it = std::find_if(
-                clusters.begin(),
-                clusters.end(),
-                [&](const QString& s) { return c.id() == s; }
-            );
-            return it != clusters.end();
-        }
-    };
-        
-    if (!validCluster(*iProgram->get(), *iCluster->get())) {
-        // We tried to start an application on a cluster for which the application
-        // is not configured
-        // TODO(alex): Signal this back to the GUI
-        Log(
-            "Application id " + cmd.applicationId +
-            " cannot be started on cluster id " + cmd.clusterId
-        );
-        return;
-    }
     
-    QString commandLineParameters = "";
     QString configurationId = "";
 
     if (!cmd.configurationId.isEmpty()) {
+        const auto& configurations = (*iProgram)->configurations();
+
         auto iConfiguration = std::find_if(
-            (*iProgram)->configurations().begin(),
-            (*iProgram)->configurations().end(),
+            configurations.begin(),
+            configurations.end(),
             [&](const Program::Configuration& c) {
             return c.id == cmd.configurationId;
         }
         );
 
-        if (iConfiguration == (*iProgram)->configurations().end()) {
+        if (iConfiguration == configurations.end()) {
             // The requested configuration does not exist for the application
-            // TODO(alex): Signal this back to the GUI
+            // TODO: Signal this back to the GUI
             Log(
                 "The configuration " + cmd.configurationId +
                 " does not exist for the application id " + cmd.applicationId
@@ -273,7 +248,19 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
 
         }
         configurationId = cmd.configurationId;
-        commandLineParameters = iConfiguration->commandlineParameters;
+
+        const auto& clusterParamsList = iConfiguration->clusterCommanlineParameters;
+        const auto& clusterParams = clusterParamsList.find(cmd.clusterId);
+
+        if (clusterParams == clusterParamsList.end()) {
+            // The requested configuration does not exist for the application
+            // TODO: Signal this back to the GUI
+            Log(
+                "The configuration " + cmd.configurationId +
+                " is not supported on cluster id " + cmd.clusterId
+            );
+            return;
+        }
     }
 
     std::unique_ptr<CoreProcess> process = std::make_unique<CoreProcess>(iProgram->get(), configurationId, iCluster->get());

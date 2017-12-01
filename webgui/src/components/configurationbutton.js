@@ -8,15 +8,20 @@ const ConfigurationButton = props => {
         classNames.push('selected');
     }
 
-    return (<a onClick={props.onClick} className={classNames.join(' ')}>
-        {props.configuration}
+    const onSelect = (evt) => {
+        props.onSelect(props.configurationId);
+    }
+
+    return (<a onClick={onSelect} className={classNames.join(' ')}>
+        {props.configurationName}
     </a>);
 }
 
 ConfigurationButton.propTypes = {
-    configuration: PropTypes.string.isRequired,
+    configurationId: PropTypes.string.isRequired,
+    configurationName: PropTypes.string.isRequired,
     selected: PropTypes.bool,
-    onClick: PropTypes.func
+    onSelect: PropTypes.func
 };
 
 export default ConfigurationButton;

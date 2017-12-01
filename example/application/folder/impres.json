@@ -8,20 +8,12 @@
         "sgct",
         "Presentation"
     ],
-    "configurations": [
-        {
-            "name": "Configuration 13",
-            "identifier": "configuration identifier 13",
-            "commandlineParameters": "commandline parameter 13"
-        },        
-        {
-            "name": "Configuration 23",
-            "identifier": "configuration identifier 23",
-            "commandlineParameters": "commandline parameter 23"
+    "configurations": {
+        "default": {
+            "name": "Default",
+            "clusters": {
+                "emil": ""
+            }
         }
-    ],
-    "clusters": [
-        "alpha",
-        "emil"
-    ]    
+    }
 }

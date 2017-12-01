@@ -14,27 +14,37 @@ const tagList = (props) => {
 }
 
 const configurations = (props) => {
-    const buttons = props.configurationButtons;
-    if (!buttons || buttons.length === 0) {
+    if (!props.configurationButtons) {
         return null;
     }
     return (
         <div>
             <div className="row">
                 <h2>Configurations</h2>
+                {props.configurationButtons}
             </div>
-            {buttons}
         </div>
     );
 }
 
 const clusters = (props) => {
-    const buttons = props.clusterButtons;
-    if (!buttons || buttons.length === 0) {
+    if (!props.clusterButtons) {
+        if (!props.configurationButtons) {
+            return (
+                <div>
+                    <div className="row">
+                        <h2>No clusters</h2>
+                        <p>The application is not available on any cluster</p>
+                    </div>
+                </div>
+            );
+        }
         return (
-            <div className="row">
-                <h2>No clusters</h2>
-                <p>This application is not available on any cluster.</p>
+            <div>
+                <div className="row">
+                    <h2>No clusters</h2>
+                    <p>The selected configuration is not available on any cluster</p>
+                </div>
             </div>
         );
     }
@@ -42,6 +52,26 @@ const clusters = (props) => {
         <div>
             <div className="row">
                 <h2>Clusters</h2>
+                {props.clusterButtons}
+            </div>
+        </div>
+    );
+}
+
+const processes = (props) => {
+    const buttons = props.processButtons;
+    if (!buttons || buttons.length === 0) {
+        return (
+            <div className="row">
+                <h2>No active processes</h2>
+                <p>This application is not running on any cluster.</p>
+            </div>
+        );
+    }
+    return (
+        <div>
+            <div className="row">
+                <h2>Processes</h2>
             </div>
             {buttons}
         </div>
@@ -65,6 +95,7 @@ const ApplicationDetails = props => {
             { tagList(props) }
             { configurations(props) }
             { clusters(props) }
+            { processes(props) }
         </div>
     );
 };
@@ -74,7 +105,7 @@ ApplicationDetails.propTypes = {
     description: PropTypes.string,
     tags: PropTypes.array,
     configurationButtons: PropTypes.node,
-    clusterButtons: PropTypes.node
+    processButtons: PropTypes.node
 };
 
 export default ApplicationDetails;

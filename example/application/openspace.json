@@ -1,27 +1,40 @@
 {
     "name": "OpenSpace",
-    "executable": "executable name 2",
-    "baseDirectory": "base directory 2",
-    "commandlineParameters": "commandline parameters 2",
-    "currentWorkingDirectory": "current working directory 2",
+    "executable": "D:/dev/OpenSpace/bin/openspace/Release/OpenSpace.exe",
+    "baseDirectory": "D:/dev/OpenSpace/bin/openspace/Release",
+    "commandlineParameters": "",
+    "currentWorkingDirectory": "D:/dev/OpenSpace/bin/openspace/Release",
     "tags": [
         "Research demos",
         "OpenSpace",
         "sgct"
     ],
-    "configurations": [
-        {
-            "name": "Configuration 21",
-            "identifier": "configuration identifier 12",
-            "commandlineParameters": "commandline parameter 12"
+    "configurations": {
+        "nh-stereo": {
+            "name": "NH Stereo",
+            "clusters": {
+                "alpha0": "--stereo"
+            }
         },
-        {
-            "name": "Configuration 22",
-            "identifier": "configuration identifier 22",
-            "commandlineParameters": "commandline parameter 22"
+        "nh-mono": {
+            "name": "NH Mono",
+            "clusters": {
+                "alpha0": "--mono",
+                "alpha": "--mono"
+            }
+        },
+        "mars-mono": {
+            "name": "Mars Mono",
+            "clusters": {
+                "alpha0": "--scene=mars --alpha0mono",
+                "alpha": "--scene=mars --alphaMono"
+            }
+        },
+        "mars-stereo": {
+            "name": "Mars Stereo",
+            "clusters": {
+                "alpha": "--scene=mars --alphastereo"
+            }
         }
-    ],
-    "clusters": [
-        "emil"
-    ]
+    }
 }

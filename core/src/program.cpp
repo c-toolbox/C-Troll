@@ -52,8 +52,8 @@ namespace {
     const QString KeyBaseDirectory = "baseDirectory";
     const QString KeyCommandlineParameters = "commandlineParameters";
     const QString KeyCurrentWorkingDirectory = "currentWorkingDirectory";
+    const QString KeyClusterCommandlineParameters = "clusters";
     const QString KeyTags = "tags";
-    const QString KeyClusters = "clusters";
     const QString KeyConfigurations = "configurations";
 
     const QString KeyConfigurationName = "name";
@@ -98,12 +98,13 @@ common::GuiInitialization::Application Program::toGuiInitializationApplication()
     app.name = name();
     app.id = id();
     app.tags = tags();
-    app.clusters = clusters();
-    
+
     for (const Program::Configuration& conf : configurations()) {
         common::GuiInitialization::Application::Configuration c;
         c.name = conf.name;
         c.id = conf.id;
+        c.clusters = conf.clusterCommanlineParameters.keys();
+
         app.configurations.push_back(c);
     }
     
@@ -123,7 +124,12 @@ std::unique_ptr<std::vector<std::unique_ptr<Program>>> Program::loadProgramsFrom
     while (it.hasNext()) {
         QString file = it.next();
         Log("Loading application file " + file);
-        programs->push_back(loadProgram(file, directory));
+        try {
+            std::unique_ptr<Program> program = loadProgram(file, directory);
+            programs->push_back(std::move(program));
+        } catch (const std::runtime_error& e) {
+            Log("Failed to load application file " + file + ". " + e.what());
+        }
     }
     return std::move(programs);
 }
@@ -144,25 +150,32 @@ Program::Program(const QJsonObject& jsonObject) {
     );
     
     _tags = common::testAndReturnStringList(jsonObject, KeyTags, Optional::Yes);
-    _clusters = common::testAndReturnStringList(jsonObject, KeyClusters, Optional::Yes);
     
-    QJsonArray configurationArray = common::testAndReturnArray(
+    QJsonObject configurationObject = common::testAndReturnObject(
         jsonObject, KeyConfigurations, Optional::Yes
     );
-    _configurations.clear();
-    for (const QJsonValue& v : configurationArray) {
+
+    for (auto it = configurationObject.begin();
+        it != configurationObject.end();
+        it++)
+    {
         Configuration conf;
-        QJsonObject obj = v.toObject();
+        conf.id = it.key();
+
+        QJsonValueRef value = it.value();
         
+        if (!value.isObject()) {
+            continue;
+        }
+        QJsonObject obj = value.toObject();
         conf.name = common::testAndReturnString(obj, KeyConfigurationName);
-        
-        conf.id = common::testAndReturnString(
-            obj, KeyConfigurationIdentifier
-        );
-        conf.commandlineParameters = common::testAndReturnString(
-            obj, KeyConfigurationParameters
-        );
-        
+
+        QJsonObject clusters = common::testAndReturnObject(obj, KeyClusterCommandlineParameters);
+
+        for (QString key : clusters.keys()) {
+            conf.clusterCommanlineParameters[key] = common::testAndReturnString(clusters, key);
+        }
+
         _configurations.push_back(conf);
     }
 }
@@ -199,10 +212,6 @@ QStringList Program::tags() const {
     return _tags;
 }
 
-QStringList Program::clusters() const {
-    return _clusters;
-}
-
 QList<Program::Configuration> Program::configurations() const {
     return _configurations;
 }
@@ -230,23 +239,21 @@ QJsonObject Program::toJson() const {
         }
         program[KeyTags] = tags;
     }
-
-    if (_clusters.size() != 0) {
-        QJsonArray clusters;
-        for (const auto& cluster : _clusters) {
-            clusters.push_back(cluster);
-        }
-        program[KeyClusters] = clusters;
-    }
     
     if (_configurations.size() != 0) {
-        QJsonArray configurations;
+        QJsonObject configurations;
         for (const auto& configuration : _configurations) {
             QJsonObject configurationObject;
             configurationObject[KeyConfigurationName] = configuration.name;
-            configurationObject[KeyConfigurationIdentifier] = configuration.id;
-            configurationObject[KeyConfigurationParameters] = configuration.commandlineParameters;
-            configurations.push_back(configurationObject);
+
+            QJsonObject clusterParams;
+            for (const auto& cluster : configuration.clusterCommanlineParameters.keys()) {
+                QString params = configuration.clusterCommanlineParameters[cluster];
+                clusterParams[cluster] = params;
+            }
+            configurationObject[KeyClusterCommandlineParameters] = clusterParams;
+
+            configurations[configuration.id] = configurationObject;
         }
         program[KeyConfigurations] = configurations;
     }
