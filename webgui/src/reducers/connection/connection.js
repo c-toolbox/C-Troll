@@ -1,6 +1,8 @@
 import {
     ServerConnect,
-    ServerConnected
+    ServerConnected,
+    ServerDisconnected,
+    InitializeGui
 
 } from '../../actions';
 
@@ -24,6 +26,7 @@ function serverDisconnected(state, action) {
     return {
         ...state,
         connected: false,
+        initialized: false,
         connectionLost: true
     }
 }
@@ -37,10 +40,18 @@ function serverConnected(state, action) {
     }
 }
 
+function initializeGui(state, action) {
+    return {
+        ...state,
+        initialized: true
+    }
+}
+
 export default (state = initialConnectionState, action) => {
     switch (action.type) {
+        case InitializeGui: return initializeGui(state, action);
         case ServerConnect: return serverConnect(state, action);
-        case serverDisconnected: return serverDisconnected(state, action);
+        case ServerDisconnected: return serverDisconnected(state, action);
         case ServerConnected: return serverConnected(state, action);
         default: return state;
     }

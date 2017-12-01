@@ -4,14 +4,14 @@ import PropTypes from 'prop-types';
 import './reconnectingnotifier.css';
 
 const ReconnectingNotifier = (props) => {
-    if (props.connected) {
-        return [];
+    if (props.connected && props.initialized) {
+        return null;
     }
 
     let content = null;
-    if (props.reconnecting) {
+    if (props.reconnecting || !props.initialized) {
         content = <div className="reconnecting">Connection lost. Reconnecting...</div>
-    } else if (props.connecting) {
+    } else if (props.connecting || !props.initialized) {
         content = <div className="reconnecting">Connecting...</div>
     } else {
         content = <div className="disconnected">Disconnected</div>
@@ -25,6 +25,7 @@ const ReconnectingNotifier = (props) => {
 };
 
 ReconnectingNotifier.propTypes = {
+    initialized: PropTypes.bool.isRequired,
     connected: PropTypes.bool.isRequired,
     reconnecting: PropTypes.bool.isRequired,
     connecting: PropTypes.bool.isRequired,

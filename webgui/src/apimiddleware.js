@@ -5,6 +5,7 @@ import {
     RestartProcess,
     StopProcess,
     ReloadConfig,
+    ServerDisconnected,
     initializeGui,
     setProcessStatus,
     addProcessLogMessage,
@@ -51,6 +52,10 @@ function sendRestartProcessCommand(processId) {
 
 function sendReloadConfigCommand() {
     sendCommand('GuiReloadConfigCommand', {});
+}
+
+function scheduleReconnection(dispatch) {
+    setTimeout(() => {serverConnect(dispatch)}, 2000);
 }
 
 function serverConnect(dispatch) {
@@ -112,6 +117,9 @@ const apiMiddleware = store => next => action => {
                 payload.processId
             );
         break;
+        case ServerDisconnected:
+            scheduleReconnection(store.dispatch);
+            break;
         case ReloadConfig:
             sendReloadConfigCommand();
         break;
