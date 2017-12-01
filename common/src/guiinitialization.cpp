@@ -51,7 +51,11 @@ namespace {
     const QString KeyApplicationConfigurationClusters = "clusters";
     const QString KeyApplicationConfigurationName = "name";
     const QString KeyApplicationConfigurationId = "id";
-    
+
+    const QString KeyApplicationDefaults = "defaults";
+    const QString KeyApplicationDefaultConfiguration = "configuration";
+    const QString KeyApplicationDefaultCluster = "cluster";
+
     const QString KeyClusterName = "name";
     const QString KeyClusterId = "id";
     const QString KeyClusterEnabled = "enabled";
@@ -98,6 +102,11 @@ GuiInitialization::Application::Application(QJsonObject obj) {
         
         configurations.push_back(configuration);
     }
+
+    QJsonObject defaults = common::testAndReturnObject(obj, KeyApplicationDefaults);
+    defaultConfiguration = common::testAndReturnString(defaults, KeyApplicationDefaultConfiguration);
+    defaultCluster = common::testAndReturnString(defaults, KeyApplicationDefaultCluster);
+
 }
     
 QJsonObject GuiInitialization::Application::toJson() const {
@@ -116,7 +125,13 @@ QJsonObject GuiInitialization::Application::toJson() const {
         confs[conf.id] = obj;
     }
     res[KeyApplicationConfigurations] = confs;
-    
+
+    QJsonObject defaults;
+    defaults[KeyApplicationDefaultConfiguration] = defaultConfiguration;
+    defaults[KeyApplicationDefaultCluster] = defaultCluster;
+
+    res[KeyApplicationDefaults] = defaults;
+
     return res;
 }
     

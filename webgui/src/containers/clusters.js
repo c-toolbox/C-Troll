@@ -9,7 +9,6 @@ const getClusterId = (cluster) => {
 }
 
 const getClusterIds = state => {
-    console.log(state.model.clusters);
     const allClusters = Object.values(state.model.clusters);
     return allClusters.map(getClusterId);
 }

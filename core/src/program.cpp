@@ -53,6 +53,9 @@ namespace {
     const QString KeyCommandlineParameters = "commandlineParameters";
     const QString KeyCurrentWorkingDirectory = "currentWorkingDirectory";
     const QString KeyClusterCommandlineParameters = "clusters";
+    const QString KeyDefaults = "defaults";
+    const QString KeyDefaultCluster = "cluster";
+    const QString KeyDefaultConfiguration = "configuration";
     const QString KeyTags = "tags";
     const QString KeyConfigurations = "configurations";
 
@@ -107,6 +110,10 @@ common::GuiInitialization::Application Program::toGuiInitializationApplication()
 
         app.configurations.push_back(c);
     }
+
+    QJsonObject defaults;
+    app.defaultCluster = _defaultCluster;
+    app.defaultConfiguration = _defaultConfiguration;
     
     return app;
 }
@@ -150,7 +157,13 @@ Program::Program(const QJsonObject& jsonObject) {
     );
     
     _tags = common::testAndReturnStringList(jsonObject, KeyTags, Optional::Yes);
-    
+
+    QJsonObject defaults = common::testAndReturnObject(jsonObject, KeyDefaults, Optional::Yes);
+    if (defaults.size() > 0) {
+        _defaultConfiguration = common::testAndReturnString(defaults, KeyDefaultConfiguration);
+        _defaultCluster = common::testAndReturnString(defaults, KeyDefaultCluster);
+    }
+
     QJsonObject configurationObject = common::testAndReturnObject(
         jsonObject, KeyConfigurations, Optional::Yes
     );
@@ -257,6 +270,14 @@ QJsonObject Program::toJson() const {
         }
         program[KeyConfigurations] = configurations;
     }
+
+    if (_defaultConfiguration != "" || _defaultCluster != "") {
+        QJsonObject defaults;
+        defaults[KeyDefaultCluster] = _defaultCluster;
+        defaults[KeyDefaultConfiguration] = _defaultConfiguration;
+        program[KeyDefaults] = defaults;
+    }
+
     return program;
 }
 

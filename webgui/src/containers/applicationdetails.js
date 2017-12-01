@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import ApplicationDetails from '../components/applicationdetails';
 //import ApplicationConfigurationButtons from './applicationconfigurationbuttons';
 import ConfigurationButton from '../components/configurationbutton';
-import { defaultApplicationConfiguration } from '../query';
+import { applicationDefaults } from '../query';
 import { setApplicationConfiguration } from '../actions';
 
 import ClusterButton from './clusterbutton';
@@ -62,9 +62,17 @@ const mapStateToProps = (state, ownProps) => {
     const tags = application.tags;
     const description = application.description;
 
-    const selectedConfiguration =
-        state.session.applications.selectedConfigurations[applicationId] ||
-        defaultApplicationConfiguration(state, applicationId);
+    let selectedConfiguration = state.session.applications.selectedConfigurations[applicationId];
+
+    if (!selectedConfiguration) {
+        const defaults = applicationDefaults(state, applicationId);
+        if (defaults && defaults.configuration) {
+            selectedConfiguration = defaults.configuration;
+        } else {
+            const allConfs = Object.keys(application.configurations);
+            selectedConfiguration = allConfs[0];
+        }
+    }
 
     const configurationIds = Object.keys(application.configurations);
     const configurations = configurationIds.length > 1 && configurationIds.map(k => {

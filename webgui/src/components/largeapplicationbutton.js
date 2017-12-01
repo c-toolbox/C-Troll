@@ -19,6 +19,7 @@ const ApplicationButton = props => {
             </div>
             <div className="application-icon"/>
             <div className="main">{name}</div>
+            <div className="sub"></div>
             {props.children}
         </div>);
 }

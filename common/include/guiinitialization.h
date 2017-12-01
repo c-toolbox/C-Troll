@@ -87,6 +87,8 @@ struct GuiInitialization {
             QStringList clusters;
         };
         QList<Configuration> configurations;
+        QString defaultConfiguration;
+        QString defaultCluster;
     };
     
     /// This struct represents the information about the clusters that are registered with

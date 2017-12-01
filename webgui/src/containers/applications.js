@@ -19,8 +19,7 @@ import StartButton from './startbutton';
 import StopButton from './stopbutton';
 import RestartButton from './restartbutton';
 import ApplicationProcessButtons from './applicationprocessbuttons';
-import { defaultApplicationCluster,
-         defaultApplicationConfiguration,
+import { applicationDefaults,
          isProcessActive } from '../query';
 
 const getTags = state => {
@@ -139,15 +138,13 @@ const mapStateToProps = (state) => {
     const defaultApplicationConfigurations = {};
 
     applicationIds.forEach((applicationId) => {
-        const clusterId = defaultApplicationCluster(state, applicationId);
-        const configurationId = defaultApplicationConfiguration(state, applicationId);
+        const defaults = applicationDefaults(state, applicationId);
 
-        if (clusterId !== undefined && configurationId !== undefined) {
-            defaultApplicationConfigurations[applicationId] = {
-                clusterId,
-                configurationId
-            }
+        if (!defaults) {
+            return;
         }
+
+        defaultApplicationConfigurations[applicationId] = defaults;
     });
 
     const initialSearchText = state.session.applications.searchString;
