@@ -18,7 +18,6 @@ const children = processId => (
 );
 
 const ProcessControlButton = props => {
-    console.log(props);
     return (
         <ProcessButton processId={props.processId}>
         { props.active && children(props.processId)}

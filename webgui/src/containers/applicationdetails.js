@@ -26,7 +26,7 @@ const ApplicationDetailsContainer = props => {
     ));
 
     const processButtons = props.processIds && props.processIds.map(processId => (
-        <ProcessControlButton processId={processId}/>
+        <ProcessControlButton key={processId} processId={processId}/>
     ));
 
     const clusterButtons = props.clusterIds.map((clusterId) => (
