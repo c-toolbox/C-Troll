@@ -24,11 +24,12 @@ const NavigationSidebar = props => {
                 <ClustersIcon/>
                 Clusters
             </Link>
+            <div className={reloadConfigStyles.join(' ')} onClick={props.onReloadConfig}>
+                <ReloadConfigIcon/>
+                Reload Configuration
+            </div>
         </nav>
-        <div className={reloadConfigStyles.join(' ')} onClick={props.onReloadConfig}>
-            <ReloadConfigIcon/>
-            Reload Configuration
-        </div>
+
     </div>
 )};
 

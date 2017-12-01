@@ -54,8 +54,6 @@ export const applicationDefaults = (state, applicationId) => {
 }
 
 export const isProcessActive = (state, processId) => {
-    console.log(state)
-    if (!state.model) { debugger; }
     const process = state.model.processes[processId];
     if (!process) {
         return false;

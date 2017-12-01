@@ -77,14 +77,20 @@
 @media (max-width: 600px) {
     #side-bar {
         position: static;
-        height: 100px;
+        height: auto;
+        min-height: 100px;
         width: 100%;
     }
 
-    #side-bar a {
+    #side-bar a,
+    #side-bar .reload-config {
         display: inline-block;
         width: 100px;
         padding-top: 20px;
+    }
+
+    #side-bar .reload-config {
+        position: static;
     }
 }
 
