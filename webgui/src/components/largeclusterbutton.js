@@ -14,7 +14,7 @@ const ClusterButton = props => {
 
     const classNames = ['square', 'button', 'no-select'];
 
-    if (clusterStatus === 'Disconnected') {
+    if (!props.available) {
         classNames.push('error');
     }
 
@@ -30,6 +30,7 @@ const ClusterButton = props => {
 }
 
 ClusterButton.propTypes = {
+    available: PropTypes.bool.isRequired,
     clusterId: PropTypes.string.isRequired,
     clusterName: PropTypes.string.isRequired,
     tags: PropTypes.array,

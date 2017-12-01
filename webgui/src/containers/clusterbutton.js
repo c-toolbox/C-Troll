@@ -7,9 +7,10 @@ const mapStateToProps = (state, ownProps) => {
 
     if (!cluster) {
         return {
+            available: false,
             clusterId,
             clusterName: 'Unknown',
-            clusterStatus: ''
+            clusterStatus: 'No cluster with id "' + clusterId + '"'
         }
     }
 
@@ -17,6 +18,7 @@ const mapStateToProps = (state, ownProps) => {
     const clusterStatus = cluster.connected ? "Connected" : "Disconnected";
     
     return {
+        available: cluster.connected,
         clusterId,
         clusterName,
         clusterStatus

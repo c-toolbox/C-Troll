@@ -7,7 +7,7 @@ const mapStateToProps = (state, ownProps) => {
     const clusterId = ownProps.clusterId;
     const configurationId = ownProps.configurationId;
 
-    const clusterConnected = state.model.clusters[clusterId] &&
+    const clusterConnected = state.model.clusters[clusterId] !== undefined &&
         state.model.clusters[clusterId].connected;
 
     const props = {
