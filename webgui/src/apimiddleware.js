@@ -71,7 +71,6 @@ function serverConnect(dispatch) {
         deepFreeze(data);
         switch (data.type) {
             case 'GuiInit':
-                console.log(data);
                 dispatch(initializeGui(data.payload));
                 break;
             case 'GuiProcessStatus':

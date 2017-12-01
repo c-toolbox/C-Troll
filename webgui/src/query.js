@@ -22,10 +22,8 @@ export const clusterNameByProcessId = (state, processId) => {
 
 
 export const defaultApplicationCluster = (state, applicationId) => {
-    console.log(state, applicationId);
     const application = state.model.applications[applicationId];
     const configurations = application.configurations;
-
 
     // Todo: add default configuration to application config.
     // For now, just pick the first key (baiscally random)

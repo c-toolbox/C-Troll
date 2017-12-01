@@ -39,9 +39,6 @@ const setProcessStatus = (state, action) => {
 	} else {
 		newProcess = createProcess(data);
 	}
-
-	console.log(newProcess);
-
 	newState[newProcess.id] = newProcess;
 	return newState;
 }
