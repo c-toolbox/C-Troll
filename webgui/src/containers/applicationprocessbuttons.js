@@ -43,7 +43,7 @@ const mapStateToProps = (state, ownProps) => {
     const processIds = Object.values(state.model.processes).filter(process => {
         return process.applicationId === applicationId;
     }).filter(process => {
-        return isProcessActive(process);
+        return isProcessActive(state, process.id);
     }).map(process => {
         return process.id;
     });

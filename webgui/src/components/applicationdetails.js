@@ -69,10 +69,8 @@ const processes = (props) => {
         );
     }
     return (
-        <div>
-            <div className="row">
-                <h2>Processes</h2>
-            </div>
+        <div className="row">
+            <h2>Processes</h2>
             {buttons}
         </div>
     );

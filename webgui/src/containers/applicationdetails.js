@@ -3,10 +3,11 @@ import { connect } from 'react-redux';
 import ApplicationDetails from '../components/applicationdetails';
 //import ApplicationConfigurationButtons from './applicationconfigurationbuttons';
 import ConfigurationButton from '../components/configurationbutton';
-import { applicationDefaults } from '../query';
+import { applicationDefaults, isProcessActive } from '../query';
 import { setApplicationConfiguration } from '../actions';
 
 import ClusterButton from './clusterbutton';
+import ProcessControlButton from './processcontrolbutton';
 import ClusterProcessButtons from './clusterprocessbuttons';
 import StartButton from './startbutton';
 
@@ -15,7 +16,7 @@ import StartButton from './startbutton';
 const ApplicationDetailsContainer = props => {
     const applicationId = props.applicationId;
 
-    const configurationButtons = props.configurations && props.configurations.map((config) => (
+    const configurationButtons = props.configurations && props.configurations.map(config => (
         <ConfigurationButton configurationName={config.name}
                              configurationId={config.id}
                              selected={config.selected}
@@ -24,7 +25,9 @@ const ApplicationDetailsContainer = props => {
         </ConfigurationButton>
     ));
 
-    const processButtons = [];
+    const processButtons = props.processIds && props.processIds.map(processId => (
+        <ProcessControlButton processId={processId}/>
+    ));
 
     const clusterButtons = props.clusterIds.map((clusterId) => (
         <ClusterButton clusterId={clusterId}
@@ -32,8 +35,7 @@ const ApplicationDetailsContainer = props => {
             <ClusterProcessButtons clusterId={clusterId}/>
             <StartButton application applicationId={applicationId} configurationId={props.selectedConfiguration} clusterId={clusterId} />
         </ClusterButton>
-    ))
-
+    ));
 
     return (
         <ApplicationDetails tags={props.tags}
@@ -84,7 +86,11 @@ const mapStateToProps = (state, ownProps) => {
     });
 
     const clusterIds = application.configurations[selectedConfiguration].clusters;
-   
+
+    const processIds = Object.values(state.model.processes)
+        .filter(process => (process.applicationId === applicationId))
+        .filter(process => isProcessActive(state, process.id))
+        .map(process => process.id);
 
     return {
         id,
@@ -93,7 +99,8 @@ const mapStateToProps = (state, ownProps) => {
         tags,
         clusterIds,
         configurations,
-        selectedConfiguration
+        selectedConfiguration,
+        processIds
     }
 };
 

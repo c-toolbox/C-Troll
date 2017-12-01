@@ -12,6 +12,6 @@
     },
     "defaults": {
         "configuration": "default",
-        "cluster": "emil"
+        "cluster": "local"
     }
 }

@@ -14,10 +14,8 @@ import {Expandable, ExpandIcon} from '../components/expandable';
 import List from '../components/list';
 
 import ApplicationButton from './applicationbutton';
-import ProcessButton from './processbutton';
+import ProcessControlButton from './processcontrolbutton';
 import StartButton from './startbutton';
-import StopButton from './stopbutton';
-import RestartButton from './restartbutton';
 import ApplicationProcessButtons from './applicationprocessbuttons';
 import { applicationDefaults,
          isProcessActive } from '../query';
@@ -125,7 +123,7 @@ function getApplicationIds(state) {
 function getProcessIds(state) {
     const allProcesses = Object.values(state.model.processes);
     return allProcesses.filter(process => {
-        return isProcessActive(process);
+        return isProcessActive(state, process.id);
     }).map(getProcessId);
 }
 
@@ -242,13 +240,9 @@ const Applications = (props) => {
                 {
                     props.processIds.map((processId) => {
                         return (
-                            <ProcessButton processId={processId}
-                                               key={processId}>
-
-                                <StopButton processId={processId} />
-                                <RestartButton processId={processId} />
-
-                            </ProcessButton>
+                            <ProcessControlButton processId={processId}
+                                                  key={processId}>
+                            </ProcessControlButton>
                         );
                     })
                 }

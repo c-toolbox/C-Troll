@@ -39,7 +39,7 @@ const processes = (props) => {
                 <h2>Processes</h2>
             </div>
             <div className="row">
-            {buttons}
+                {buttons}
             </div>
         </div>
     );
