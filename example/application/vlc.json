@@ -1,0 +1,17 @@
+{
+    "name": "VLC",
+    "executable": "C:/Program Files/VideoLAN/VLC/vlc.exe",
+	"currentWorkingDirectory": "C:/Program Files/VideoLAN/VLC",
+    "configurations": {
+        "default": {
+            "name": "Default",
+            "clusters": {
+                "local": ""
+            }
+        }
+    },
+    "defaults": {
+        "configuration": "default",
+        "cluster": "local"
+    }
+}

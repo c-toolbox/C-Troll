@@ -48,12 +48,6 @@ int main(int argc, char** argv) {
     
 #ifdef DEVELOP
     QDir current = QDir::current();
-#ifndef WIN32
-    current.cdUp();
-#endif
-    current.cdUp();
-    current.cdUp();
-    current.cd("example");
     QDir::setCurrent(current.absolutePath());
 #endif
     

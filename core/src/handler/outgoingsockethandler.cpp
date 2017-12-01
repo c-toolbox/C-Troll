@@ -127,6 +127,11 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
     timer->start(2500);
 }
 
+void OutgoingSocketHandler::deinitialize() {
+	_sockets.clear();
+	_clusters.clear();
+}
+
 void OutgoingSocketHandler::readyRead(const Cluster& cluster, const Cluster::Node& node) {
     QJsonDocument message = _sockets[hash(cluster, node)]->read();
     emit messageReceived(cluster, node, message);

@@ -246,10 +246,10 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process, const comm
         }
         
         if(command.commandlineParameters.isEmpty()){
-            process->start(command.executable);
+            process->start("\"" + command.executable + "\"");
         }
         else {
-            process->start(command.executable + " " + command.commandlineParameters);
+            process->start("\"" + command.executable + "\" " + command.commandlineParameters);
         }
     } else if (command.command == "Kill" || command.command == "Exit") {
         common::TrayProcessStatus ps;
