@@ -4,6 +4,7 @@ import {
     StartProcess,
     RestartProcess,
     StopProcess,
+    ReloadConfig,
     initializeGui,
     setProcessStatus,
     addProcessLogMessage,
@@ -46,6 +47,10 @@ function sendRestartProcessCommand(processId) {
         processId: processId
     };
     sendCommand('GuiProcessCommand', data);
+}
+
+function sendReloadConfigCommand() {
+    sendCommand('GuiReloadConfigCommand', {});
 }
 
 function serverConnect(dispatch) {
@@ -107,6 +112,9 @@ const apiMiddleware = store => next => action => {
             sendStopProcessCommand(
                 payload.processId
             );
+        break;
+        case ReloadConfig:
+            sendReloadConfigCommand();
         break;
         default: break;
     }

@@ -17,14 +17,40 @@
 }
 
 
-#side-bar a.active {
-    opacity: 1.0;
+#side-bar .reload-config {
+    position: absolute;
+    bottom: 0;
+    height: 100px;
 
+    opacity: 0.7;
+    color: #fff;
+    font-size: 0.8em;
+    text-decoration: none;
+    text-align: center;
+    display: block;
 }
 
+#side-bar .reload-config svg {
+    transition: 0.5s all;
+}
 
-#side-bar a .icon path,
-#side-bar a .icon polygon {
+#side-bar .reload-config:hover svg {
+    transform: rotate(-10deg);
+}
+
+#side-bar .reload-config.reloading svg {
+    transform: rotate(0deg);
+    animation-name: spin;
+    animation-duration: 0.5s;
+    animation-timing-function: ease-out;
+}
+
+#side-bar a.active {
+    opacity: 1.0;
+}
+
+#side-bar .icon path,
+#side-bar .icon polygon {
     fill: none;
     stroke: #fff;
     stroke-width: 3px;
@@ -37,13 +63,16 @@
     stroke: none;
 }
 
-#side-bar a .icon {
+#side-bar .icon {
     width: 40%;
     display: block;
     margin: auto;
     margin-bottom: 1em;
 }
 
+#side-bar .icon .icon-fill {
+    fill: #fff;
+}
 
 @media (max-width: 600px) {
     #side-bar {
@@ -58,5 +87,12 @@
         padding-top: 20px;
     }
 }
+
+
+@keyframes spin {
+    from {transform: rotate(0deg);}
+    from {transform: rotate(-360deg);}
+}
+
 
 

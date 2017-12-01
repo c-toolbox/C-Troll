@@ -7,6 +7,7 @@
 export const ServerConnect = 'ServerConnect';
 export const StartProcess = 'StartProcess';
 export const StopProcess = 'StopProcess';
+export const ReloadConfig = 'ReloadConfig';
 
   // Interact with model
 export const RestartProcess = 'RestartProcess';
@@ -64,6 +65,13 @@ export function stopProcess(processId) {
         payload: {
             processId
         } 
+    }
+}
+
+export function reloadConfig() {
+    return {
+        type: ReloadConfig,
+        payload: {} 
     }
 }
 
