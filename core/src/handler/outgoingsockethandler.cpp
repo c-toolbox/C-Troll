@@ -128,12 +128,8 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
 }
 
 void OutgoingSocketHandler::deinitialize() {
-	for (Cluster* cluster : _clusters) {
-		delete cluster;
-	}
-	_clusters.clear();
-
 	_sockets.clear();
+	_clusters.clear();
 }
 
 void OutgoingSocketHandler::readyRead(const Cluster& cluster, const Cluster::Node& node) {

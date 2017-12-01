@@ -61,7 +61,7 @@ Application::Application(QString configurationFile) {
 	initalize();
 }
 
-void Application::initalize() {
+void Application::initalize(bool resetGUIconnection) {
 	QFile f(_configurationFile);
 	f.open(QFile::ReadOnly);
 	QJsonDocument d = QJsonDocument::fromJson(f.readAll());
@@ -83,8 +83,10 @@ void Application::initalize() {
 		return std::move(cluster);
 	});
 
-	// The incoming socket handler takes care of messages from the GUI
-	_incomingSocketHandler.initialize(listeningPort);
+	if (resetGUIconnection) {
+		// The incoming socket handler takes care of messages from the GUI
+		_incomingSocketHandler.initialize(listeningPort);
+	}
 
 	// The outgoing socket handler takes care of messages to the Tray
 	QList<Cluster*> clusters;
@@ -93,10 +95,12 @@ void Application::initalize() {
 	});
 	_outgoingSocketHandler.initialize(clusters);
 
-	QObject::connect(
-		&_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
-		[this](const QJsonDocument& message) { incomingGuiMessage(message); }
-	);
+	if (resetGUIconnection) {
+		QObject::connect(
+			&_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
+			[this](const QJsonDocument& message) { incomingGuiMessage(message); }
+		);
+	}
 
 	QObject::connect(
 		&_outgoingSocketHandler, &OutgoingSocketHandler::messageReceived,
@@ -110,19 +114,23 @@ void Application::initalize() {
 	}
 	);
 
-	QObject::connect(
-		&_incomingSocketHandler, &IncomingSocketHandler::newConnectionEstablished,
-		[this](common::JsonSocket* socket) {
-		_incomingSocketHandler.sendMessage(socket, initializationInformation().toJson());
-		for (auto& process : _processes) {
-			_incomingSocketHandler.sendMessage(socket, guiProcessLogMessageHistory(*process).toJson());
+	if (resetGUIconnection) {
+		QObject::connect(
+			&_incomingSocketHandler, &IncomingSocketHandler::newConnectionEstablished,
+			[this](common::JsonSocket* socket) {
+			_incomingSocketHandler.sendMessage(socket, initializationInformation().toJson());
+			for (auto& process : _processes) {
+				_incomingSocketHandler.sendMessage(socket, guiProcessLogMessageHistory(*process).toJson());
+			}
 		}
+		);
 	}
-	);
 }
 
-void Application::deinitalize() {
-	_incomingSocketHandler.deinitialize();
+void Application::deinitalize(bool resetGUIconnection) {
+	if (resetGUIconnection) {
+		_incomingSocketHandler.deinitialize();
+	}
 	_outgoingSocketHandler.deinitialize();
 
 	_processes.clear();
@@ -315,8 +323,8 @@ void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd)
 }
 
 void Application::handleIncomingGuiReloadConfigCommand() {
-	deinitalize();
-	initalize();
+	deinitalize(false);
+	initalize(false);
 }
 
 void Application::incomingGuiMessage(const QJsonDocument& message) {

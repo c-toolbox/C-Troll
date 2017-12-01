@@ -52,9 +52,6 @@ void IncomingSocketHandler::initialize(quint16 port) {
 void IncomingSocketHandler::deinitialize() {
 	disconnect();
 
-	for (common::JsonSocket* socket : _sockets) {
-		delete socket;
-	}
 	_sockets.clear();
 }
 

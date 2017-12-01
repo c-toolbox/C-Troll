@@ -56,8 +56,8 @@ public:
     Application(QString configurationFile);
 
 private:
-	void initalize();
-	void deinitalize();
+	void initalize(bool resetGUIconnection = true);
+	void deinitalize(bool resetGUIconnection = true);
 
     void incomingGuiMessage(const QJsonDocument& message);
     void incomingTrayMessage(const Cluster& cluster, const Cluster::Node& node, const QJsonDocument& message);

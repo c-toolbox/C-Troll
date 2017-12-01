@@ -1,0 +1,8 @@
+{
+    "name": "VLC",
+    "executable": "C:/Program Files/VideoLAN/VLC/vlc.exe",
+	"currentWorkingDirectory": "C:/Program Files/VideoLAN/VLC",
+    "clusters": [
+        "local"
+    ]
+}
