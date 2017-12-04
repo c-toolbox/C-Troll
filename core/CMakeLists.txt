@@ -45,7 +45,7 @@ target_include_directories(${APPLICATION_NAME} PUBLIC "src")
 
 target_link_libraries(${APPLICATION_NAME}
     C-Troll-Common
-	Qt5::Widgets
+    Qt5::Widgets
     Qt5::Network
 )
 

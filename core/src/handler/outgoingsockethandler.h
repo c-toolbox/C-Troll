@@ -51,7 +51,7 @@ public:
     ~OutgoingSocketHandler();
 
     void initialize(const QList<Cluster*>& clusters);
-	void deinitialize();
+    void deinitialize();
 
     void sendMessage(const Cluster& cluster, QJsonDocument message) const;
 

@@ -6,49 +6,49 @@ QTextEdit * StandardMainWindow::_staticTextEdit = 0;
 
 void StandardMainWindow::myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-	if (StandardMainWindow::_staticTextEdit == 0)
-	{
-		QByteArray localMsg = msg.toLocal8Bit();
-		switch (type) {
-		case QtDebugMsg:
-			fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-			break;
-		case QtWarningMsg:
-			fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-			break;
-		case QtCriticalMsg:
-			fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-			break;
-		case QtFatalMsg:
-			fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-			abort();
-		}
-	}
-	else
-	{
-		switch (type) {
-		case QtDebugMsg:
-		case QtWarningMsg:
-		case QtCriticalMsg:
-			// redundant check, could be removed, or the 
-			// upper if statement could be removed
-			if (StandardMainWindow::_staticTextEdit != 0)
-				StandardMainWindow::_staticTextEdit->append(msg);
-			break;
-		case QtFatalMsg:
-			abort();
-		}
-	}
+    if (StandardMainWindow::_staticTextEdit == 0)
+    {
+        QByteArray localMsg = msg.toLocal8Bit();
+        switch (type) {
+        case QtDebugMsg:
+            fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+            break;
+        case QtWarningMsg:
+            fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+            break;
+        case QtCriticalMsg:
+            fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+            break;
+        case QtFatalMsg:
+            fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+            abort();
+        }
+    }
+    else
+    {
+        switch (type) {
+        case QtDebugMsg:
+        case QtWarningMsg:
+        case QtCriticalMsg:
+            // redundant check, could be removed, or the 
+            // upper if statement could be removed
+            if (StandardMainWindow::_staticTextEdit != 0)
+                StandardMainWindow::_staticTextEdit->append(msg);
+            break;
+        case QtFatalMsg:
+            abort();
+        }
+    }
 }
  
 StandardMainWindow::StandardMainWindow(const QString& title, QWidget *parent) :
     QMainWindow(parent)
 {
     setWindowTitle(title);
-	setMinimumSize(512, 256);
+    setMinimumSize(512, 256);
 
-	_staticTextEdit = new QTextEdit();
-	this->layout()->addWidget(_staticTextEdit);
+    _staticTextEdit = new QTextEdit();
+    this->layout()->addWidget(_staticTextEdit);
  
     /* Initialize the tray icon, set the icon of a set of system icons,
      * As well as set a tooltip
@@ -109,11 +109,11 @@ void StandardMainWindow::closeEvent(QCloseEvent * event)
 
 void StandardMainWindow::changeEvent(QEvent *event)
 {
-	if (event->type() == QEvent::WindowStateChange) {
-		if (isMinimized())
-			this->hide();
-		event->ignore();
-	}
+    if (event->type() == QEvent::WindowStateChange) {
+        if (isMinimized())
+            this->hide();
+        event->ignore();
+    }
 }
  
 /* The method that handles click on the application icon in the system tray
@@ -125,12 +125,12 @@ void StandardMainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
         /* If the window is visible, it is hidden,
              * Conversely, if hidden, it unfolds on the screen
              * */
-		if (!this->isVisible()) {
-			this->show();
-		}
-		else {
-			this->hide();
-		}
+        if (!this->isVisible()) {
+            this->show();
+        }
+        else {
+            this->hide();
+        }
         break;
     default:
         break;

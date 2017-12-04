@@ -47,7 +47,7 @@ class IncomingSocketHandler : public QObject {
 Q_OBJECT
 public:
     void initialize(quint16 port);
-	void deinitialize();
+    void deinitialize();
     
     void sendMessage(common::JsonSocket* socket, QJsonDocument message);
     void sendMessageToAll(QJsonDocument message);

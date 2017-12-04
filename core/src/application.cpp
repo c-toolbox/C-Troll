@@ -57,85 +57,83 @@ const QString KeyListeningPort = "listeningPort";
 }
 
 Application::Application(QString configurationFile) {
-	_configurationFile = configurationFile;
-	initalize();
+    _configurationFile = configurationFile;
+    initalize();
 }
 
 void Application::initalize(bool resetGUIconnection) {
-	QFile f(_configurationFile);
-	f.open(QFile::ReadOnly);
-	QJsonDocument d = QJsonDocument::fromJson(f.readAll());
-	QJsonObject jsonObject = d.object();
+    QFile f(_configurationFile);
+    f.open(QFile::ReadOnly);
+    QJsonDocument d = QJsonDocument::fromJson(f.readAll());
+    QJsonObject jsonObject = d.object();
 
-	QString programPath = jsonObject.value("applicationPath").toString();
-	QString clusterPath = jsonObject.value("clusterPath").toString();
-	int listeningPort = jsonObject.value("listeningPort").toInt();
+    QString programPath = jsonObject.value("applicationPath").toString();
+    QString clusterPath = jsonObject.value("clusterPath").toString();
+    int listeningPort = jsonObject.value("listeningPort").toInt();
 
-	// Load all program descriptions from the path provided by the configuration file
-	auto programs = Program::loadProgramsFromDirectory(programPath);
-	std::transform(programs->begin(), programs->end(), std::back_inserter(_programs), [](std::unique_ptr<Program>& program) {
-		return std::move(program);
-	});
+    // Load all program descriptions from the path provided by the configuration file
+    auto programs = Program::loadProgramsFromDirectory(programPath);
+    std::transform(programs->begin(), programs->end(), std::back_inserter(_programs), [](std::unique_ptr<Program>& program) {
+        return std::move(program);
+    });
 
-	// Load all cluster descriptions from the path provided by the configuration file
-	auto uniqueClisters = Cluster::loadClustersFromDirectory(clusterPath);
-	std::transform(uniqueClisters->begin(), uniqueClisters->end(), std::back_inserter(_clusters), [](std::unique_ptr<Cluster>& cluster) {
-		return std::move(cluster);
-	});
+    // Load all cluster descriptions from the path provided by the configuration file
+    auto uniqueClisters = Cluster::loadClustersFromDirectory(clusterPath);
+    std::transform(uniqueClisters->begin(), uniqueClisters->end(), std::back_inserter(_clusters), [](std::unique_ptr<Cluster>& cluster) {
+        return std::move(cluster);
+    });
 
-	if (resetGUIconnection) {
-		// The incoming socket handler takes care of messages from the GUI
-		_incomingSocketHandler.initialize(listeningPort);
-	}
+    if (resetGUIconnection) {
+        // The incoming socket handler takes care of messages from the GUI
+        _incomingSocketHandler.initialize(listeningPort);
+    }
 
-	// The outgoing socket handler takes care of messages to the Tray
-	QList<Cluster*> clusters;
-	std::transform(_clusters.begin(), _clusters.end(), std::back_inserter(clusters), [](auto& cluster) {
-		return cluster.get();
-	});
-	_outgoingSocketHandler.initialize(clusters);
+    // The outgoing socket handler takes care of messages to the Tray
+    QList<Cluster*> clusters;
+    std::transform(_clusters.begin(), _clusters.end(), std::back_inserter(clusters), [](auto& cluster) {
+        return cluster.get();
+    });
+    _outgoingSocketHandler.initialize(clusters);
 
-	if (resetGUIconnection) {
-		QObject::connect(
-			&_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
-			[this](const QJsonDocument& message) { incomingGuiMessage(message); }
-		);
-	}
+    if (resetGUIconnection) {
+        QObject::connect(
+            &_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
+            [this](const QJsonDocument& message) { incomingGuiMessage(message); }
+        );
 
-	QObject::connect(
-		&_outgoingSocketHandler, &OutgoingSocketHandler::messageReceived,
-		[this](const Cluster& cluster, const Cluster::Node& node, const QJsonDocument& message) { incomingTrayMessage(cluster, node, message); }
-	);
+        QObject::connect(
+            &_outgoingSocketHandler, &OutgoingSocketHandler::messageReceived,
+            [this](const Cluster& cluster, const Cluster::Node& node, const QJsonDocument& message) { incomingTrayMessage(cluster, node, message); }
+        );
 
-	QObject::connect(
-		&_outgoingSocketHandler, &OutgoingSocketHandler::connectedStatusChanged,
-		[this](const Cluster& cluster, const Cluster::Node& node) {
-		_incomingSocketHandler.sendMessageToAll(initializationInformation().toJson());
-	}
-	);
+        QObject::connect(
+            &_outgoingSocketHandler, &OutgoingSocketHandler::connectedStatusChanged,
+            [this](const Cluster& cluster, const Cluster::Node& node) {
+            _incomingSocketHandler.sendMessageToAll(initializationInformation().toJson());
+        }
+        );
 
-	if (resetGUIconnection) {
-		QObject::connect(
-			&_incomingSocketHandler, &IncomingSocketHandler::newConnectionEstablished,
-			[this](common::JsonSocket* socket) {
-			_incomingSocketHandler.sendMessage(socket, initializationInformation().toJson());
-			for (auto& process : _processes) {
-				_incomingSocketHandler.sendMessage(socket, guiProcessLogMessageHistory(*process).toJson());
-			}
-		}
-		);
-	}
+        QObject::connect(
+            &_incomingSocketHandler, &IncomingSocketHandler::newConnectionEstablished,
+            [this](common::JsonSocket* socket) {
+            _incomingSocketHandler.sendMessage(socket, initializationInformation().toJson());
+            for (auto& process : _processes) {
+                _incomingSocketHandler.sendMessage(socket, guiProcessLogMessageHistory(*process).toJson());
+            }
+        }
+        );
+    }
 }
 
 void Application::deinitalize(bool resetGUIconnection) {
-	if (resetGUIconnection) {
-		_incomingSocketHandler.deinitialize();
-	}
-	_outgoingSocketHandler.deinitialize();
+    if (resetGUIconnection) {
+        _incomingSocketHandler.deinitialize();
+    }
+    _outgoingSocketHandler.deinitialize();
 
-	_processes.clear();
-	_clusters.clear();
-	_programs.clear();
+    _processes.clear();
+    _clusters.clear();
+    _programs.clear();
 }
 
 void Application::handleTrayProcessStatus(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessStatus status) {
@@ -323,8 +321,8 @@ void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd)
 }
 
 void Application::handleIncomingGuiReloadConfigCommand() {
-	deinitalize(false);
-	initalize(false);
+    deinitalize(false);
+    initalize(false);
 }
 
 void Application::incomingGuiMessage(const QJsonDocument& message) {
@@ -341,10 +339,10 @@ void Application::incomingGuiMessage(const QJsonDocument& message) {
             // We have received a message from the GUI to start a new application
             handleIncomingGuiProcessCommand(common::GuiProcessCommand(QJsonDocument(msg.payload)));
         }
-		else if (msg.type == "GuiReloadConfigCommand") {
-			 // We have received a message from the GUI to reload the configs
-			handleIncomingGuiReloadConfigCommand();
-		 }
+        else if (msg.type == "GuiReloadConfigCommand") {
+             // We have received a message from the GUI to reload the configs
+            handleIncomingGuiReloadConfigCommand();
+         }
     } catch (const std::runtime_error& e) {
         Log(QString("Error with incoming gui message: ") + e.what());
         Log(message.toJson());

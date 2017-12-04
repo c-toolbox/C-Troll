@@ -40,18 +40,18 @@
 #include <standardmainwindow.h>
 
 int main(int argc, char** argv) {
-	Q_INIT_RESOURCE(resources);
+    Q_INIT_RESOURCE(resources);
 
-	qInstallMessageHandler(StandardMainWindow::myMessageOutput);
+    qInstallMessageHandler(StandardMainWindow::myMessageOutput);
 
     QApplication app(argc, argv);
     
-	StandardMainWindow mainWindow("C-Troll-Tray");
+    StandardMainWindow mainWindow("C-Troll-Tray");
 
 #ifdef QT_DEBUG
-	mainWindow.show();
+    mainWindow.show();
 #else
-	mainWindow.showMinimized();
+    mainWindow.showMinimized();
 #endif // DEBUG
 
     SocketHandler socketHandler;

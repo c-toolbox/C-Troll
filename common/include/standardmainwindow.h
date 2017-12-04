@@ -19,8 +19,8 @@ public:
     explicit StandardMainWindow(const QString& title, QWidget *parent = 0);
     ~StandardMainWindow();
 
-	static QTextEdit *_staticTextEdit;
-	static void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    static QTextEdit *_staticTextEdit;
+    static void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
  
 protected:
     /* Virtual function of the parent class in our class
@@ -28,7 +28,7 @@ protected:
      * That it is minimized to tray when we want
      */
     void closeEvent(QCloseEvent * event);
-	void changeEvent(QEvent * event);
+    void changeEvent(QEvent * event);
  
 private slots:
     /* The slot that will accept the signal from the event

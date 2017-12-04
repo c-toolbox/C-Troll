@@ -50,9 +50,9 @@ void IncomingSocketHandler::initialize(quint16 port) {
 }
 
 void IncomingSocketHandler::deinitialize() {
-	disconnect();
+    disconnect();
 
-	_sockets.clear();
+    _sockets.clear();
 }
 
 void IncomingSocketHandler::newConnection() {

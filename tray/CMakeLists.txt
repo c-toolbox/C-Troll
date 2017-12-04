@@ -29,7 +29,7 @@ add_executable(${APPLICATION_NAME} WIN32 MACOSX_BUNDLE
 
 target_link_libraries(${APPLICATION_NAME}
     C-Troll-Common
-	Qt5::Widgets
+    Qt5::Widgets
     Qt5::Network
 )
 
