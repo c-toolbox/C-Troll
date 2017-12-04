@@ -36,11 +36,24 @@
 
 #include "sockethandler.h"
 #include "processhandler.h"
-#include <QCoreApplication>
+#include <QApplication>
+#include <standardmainwindow.h>
 
 int main(int argc, char** argv) {
-    QCoreApplication app(argc, argv);
+	Q_INIT_RESOURCE(resources);
+
+	qInstallMessageHandler(StandardMainWindow::myMessageOutput);
+
+    QApplication app(argc, argv);
     
+	StandardMainWindow mainWindow("C-Troll-Tray");
+
+#ifdef QT_DEBUG
+	mainWindow.show();
+#else
+	mainWindow.showMinimized();
+#endif // DEBUG
+
     SocketHandler socketHandler;
     socketHandler.initialize();
     

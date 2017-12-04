@@ -9,6 +9,7 @@ set(HEADER_FILES
     include/jsonsocket.h
     include/jsonsupport.h
     include/logging.h
+	include/standardmainwindow.h
     include/traycommand.h
     include/trayprocesslogmessage.h
     include/trayprocessstatus.h
@@ -25,22 +26,25 @@ set(SOURCE_FILES
     src/jsonsocket.cpp
     src/jsonsupport.cpp
     src/logging.cpp
+	src/standardmainwindow.cpp
     src/traycommand.cpp
     src/trayprocesslogmessage.cpp
     src/trayprocessstatus.cpp
 )
 
-# find_package(Qt5Widgets)
+find_package(Qt5Widgets)
 find_package(Qt5Network)
 
 set(MOC_FILES "")
 qt5_wrap_cpp(MOC_FILES 
     include/jsonsocket.h
+	include/standardmainwindow.h
 )
 
 qt5_wrap_cpp(MOC_FILES)
 
 set(LIBRARY_NAME C-Troll-Common)
+
 add_library(${LIBRARY_NAME}
     ${SOURCE_FILES}
     ${HEADER_FILES}
@@ -51,6 +55,7 @@ add_library(${LIBRARY_NAME}
 target_include_directories(${LIBRARY_NAME} PUBLIC "include") 
 
 target_link_libraries(${LIBRARY_NAME}
+	Qt5::Widgets
     Qt5::Network
 )
 

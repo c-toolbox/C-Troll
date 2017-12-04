@@ -32,17 +32,29 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include <QCoreApplication>
+#include <QApplication>
 #include <QDir>
 #include <QFileInfo>
 
 #include "application.h"
+#include <standardmainwindow.h>
 #include <logging.h>
 
 #define DEVELOP
 
 int main(int argc, char** argv) {
-    QCoreApplication application(argc, argv);
+	Q_INIT_RESOURCE(resources);
+
+	qInstallMessageHandler(StandardMainWindow::myMessageOutput);
+
+	QApplication app(argc, argv);
+
+	StandardMainWindow mainWindow("C-Troll-Core");
+#ifdef QT_DEBUG
+	mainWindow.show();
+#else
+	mainWindow.showMinimized();
+#endif // DEBUG
     
     common::Log::initialize("core");
     
@@ -66,6 +78,6 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
     }
 
-    Application app(configurationFile);
-    application.exec();
+    Application application(configurationFile);
+    app.exec();
 }
