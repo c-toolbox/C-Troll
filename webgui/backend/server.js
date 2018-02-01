@@ -42,7 +42,7 @@ const http = require('http');
 const pluralize = require('pluralize');
 const colors = require('colors');
 const express = require('express');
-const config = JSON.parse(fs.readFileSync('config.json', 'utf-8'));
+const config = JSON.parse(fs.readFileSync(__dirname + '/config.json', 'utf-8'));
 
 pluralize.addIrregularRule('is', 'are');
 
@@ -130,10 +130,10 @@ guiSocketServer.on('connection', (guiSocket) => {
 
 
 const app = express();
-app.use(express.static(config['public']));
+app.use(express.static(__dirname + '/' + config['public']));
 
 app.use( '/**', (req, res) => {
-    res.sendfile('./' + config['public'] + 'index.html');
+    res.sendfile(__dirname + '/' + config['public'] + 'index.html');
 });
 
 let httpServer = http.createServer(app);

@@ -40,8 +40,10 @@
 #include <trayprocessstatus.h>
 #include <trayprocesslogmessage.h>
 #include <logging.h>
+#include <jsonsupport.h>
 
 #include <QFile>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTcpSocket>
@@ -70,6 +72,18 @@ void Application::initalize(bool resetGUIconnection) {
     QString programPath = jsonObject.value("applicationPath").toString();
     QString clusterPath = jsonObject.value("clusterPath").toString();
     int listeningPort = jsonObject.value("listeningPort").toInt();
+
+    QJsonArray services = common::testAndReturnArray(jsonObject, "services", Optional::Yes);
+    for (auto& s : services) {
+        if (!s.isString()) {
+            Log("Error when parsing service command.");
+            continue;
+        }
+        QString command = s.toString();
+        std::unique_ptr<QProcess> p = std::make_unique<QProcess>();
+        p->start(command);
+        _services.push_back(std::move(p));
+    }
 
     // Load all program descriptions from the path provided by the configuration file
     auto programs = Program::loadProgramsFromDirectory(programPath);
