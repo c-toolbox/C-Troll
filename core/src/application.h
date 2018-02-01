@@ -43,6 +43,8 @@
 #include "traycommand.h"
 #include "genericmessage.h"
 
+#include <QProcess>
+
 namespace common {
     struct GuiStartCommand;
     struct GuiProcessCommand;
@@ -82,6 +84,7 @@ private:
     IncomingSocketHandler _incomingSocketHandler;
     OutgoingSocketHandler _outgoingSocketHandler;
 
+    std::vector<std::unique_ptr<QProcess>> _services;
     QString _configurationFile;
 };
 
