@@ -33,6 +33,7 @@
  ****************************************************************************************/
 
 #include <jsonsocket.h>
+#include <QNetworkProxy>
 
 namespace common {
 
@@ -44,6 +45,7 @@ JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject *parent)
 
     QObject::connect(_socket.get(), &QTcpSocket::readyRead,
         [this]() { readToBuffer(); });
+    _socket->setProxy(QNetworkProxy::NoProxy);
 }
 
 JsonSocket::~JsonSocket() {}
