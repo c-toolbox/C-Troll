@@ -36,8 +36,8 @@
 #define __GUIPROCESSLOGMESSAGEHISTORY_H__
 
 #include <QJsonDocument>
-#include <QString>
 #include <QMap>
+#include <QString>
 
 namespace common {
     
@@ -59,8 +59,8 @@ struct GuiProcessLogMessageHistory {
     GuiProcessLogMessageHistory() = default;
     
     /**
-     * Creates a GuiProcessLogMessageHistory from the passed \p document. The \p document must
-     * contain the following keys:
+     * Creates a GuiProcessLogMessageHistory from the passed \p document. The \p document
+     * must contain the following keys:
      * \c processId (int)
      * \c applicationId (string)
      * \c clusterId (string)
@@ -90,7 +90,6 @@ struct GuiProcessLogMessageHistory {
     int configurationId;
     /// The log messages
     QList<LogMessage> logMessages;
-
 };
     
 } // namespace common

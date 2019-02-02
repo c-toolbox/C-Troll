@@ -39,10 +39,8 @@
 #include <QJsonArray>
 #include <QJsonParseError>
 #include <QCryptographicHash>
-
 #include <cassert>
 #include <logging.h>
-
 #include "jsonsupport.h"
 
 namespace {
@@ -62,7 +60,7 @@ namespace {
     const QString KeyConfigurationName = "name";
     const QString KeyConfigurationIdentifier = "identifier";
     const QString KeyConfigurationParameters = "commandlineParameters";
-}
+} // namespace
 
 std::unique_ptr<Program> Program::loadProgram(QString jsonFile, QString baseDirectory) {
     QString identifier = QDir(baseDirectory).relativeFilePath(jsonFile);
@@ -86,8 +84,7 @@ std::unique_ptr<Program> Program::loadProgram(QString jsonFile, QString baseDire
 
     if (d.isEmpty()) {
         throw std::runtime_error(
-            std::to_string(err.offset) + ": " +
-            err.errorString().toStdString()
+            std::to_string(err.offset) + ": " + err.errorString().toStdString()
         );
     }
     
@@ -106,7 +103,7 @@ common::GuiInitialization::Application Program::toGuiInitializationApplication()
         common::GuiInitialization::Application::Configuration c;
         c.name = conf.name;
         c.id = conf.id;
-        c.clusters = conf.clusterCommanlineParameters.keys();
+        c.clusters = conf.clusterCommandlineParameters.keys();
 
         app.configurations.push_back(c);
     }
@@ -118,9 +115,10 @@ common::GuiInitialization::Application Program::toGuiInitializationApplication()
     return app;
 }
 
-std::unique_ptr<std::vector<std::unique_ptr<Program>>> Program::loadProgramsFromDirectory(QString directory) {
-    std::unique_ptr<std::vector<std::unique_ptr<Program>>> programs
-        = std::make_unique<std::vector<std::unique_ptr<Program>>>();
+std::unique_ptr<std::vector<std::unique_ptr<Program>>>
+Program::loadProgramsFromDirectory(QString directory)
+{
+    auto programs = std::make_unique<std::vector<std::unique_ptr<Program>>>();
     // First, get all the *.json files from the directory and subdirectories
     QDirIterator it(
         directory,
@@ -146,26 +144,41 @@ Program::Program(const QJsonObject& jsonObject) {
     _name = common::testAndReturnString(jsonObject, KeyName);
     _executable = common::testAndReturnString(jsonObject, KeyExecutable);
     _baseDirectory = common::testAndReturnString(
-        jsonObject, KeyBaseDirectory, Optional::Yes
+        jsonObject,
+        KeyBaseDirectory,
+        Optional::Yes
     );
     _commandlineParameters = common::testAndReturnString(
-        jsonObject, KeyCommandlineParameters, Optional::Yes
+        jsonObject,
+        KeyCommandlineParameters,
+        Optional::Yes
     );
     _currentWorkingDirectory = common::testAndReturnString(
-        jsonObject, KeyCurrentWorkingDirectory,
-        Optional::Yes, _baseDirectory
+        jsonObject,
+        KeyCurrentWorkingDirectory,
+        Optional::Yes,
+        _baseDirectory
     );
     
     _tags = common::testAndReturnStringList(jsonObject, KeyTags, Optional::Yes);
 
-    QJsonObject defaults = common::testAndReturnObject(jsonObject, KeyDefaults, Optional::Yes);
-    if (defaults.size() > 0) {
-        _defaultConfiguration = common::testAndReturnString(defaults, KeyDefaultConfiguration);
+    QJsonObject defaults = common::testAndReturnObject(
+        jsonObject,
+        KeyDefaults,
+        Optional::Yes
+    );
+    if (!defaults.empty()) {
+        _defaultConfiguration = common::testAndReturnString(
+            defaults,
+            KeyDefaultConfiguration
+        );
         _defaultCluster = common::testAndReturnString(defaults, KeyDefaultCluster);
     }
 
     QJsonObject configurationObject = common::testAndReturnObject(
-        jsonObject, KeyConfigurations, Optional::Yes
+        jsonObject,
+        KeyConfigurations,
+        Optional::Yes
     );
 
     for (auto it = configurationObject.begin();
@@ -183,10 +196,16 @@ Program::Program(const QJsonObject& jsonObject) {
         QJsonObject obj = value.toObject();
         conf.name = common::testAndReturnString(obj, KeyConfigurationName);
 
-        QJsonObject clusters = common::testAndReturnObject(obj, KeyClusterCommandlineParameters);
+        QJsonObject clusters = common::testAndReturnObject(
+            obj,
+            KeyClusterCommandlineParameters
+        );
 
         for (QString key : clusters.keys()) {
-            conf.clusterCommanlineParameters[key] = common::testAndReturnString(clusters, key);
+            conf.clusterCommandlineParameters[key] = common::testAndReturnString(
+                clusters,
+                key
+            );
         }
 
         _configurations.push_back(conf);
@@ -235,34 +254,33 @@ QJsonObject Program::toJson() const {
     program[KeyId] = _id;
     program[KeyName] = _name;
     program[KeyExecutable] = _executable;
-    if (_baseDirectory != "") {
+    if (!_baseDirectory.isEmpty()) {
         program[KeyBaseDirectory] = _baseDirectory;
     }
-    if (_commandlineParameters != "") {
+    if (!_commandlineParameters.isEmpty()) {
         program[KeyCommandlineParameters] = _commandlineParameters;
     }
-    if (_currentWorkingDirectory != "") {
+    if (!_currentWorkingDirectory.isEmpty()) {
         program[KeyCurrentWorkingDirectory] = _currentWorkingDirectory;
     }
 
-    if (_tags.size() != 0) {
+    if (!_tags.empty()) {
         QJsonArray tags;
-        for (const auto& tag : _tags) {
+        for (const QString& tag : _tags) {
             tags.push_back(tag);
         }
         program[KeyTags] = tags;
     }
     
-    if (_configurations.size() != 0) {
+    if (!_configurations.empty()) {
         QJsonObject configurations;
-        for (const auto& configuration : _configurations) {
+        for (const Program::Configuration& configuration : _configurations) {
             QJsonObject configurationObject;
             configurationObject[KeyConfigurationName] = configuration.name;
 
             QJsonObject clusterParams;
-            for (const auto& cluster : configuration.clusterCommanlineParameters.keys()) {
-                QString params = configuration.clusterCommanlineParameters[cluster];
-                clusterParams[cluster] = params;
+            for (const QString& c : configuration.clusterCommandlineParameters.keys()) {
+                clusterParams[c] = configuration.clusterCommandlineParameters[c];
             }
             configurationObject[KeyClusterCommandlineParameters] = clusterParams;
 
@@ -271,7 +289,7 @@ QJsonObject Program::toJson() const {
         program[KeyConfigurations] = configurations;
     }
 
-    if (_defaultConfiguration != "" || _defaultCluster != "") {
+    if (!_defaultConfiguration.isEmpty() || !_defaultCluster.isEmpty()) {
         QJsonObject defaults;
         defaults[KeyDefaultCluster] = _defaultCluster;
         defaults[KeyDefaultConfiguration] = _defaultConfiguration;

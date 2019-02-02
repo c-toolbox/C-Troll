@@ -115,43 +115,45 @@ public:
     QList<Node>& nodes();
 
     /**
-    * Returns a list of all computer nodes that belong to this Cluster.
-    * \return A list of all computer nodes that belong to this Cluster
-    */
+     * Returns a list of all computer nodes that belong to this Cluster.
+     * \return A list of all computer nodes that belong to this Cluster
+     */
     const QList<Node>& nodes() const;
 
     /**
-    * This method converts a Cluster information into the common::GuiInitialization::Cluster
-    * format so that it can be send to connected GUIs.
-    * \param cluster The Cluster information that is to be converte
-    * \return A common::GuiInitialization::Cluster structure that contains all relevant
-    * information for the GUI initialization step
-    */
+     * This method converts a Cluster information into the
+     * common::GuiInitialization::Cluster format so that it can be send to connected GUIs.
+     * \param cluster The Cluster information that is to be converte
+     * \return A common::GuiInitialization::Cluster structure that contains all relevant
+     * information for the GUI initialization step
+     */
     common::GuiInitialization::Cluster toGuiInitializationCluster() const;
 
     /**
-    * Return true if all nodes of the cluster are connected.
-    */
+     * Return true if all nodes of the cluster are connected.
+     */
     bool connected() const;
    
     /**
-    * Return a JSON string that represents this cluster.
-    */
+     * Return a JSON string that represents this cluster.
+     */
     QJsonObject toJson() const;
 
     /**
-    * Return a unique hash that represents this cluster configuration.
-    */
+     * Return a unique hash that represents this cluster configuration.
+     */
     QByteArray hash() const;
 
     /**
-    * This method walks the passed \p directory and looks for all <code>*.json</code>
-    * files in it. Any \c JSON file in it will be interpreted as a cluster configuration and
-    * returned.
-    * \param directory The directory that is walked in search for <code>*.json</code> files
-    * \return A list of all Cluster%s that were found by walking the \p directory
-    */
-    static std::unique_ptr<std::vector<std::unique_ptr<Cluster>>> loadClustersFromDirectory(QString directory);
+     * This method walks the passed \p directory and looks for all <code>*.json</code>
+     * files in it. Any \c JSON file in it will be interpreted as a cluster configuration
+     * and returned.
+     * \param directory The directory that is walked in search for <code>*.json</code>
+     * files
+     * \return A list of all Cluster%s that were found by walking the \p directory
+     */
+    static std::unique_ptr<std::vector<std::unique_ptr<Cluster>>>
+        loadClustersFromDirectory(QString directory);
 
     /**
      * Load a cluster from file.
@@ -170,6 +172,5 @@ private:
     /// A vector of processes that are active on this cluster
     QVector<Process*> _processes;
 };
-
 
 #endif // __CLUSTER_H__

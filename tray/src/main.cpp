@@ -60,10 +60,14 @@ int main(int argc, char** argv) {
     ProcessHandler processHandler;
     
     // Connect the sockethandler and the processhandler
-    QObject::connect(&socketHandler, SIGNAL(messageRecieved(QJsonDocument)),
-                     &processHandler, SLOT(handleSocketMessage(QJsonDocument)));
-    QObject::connect(&processHandler, SIGNAL(sendSocketMessage(QJsonDocument)),
-                     &socketHandler, SLOT(sendMessage(QJsonDocument)));
+    QObject::connect(
+        &socketHandler, SIGNAL(messageRecieved(QJsonDocument)),
+        &processHandler, SLOT(handleSocketMessage(QJsonDocument))
+    );
+    QObject::connect(
+        &processHandler, SIGNAL(sendSocketMessage(QJsonDocument)),
+        &socketHandler, SLOT(sendMessage(QJsonDocument))
+    );
 
     app.exec();
     qDebug() << "Application finished";

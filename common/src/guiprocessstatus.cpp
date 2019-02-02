@@ -35,7 +35,6 @@
 #include "guiprocessstatus.h"
 
 #include "jsonsupport.h"
-
 #include <QJsonObject>
 
 namespace {
@@ -47,7 +46,7 @@ namespace {
     const QString KeyNodeStatus = "nodeStatus";
     const QString KeyTime = "time";
     const QString KeyId = "id";
-}
+} // namespace
 
 namespace common {
     

@@ -35,13 +35,12 @@
 #include "trayprocessstatus.h"
 
 #include "jsonsupport.h"
-
 #include <QJsonObject>
 
 namespace {
     const QString KeyProcessId = "processId";
     const QString KeyStatus = "status";
-}
+} // namespace
 
 namespace common {
     
@@ -51,7 +50,9 @@ TrayProcessStatus::TrayProcessStatus(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
     processId = common::testAndReturnInt(obj, KeyProcessId);
-    status = static_cast<common::TrayProcessStatus::Status>(common::testAndReturnInt(obj, KeyStatus));
+    status = static_cast<common::TrayProcessStatus::Status>(
+        common::testAndReturnInt(obj, KeyStatus)
+    );
 }
 
 QJsonDocument TrayProcessStatus::toJson() const {

@@ -35,7 +35,6 @@
 #include "traycommand.h"
 
 #include "jsonsupport.h"
-
 #include <QJsonObject>
 
 namespace {
@@ -46,7 +45,7 @@ namespace {
     const QString KeyWorkingDirectory = "currentWorkingDirectory";
     const QString KeyCommandlineArguments = "commandlineArguments";
     const QString KeyEnvironmentVariables = "environmentVariables";
-}
+} // namespace
 
 namespace common {
 

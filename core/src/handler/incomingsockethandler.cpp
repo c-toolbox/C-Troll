@@ -34,31 +34,28 @@
 
 #include "incomingsockethandler.h"
 
-#include <QTcpSocket>
 #include <jsonsocket.h>
-
+#include <QTcpSocket>
 #include <assert.h>
 #include <memory>
 
 void IncomingSocketHandler::initialize(quint16 port) {
     _server.listen(QHostAddress::Any, port);
 
-    QObject::connect(
-        &_server, &QTcpServer::newConnection,
-        [this]() { newConnection(); }
-    );
+    QObject::connect(&_server, &QTcpServer::newConnection, [this]() { newConnection(); });
 }
 
 void IncomingSocketHandler::deinitialize() {
     disconnect();
-
     _sockets.clear();
 }
 
 void IncomingSocketHandler::newConnection() {
     while (_server.hasPendingConnections()) {
-        std::unique_ptr<QTcpSocket> socket = std::unique_ptr<QTcpSocket>(_server.nextPendingConnection());
-        common::JsonSocket *jsonSocket = new common::JsonSocket(std::move(socket));
+        QTcpSocket* socket = _server.nextPendingConnection();
+        common::JsonSocket* jsonSocket = new common::JsonSocket(
+            std::unique_ptr<QTcpSocket>(socket)
+        );
 
         _sockets.push_back(jsonSocket);
 
@@ -101,7 +98,7 @@ void IncomingSocketHandler::sendMessage(common::JsonSocket* socket, QJsonDocumen
 
 void IncomingSocketHandler::sendMessageToAll(QJsonDocument message) {
     assert(!message.isEmpty());
-    for (auto& socket : _sockets) {
+    for (common::JsonSocket* socket : _sockets) {
         socket->write(message);
     }
 }

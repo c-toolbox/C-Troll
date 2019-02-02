@@ -35,14 +35,13 @@
 #include "trayprocesslogmessage.h"
 
 #include "jsonsupport.h"
-
 #include <QJsonObject>
 
 namespace {
     const QString KeyIdentifier = "processId";
     const QString KeyMessage = "message";
     const QString KeyType = "type";
-}
+} // namespace
 
 namespace common {
     

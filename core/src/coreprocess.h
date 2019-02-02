@@ -36,13 +36,13 @@
 #define __COREPROCESS_H__
 
 #include "cluster.h"
-#include "program.h"
-#include "handler/incomingsockethandler.h"
-#include "handler/outgoingsockethandler.h"
-#include "traycommand.h"
 #include "guiinitialization.h"
 #include "guiprocesslogmessage.h"
 #include "guiprocesslogmessagehistory.h"
+#include "program.h"
+#include "traycommand.h"
+#include "handler/incomingsockethandler.h"
+#include "handler/outgoingsockethandler.h"
 #include <chrono>
 
 namespace common {
@@ -146,9 +146,9 @@ private:
     QMap<QString, CoreProcess::NodeLog> _nodeLogs;
     CoreProcess::ClusterStatus _clusterStatus;
 
-    int _nextLogMessageId;
-    int _nextNodeErrorId;
-    int _nextNodeStatusId;
+    int _nextLogMessageId = 0;
+    int _nextNodeErrorId = 0;
+    int _nextNodeStatusId = 0;
 };
 
 #endif // __COREPROCESS_H__

@@ -37,26 +37,24 @@
 #include <guistartcommand.h>
 #include <guiprocesscommand.h>
 #include <guiprocessstatus.h>
-#include <trayprocessstatus.h>
-#include <trayprocesslogmessage.h>
-#include <logging.h>
 #include <jsonsupport.h>
-
+#include <logging.h>
+#include <trayprocesslogmessage.h>
+#include <trayprocessstatus.h>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QTcpSocket>
 #include <QObject>
+#include <QTcpSocket>
 #include <QThread>
-
 #include <assert.h>
 
 namespace {
-const QString KeyApplicationPath = "applicationPath";
-const QString KeyClusterPath = "clusterPath";
-const QString KeyListeningPort = "listeningPort";
-}
+    const QString KeyApplicationPath = "applicationPath";
+    const QString KeyClusterPath = "clusterPath";
+    const QString KeyListeningPort = "listeningPort";
+} // namespace
 
 Application::Application(QString configurationFile) {
     _configurationFile = configurationFile;
@@ -73,8 +71,12 @@ void Application::initalize(bool resetGUIconnection) {
     QString clusterPath = jsonObject.value("clusterPath").toString();
     int listeningPort = jsonObject.value("listeningPort").toInt();
 
-    QJsonArray services = common::testAndReturnArray(jsonObject, "services", Optional::Yes);
-    for (auto& s : services) {
+    QJsonArray services = common::testAndReturnArray(
+        jsonObject,
+        "services",
+        Optional::Yes
+    );
+    for (QJsonValueRef& s : services) {
         if (!s.isString()) {
             Log("Error when parsing service command.");
             continue;
@@ -86,16 +88,25 @@ void Application::initalize(bool resetGUIconnection) {
     }
 
     // Load all program descriptions from the path provided by the configuration file
-    auto programs = Program::loadProgramsFromDirectory(programPath);
-    std::transform(programs->begin(), programs->end(), std::back_inserter(_programs), [](std::unique_ptr<Program>& program) {
-        return std::move(program);
-    });
+    std::unique_ptr<std::vector<std::unique_ptr<Program>>> programs =
+        Program::loadProgramsFromDirectory(programPath);
+
+    std::transform(
+        programs->begin(),
+        programs->end(),
+        std::back_inserter(_programs),
+        [](std::unique_ptr<Program>& program) { return std::move(program); }
+    );
 
     // Load all cluster descriptions from the path provided by the configuration file
-    auto uniqueClisters = Cluster::loadClustersFromDirectory(clusterPath);
-    std::transform(uniqueClisters->begin(), uniqueClisters->end(), std::back_inserter(_clusters), [](std::unique_ptr<Cluster>& cluster) {
-        return std::move(cluster);
-    });
+    std::unique_ptr<std::vector<std::unique_ptr<Cluster>>> uniqueClisters =
+        Cluster::loadClustersFromDirectory(clusterPath);
+    std::transform(
+        uniqueClisters->begin(),
+        uniqueClisters->end(),
+        std::back_inserter(_clusters),
+        [](std::unique_ptr<Cluster>& cluster) { return std::move(cluster); }
+    );
 
     if (resetGUIconnection) {
         // The incoming socket handler takes care of messages from the GUI
@@ -104,9 +115,12 @@ void Application::initalize(bool resetGUIconnection) {
 
     // The outgoing socket handler takes care of messages to the Tray
     QList<Cluster*> clusters;
-    std::transform(_clusters.begin(), _clusters.end(), std::back_inserter(clusters), [](auto& cluster) {
-        return cluster.get();
-    });
+    std::transform(
+        _clusters.begin(),
+        _clusters.end(),
+        std::back_inserter(clusters),
+        [](std::unique_ptr<Cluster>& cluster) { return cluster.get(); }
+    );
     _outgoingSocketHandler.initialize(clusters);
 
     if (resetGUIconnection) {
@@ -123,18 +137,18 @@ void Application::initalize(bool resetGUIconnection) {
         QObject::connect(
             &_outgoingSocketHandler, &OutgoingSocketHandler::connectedStatusChanged,
             [this](const Cluster& cluster, const Cluster::Node& node) {
-            _incomingSocketHandler.sendMessageToAll(initializationInformation().toJson());
-        }
+                _incomingSocketHandler.sendMessageToAll(initializationInformation().toJson());
+            }
         );
 
         QObject::connect(
             &_incomingSocketHandler, &IncomingSocketHandler::newConnectionEstablished,
             [this](common::JsonSocket* socket) {
-            _incomingSocketHandler.sendMessage(socket, initializationInformation().toJson());
-            for (auto& process : _processes) {
-                _incomingSocketHandler.sendMessage(socket, guiProcessLogMessageHistory(*process).toJson());
+                _incomingSocketHandler.sendMessage(socket, initializationInformation().toJson());
+                for (std::unique_ptr<CoreProcess>& process : _processes) {
+                    _incomingSocketHandler.sendMessage(socket, guiProcessLogMessageHistory(*process).toJson());
+                }
             }
-        }
         );
     }
 }
@@ -150,76 +164,91 @@ void Application::deinitalize(bool resetGUIconnection) {
     _programs.clear();
 }
 
-void Application::handleTrayProcessStatus(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessStatus status) {
-    auto iProcess = std::find_if(_processes.begin(), _processes.end(), [&status](auto& p) {
-        return p->id() == status.processId;
-    });
+void Application::handleTrayProcessStatus(const Cluster& cluster,
+                                          const Cluster::Node& node,
+                                          common::TrayProcessStatus status)
+{
+    auto iProcess = std::find_if(
+        _processes.begin(),
+        _processes.end(),
+        [&status](std::unique_ptr<CoreProcess>& p) { return p->id() == status.processId; }
+    );
     if (iProcess == _processes.end()) {
         return;
     }
+
+    CoreProcess& p = *(*iProcess);
 
     QString nodeId = node.id;
 
     switch (status.status) {
-    case common::TrayProcessStatus::Status::Starting:
-        (*iProcess)->pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::Starting);
-        sendGuiProcessStatus(*iProcess->get(), nodeId);
-        break;
-    case common::TrayProcessStatus::Status::Running:
-        (*iProcess)->pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::Running);
-        sendGuiProcessStatus(*iProcess->get(), nodeId);
-        break;
-    case common::TrayProcessStatus::Status::NormalExit:
-        (*iProcess)->pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::NormalExit);
-        sendGuiProcessStatus(*iProcess->get(), nodeId);
-        break;
-    case common::TrayProcessStatus::Status::FailedToStart:
-        (*iProcess)->pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::FailedToStart);
-        sendGuiProcessStatus(*iProcess->get(), nodeId);
-        break;
-    case common::TrayProcessStatus::Status::CrashExit:
-        (*iProcess)->pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::CrashExit);
-        sendGuiProcessStatus(*iProcess->get(), nodeId);
-        break;
-    case common::TrayProcessStatus::Status::WriteError:
-        (*iProcess)->pushNodeError(nodeId, CoreProcess::NodeError::Error::WriteError);
-        break;
-    case common::TrayProcessStatus::Status::ReadError:
-        (*iProcess)->pushNodeError(nodeId, CoreProcess::NodeError::Error::ReadError);
-        break;
-    case common::TrayProcessStatus::Status::TimedOut:
-        (*iProcess)->pushNodeError(nodeId, CoreProcess::NodeError::Error::TimedOut);
-        break;
-    case common::TrayProcessStatus::Status::UnknownError:
-        (*iProcess)->pushNodeError(nodeId, CoreProcess::NodeError::Error::UnknownError);
-        break;
-    }
-   
+        case common::TrayProcessStatus::Status::Starting:
+            p.pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::Starting);
+            sendGuiProcessStatus(*iProcess->get(), nodeId);
+            break;
+        case common::TrayProcessStatus::Status::Running:
+            p.pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::Running);
+            sendGuiProcessStatus(*iProcess->get(), nodeId);
+            break;
+        case common::TrayProcessStatus::Status::NormalExit:
+            p.pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::NormalExit);
+            sendGuiProcessStatus(*iProcess->get(), nodeId);
+            break;
+        case common::TrayProcessStatus::Status::FailedToStart:
+            p.pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::FailedToStart);
+            sendGuiProcessStatus(*iProcess->get(), nodeId);
+            break;
+        case common::TrayProcessStatus::Status::CrashExit:
+            p.pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::CrashExit);
+            sendGuiProcessStatus(*iProcess->get(), nodeId);
+            break;
+        case common::TrayProcessStatus::Status::WriteError:
+            p.pushNodeError(nodeId, CoreProcess::NodeError::Error::WriteError);
+            break;
+        case common::TrayProcessStatus::Status::ReadError:
+            p.pushNodeError(nodeId, CoreProcess::NodeError::Error::ReadError);
+            break;
+        case common::TrayProcessStatus::Status::TimedOut:
+            p.pushNodeError(nodeId, CoreProcess::NodeError::Error::TimedOut);
+            break;
+        case common::TrayProcessStatus::Status::UnknownError:
+            p.pushNodeError(nodeId, CoreProcess::NodeError::Error::UnknownError);
+            break;
+        }
 }
 
-void Application::handleTrayProcessLogMessage(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessLogMessage logMessage) {
-    auto iProcess = std::find_if(_processes.begin(), _processes.end(), [&logMessage](auto& p) {
-        return p->id() == logMessage.processId;
-    });
+void Application::handleTrayProcessLogMessage(const Cluster& cluster,
+                                              const Cluster::Node& node,
+                                              common::TrayProcessLogMessage logMessage)
+{
+    auto iProcess = std::find_if(
+        _processes.begin(),
+        _processes.end(),
+        [&logMessage](std::unique_ptr<CoreProcess>& p) {
+            return p->id() == logMessage.processId;
+        }
+    );
 
     if (iProcess == _processes.end()) {
         return;
     }
+
+    CoreProcess& p = **iProcess;
     
     Log(logMessage.message);
 
     QString nodeId = node.id;
-    if (logMessage.outputType == common::TrayProcessLogMessage::OutputType::StdOut) {
-        (*iProcess)->pushNodeStdOut(nodeId, logMessage.message);
-    } else if (logMessage.outputType == common::TrayProcessLogMessage::OutputType::StdErr) {
-        (*iProcess)->pushNodeStdError(nodeId, logMessage.message);
-    } else {
-        return;
+    switch (logMessage.outputType) {
+        case common::TrayProcessLogMessage::OutputType::StdOut:
+            p.pushNodeStdOut(nodeId, logMessage.message);
+            break;
+        case common::TrayProcessLogMessage::OutputType::StdErr:
+            p.pushNodeStdError(nodeId, logMessage.message);
+            break;
     }
     
     sendLatestLogMessage(*iProcess->get(), nodeId);
 }
-
 
 void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     Log("Application: " + cmd.applicationId);
@@ -229,9 +258,7 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     auto iProgram = std::find_if(
         _programs.begin(),
         _programs.end(),
-            [&](const auto& p) {
-                return p->id() == cmd.applicationId;
-            }
+        [&](const std::unique_ptr<Program>& p) { return p->id() == cmd.applicationId; }
     );
         
     if (iProgram == _programs.end()) {
@@ -245,9 +272,7 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     auto iCluster = std::find_if(
         _clusters.begin(),
         _clusters.end(),
-        [&](const auto& c) {
-            return c->id() == cmd.clusterId;
-        }
+        [&](const std::unique_ptr<Cluster>& c) { return c->id() == cmd.clusterId; }
     );
             
     if (iCluster == _clusters.end()) {
@@ -260,43 +285,44 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     QString configurationId = "";
 
     if (!cmd.configurationId.isEmpty()) {
-        const auto& configurations = (*iProgram)->configurations();
+        const QList<Program::Configuration>& confs = (*iProgram)->configurations();
 
         auto iConfiguration = std::find_if(
-            configurations.begin(),
-            configurations.end(),
-            [&](const Program::Configuration& c) {
-            return c.id == cmd.configurationId;
-        }
+            confs.begin(),
+            confs.end(),
+            [&](const Program::Configuration& c) { return c.id == cmd.configurationId; }
         );
 
-        if (iConfiguration == configurations.end()) {
+        if (iConfiguration == confs.end()) {
             // The requested configuration does not exist for the application
             // TODO: Signal this back to the GUI
-            Log(
-                "The configuration " + cmd.configurationId +
+            Log("The configuration " + cmd.configurationId +
                 " does not exist for the application id " + cmd.applicationId
-                );
+            );
             return;
 
         }
         configurationId = cmd.configurationId;
 
-        const auto& clusterParamsList = iConfiguration->clusterCommanlineParameters;
-        const auto& clusterParams = clusterParamsList.find(cmd.clusterId);
+        const QMap<QString, QString>& clusterParamsList =
+            iConfiguration->clusterCommandlineParameters;
+        auto clusterParams = clusterParamsList.find(cmd.clusterId);
 
         if (clusterParams == clusterParamsList.end()) {
             // The requested configuration does not exist for the application
             // TODO: Signal this back to the GUI
-            Log(
-                "The configuration " + cmd.configurationId +
+            Log("The configuration " + cmd.configurationId +
                 " is not supported on cluster id " + cmd.clusterId
             );
             return;
         }
     }
 
-    std::unique_ptr<CoreProcess> process = std::make_unique<CoreProcess>(iProgram->get(), configurationId, iCluster->get());
+    std::unique_ptr<CoreProcess> process = std::make_unique<CoreProcess>(
+        iProgram->get(),
+        configurationId,
+        iCluster->get()
+    );
     common::TrayCommand trayCommand = process->startProcessCommand();
     _processes.push_back(std::move(process));
 
@@ -310,9 +336,7 @@ void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd)
     auto iProcess = std::find_if(
         _processes.begin(),
         _processes.end(),
-        [&](const auto& p) {
-            return p->id() == processId;
-        }
+        [&](const std::unique_ptr<CoreProcess>& p) { return p->id() == processId; }
     );
 
     if (iProcess == _processes.end()) {
@@ -348,10 +372,14 @@ void Application::incomingGuiMessage(const QJsonDocument& message) {
 
         if (msg.type == common::GuiStartCommand::Type) {
             // We have received a message from the GUI to start a new application
-            handleIncomingGuiStartCommand(common::GuiStartCommand(QJsonDocument(msg.payload)));
+            handleIncomingGuiStartCommand(
+                common::GuiStartCommand(QJsonDocument(msg.payload))
+            );
         } else if (msg.type == common::GuiProcessCommand::Type) {
             // We have received a message from the GUI to start a new application
-            handleIncomingGuiProcessCommand(common::GuiProcessCommand(QJsonDocument(msg.payload)));
+            handleIncomingGuiProcessCommand(
+                common::GuiProcessCommand(QJsonDocument(msg.payload))
+            );
         }
         else if (msg.type == "GuiReloadConfigCommand") {
              // We have received a message from the GUI to reload the configs
@@ -363,7 +391,9 @@ void Application::incomingGuiMessage(const QJsonDocument& message) {
     }
 }
 
-void Application::incomingTrayMessage(const Cluster& cluster, const Cluster::Node& node, const QJsonDocument& message) {
+void Application::incomingTrayMessage(const Cluster& cluster, const Cluster::Node& node,
+                                      const QJsonDocument& message)
+{
     try {
         // The message contains a JSON object of the GenericMessage
         common::GenericMessage msg = common::GenericMessage(message);
@@ -372,10 +402,18 @@ void Application::incomingTrayMessage(const Cluster& cluster, const Cluster::Nod
 
         if (msg.type == common::TrayProcessStatus::Type) {
             // We have received a message from the GUI to start a new application
-            handleTrayProcessStatus(cluster, node, common::TrayProcessStatus(QJsonDocument(msg.payload)));
+            handleTrayProcessStatus(
+                cluster,
+                node,
+                common::TrayProcessStatus(QJsonDocument(msg.payload))
+            );
         } else if (msg.type == common::TrayProcessLogMessage::Type) {
             // We have received a message from the GUI to start a new application
-            handleTrayProcessLogMessage(cluster, node, common::TrayProcessLogMessage(QJsonDocument(msg.payload)));
+            handleTrayProcessLogMessage(
+                cluster,
+                node,
+                common::TrayProcessLogMessage(QJsonDocument(msg.payload))
+            );
         }
     }
     catch (const std::runtime_error& e) {
@@ -389,15 +427,15 @@ common::GenericMessage Application::initializationInformation() {
     msg.type = common::GuiInitialization::Type;
 
     common::GuiInitialization initMsg;
-    for (const auto& p : _programs) {
+    for (const std::unique_ptr<Program>& p : _programs) {
         initMsg.applications.push_back(p->toGuiInitializationApplication());
     }
 
-    for (const auto& c : _clusters) {
+    for (const std::unique_ptr<Cluster>& c : _clusters) {
         initMsg.clusters.push_back(c->toGuiInitializationCluster());
     }
 
-    for (const auto& p : _processes) {
+    for (const std::unique_ptr<CoreProcess>& p : _processes) {
         initMsg.processes.push_back(p->toGuiInitializationProcess());
     }
 
@@ -405,7 +443,8 @@ common::GenericMessage Application::initializationInformation() {
     return msg;
 }
 
-void Application::sendGuiProcessStatus(const CoreProcess& process, const QString& nodeId) {
+void Application::sendGuiProcessStatus(const CoreProcess& process, const QString& nodeId)
+{
     common::GuiProcessStatus statusMsg = process.toGuiProcessStatus(nodeId);
 
     common::GenericMessage msg;
@@ -415,7 +454,8 @@ void Application::sendGuiProcessStatus(const CoreProcess& process, const QString
     _incomingSocketHandler.sendMessageToAll(msg.toJson());
 }
 
-void Application::sendLatestLogMessage(const CoreProcess& process, const QString& nodeId) {
+void Application::sendLatestLogMessage(const CoreProcess& process, const QString& nodeId)
+{
     common::GuiProcessLogMessage logMsg = process.latestGuiProcessLogMessage(nodeId);
 
     common::GenericMessage msg;
@@ -425,8 +465,8 @@ void Application::sendLatestLogMessage(const CoreProcess& process, const QString
     _incomingSocketHandler.sendMessageToAll(msg.toJson());
 }
 
-common::GenericMessage Application::guiProcessLogMessageHistory(const CoreProcess& process) {
-    common::GuiProcessLogMessageHistory historyMsg = process.guiProcessLogMessageHistory();
+common::GenericMessage Application::guiProcessLogMessageHistory(const CoreProcess& proc) {
+    common::GuiProcessLogMessageHistory historyMsg = proc.guiProcessLogMessageHistory();
 
     common::GenericMessage msg;
     msg.type = common::GuiProcessLogMessageHistory::Type;

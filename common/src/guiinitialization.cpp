@@ -35,7 +35,6 @@
 #include "guiinitialization.h"
 
 #include "jsonsupport.h"
-
 #include <QJsonArray>
 #include <QJsonObject>
 
@@ -73,7 +72,7 @@ namespace {
     const QString KeyNodeStatusHistoryStatus = "status";
     const QString KeyNodeStatusHistoryTime = "time";
     const QString KeyNodeStatusHistoryId = "id";
-}
+} // namespace
 
 namespace common {
 
@@ -92,21 +91,27 @@ GuiInitialization::Application::Application(QJsonObject obj) {
         
         Configuration configuration;
         configuration.name = common::testAndReturnString(
-            config, KeyApplicationConfigurationName
+            config,
+            KeyApplicationConfigurationName
         );
         configuration.id = common::testAndReturnString(
-            config, KeyApplicationConfigurationId
+            config,
+            KeyApplicationConfigurationId
         );
         configuration.clusters = common::testAndReturnStringList(
-            config, KeyApplicationConfigurationClusters);
+            config,
+            KeyApplicationConfigurationClusters
+        );
         
         configurations.push_back(configuration);
     }
 
     QJsonObject defaults = common::testAndReturnObject(obj, KeyApplicationDefaults);
-    defaultConfiguration = common::testAndReturnString(defaults, KeyApplicationDefaultConfiguration);
+    defaultConfiguration = common::testAndReturnString(
+        defaults,
+        KeyApplicationDefaultConfiguration
+    );
     defaultCluster = common::testAndReturnString(defaults, KeyApplicationDefaultCluster);
-
 }
     
 QJsonObject GuiInitialization::Application::toJson() const {
@@ -121,7 +126,8 @@ QJsonObject GuiInitialization::Application::toJson() const {
         QJsonObject obj;
         obj[KeyApplicationConfigurationName] = conf.name;
         obj[KeyApplicationConfigurationId] = conf.id;
-        obj[KeyApplicationConfigurationClusters] = QJsonArray::fromStringList(conf.clusters);
+        QJsonArray clusters = QJsonArray::fromStringList(conf.clusters);
+        obj[KeyApplicationConfigurationClusters] = clusters;
         confs[conf.id] = obj;
     }
     res[KeyApplicationConfigurations] = confs;
@@ -176,13 +182,14 @@ QJsonObject GuiInitialization::Process::toJson() const {
     res[KeyProcessClusterId] = clusterId;
 
     QJsonArray statusHistory;
-    for (auto it : nodeStatusHistory) {
-        statusHistory.push_back(it.toJson());
+    for (const Process::NodeStatus& s : nodeStatusHistory) {
+        statusHistory.push_back(s.toJson());
     }
 
     res[KeyProcessNodeStatusHistory] = statusHistory;
     res[KeyProcessClusterStatus] = clusterStatus;
     res[KeyProcessClusterStatusTime] = clusterStatusTime;
+
     return res;
 }
 

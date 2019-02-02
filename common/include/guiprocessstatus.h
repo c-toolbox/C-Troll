@@ -36,8 +36,8 @@
 #define __GUIPROCESSSTATUS_H__
 
 #include <QJsonDocument>
-#include <QString>
 #include <QMap>
+#include <QString>
 
 namespace common {
     

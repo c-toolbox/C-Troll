@@ -42,7 +42,6 @@
 #include "handler/outgoingsockethandler.h"
 #include "traycommand.h"
 #include "genericmessage.h"
-
 #include <QProcess>
 
 namespace common {
@@ -62,10 +61,13 @@ private:
     void deinitalize(bool resetGUIconnection = true);
 
     void incomingGuiMessage(const QJsonDocument& message);
-    void incomingTrayMessage(const Cluster& cluster, const Cluster::Node& node, const QJsonDocument& message);
+    void incomingTrayMessage(const Cluster& cluster, const Cluster::Node& node,
+        const QJsonDocument& message);
     
-    void handleTrayProcessStatus(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessStatus status);
-    void handleTrayProcessLogMessage(const Cluster& cluster, const Cluster::Node& node, common::TrayProcessLogMessage status);
+    void handleTrayProcessStatus(const Cluster& cluster, const Cluster::Node& node,
+        common::TrayProcessStatus status);
+    void handleTrayProcessLogMessage(const Cluster& cluster, const Cluster::Node& node,
+        common::TrayProcessLogMessage status);
     void handleIncomingGuiStartCommand(common::GuiStartCommand cmd);
     void handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd);
     void handleIncomingGuiReloadConfigCommand();

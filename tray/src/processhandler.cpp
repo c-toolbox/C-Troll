@@ -37,10 +37,8 @@
 #include <genericmessage.h>
 #include <trayprocesslogmessage.h>
 #include <trayprocessstatus.h>
-
 #include <QDebug>
 #include <QJsonDocument>
-
 #include <functional>
 
 template<class T>
@@ -88,7 +86,6 @@ void ProcessHandler::handleSocketMessage(const QJsonDocument& message) {
         // Found
         executeProcessWithTrayCommand(p->second, command);
     }
-    
 }
 
 void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
@@ -96,7 +93,11 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    ProcessMap::iterator p2T = std::find_if(_processes.begin(), _processes.end(), std::bind2nd(map_data_compare<ProcessMap>(), process) );
+    ProcessMap::iterator p2T = std::find_if(
+        _processes.begin(),
+        _processes.end(),
+        std::bind2nd(map_data_compare<ProcessMap>(), process)
+    );
     
     if (p2T != _processes.end() ) {
         common::TrayProcessStatus ps;
@@ -122,7 +123,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
                 sendError = false;
                 break;
         }
-        if(sendError) {
+        if (sendError) {
             // Send out the TrayProcessStatus with the error/status string
             common::GenericMessage msg;
             msg.type = common::TrayProcessStatus::Type;
@@ -136,9 +137,13 @@ void ProcessHandler::handleStarted(){
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    ProcessMap::iterator p2T = std::find_if(_processes.begin(), _processes.end(), std::bind2nd(map_data_compare<ProcessMap>(), process) );
+    ProcessMap::iterator p2T = std::find_if(
+        _processes.begin(),
+        _processes.end(),
+        std::bind2nd(map_data_compare<ProcessMap>(), process)
+    );
     
-    if (p2T != _processes.end() ) {
+    if (p2T != _processes.end()) {
         // Send out the TrayProcessStatus with the status string
         common::TrayProcessStatus ps;
         ps.processId = p2T->first;
@@ -150,18 +155,22 @@ void ProcessHandler::handleStarted(){
     }
 }
 
-void ProcessHandler::handleFinished(int exitCode){
+void ProcessHandler::handleFinished(int exitCode) {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     handleFinished(exitCode, process->exitStatus());
 }
 
-void ProcessHandler::handleFinished(int exitCode, QProcess::ExitStatus exitStatus){
+void ProcessHandler::handleFinished(int exitCode, QProcess::ExitStatus exitStatus) {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    ProcessMap::iterator p2T = std::find_if(_processes.begin(), _processes.end(), std::bind2nd(map_data_compare<ProcessMap>(), process) );
+    ProcessMap::iterator p2T = std::find_if(
+        _processes.begin(),
+        _processes.end(),
+        std::bind2nd(map_data_compare<ProcessMap>(), process)
+    );
     
-    if (p2T != _processes.end() ) {
+    if (p2T != _processes.end()) {
         common::TrayProcessStatus ps;
         ps.processId = p2T->first;
         switch (exitStatus) {
@@ -185,13 +194,17 @@ void ProcessHandler::handleFinished(int exitCode, QProcess::ExitStatus exitStatu
     }
 }
 
-void ProcessHandler::handleReadyReadStandardError(){
+void ProcessHandler::handleReadyReadStandardError() {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    ProcessMap::iterator p2T = std::find_if(_processes.begin(), _processes.end(), std::bind2nd(map_data_compare<ProcessMap>(), process) );
+    ProcessMap::iterator p2T = std::find_if(
+        _processes.begin(),
+        _processes.end(),
+        std::bind2nd(map_data_compare<ProcessMap>(), process)
+    );
     
-    if (p2T != _processes.end() ) {
+    if (p2T != _processes.end()) {
         // Send out the TrayProcessLogMessage with the stderror key
         common::TrayProcessLogMessage pm;
         pm.processId = p2T->first;
@@ -204,13 +217,17 @@ void ProcessHandler::handleReadyReadStandardError(){
     }
 }
 
-void ProcessHandler::handleReadyReadStandardOutput(){
+void ProcessHandler::handleReadyReadStandardOutput() {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    ProcessMap::iterator p2T = std::find_if(_processes.begin(), _processes.end(), std::bind2nd(map_data_compare<ProcessMap>(), process) );
+    ProcessMap::iterator p2T = std::find_if(
+        _processes.begin(),
+        _processes.end(),
+        std::bind2nd(map_data_compare<ProcessMap>(), process)
+    );
     
-    if (p2T != _processes.end() ) {
+    if (p2T != _processes.end()) {
         common::TrayProcessLogMessage pm;
         pm.processId = p2T->first;
         pm.message = QString::fromLatin1(process->readAllStandardOutput());
@@ -222,34 +239,38 @@ void ProcessHandler::handleReadyReadStandardOutput(){
     }
 }
 
-void ProcessHandler::executeProcessWithTrayCommand(QProcess* process, const common::TrayCommand& command) {    
-    if(command.command == "Start"){
-        if(!command.environmentVariables.isEmpty()){
+void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
+                                                   const common::TrayCommand& command)
+{
+    if (command.command == "Start") {
+        if (!command.environmentVariables.isEmpty()) {
             QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
             // First split per variable, such that each string contains "name,value"
             QStringList envVariables = command.environmentVariables.split(';');
             foreach (QString var, envVariables) {
                 // Split name and value
                 QStringList envVariableNameValue = var.split(',');
-                if(envVariableNameValue.size() == 2){
+                if (envVariableNameValue.size() == 2) {
                     env.insert(envVariableNameValue[0], envVariableNameValue[1]);
                 }
             }
             process->setProcessEnvironment(env);
         }
         
-        if(!command.currentWorkingDirectory.isEmpty()){
+        if (!command.currentWorkingDirectory.isEmpty()) {
             process->setWorkingDirectory(command.currentWorkingDirectory);
         }
-        else if(!command.baseDirectory.isEmpty()){
+        else if (!command.baseDirectory.isEmpty()) {
             process->setWorkingDirectory(command.baseDirectory);
         }
         
-        if(command.commandlineParameters.isEmpty()){
+        if (command.commandlineParameters.isEmpty()) {
             process->start("\"" + command.executable + "\"");
         }
         else {
-            process->start("\"" + command.executable + "\" " + command.commandlineParameters);
+            process->start(
+                "\"" + command.executable + "\" " + command.commandlineParameters
+            );
         }
     } else if (command.command == "Kill" || command.command == "Exit") {
         common::TrayProcessStatus ps;
@@ -262,7 +283,11 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process, const comm
             ps.status = common::TrayProcessStatus::Status::NormalExit;
         }
         // Find specifc value in process map i.e. process
-        ProcessMap::iterator p2T = std::find_if(_processes.begin(), _processes.end(), std::bind2nd(map_data_compare<ProcessMap>(), process));
+        ProcessMap::iterator p2T = std::find_if(
+            _processes.begin(),
+            _processes.end(),
+            std::bind2nd(map_data_compare<ProcessMap>(), process)
+        );
 
         if (p2T != _processes.end()) {
             ps.processId = p2T->first;
@@ -277,22 +302,36 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process, const comm
     }
 }
 
-void ProcessHandler::createAndRunProcessFromTrayCommand(const common::TrayCommand& command) {
+void ProcessHandler::createAndRunProcessFromTrayCommand(
+                                                       const common::TrayCommand& command)
+{
     QProcess* newProcess = new QProcess(this);
     
     // Connect all process signals for logging feedback to core
-    QObject::connect(newProcess, SIGNAL(errorOccurred(QProcess::ProcessError)),
-                     this, SLOT(handlerErrorOccurred(QProcess::ProcessError)));
-    QObject::connect(newProcess, SIGNAL(finished(int)),
-                     this, SLOT(handleFinished(int)));
-    QObject::connect(newProcess, SIGNAL(finished(int, QProcess::ExitStatus)),
-                     this, SLOT(handleFinished(int, QProcess::ExitStatus)));
-    QObject::connect(newProcess, SIGNAL(readyReadStandardError()),
-                     this, SLOT(handleReadyReadStandardError()));
-    QObject::connect(newProcess, SIGNAL(readyReadStandardOutput()),
-                     this, SLOT(handleReadyReadStandardOutput()));
-    QObject::connect(newProcess, SIGNAL(started()),
-                     this, SLOT(handleStarted()));
+    QObject::connect(
+        newProcess, SIGNAL(errorOccurred(QProcess::ProcessError)),
+        this, SLOT(handlerErrorOccurred(QProcess::ProcessError))
+    );
+    QObject::connect(
+        newProcess, SIGNAL(finished(int)),
+        this, SLOT(handleFinished(int))
+    );
+    QObject::connect(
+        newProcess, SIGNAL(finished(int, QProcess::ExitStatus)),
+        this, SLOT(handleFinished(int, QProcess::ExitStatus))
+    );
+    QObject::connect(
+        newProcess, SIGNAL(readyReadStandardError()),
+        this, SLOT(handleReadyReadStandardError())
+    );
+    QObject::connect(
+        newProcess, SIGNAL(readyReadStandardOutput()),
+        this, SLOT(handleReadyReadStandardOutput())
+    );
+    QObject::connect(
+        newProcess, SIGNAL(started()),
+        this, SLOT(handleStarted())
+    );
     
     // Insert command identifier and process into out lists
     _processes.insert(std::make_pair(command.id, newProcess));
@@ -300,5 +339,3 @@ void ProcessHandler::createAndRunProcessFromTrayCommand(const common::TrayComman
     // Run the process with the command
     executeProcessWithTrayCommand(newProcess, command);
 }
-
-

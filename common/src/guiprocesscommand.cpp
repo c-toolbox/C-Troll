@@ -35,13 +35,12 @@
 #include "guiprocesscommand.h"
 
 #include "jsonsupport.h"
-
 #include <QJsonObject>
 
 namespace {
     const QString KeyCommand = "command";
     const QString KeyProcessId = "processId";
-}
+} // namespace
 
 namespace common {
 

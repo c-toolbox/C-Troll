@@ -127,7 +127,6 @@ struct GuiInitialization {
     /// This struct represents the information about the processes that are registered with
     /// the Core library
     struct Process {
-
         struct NodeStatus {
             /**
              * Creates a NodeStatus from the passed node status. The object must contain
@@ -139,10 +138,10 @@ struct GuiInitialization {
             NodeStatus(QJsonObject nodeStatus);
 
             /**
-            * Returns the JSON object representation of this NodeStatus. See the constructor
-            * for a list of keys and their types.
-            * \return The JSON object representation of this NodeStatus
-            */
+             * Returns the JSON object representation of this NodeStatus. See the
+             * constructor for a list of keys and their types.
+             * \return The JSON object representation of this NodeStatus
+             */
 
             int id;
             QString node;
@@ -155,39 +154,32 @@ struct GuiInitialization {
         Process() = default;
 
         /**
-        * Creates a Process from the passed \p process. The \p process must contain all
-        * of the following keys
-        * \c id The identifier used for this process (int)
-        * \c applicationId The application id associated with this process (string)
-        * \c configurationId The configuration id of the application (string)
-        * \c clusterId The cluster id associated with this process (string)
-        * \param process The JSON object that contains all of the values for this process
-        * \throw std::runtime_error If one of the keys is missing or has the wrong type
-        */
+         * Creates a Process from the passed \p process. The \p process must contain all
+         * of the following keys.
+         * \c id The identifier used for this process (int)
+         * \c applicationId The application id associated with this process (string)
+         * \c configurationId The configuration id of the application (string)
+         * \c clusterId The cluster id associated with this process (string)
+         * \param process The JSON object that contains all of the values for this process
+         * \throw std::runtime_error If one of the keys is missing or has the wrong type
+         */
         Process(QJsonObject process);
 
         /**
-        * Returns the JSON object representation of this process. See the constructor
-        * for a list of keys and their types.
-        * \return The JSON object representation of this process
-        */
+         * Returns the JSON object representation of this process. See the constructor
+         * for a list of keys and their types.
+         * \return The JSON object representation of this process
+         */
         QJsonObject toJson() const;
 
         /// The unique identifier for the process
         int id;
-
         QString applicationId;
-
         QString configurationId;
-
         QString clusterId;
-
         QString clusterStatus;
-
         double clusterStatusTime;
-
         QList<GuiInitialization::Process::NodeStatus> nodeStatusHistory;
-
     };
     
     /// Default constructor

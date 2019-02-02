@@ -41,7 +41,8 @@
 namespace common {
 
 /// This struct is the data structure that gets send from the GUI to the Core
-/// to signal that the Core should launch a process from a specific application, configuration and cluster.
+/// to signal that the Core should launch a process from a specific application,
+/// configuration and cluster.
 struct GuiStartCommand {
     /// The string representing this command type, for usage in the common::GenericMessage
     static const QString Type;

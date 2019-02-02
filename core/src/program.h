@@ -35,16 +35,14 @@
 #ifndef __PROGRAM_H__
 #define __PROGRAM_H__
 
+#include "guiinitialization.h"
+#include "traycommand.h"
 #include <QJsonObject>
 #include <QList>
 #include <QString>
 #include <QVector>
 #include <QMap>
-
 #include <memory>
-
-#include "guiinitialization.h"
-#include "traycommand.h"
 
 class Process;
 
@@ -57,7 +55,7 @@ public:
     struct Configuration {
         QString id;
         QString name;
-        QMap<QString, QString> clusterCommanlineParameters;
+        QMap<QString, QString> clusterCommandlineParameters;
     };
 
     /**
@@ -123,7 +121,8 @@ public:
     */
     QByteArray hash() const;
 
-    static std::unique_ptr<std::vector<std::unique_ptr<Program>>> loadProgramsFromDirectory(QString directory);
+    static std::unique_ptr<std::vector<std::unique_ptr<Program>>>
+        loadProgramsFromDirectory(QString directory);
 
     static std::unique_ptr<Program> loadProgram(QString jsonFile, QString baseDirectory);
 
@@ -151,6 +150,5 @@ private:
     /// A vector of processes that derive from this program.
     QVector<Process*> _processes;
 };
-
 
 #endif // __PROGRAM_H__

@@ -38,12 +38,10 @@
 #include <QObject>
 
 #include "cluster.h"
-
+#include <jsonsocket.h>
 #include <QMap>
-
 #include <map>
 #include <memory>
-#include <jsonsocket.h>
 
 class OutgoingSocketHandler : public QObject {
 Q_OBJECT
@@ -56,18 +54,15 @@ public:
     void sendMessage(const Cluster& cluster, QJsonDocument message) const;
 
 signals:
-    void messageReceived(const Cluster& cluster, const Cluster::Node& node, QJsonDocument message);
+    void messageReceived(const Cluster& cluster, const Cluster::Node& node,
+        QJsonDocument message);
     void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);
 
 private:
-    using HashValue = QString;
-
     void readyRead(const Cluster& cluster, const Cluster::Node& node);
-    HashValue hash(const Cluster& cluster, const Cluster::Node& node) const;
 
     QList<Cluster*> _clusters;
-    std::map<HashValue, std::unique_ptr<common::JsonSocket>> _sockets;
- 
+    std::map<QString, std::unique_ptr<common::JsonSocket>> _sockets;
 };
 
 #endif // __OUTGOINGSOCKETHANDLER_H__

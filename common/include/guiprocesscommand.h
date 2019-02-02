@@ -50,8 +50,8 @@ struct GuiProcessCommand {
     GuiProcessCommand() = default;
 
     /**
-     * Creates a GuiProcessCommand from the passed \p document. The \p document must contain
-     * all of the following keys:
+     * Creates a GuiProcessCommand from the passed \p document. The \p document must
+     * contain all of the following keys:
      * \c processId (int)
      * \c command (string)
      * \param document The QJsonDocument that contains the information about this

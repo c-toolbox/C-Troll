@@ -35,18 +35,20 @@
 #ifndef __PROCESSHANDLER_H__
 #define __PROCESSHANDLER_H__
 
+#include <QObject>
+
+#include <QJsonDocument>
+#include <QProcess>
+#include <traycommand.h>
 #include <map>
 #include <string>
-#include <traycommand.h>
-#include <QObject>
-#include <QProcess>
-#include <QJsonDocument>
 
 class ProcessHandler : public QObject {
-    Q_OBJECT
+Q_OBJECT
 public:
     ProcessHandler();
     ~ProcessHandler();
+
 public slots:
     void handleSocketMessage(const QJsonDocument& message);
     // Process slots
@@ -56,15 +58,18 @@ public slots:
     void handleReadyReadStandardError();
     void handleReadyReadStandardOutput();
     void handleStarted();
+
 signals:
     void sendSocketMessage(const QJsonDocument& message);
+
 private:
-    void executeProcessWithTrayCommand(QProcess* process, const common::TrayCommand& command);
+    void executeProcessWithTrayCommand(QProcess* process,
+        const common::TrayCommand& command);
     void createAndRunProcessFromTrayCommand(const common::TrayCommand& command);
     
     // The key of this map is a unique id (recieved from core)
     // The value is the process which is running
-    typedef std::map<int, QProcess*> ProcessMap;
+    using ProcessMap = std::map<int, QProcess*>;
     ProcessMap _processes;
 };
 

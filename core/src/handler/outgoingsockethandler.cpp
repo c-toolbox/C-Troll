@@ -36,30 +36,28 @@
 
 #include <jsonsocket.h>
 #include <QTimer>
-
 #include <assert.h>
+
+namespace {
+    QString hash(const Cluster& cluster, const Cluster::Node& node) {
+        return cluster.name() + "::" + node.name;
+    }
+} // namespace
 
 // This is just here so that we can use a forward declaration in the header file
 OutgoingSocketHandler::~OutgoingSocketHandler() = default;
-
-OutgoingSocketHandler::HashValue OutgoingSocketHandler::hash(
-    const Cluster& cluster, const Cluster::Node& node) const
-{
-    return cluster.name() + "::" + node.name;
-}
 
 void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
     std::copy_if(
         clusters.cbegin(),
         clusters.cend(),
         std::back_inserter(_clusters),
-        [](const Cluster* cluster) {
-            return cluster->enabled();
-    });
+        [](const Cluster* cluster) { return cluster->enabled(); }
+    );
 
     for (Cluster* c : _clusters) {
         for (Cluster::Node& node : c->nodes()) {
-            HashValue h = hash(*c, node);
+            QString h = hash(*c, node);
 
             // This handler keeps the sockets to the tray applications open
             std::unique_ptr<QTcpSocket> socket = std::make_unique<QTcpSocket>();
@@ -85,8 +83,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
                 }
             );
 
-            std::unique_ptr<common::JsonSocket> jsonSocket = std::make_unique<common::JsonSocket>(std::move(socket));
-            common::JsonSocket* s = jsonSocket.get();
+            auto jsonSocket = std::make_unique<common::JsonSocket>(std::move(socket));
 
             connect(
                 jsonSocket.get(), &common::JsonSocket::readyRead,
@@ -104,7 +101,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
         [this](){
             for (Cluster* c : _clusters) {
                 for (Cluster::Node& node : c->nodes()) {
-                    HashValue h = hash(*c, node);
+                    QString h = hash(*c, node);
 
                     auto it = _sockets.find(h);
                     assert(it != _sockets.end());
@@ -137,13 +134,12 @@ void OutgoingSocketHandler::readyRead(const Cluster& cluster, const Cluster::Nod
     emit messageReceived(cluster, node, message);
 }
 
-
 void OutgoingSocketHandler::sendMessage(const Cluster& cluster, QJsonDocument msg) const {
     assert(!msg.isEmpty());
 
     for (const Cluster::Node& node : cluster.nodes()) {
         qDebug() << "Node: " << node.name << node.ipAddress << node.port;
-        HashValue h = hash(cluster, node);
+        QString h = hash(cluster, node);
 
         auto it = _sockets.find(h);
         assert(it != _sockets.end());
@@ -153,4 +149,3 @@ void OutgoingSocketHandler::sendMessage(const Cluster& cluster, QJsonDocument ms
         it->second->write(msg);
     }
 }
-

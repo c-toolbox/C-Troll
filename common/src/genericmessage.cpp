@@ -35,13 +35,12 @@
 #include "genericmessage.h"
 
 #include "jsonsupport.h"
-
 #include <QJsonObject>
 
 namespace {
     const QString KeyType = "type";
     const QString KeyPayload = "payload";
-}
+} // namespace
 
 namespace common {
 

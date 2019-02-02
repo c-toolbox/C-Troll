@@ -32,13 +32,13 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include <iostream>
-#include <QTcpSocket.h>
 #include "sockethandler.h"
-#include "jsonsocket.h"
-#include <memory>
 
+#include "jsonsocket.h"
 #include <QDebug>
+#include <QTcpSocket.h>
+#include <iostream>
+#include <memory>
 
 SocketHandler::SocketHandler() {}
 
@@ -50,7 +50,10 @@ void SocketHandler::initialize() {
     qDebug() << "Listening on port:" << port;
     
     _server.listen(QHostAddress::Any, port);
-    QObject::connect(&_server, &QTcpServer::newConnection, this, &SocketHandler::newConnection);
+    QObject::connect(
+        &_server, &QTcpServer::newConnection,
+        this, &SocketHandler::newConnection
+    );
 }
 
 void SocketHandler::readyRead(common::JsonSocket* socket) {
@@ -61,7 +64,8 @@ void SocketHandler::readyRead(common::JsonSocket* socket) {
 void SocketHandler::sendMessage(const QJsonDocument& message) {
     qDebug() << "Sending message: " << message;
     for (common::JsonSocket* jsonSocket : _sockets) {
-        qDebug() << jsonSocket->socket()->localAddress() << " -> " << jsonSocket->socket()->peerAddress();
+        qDebug() << jsonSocket->socket()->localAddress() << " -> " <<
+            jsonSocket->socket()->peerAddress();
         jsonSocket->write(message);
     }
 }
@@ -77,19 +81,20 @@ void SocketHandler::disconnected(common::JsonSocket* socket) {
 
 void SocketHandler::newConnection() {
     while (_server.hasPendingConnections()) {
-        
         common::JsonSocket* jsonSocket = new common::JsonSocket(
             std::unique_ptr<QTcpSocket>(_server.nextPendingConnection()));
         
         QTcpSocket* rawSocket = jsonSocket->socket();
 
-        QObject::connect(rawSocket, &QTcpSocket::disconnected, [=]() {
-            disconnected(jsonSocket);
-        });
+        QObject::connect(
+            rawSocket, &QTcpSocket::disconnected,
+            [this, jsonSocket]() { disconnected(jsonSocket); }
+        );
 
-        QObject::connect(jsonSocket, &common::JsonSocket::readyRead, [=]() {
-            readyRead(jsonSocket);
-        });
+        QObject::connect(
+            jsonSocket, &common::JsonSocket::readyRead,
+            [this, jsonSocket]() { readyRead(jsonSocket); }
+        );
 
         _sockets.push_back(jsonSocket);
         qDebug() << "Socket connected";

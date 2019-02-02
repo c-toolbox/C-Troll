@@ -36,12 +36,10 @@
 #define __INCOMINGSOCKETHANDLER_H__
 
 #include <QObject>
-#include <QTcpServer>
 #include <QJsonDocument>
+#include <QTcpServer>
 
-namespace common {
-class JsonSocket;
-}
+namespace common { class JsonSocket; }
 
 class IncomingSocketHandler : public QObject {
 Q_OBJECT

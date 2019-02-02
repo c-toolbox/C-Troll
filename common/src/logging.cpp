@@ -35,7 +35,6 @@
 #include "logging.h"
 
 #include <QDebug>
-
 #include <assert.h>
 
 #ifdef WIN32
@@ -45,7 +44,7 @@
 namespace {
     const QString LogPrefix = "log_";
     const QString LogPostfix = ".txt";
-}
+} // namespace
 
 namespace common {
 
@@ -61,9 +60,7 @@ Log& Log::ref() {
     return *_log;
 }
     
-Log::Log(QString componentName)
-    : _file(LogPrefix + componentName + LogPostfix)
-{
+Log::Log(QString componentName) : _file(LogPrefix + componentName + LogPostfix) {
     assert(!componentName.isEmpty());
     _file.open(QIODevice::WriteOnly);
 }

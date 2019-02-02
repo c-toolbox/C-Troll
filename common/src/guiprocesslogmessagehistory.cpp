@@ -35,24 +35,22 @@
 #include "guiprocesslogmessagehistory.h"
 
 #include "jsonsupport.h"
-
 #include <QJsonObject>
 
 namespace {
+    const QString KeyProcessId = "processId";
+    const QString KeyApplicationId = "applicationId";
+    const QString KeyClusterId = "clusterId";
 
-const QString KeyProcessId = "processId";
-const QString KeyApplicationId = "applicationId";
-const QString KeyClusterId = "clusterId";
+    const QString KeyConfigurationId = "configurationId";
+    const QString KeyMessages = "messages";
 
-const QString KeyConfigurationId = "configurationId";
-const QString KeyMessages = "messages";
-
-const QString KeyLogMessageId = "id";
-const QString KeyLogMessageNodeId = "nodeId";
-const QString KeyLogMessageOutputType = "outputType";
-const QString KeyLogMessageTime = "time";   
-const QString KeyLogMessageMessage = "message";
-}
+    const QString KeyLogMessageId = "id";
+    const QString KeyLogMessageNodeId = "nodeId";
+    const QString KeyLogMessageOutputType = "outputType";
+    const QString KeyLogMessageTime = "time";   
+    const QString KeyLogMessageMessage = "message";
+} // namespace
 
 namespace common {
 
@@ -60,7 +58,6 @@ const QString GuiProcessLogMessageHistory::Type = "GuiProcessLogMessageHistory";
 
 GuiProcessLogMessageHistory::GuiProcessLogMessageHistory(const QJsonDocument& document) {
     QJsonObject obj = document.object();
-
 
     processId = common::testAndReturnInt(obj, KeyProcessId);
     applicationId = common::testAndReturnString(obj, KeyApplicationId);

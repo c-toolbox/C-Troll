@@ -35,14 +35,13 @@
 #include "guistartcommand.h"
 
 #include "jsonsupport.h"
-
 #include <QJsonObject>
 
 namespace {
     const QString KeyApplicationId = "applicationId";
     const QString KeyConfigurationId = "configurationId";
     const QString KeyClusterId = "clusterId";
-}
+} // namespace
 
 namespace common {
 

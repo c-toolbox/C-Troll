@@ -43,7 +43,6 @@ namespace common {
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
 struct TrayProcessStatus {
-
     enum class Status {
         Starting,
         Running,
@@ -53,7 +52,7 @@ struct TrayProcessStatus {
         TimedOut,
         WriteError,
         ReadError,
-        UnknownError,
+        UnknownError
     };
 
     /// The string representing this command type, for usage in the common::GenericMessage

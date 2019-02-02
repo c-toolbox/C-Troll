@@ -35,16 +35,14 @@
 #ifndef __SOCKETHANDLER_H__
 #define __SOCKETHANDLER_H__
 
-#include <QObject.h>
-#include <QTcpServer.h>
+#include <QObject>
 #include <QJsonDocument>
+#include <QTcpServer>
 
-namespace common {
-class JsonSocket;
-}
+namespace common { class JsonSocket; }
 
 class SocketHandler : public QObject {
-    Q_OBJECT
+Q_OBJECT
 public:
     SocketHandler();
     ~SocketHandler();
@@ -52,11 +50,14 @@ public:
     void disconnected(common::JsonSocket*);
     void readyRead(common::JsonSocket*);
     void initialize();
+
 public slots:    
     void sendMessage(const QJsonDocument& message);
+
 signals:
     void messageRecieved(const QJsonDocument& message);
- private:
+
+private:
     QTcpServer _server;
     std::vector<common::JsonSocket*> _sockets;
 };

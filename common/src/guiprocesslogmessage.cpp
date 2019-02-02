@@ -35,7 +35,6 @@
 #include "guiprocesslogmessage.h"
 
 #include "jsonsupport.h"
-
 #include <QJsonObject>
 
 namespace {
@@ -48,7 +47,7 @@ namespace {
     const QString KeyMessage = "message";
     const QString KeyOutputType = "outputType";
     const QString KeyTime = "time";
-}
+} // namespace
 
 namespace common {
 

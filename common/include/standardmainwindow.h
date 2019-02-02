@@ -1,5 +1,5 @@
-#ifndef STANDARDMAINWINDOW_H
-#define STANDARDMAINWINDOW_H
+#ifndef __STANDARDMAINWINDOW_H__
+#define __STANDARDMAINWINDOW_H__
  
 #include <QMainWindow>
 #include <QCloseEvent>
@@ -7,20 +7,18 @@
 #include <QAction>
 #include <QTextEdit>
  
-namespace Ui {
-class StandardMainWindow;
-}
+namespace Ui { class StandardMainWindow; }
  
-class StandardMainWindow : public QMainWindow
-{
+class StandardMainWindow : public QMainWindow {
     Q_OBJECT
  
 public:
-    explicit StandardMainWindow(const QString& title, QWidget *parent = 0);
+    explicit StandardMainWindow(const QString& title, QWidget* parent = nullptr);
     ~StandardMainWindow();
 
-    static QTextEdit *_staticTextEdit;
-    static void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    static QTextEdit* _staticTextEdit;
+    static void myMessageOutput(QtMsgType type, const QMessageLogContext& context,
+        const QString& msg);
  
 protected:
     /* Virtual function of the parent class in our class
@@ -38,7 +36,7 @@ private slots:
  
 private:
     /* Declare the object of future applications for the tray icon */
-    QSystemTrayIcon *_trayIcon;
+    QSystemTrayIcon* _trayIcon;
 };
  
-#endif // STANDARDMAINWINDOW_H
+#endif // __STANDARDMAINWINDOW_H__

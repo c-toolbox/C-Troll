@@ -36,13 +36,11 @@
 
 #include "jsonsupport.h"
 #include <logging.h>
-
 #include <QDirIterator>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QVector>
 #include <QCryptographicHash>
-
 #include <assert.h>
 
 namespace {
@@ -54,7 +52,7 @@ namespace {
     const QString KeyNodeName = "name";
     const QString KeyNodeIpAddress = "ip";
     const QString KeyNodePort = "port";
-}
+} // namespace
 
 Cluster::Cluster(const QJsonObject& jsonObject) {
     _name = common::testAndReturnString(jsonObject, KeyName);
@@ -75,7 +73,6 @@ Cluster::Cluster(const QJsonObject& jsonObject) {
 
         _nodes.push_back({ id, name, ipAddress, port });
     }
-
 }
 
 QString Cluster::name() const {
@@ -99,9 +96,14 @@ const QList<Cluster::Node>& Cluster::nodes() const {
 }
 
 bool Cluster::connected() const {
-    return std::accumulate(_nodes.begin(), _nodes.end(), true, [](bool othersConnected, const Node& node) {
-        return othersConnected && node.connected;
-    });
+    return std::accumulate(
+        _nodes.begin(),
+        _nodes.end(),
+        true,
+        [](bool othersConnected, const Node& node) {
+            return othersConnected && node.connected;
+        }
+    );
 }
 
 QJsonObject Cluster::toJson() const {
@@ -112,7 +114,7 @@ QJsonObject Cluster::toJson() const {
     cluster[KeyEnabled] = _enabled;
 
     QJsonObject nodes;
-    for (const auto& node : _nodes) {
+    for (const Node& node : _nodes) {
         QJsonObject nodeObject;
         nodeObject[KeyNodeName] = node.name;
         nodeObject[KeyNodeIpAddress] = node.ipAddress;
@@ -151,9 +153,10 @@ std::unique_ptr<Cluster> Cluster::loadCluster(QString jsonFile, QString baseDire
     return std::make_unique<Cluster>(obj);
 }
 
-std::unique_ptr<std::vector<std::unique_ptr<Cluster>>> Cluster::loadClustersFromDirectory(QString directory) {
-    std::unique_ptr<std::vector<std::unique_ptr<Cluster>>> result =
-        std::make_unique<std::vector<std::unique_ptr<Cluster>>>();
+std::unique_ptr<std::vector<std::unique_ptr<Cluster>>>
+Cluster::loadClustersFromDirectory(QString directory)
+{
+    auto result = std::make_unique<std::vector<std::unique_ptr<Cluster>>>();
 
     // First, get all the *.json files from the directory and subdirectories
     QDirIterator it(

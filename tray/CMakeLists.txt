@@ -1,14 +1,12 @@
 set(HEADER_FILES
     src/sockethandler.h
     src/processhandler.h
-    src/trayprocess.h
 )
 
 set(SOURCE_FILES
     src/main.cpp
     src/processhandler.cpp
     src/sockethandler.cpp
-    src/trayprocess.cpp
 )
 
 find_package(Qt5Widgets)
