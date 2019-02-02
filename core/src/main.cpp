@@ -72,9 +72,7 @@ int main(int argc, char** argv) {
 
     QFileInfo info(configurationFile);
     if (!info.exists()) {
-        Log(
-            "Could not find configuration file " + info.absolutePath()
-        );
+        Log("Could not find configuration file " + info.absolutePath());
         exit(EXIT_FAILURE);
     }
 

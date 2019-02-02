@@ -133,7 +133,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     }
 }
 
-void ProcessHandler::handleStarted(){
+void ProcessHandler::handleStarted() {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process

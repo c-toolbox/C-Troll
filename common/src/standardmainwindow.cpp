@@ -1,3 +1,37 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * Copyright (c) 2016                                                                    *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
+ *                                                                                       *
+ * All rights reserved.                                                                  *
+ *                                                                                       *
+ * Redistribution and use in source and binary forms, with or without modification, are  *
+ * permitted provided that the following conditions are met:                             *
+ *                                                                                       *
+ * 1. Redistributions of source code must retain the above copyright notice, this list   *
+ * of conditions and the following disclaimer.                                           *
+ *                                                                                       *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this     *
+ * list of conditions and the following disclaimer in the documentation and/or other     *
+ * materials provided with the distribution.                                             *
+ *                                                                                       *
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be  *
+ * used to endorse or promote products derived from this software without specific prior *
+ * written permission.                                                                   *
+ *                                                                                       *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY   *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES  *
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT   *
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,        *
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED  *
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR    *
+ * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN      *
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN    *
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH   *
+ * DAMAGE.                                                                               *
+ *                                                                                       *
+ ****************************************************************************************/
+
 #include <standardmainwindow.h>
 
 #include <QMenu>
@@ -32,18 +66,17 @@ void StandardMainWindow::myMessageOutput(QtMsgType type,
         if (type == QtFatalMsg) {
             abort();
         }
-
-        return;
     }
-
-    switch (type) {
-        case QtDebugMsg:
-        case QtWarningMsg:
-        case QtCriticalMsg:
-            _staticTextEdit->append(msg);
-            break;
-        case QtFatalMsg:
-            abort();
+    else {
+        switch (type) {
+            case QtDebugMsg:
+            case QtWarningMsg:
+            case QtCriticalMsg:
+                _staticTextEdit->append(msg);
+                break;
+            case QtFatalMsg:
+                abort();
+        }
     }
 }
  
@@ -54,7 +87,7 @@ StandardMainWindow::StandardMainWindow(const QString& title, QWidget* parent)
     setMinimumSize(512, 256);
 
     _staticTextEdit = new QTextEdit();
-    layout()->addWidget(_staticTextEdit);
+    setCentralWidget(_staticTextEdit);
  
     // Initialize the tray icon, set the icon of a set of system icons,
     // as well as set a tooltip
@@ -63,16 +96,14 @@ StandardMainWindow::StandardMainWindow(const QString& title, QWidget* parent)
 
     // After that create a context menu of two items
     QMenu* menu = new QMenu(this);
-    QAction* viewWindow = new QAction(trUtf8("Show"), this);
-    QAction* quitAction = new QAction(trUtf8("Quit"), this);
- 
-    // connect the signals clicks on menu items to by appropriate slots.
     // The first menu item expands the application from the tray,
-    // And the second menu item terminates the application
+    QAction* viewWindow = new QAction(trUtf8("Show"), this);
     connect(viewWindow, SIGNAL(triggered()), this, SLOT(show()));
-    connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
- 
     menu->addAction(viewWindow);
+
+    // The second menu item terminates the application
+    QAction* quitAction = new QAction(trUtf8("Quit"), this);
+    connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
     menu->addAction(quitAction);
  
     // Set the context menu on the icon and show the application icon in the system tray
@@ -81,14 +112,10 @@ StandardMainWindow::StandardMainWindow(const QString& title, QWidget* parent)
  
     // Also connect clicking on the icon to the signal processor of this press 
     connect(
-        _trayIcon,
-        SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-        this,
-        SLOT(iconActivated(QSystemTrayIcon::ActivationReason))
+        _trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+        this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason))
     );
 }
- 
-StandardMainWindow::~StandardMainWindow() {}
  
 // The method that handles the closing event of the application window
 void StandardMainWindow::closeEvent(QCloseEvent* event) {
@@ -98,14 +125,11 @@ void StandardMainWindow::closeEvent(QCloseEvent* event) {
     if (isVisible()) {
         event->ignore();
         hide();
-        QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::MessageIcon(
-            QSystemTrayIcon::Information
-        );
  
         _trayIcon->showMessage(
             windowTitle(),
             trUtf8("The application is still running in the background"),
-            icon,
+            QSystemTrayIcon::Information,
             2000
         );
     }
@@ -113,6 +137,7 @@ void StandardMainWindow::closeEvent(QCloseEvent* event) {
 
 void StandardMainWindow::changeEvent(QEvent* event) {
     if (event->type() == QEvent::WindowStateChange) {
+        // Hide the taskbar icon if the window is minimized
         if (isMinimized()) {
             hide();
         }
@@ -125,6 +150,12 @@ void StandardMainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
     if (reason == QSystemTrayIcon::Trigger) {
         // If the window is visible, it is hidden
         // Conversely, if hidden, it unfolds on the screen
-        isVisible() ? hide() : show();
+        if (isVisible()) {
+            hide(); // Hide the taskbar icon
+        }
+        else {
+            show(); // Show the taskbar icon
+            showNormal(); // Bring the window to the front
+        }
     }
 }

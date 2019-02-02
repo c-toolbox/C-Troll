@@ -14,7 +14,6 @@ class StandardMainWindow : public QMainWindow {
  
 public:
     explicit StandardMainWindow(const QString& title, QWidget* parent = nullptr);
-    ~StandardMainWindow();
 
     static QTextEdit* _staticTextEdit;
     static void myMessageOutput(QtMsgType type, const QMessageLogContext& context,
