@@ -147,7 +147,11 @@ std::unique_ptr<Cluster> Cluster::loadCluster(QString jsonFile, QString baseDire
     
     QFile f(jsonFile);
     f.open(QFile::ReadOnly);
-    QJsonDocument d = QJsonDocument::fromJson(f.readAll());
+    QJsonParseError e;
+    QJsonDocument d = QJsonDocument::fromJson(f.readAll(), &e);
+    if (e.error != QJsonParseError::NoError) {
+        throw std::runtime_error(e.errorString().toLocal8Bit());
+    }
     QJsonObject obj = d.object();
     obj[KeyId] = id;
     return std::make_unique<Cluster>(obj);
@@ -169,7 +173,13 @@ Cluster::loadClustersFromDirectory(QString directory)
         QString file = it.next();
         
         Log("Loading cluster file " + file);
-        result->push_back(loadCluster(file, directory));
+        try {
+            std::unique_ptr<Cluster> c = loadCluster(file, directory);
+            result->push_back(std::move(c));
+        }
+        catch (const std::runtime_error& e) {
+            Log(QString::fromLocal8Bit("Error loading cluster: ") + e.what());
+        }
     }
 
     return std::move(result);
