@@ -45,7 +45,8 @@ int main(int argc, char** argv) {
     qInstallMessageHandler(StandardMainWindow::myMessageOutput);
 
     QApplication app(argc, argv);
-    
+    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+
     StandardMainWindow mainWindow("C-Troll-Tray");
 
 #ifdef QT_DEBUG
