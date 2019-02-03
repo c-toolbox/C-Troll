@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016                                                                    *
+ * Copyright (c) 2016 - 2019                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -52,8 +52,8 @@ int main(int argc, char** argv) {
 #ifdef QT_DEBUG
     mainWindow.show();
 #else
-    mainWindow.showMinimized();
-#endif // DEBUG
+    mainWindow.hide();
+#endif // QT_DEBUG
 
     SocketHandler socketHandler;
     socketHandler.initialize();
@@ -69,6 +69,8 @@ int main(int argc, char** argv) {
         &processHandler, SIGNAL(sendSocketMessage(QJsonDocument)),
         &socketHandler, SLOT(sendMessage(QJsonDocument))
     );
+
+    for (int i = 0; i < 100; ++i) qDebug() << "asdasd";
 
     app.exec();
     qDebug() << "Application finished";

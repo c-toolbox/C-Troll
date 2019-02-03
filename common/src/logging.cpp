@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016                                                                    *
+ * Copyright (c) 2016 - 2019                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -76,7 +76,7 @@ void Log::logMessage(QString message) {
     _file.flush();
 
     // Then the console
-    qDebug() << message;
+    qDebug() << message.toUtf8();
 
     // And if we are running in Visual Studio, this output, too
 #ifdef WIN32

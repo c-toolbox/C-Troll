@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016                                                                    *
+ * Copyright (c) 2016 - 2019                                                             *
  * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,15 +32,12 @@
  *                                                                                       *
  ****************************************************************************************/
 
+#include "application.h"
+#include "logging.h"
+#include "standardmainwindow.h"
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
-
-#include "application.h"
-#include <standardmainwindow.h>
-#include <logging.h>
-
-#define DEVELOP
 
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
@@ -54,15 +51,10 @@ int main(int argc, char** argv) {
 #ifdef QT_DEBUG
     mainWindow.show();
 #else
-    mainWindow.showMinimized();
-#endif // DEBUG
+    mainWindow.hide();
+#endif // QT_DEBUG
     
     common::Log::initialize("core");
-    
-#ifdef DEVELOP
-    QDir current = QDir::current();
-    QDir::setCurrent(current.absolutePath());
-#endif
     
     // Load configuration file
     QString configurationFile = QDir::current().relativeFilePath("config.json");
@@ -78,5 +70,6 @@ int main(int argc, char** argv) {
     }
 
     Application application(configurationFile);
+
     app.exec();
 }
