@@ -66,16 +66,14 @@ set(SOURCE_FILES
     src/trayprocessstatus.cpp
 )
 
-find_package(Qt5Widgets)
-find_package(Qt5Network)
+find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
 
 set(MOC_FILES "")
-qt5_wrap_cpp(MOC_FILES 
+qt5_wrap_cpp(
+    MOC_FILES 
     include/jsonsocket.h
     include/standardmainwindow.h
 )
-
-qt5_wrap_cpp(MOC_FILES)
 
 set(LIBRARY_NAME C-Troll-Common)
 
@@ -87,12 +85,34 @@ add_library(${LIBRARY_NAME}
 )
 
 target_include_directories(${LIBRARY_NAME} PUBLIC "include") 
+target_link_libraries(${LIBRARY_NAME} Qt5::Widgets Qt5::Network)
 
-target_link_libraries(${LIBRARY_NAME}
-    Qt5::Widgets
-    Qt5::Network
-)
-
-set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD 17)
 set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD_REQUIRED On)
 
+if (MSVC)
+    target_compile_options(
+        ${LIBRARY_NAME}
+        PUBLIC
+        "/ZI"
+        "/MP"
+        "/W4"
+        "/std:c++latest"
+        "/permissive-"
+        "/wd4127" # conditional expression is constant (thrown in Qt)
+    )
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(
+        ${LIBRARY_NAME}
+        PUBLIC
+        "-stdlib=libc++"
+        "-Wextra"
+    )
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    target_compile_options(
+        ${LIBRARY_NAME}
+        PUBLIC
+        "-ggdb"
+        "-Wextra"
+    )
+endif ()

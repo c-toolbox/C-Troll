@@ -126,8 +126,8 @@ QJsonObject GuiInitialization::Application::toJson() const {
         QJsonObject obj;
         obj[KeyApplicationConfigurationName] = conf.name;
         obj[KeyApplicationConfigurationId] = conf.id;
-        QJsonArray clusters = QJsonArray::fromStringList(conf.clusters);
-        obj[KeyApplicationConfigurationClusters] = clusters;
+        QJsonArray cs = QJsonArray::fromStringList(conf.clusters);
+        obj[KeyApplicationConfigurationClusters] = cs;
         confs[conf.id] = obj;
     }
     res[KeyApplicationConfigurations] = confs;

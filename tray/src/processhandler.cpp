@@ -41,19 +41,6 @@
 #include <QJsonDocument>
 #include <functional>
 
-template<class T>
-struct map_data_compare : public std::binary_function<typename T::value_type,
-typename T::mapped_type,
-bool>
-{
-public:
-    bool operator() (typename T::value_type &pair,
-                     typename T::mapped_type i) const
-    {
-        return pair.second == i;
-    }
-};
-
 ProcessHandler::ProcessHandler() {}
 
 ProcessHandler::~ProcessHandler() {}
@@ -96,7 +83,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     ProcessMap::iterator p2T = std::find_if(
         _processes.begin(),
         _processes.end(),
-        std::bind2nd(map_data_compare<ProcessMap>(), process)
+        [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
     );
     
     if (p2T != _processes.end() ) {
@@ -140,7 +127,7 @@ void ProcessHandler::handleStarted() {
     ProcessMap::iterator p2T = std::find_if(
         _processes.begin(),
         _processes.end(),
-        std::bind2nd(map_data_compare<ProcessMap>(), process)
+        [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
     );
     
     if (p2T != _processes.end()) {
@@ -160,14 +147,14 @@ void ProcessHandler::handleFinished(int exitCode) {
     handleFinished(exitCode, process->exitStatus());
 }
 
-void ProcessHandler::handleFinished(int exitCode, QProcess::ExitStatus exitStatus) {
+void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
     ProcessMap::iterator p2T = std::find_if(
         _processes.begin(),
         _processes.end(),
-        std::bind2nd(map_data_compare<ProcessMap>(), process)
+        [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
     );
     
     if (p2T != _processes.end()) {
@@ -201,7 +188,7 @@ void ProcessHandler::handleReadyReadStandardError() {
     ProcessMap::iterator p2T = std::find_if(
         _processes.begin(),
         _processes.end(),
-        std::bind2nd(map_data_compare<ProcessMap>(), process)
+        [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
     );
     
     if (p2T != _processes.end()) {
@@ -224,7 +211,7 @@ void ProcessHandler::handleReadyReadStandardOutput() {
     ProcessMap::iterator p2T = std::find_if(
         _processes.begin(),
         _processes.end(),
-        std::bind2nd(map_data_compare<ProcessMap>(), process)
+        [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
     );
     
     if (p2T != _processes.end()) {
@@ -286,7 +273,7 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
         ProcessMap::iterator p2T = std::find_if(
             _processes.begin(),
             _processes.end(),
-            std::bind2nd(map_data_compare<ProcessMap>(), process)
+            [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
         );
 
         if (p2T != _processes.end()) {

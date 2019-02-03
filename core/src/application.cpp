@@ -76,7 +76,7 @@ void Application::initalize(bool resetGUIconnection) {
         "services",
         Optional::Yes
     );
-    for (QJsonValueRef& s : services) {
+    for (const QJsonValueRef& s : services) {
         if (!s.isString()) {
             Log("Error when parsing service command.");
             continue;
