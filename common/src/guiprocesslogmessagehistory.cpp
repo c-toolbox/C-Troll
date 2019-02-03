@@ -54,8 +54,6 @@ namespace {
 
 namespace common {
 
-const QString GuiProcessLogMessageHistory::Type = "GuiProcessLogMessageHistory";
-
 GuiProcessLogMessageHistory::GuiProcessLogMessageHistory(const QJsonDocument& document) {
     QJsonObject obj = document.object();
 

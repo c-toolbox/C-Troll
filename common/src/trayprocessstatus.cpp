@@ -44,8 +44,6 @@ namespace {
 
 namespace common {
     
-const QString TrayProcessStatus::Type = "TrayProcessStatus";
-
 TrayProcessStatus::TrayProcessStatus(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     

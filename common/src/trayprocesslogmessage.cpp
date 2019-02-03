@@ -45,20 +45,18 @@ namespace {
 
 namespace common {
     
-const QString TrayProcessLogMessage::Type = "TrayProcessLogMessage";
-
 TrayProcessLogMessage::TrayProcessLogMessage(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
     processId = common::testAndReturnInt(obj, KeyIdentifier);
-    message = common::testAndReturnString(obj, KeyMessage);
+    message = common::testAndReturnString(obj, KeyMessage).toStdString();
     outputType = static_cast<OutputType>(common::testAndReturnInt(obj, KeyType));
 }
 
 QJsonDocument TrayProcessLogMessage::toJson() const {
     QJsonObject obj;
     obj[KeyIdentifier] = processId;
-    obj[KeyMessage] = message;
+    obj[KeyMessage] = QString::fromStdString(message);
     obj[KeyType] = static_cast<int>(outputType);
     return QJsonDocument(obj);
 }

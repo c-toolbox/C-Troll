@@ -36,8 +36,8 @@
 #define __GUIPROCESSSTATUS_H__
 
 #include <QJsonDocument>
-#include <QMap>
 #include <QString>
+#include <map>
 
 namespace common {
     
@@ -45,7 +45,7 @@ namespace common {
 /// inform the GUI about a change in process status
 struct GuiProcessStatus {
     /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
+    static constexpr const char* Type = "GuiProcessStatus";
     
     /// Default constructor
     GuiProcessStatus() = default;
@@ -82,7 +82,7 @@ struct GuiProcessStatus {
     /// The cluster status
     QString clusterStatus;
     /// The process status
-    QMap<QString, QString> nodeStatus;
+    std::map<QString, QString> nodeStatus;
     /// The time
     double time;
 };

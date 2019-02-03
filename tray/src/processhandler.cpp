@@ -40,6 +40,7 @@
 #include <QDebug>
 #include <QJsonDocument>
 #include <functional>
+#include <jsonsupport.h>
 
 ProcessHandler::ProcessHandler() {}
 
@@ -114,8 +115,9 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
             // Send out the TrayProcessStatus with the error/status string
             common::GenericMessage msg;
             msg.type = common::TrayProcessStatus::Type;
-            msg.payload = ps.toJson().object();
-            emit sendSocketMessage(msg.toJson());
+            msg.payload = common::conv::from_qtjsondoc(ps.toJson());
+            nlohmann::json j = msg;
+            emit sendSocketMessage(common::conv::to_qtjsondoc(j));
         }
     }
 }
@@ -137,8 +139,9 @@ void ProcessHandler::handleStarted() {
         ps.status = common::TrayProcessStatus::Status::Running;
         common::GenericMessage msg;
         msg.type = common::TrayProcessStatus::Type;
-        msg.payload = ps.toJson().object();
-        emit sendSocketMessage(msg.toJson());
+        msg.payload = common::conv::from_qtjsondoc(ps.toJson());
+        nlohmann::json j = msg;
+        emit sendSocketMessage(common::conv::to_qtjsondoc(j));
     }
 }
 
@@ -173,8 +176,9 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
         // Send out the TrayProcessStatus with the error/status string
         common::GenericMessage msg;
         msg.type = common::TrayProcessStatus::Type;
-        msg.payload = ps.toJson().object();
-        emit sendSocketMessage(msg.toJson());
+        msg.payload = common::conv::from_qtjsondoc(ps.toJson());
+        nlohmann::json j = msg;
+        emit sendSocketMessage(common::conv::to_qtjsondoc(j));
         
         // Remove this process from the list as we consider it finsihed
         _processes.erase(p2T);
@@ -196,11 +200,12 @@ void ProcessHandler::handleReadyReadStandardError() {
         common::TrayProcessLogMessage pm;
         pm.processId = p2T->first;
         pm.outputType = common::TrayProcessLogMessage::OutputType::StdErr;
-        pm.message = QString::fromLatin1(process->readAllStandardError());
+        pm.message = QString::fromLatin1(process->readAllStandardError()).toStdString();
         common::GenericMessage msg;
         msg.type = common::TrayProcessLogMessage::Type;
-        msg.payload = pm.toJson().object();
-        emit sendSocketMessage(msg.toJson());
+        msg.payload = common::conv::from_qtjsondoc(pm.toJson());
+        nlohmann::json j = msg;
+        emit sendSocketMessage(common::conv::to_qtjsondoc(j));
     }
 }
 
@@ -217,12 +222,13 @@ void ProcessHandler::handleReadyReadStandardOutput() {
     if (p2T != _processes.end()) {
         common::TrayProcessLogMessage pm;
         pm.processId = p2T->first;
-        pm.message = QString::fromLatin1(process->readAllStandardOutput());
+        pm.message = QString::fromLatin1(process->readAllStandardOutput()).toStdString();
         pm.outputType = common::TrayProcessLogMessage::OutputType::StdOut;
         common::GenericMessage msg;
         msg.type = common::TrayProcessLogMessage::Type;
-        msg.payload = pm.toJson().object();
-        emit sendSocketMessage(msg.toJson());
+        msg.payload = common::conv::from_qtjsondoc(pm.toJson());
+        nlohmann::json j = msg;
+        emit sendSocketMessage(common::conv::to_qtjsondoc(j));
     }
 }
 
@@ -281,8 +287,9 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
             // Send out the TrayProcessStatus with the error/status string
             common::GenericMessage msg;
             msg.type = common::TrayProcessStatus::Type;
-            msg.payload = ps.toJson().object();
-            emit sendSocketMessage(msg.toJson());
+            msg.payload = common::conv::from_qtjsondoc(ps.toJson());
+            nlohmann::json j = msg;
+            emit sendSocketMessage(common::conv::to_qtjsondoc(j));
             // Remove this process from the list as we consider it finsihed
             _processes.erase(p2T);
         }

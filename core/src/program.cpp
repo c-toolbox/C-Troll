@@ -95,22 +95,26 @@ std::unique_ptr<Program> Program::loadProgram(QString jsonFile, QString baseDire
 
 common::GuiInitialization::Application Program::toGuiInitializationApplication() const {
     common::GuiInitialization::Application app;
-    app.name = name();
-    app.id = id();
-    app.tags = tags();
+    app.name = name().toStdString();
+    app.id = id().toStdString();
+    foreach (QString str, tags()) {
+        app.tags.push_back(str.toStdString());
+    }
 
     for (const Program::Configuration& conf : configurations()) {
         common::GuiInitialization::Application::Configuration c;
-        c.name = conf.name;
-        c.id = conf.id;
-        c.clusters = conf.clusterCommandlineParameters.keys();
+        c.name = conf.name.toStdString();
+        c.id = conf.id.toStdString();
+        foreach (QString str, conf.clusterCommandlineParameters.keys()) {
+            c.clusters.push_back(str.toStdString());
+        }
 
         app.configurations.push_back(c);
     }
 
     QJsonObject defaults;
-    app.defaultCluster = _defaultCluster;
-    app.defaultConfiguration = _defaultConfiguration;
+    app.defaultCluster = _defaultCluster.toStdString();
+    app.defaultConfiguration = _defaultConfiguration.toStdString();
     
     return app;
 }
@@ -128,12 +132,12 @@ Program::loadProgramsFromDirectory(QString directory)
     );
     while (it.hasNext()) {
         QString file = it.next();
-        Log("Loading application file " + file);
+        Log("Loading application file " + file.toStdString());
         try {
             std::unique_ptr<Program> program = loadProgram(file, directory);
             programs->push_back(std::move(program));
         } catch (const std::runtime_error& e) {
-            Log("Failed to load application file " + file + ". " + e.what());
+            Log("Failed to load application file " + file.toStdString() + ". " + e.what());
         }
     }
     return std::move(programs);

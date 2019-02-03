@@ -44,7 +44,7 @@ namespace common {
 /// that the Tray should perform a task
 struct TrayProcessLogMessage {
     /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
+    static constexpr const char* Type = "TrayProcessLogMessage";
 
     enum class OutputType : int {
         StdOut = 0,
@@ -77,7 +77,7 @@ struct TrayProcessLogMessage {
     /// The unique identifier for the process
     int processId;
     /// The process stdout/stderr line
-    QString message;
+    std::string message;
     /// The type of output
     OutputType outputType;
 };

@@ -36,12 +36,21 @@
 #define __JSONSUPPORT_H__
 
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QStringList>
+#include <json/json.hpp>
 
 enum class Optional { Yes, No };
 
 namespace common {
+
+namespace conv {
+    nlohmann::json from_qtjsonobj(QJsonObject obj);
+    nlohmann::json from_qtjsondoc(QJsonDocument obj);
+    QJsonObject to_qtjsonobj(nlohmann::json obj);
+    QJsonDocument to_qtjsondoc(nlohmann::json obj);
+}
 
 /**
  * Tests whether the \p key exists in the QJsonObject \p obj and if it is of the string

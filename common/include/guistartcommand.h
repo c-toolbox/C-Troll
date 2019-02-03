@@ -45,7 +45,7 @@ namespace common {
 /// configuration and cluster.
 struct GuiStartCommand {
     /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
+    static constexpr const char* Type = "GuiStartCommand";
     
     /// Default constructor
     GuiStartCommand() = default;
@@ -70,11 +70,11 @@ struct GuiStartCommand {
     QJsonDocument toJson() const;
 
     /// The unique identifier of the application that is to be started
-    QString applicationId;
+    std::string applicationId;
     /// The identifier of the application's configuration that is to be started
-    QString configurationId;
+    std::string configurationId;
     /// The identifier of the cluster on which the application is to be started
-    QString clusterId;
+    std::string clusterId;
 };
 
 } // namespace

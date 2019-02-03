@@ -35,8 +35,8 @@
 #ifndef __LOGGING_H__
 #define __LOGGING_H__
 
-#include <QFile>
-#include <QString>
+#include <fstream>
+#include <string>
 
 namespace common {
     
@@ -55,7 +55,7 @@ public:
      * \param application The name of the application. This is used for creating
      * unique(ish) names for the log.
      */
-    static void initialize(QString application);
+    static void initialize(std::string application);
     
     /**
      * Returns the static reference to the Log instance.
@@ -70,7 +70,7 @@ public:
      * immediately.
      * \param message The message that is to be logged
      */
-    void logMessage(QString message);
+    void logMessage(std::string message);
   
 private:
     /**
@@ -78,7 +78,7 @@ private:
      * was in the file previously.
      * \param application The name of the application that requested the log file
      */
-     Log(QString application);
+     Log(std::string application);
     
     /// Destructor the will close the file.
      ~Log();
@@ -87,7 +87,7 @@ private:
     static Log* _log;
     
     /// The log file to which all messages from the logMessage method get logged
-    QFile _file;
+    std::ofstream _file;
 };
     
 } // namespace common
@@ -98,6 +98,6 @@ private:
  * \param message The message that is to be logged and passed to the Log::logMessage
  * function
  */
-void Log(QString message);
+void Log(std::string message);
 
 #endif // __LOGGING_H__

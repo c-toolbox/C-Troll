@@ -44,7 +44,7 @@ namespace common {
 /// that the Tray should perform a task
 struct TrayCommand {
     /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
+    static constexpr const char* Type = "TrayCommand";
     
     /// Default constructor
     TrayCommand() = default;

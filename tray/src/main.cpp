@@ -70,8 +70,6 @@ int main(int argc, char** argv) {
         &socketHandler, SLOT(sendMessage(QJsonDocument))
     );
 
-    for (int i = 0; i < 100; ++i) qDebug() << "asdasd";
-
     app.exec();
     qDebug() << "Application finished";
 }

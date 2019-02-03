@@ -39,226 +39,150 @@
 #include <QJsonObject>
 
 namespace {
-    const QString KeyApplications = "applications";
-    const QString KeyClusters = "clusters";
-    const QString KeyProcesses = "processes";
+    constexpr const char* KeyApplications = "applications";
+    constexpr const char* KeyClusters = "clusters";
+    constexpr const char* KeyProcesses = "processes";
     
-    const QString KeyApplicationName = "name";
-    const QString KeyApplicationId = "id";
-    const QString KeyApplicationTags = "tags";
-    const QString KeyApplicationConfigurations = "configurations";
-    const QString KeyApplicationConfigurationClusters = "clusters";
-    const QString KeyApplicationConfigurationName = "name";
-    const QString KeyApplicationConfigurationId = "id";
+    constexpr const char* KeyApplicationName = "name";
+    constexpr const char* KeyApplicationId = "id";
+    constexpr const char* KeyApplicationTags = "tags";
+    constexpr const char* KeyApplicationConfigurations = "configurations";
+    constexpr const char* KeyApplicationConfigurationClusters = "clusters";
+    constexpr const char* KeyApplicationConfigurationName = "name";
+    constexpr const char* KeyApplicationConfigurationId = "id";
 
-    const QString KeyApplicationDefaults = "defaults";
-    const QString KeyApplicationDefaultConfiguration = "configuration";
-    const QString KeyApplicationDefaultCluster = "cluster";
+    constexpr const char* KeyApplicationDefaults = "defaults";
+    constexpr const char* KeyApplicationDefaultConfiguration = "configuration";
+    constexpr const char* KeyApplicationDefaultCluster = "cluster";
 
-    const QString KeyClusterName = "name";
-    const QString KeyClusterId = "id";
-    const QString KeyClusterEnabled = "enabled";
-    const QString KeyClusterConnected = "connected";
+    constexpr const char* KeyClusterName = "name";
+    constexpr const char* KeyClusterId = "id";
+    constexpr const char* KeyClusterEnabled = "enabled";
+    constexpr const char* KeyClusterConnected = "connected";
 
-    const QString KeyProcessId = "processId";
-    const QString KeyProcessApplicationId = "applicationId";
-    const QString KeyProcessConfigurationId = "configurationId";
-    const QString KeyProcessClusterId = "clusterId";
-    const QString KeyProcessNodeStatusHistory = "nodeStatusHistory";
-    const QString KeyProcessClusterStatus = "clusterStatus";
-    const QString KeyProcessClusterStatusTime = "clusterStatusTime";
+    constexpr const char* KeyProcessId = "processId";
+    constexpr const char* KeyProcessApplicationId = "applicationId";
+    constexpr const char* KeyProcessConfigurationId = "configurationId";
+    constexpr const char* KeyProcessClusterId = "clusterId";
+    constexpr const char* KeyProcessNodeStatusHistory = "nodeStatusHistory";
+    constexpr const char* KeyProcessClusterStatus = "clusterStatus";
+    constexpr const char* KeyProcessClusterStatusTime = "clusterStatusTime";
     
-    const QString KeyNodeStatusHistoryNodeId = "nodeId";
-    const QString KeyNodeStatusHistoryStatus = "status";
-    const QString KeyNodeStatusHistoryTime = "time";
-    const QString KeyNodeStatusHistoryId = "id";
+    constexpr const char* KeyNodeStatusHistoryNodeId = "nodeId";
+    constexpr const char* KeyNodeStatusHistoryStatus = "status";
+    constexpr const char* KeyNodeStatusHistoryTime = "time";
+    constexpr const char* KeyNodeStatusHistoryId = "id";
 } // namespace
 
 namespace common {
 
-const QString GuiInitialization::Type = "GuiInit";
-    
-GuiInitialization::Application::Application(QJsonObject obj) {
-    name = common::testAndReturnString(obj, KeyApplicationName);
-    id = common::testAndReturnString(obj, KeyApplicationId);
-
-    tags = common::testAndReturnStringList(obj, KeyApplicationTags);
-    //clusters = common::testAndReturnStringList(obj, KeyApplicationClusters);
-    QJsonObject configs = common::testAndReturnObject(obj, KeyApplicationConfigurations);
-    
-    for (const QString& configId : configs.keys()) {
-        QJsonObject config = common::testAndReturnObject(obj, configId);
-        
-        Configuration configuration;
-        configuration.name = common::testAndReturnString(
-            config,
-            KeyApplicationConfigurationName
-        );
-        configuration.id = common::testAndReturnString(
-            config,
-            KeyApplicationConfigurationId
-        );
-        configuration.clusters = common::testAndReturnStringList(
-            config,
-            KeyApplicationConfigurationClusters
-        );
-        
-        configurations.push_back(configuration);
-    }
-
-    QJsonObject defaults = common::testAndReturnObject(obj, KeyApplicationDefaults);
-    defaultConfiguration = common::testAndReturnString(
-        defaults,
-        KeyApplicationDefaultConfiguration
-    );
-    defaultCluster = common::testAndReturnString(defaults, KeyApplicationDefaultCluster);
-}
-    
-QJsonObject GuiInitialization::Application::toJson() const {
-    QJsonObject res;
-
-    res[KeyApplicationName] = name;
-    res[KeyApplicationId] = id;
-    res[KeyApplicationTags] = QJsonArray::fromStringList(tags);
-
-    QJsonObject confs;
-    for (const Configuration& conf : configurations) {
-        QJsonObject obj;
-        obj[KeyApplicationConfigurationName] = conf.name;
-        obj[KeyApplicationConfigurationId] = conf.id;
-        QJsonArray cs = QJsonArray::fromStringList(conf.clusters);
-        obj[KeyApplicationConfigurationClusters] = cs;
-        confs[conf.id] = obj;
-    }
-    res[KeyApplicationConfigurations] = confs;
-
-    QJsonObject defaults;
-    defaults[KeyApplicationDefaultConfiguration] = defaultConfiguration;
-    defaults[KeyApplicationDefaultCluster] = defaultCluster;
-
-    res[KeyApplicationDefaults] = defaults;
-
-    return res;
-}
-    
-GuiInitialization::Cluster::Cluster(QJsonObject cluster) {
-    name = common::testAndReturnString(cluster, KeyClusterName);
-    id = common::testAndReturnString(cluster, KeyClusterId);
-    enabled = common::testAndReturnBool(cluster, KeyClusterEnabled);
-    connected = false;
-}
-    
-QJsonObject GuiInitialization::Cluster::toJson() const {
-    QJsonObject res;
-    res[KeyClusterName] = name;
-    res[KeyClusterId] = id;
-    res[KeyClusterEnabled] = enabled;
-    res[KeyClusterConnected] = connected;
-    return res;
+void to_json(nlohmann::json& j, const GuiInitialization& p) {
+    j = nlohmann::json {
+        { KeyApplications, p.applications },
+        { KeyClusters, p.clusters },
+        { KeyProcesses, p.processes }
+    };
 }
 
-GuiInitialization::Process::Process(QJsonObject process) {
-    id = common::testAndReturnInt(process, KeyProcessId);
-    applicationId = common::testAndReturnString(process, KeyProcessApplicationId);
-    configurationId = common::testAndReturnString(process, KeyProcessConfigurationId);
-    clusterId = common::testAndReturnString(process, KeyProcessClusterId);
-    QJsonArray statusHistory = common::testAndReturnArray(process, KeyProcessNodeStatusHistory);
-
-    for (int i = 0; i < statusHistory.size(); i++) {
-        nodeStatusHistory.push_back(GuiInitialization::Process::NodeStatus(
-            common::testAndReturnObject(statusHistory, i))
-        );
+void to_json(nlohmann::json& j, const GuiInitialization::Application& p) {
+    nlohmann::json json;
+    json[KeyApplicationName] = p.name;
+    json[KeyApplicationId] = p.id;
+    json[KeyApplicationTags] = p.tags;
+    for (const GuiInitialization::Application::Configuration& c : p.configurations) {
+        nlohmann::json jc = c;
+        json[KeyApplicationConfigurations][c.id] = jc;
     }
-
-    clusterStatus = common::testAndReturnString(process, KeyProcessClusterStatus);
-    clusterStatusTime = common::testAndReturnDouble(process, KeyProcessClusterStatusTime);
+    json[KeyApplicationDefaults] = {
+        { KeyApplicationDefaultConfiguration, p.defaultConfiguration },
+        { KeyApplicationDefaultCluster, p.defaultCluster }
+    };
+    j = std::move(json);
 }
 
-QJsonObject GuiInitialization::Process::toJson() const {
-    QJsonObject res;
-    res[KeyProcessId] = id;
-    res[KeyProcessApplicationId] = applicationId;
-    res[KeyProcessConfigurationId] = configurationId;
-    res[KeyProcessClusterId] = clusterId;
-
-    QJsonArray statusHistory;
-    for (const Process::NodeStatus& s : nodeStatusHistory) {
-        statusHistory.push_back(s.toJson());
-    }
-
-    res[KeyProcessNodeStatusHistory] = statusHistory;
-    res[KeyProcessClusterStatus] = clusterStatus;
-    res[KeyProcessClusterStatusTime] = clusterStatusTime;
-
-    return res;
+void to_json(nlohmann::json& j, const GuiInitialization::Application::Configuration& p) {
+    j = nlohmann::json {
+        { KeyApplicationConfigurationName, p.name },
+        { KeyApplicationConfigurationId, p.id },
+        { KeyApplicationConfigurationClusters, p.clusters }
+    };
 }
 
-GuiInitialization::Process::NodeStatus::NodeStatus(QJsonObject nodeStatus) {
-    node = common::testAndReturnString(nodeStatus, KeyNodeStatusHistoryNodeId);
-    status = common::testAndReturnString(nodeStatus, KeyNodeStatusHistoryStatus);
-    time = common::testAndReturnDouble(nodeStatus, KeyNodeStatusHistoryTime);
-    id = common::testAndReturnInt(nodeStatus, KeyNodeStatusHistoryId);
+void to_json(nlohmann::json& j, const GuiInitialization::Cluster& p) {
+    j = nlohmann::json {
+        { KeyClusterName, p.name },
+        { KeyClusterId, p.id },
+        { KeyClusterEnabled, p.enabled },
+        { KeyClusterConnected, p.connected }
+    };
 }
 
-QJsonObject GuiInitialization::Process::NodeStatus::toJson() const {
-    QJsonObject res;
-    res[KeyNodeStatusHistoryStatus] = status;
-    res[KeyNodeStatusHistoryTime] = time;
-    res[KeyNodeStatusHistoryNodeId] = node;
-    res[KeyNodeStatusHistoryId] = id;
-    return res;
+void to_json(nlohmann::json& j, const GuiInitialization::Process& p) {
+    j = nlohmann::json {
+        { KeyProcessId, p.id },
+        { KeyProcessApplicationId, p.applicationId },
+        { KeyProcessConfigurationId, p.configurationId },
+        { KeyProcessClusterId, p.clusterId },
+        { KeyProcessNodeStatusHistory, p.nodeStatusHistory },
+        { KeyProcessClusterStatus, p.clusterStatus },
+        { KeyProcessClusterStatusTime, p.clusterStatusTime }
+    };
 }
 
-GuiInitialization::GuiInitialization(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
-    
-    QJsonArray applicationsJson = common::testAndReturnArray(obj, KeyApplications);
-    for (const QJsonValue& val : applicationsJson) {
-        if (!val.isObject()) {
-            throw std::runtime_error("Value inside an application was not an object");
-        }
-        applications.push_back(Application(val.toObject()));
-    }
-    
-    QJsonArray clustersJson = common::testAndReturnArray(obj, KeyClusters);
-    for (const QJsonValue& val : clustersJson) {
-        if (!val.isObject()) {
-            throw std::runtime_error("Value inside a cluster was not an object");
-        }
-        clusters.push_back(Cluster(val.toObject()));
-    }
-
-    QJsonArray processesJson = common::testAndReturnArray(obj, KeyProcesses);
-    for (const QJsonValue& val : processesJson) {
-        if (!val.isObject()) {
-            throw std::runtime_error("Value inside a process was not an object");
-        }
-        processes.push_back(Process(val.toObject()));
-    }
+void to_json(nlohmann::json& j, const GuiInitialization::Process::NodeStatus& p) {
+    j = nlohmann::json {
+        { KeyNodeStatusHistoryNodeId, p.node},
+        { KeyNodeStatusHistoryStatus, p.status },
+        { KeyNodeStatusHistoryTime, p.time },
+        { KeyNodeStatusHistoryId, p.id},
+    };
 }
 
-QJsonDocument GuiInitialization::toJson() const {
-    QJsonObject obj;
+void from_json(const nlohmann::json& j, GuiInitialization& p) {
+    j.at(KeyApplications).get_to(p.applications);
+    j.at(KeyClusters).get_to(p.clusters);
+    j.at(KeyProcesses).get_to(p.processes);
+}
 
-    QJsonArray apps;
-    for (const Application& app : applications) {
-        apps.append(app.toJson());
-    }
-    obj[KeyApplications] = apps;
-    
-    QJsonArray cls;
-    for (const Cluster& c : clusters) {
-        cls.append(c.toJson());
-    }
-    obj[KeyClusters] = cls;
-    
-    QJsonArray procs;
-    for (const Process& p : processes) {
-        procs.append(p.toJson());
-    }
-    obj[KeyProcesses] = procs;
+void from_json(const nlohmann::json& j, GuiInitialization::Application& p) {
+    j.at(KeyApplicationName).get_to(p.name);
+    j.at(KeyApplicationId).get_to(p.id);
+    j.at(KeyApplicationTags).get_to(p.tags);
+    j.at(KeyApplicationConfigurations).get_to(p.configurations);
 
-    return QJsonDocument(obj);
+    nlohmann::json defaults = j.at(KeyApplicationDefaults);
+    defaults.at(KeyApplicationDefaultConfiguration).get_to(p.defaultConfiguration);
+    defaults.at(KeyApplicationDefaultCluster).get_to(p.defaultCluster);
+}
+
+void from_json(const nlohmann::json& j, GuiInitialization::Application::Configuration& p)
+{
+    j.at(KeyApplicationConfigurationName).get_to(p.name);
+    j.at(KeyApplicationConfigurationId).get_to(p.id);
+    j.at(KeyApplicationConfigurationClusters).get_to(p.clusters);
+}
+
+void from_json(const nlohmann::json& j, GuiInitialization::Cluster& p) {
+    j.at(KeyClusterName).get_to(p.name);
+    j.at(KeyClusterId).get_to(p.id);
+    j.at(KeyClusterEnabled).get_to(p.enabled);
+}
+
+void from_json(const nlohmann::json& j, GuiInitialization::Process& p) {
+    j.at(KeyProcessId).get_to(p.id);
+    j.at(KeyProcessApplicationId).get_to(p.applicationId);
+    j.at(KeyProcessConfigurationId).get_to(p.configurationId);
+    j.at(KeyProcessClusterId).get_to(p.clusterId);
+    j.at(KeyProcessNodeStatusHistory).get_to(p.nodeStatusHistory);
+    j.at(KeyProcessClusterStatus).get_to(p.clusterStatus);
+    j.at(KeyProcessClusterStatusTime).get_to(p.clusterStatusTime);
+}
+
+void from_json(const nlohmann::json& j, GuiInitialization::Process::NodeStatus& p) {
+    j.at(KeyNodeStatusHistoryNodeId).get_to(p.node);
+    j.at(KeyNodeStatusHistoryStatus).get_to(p.status);
+    j.at(KeyNodeStatusHistoryTime).get_to(p.time);
+    j.at(KeyNodeStatusHistoryId).get_to(p.id);
 }
 
 } // namespace common

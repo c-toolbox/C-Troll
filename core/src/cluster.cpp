@@ -172,13 +172,13 @@ Cluster::loadClustersFromDirectory(QString directory)
     while (it.hasNext()) {
         QString file = it.next();
         
-        Log("Loading cluster file " + file);
+        Log("Loading cluster file " + file.toStdString());
         try {
             std::unique_ptr<Cluster> c = loadCluster(file, directory);
             result->push_back(std::move(c));
         }
         catch (const std::runtime_error& e) {
-            Log(QString::fromLocal8Bit("Error loading cluster: ") + e.what());
+            Log(std::string("Error loading cluster: ") + e.what());
         }
     }
 
@@ -187,8 +187,8 @@ Cluster::loadClustersFromDirectory(QString directory)
 
 common::GuiInitialization::Cluster Cluster::toGuiInitializationCluster() const {
     common::GuiInitialization::Cluster cluster;
-    cluster.name = name();
-    cluster.id = id();
+    cluster.name = name().toStdString();
+    cluster.id = id().toStdString();
     cluster.enabled = enabled();
     cluster.connected = connected();
     return cluster;

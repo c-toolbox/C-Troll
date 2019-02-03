@@ -34,9 +34,38 @@
 
 #include "jsonsupport.h"
 
-#include <QJsonArray>
-
 namespace common {
+
+namespace conv {
+
+nlohmann::json from_qtjsonobj(QJsonObject obj) {
+    using namespace nlohmann;
+
+    QJsonDocument d(obj);
+    QString strJson(d.toJson(QJsonDocument::Compact));
+    std::string stdJson = strJson.toStdString();
+    json res = json::parse(stdJson);
+    return res;
+}
+
+nlohmann::json from_qtjsondoc(QJsonDocument doc) {
+    return from_qtjsonobj(doc.object());
+}
+
+QJsonObject to_qtjsonobj(nlohmann::json obj) {
+    using namespace nlohmann;
+
+    std::string stdJson = obj.dump();
+    QString strJson = QString::fromStdString(stdJson);
+    QJsonObject res = QJsonDocument::fromJson(strJson.toUtf8()).object();
+    return res;
+}
+
+QJsonDocument to_qtjsondoc(nlohmann::json doc) {
+    return QJsonDocument(to_qtjsonobj(doc));
+}
+
+} // conv
 
 QString testAndReturnString(const QJsonObject& obj, const QString& key, Optional optional,
                             QString defaultValue)

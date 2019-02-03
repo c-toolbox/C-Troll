@@ -51,8 +51,6 @@ namespace {
 
 namespace common {
 
-const QString GuiProcessLogMessage::Type = "GuiProcessLogMessage";
-
 GuiProcessLogMessage::GuiProcessLogMessage(const QJsonDocument& document) {
     QJsonObject obj = document.object();
 

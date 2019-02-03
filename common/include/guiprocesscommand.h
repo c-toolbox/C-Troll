@@ -44,7 +44,7 @@ namespace common {
 /// to signal that the Core should perform a command on a process with the given id.
 struct GuiProcessCommand {
     /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
+    static constexpr const char* Type = "GuiProcessCommand";
     
     /// Default constructor
     GuiProcessCommand() = default;

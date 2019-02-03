@@ -84,7 +84,7 @@ add_library(${LIBRARY_NAME}
     ${RESOURCE_FILES}
 )
 
-target_include_directories(${LIBRARY_NAME} PUBLIC "include") 
+target_include_directories(${LIBRARY_NAME} PUBLIC "include" "ext")
 target_link_libraries(${LIBRARY_NAME} Qt5::Widgets Qt5::Network)
 
 set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD 17)
@@ -100,6 +100,11 @@ if (MSVC)
         "/std:c++latest"
         "/permissive-"
         "/wd4127" # conditional expression is constant (thrown in Qt)
+    )
+    target_compile_definitions(
+        ${LIBRARY_NAME}
+        PUBLIC
+        "_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING"
     )
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(

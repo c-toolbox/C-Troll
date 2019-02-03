@@ -45,21 +45,19 @@ namespace {
 
 namespace common {
 
-const QString GuiStartCommand::Type = "GuiStartCommand";
-    
 GuiStartCommand::GuiStartCommand(const QJsonDocument& document) {
     QJsonObject obj = document.object();
 
-    applicationId = common::testAndReturnString(obj, KeyApplicationId);
-    configurationId = common::testAndReturnString(obj, KeyConfigurationId);
-    clusterId = common::testAndReturnString(obj, KeyClusterId);
+    applicationId = common::testAndReturnString(obj, KeyApplicationId).toStdString();
+    configurationId = common::testAndReturnString(obj, KeyConfigurationId).toStdString();
+    clusterId = common::testAndReturnString(obj, KeyClusterId).toStdString();
 }
 
 QJsonDocument GuiStartCommand::toJson() const {
     QJsonObject obj;
-    obj[KeyApplicationId] = applicationId;
-    obj[KeyConfigurationId] = configurationId;
-    obj[KeyClusterId] = clusterId;
+    obj[KeyApplicationId] = QString::fromStdString(applicationId);
+    obj[KeyConfigurationId] = QString::fromStdString(configurationId);
+    obj[KeyClusterId] = QString::fromStdString(clusterId);
 
     return QJsonDocument(obj);
 }

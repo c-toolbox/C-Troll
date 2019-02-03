@@ -38,6 +38,7 @@
 #include <QJsonDocument>
 #include <QMap>
 #include <QString>
+#include <vector>
 
 namespace common {
     
@@ -53,7 +54,7 @@ struct GuiProcessLogMessageHistory {
     };
 
     /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
+    static constexpr const char* Type = "GuiProcessLogMessageHistory";
     
     /// Default constructor
     GuiProcessLogMessageHistory() = default;
@@ -89,7 +90,7 @@ struct GuiProcessLogMessageHistory {
     /// The configuration identifier
     int configurationId;
     /// The log messages
-    QList<LogMessage> logMessages;
+    std::vector<LogMessage> logMessages;
 };
     
 } // namespace common

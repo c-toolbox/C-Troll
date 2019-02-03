@@ -44,8 +44,6 @@ namespace {
 
 namespace common {
 
-const QString GuiProcessCommand::Type = "GuiProcessCommand";
-    
 GuiProcessCommand::GuiProcessCommand(const QJsonDocument& document) {
     QJsonObject obj = document.object();
 

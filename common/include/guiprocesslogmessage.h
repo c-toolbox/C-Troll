@@ -45,7 +45,7 @@ namespace common {
 /// inform the GUI about a change in process status
 struct GuiProcessLogMessage {
     /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
+    static constexpr const char* Type = "GuiProcessLogMessage";
     
     /// Default constructor
     GuiProcessLogMessage() = default;

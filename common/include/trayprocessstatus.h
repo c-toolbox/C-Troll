@@ -56,7 +56,7 @@ struct TrayProcessStatus {
     };
 
     /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
+    static constexpr const char* Type = "TrayProcessStatus";
     
     /// Default constructor
     TrayProcessStatus() = default;

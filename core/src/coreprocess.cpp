@@ -181,20 +181,20 @@ void CoreProcess::pushNodeStdError(QString nodeId, QString message) {
 common::GuiInitialization::Process CoreProcess::toGuiInitializationProcess() const {
     common::GuiInitialization::Process p;
     p.id = _id;
-    p.applicationId = _application->id();
-    p.clusterId = _cluster->id();
-    p.configurationId = _configurationId;
-    p.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status);
+    p.applicationId = _application->id().toStdString();
+    p.clusterId = _cluster->id().toStdString();
+    p.configurationId = _configurationId.toStdString();
+    p.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status).toStdString();
     p.clusterStatusTime = timeToGuiTime(_clusterStatus.time);
 
-    QVector<common::GuiInitialization::Process::NodeStatus> nodeStatusHistory;
+    std::vector<common::GuiInitialization::Process::NodeStatus> nodeStatusHistory;
     for (const QString& node : _nodeLogs.keys()) {
         const NodeLog& nodeLog = _nodeLogs[node];
         for (NodeStatus status : nodeLog.statuses) {
             common::GuiInitialization::Process::NodeStatus nodeStatusObject;
-            nodeStatusObject.status = nodeStatusToGuiNodeStatus(status.status);
+            nodeStatusObject.status = nodeStatusToGuiNodeStatus(status.status).toStdString();
             nodeStatusObject.time = timeToGuiTime(status.time);
-            nodeStatusObject.node = node;
+            nodeStatusObject.node = node.toStdString();
             nodeStatusObject.id = status.id;
             nodeStatusHistory.push_back(nodeStatusObject);
         }
@@ -207,7 +207,7 @@ common::GuiInitialization::Process CoreProcess::toGuiInitializationProcess() con
         [](NS& a, NS& b) { return a.time < b.time; }
     );
     
-    p.nodeStatusHistory = nodeStatusHistory.toList();
+    p.nodeStatusHistory = std::move(nodeStatusHistory);
 
     return p;
 }
@@ -289,7 +289,7 @@ common::GuiProcessLogMessageHistory CoreProcess::guiProcessLogMessageHistory() c
     h.applicationId = _application->id();
     h.clusterId = _cluster->id();
 
-    QList<common::GuiProcessLogMessageHistory::LogMessage> guiLog;
+    std::vector<common::GuiProcessLogMessageHistory::LogMessage> guiLog;
     for (const QString& node : _nodeLogs.keys()) {
         const NodeLog& nodeLog = _nodeLogs[node];
         for (const NodeLogMessage& logMessage : nodeLog.messages) {
@@ -317,7 +317,7 @@ common::GuiProcessLogMessageHistory CoreProcess::guiProcessLogMessageHistory() c
         [](const LM& a, const LM& b) { return a.id < b.id; }
     );
 
-    h.logMessages = guiLog;
+    h.logMessages = std::move(guiLog);
 
     return h;
 }

@@ -50,8 +50,6 @@ namespace {
 
 namespace common {
     
-const QString GuiProcessStatus::Type = "GuiProcessStatus";
-
 GuiProcessStatus::GuiProcessStatus(const QJsonDocument& document) {
     QJsonObject obj = document.object();
     
@@ -75,8 +73,8 @@ QJsonDocument GuiProcessStatus::toJson() const {
     obj[KeyClusterStatus] = clusterStatus;
 
     QJsonObject nodeStatusObject;
-    for (auto it = nodeStatus.begin(); it != nodeStatus.end(); it++) {
-        nodeStatusObject[it.key()] = it.value();
+    for (const std::pair<QString, QString>& p : nodeStatus) {
+        nodeStatusObject[p.first] = p.second;
     }
 
     obj[KeyNodeStatus] = nodeStatusObject;
