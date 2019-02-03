@@ -136,7 +136,7 @@ void Application::initalize(bool resetGUIconnection) {
 
         QObject::connect(
             &_outgoingSocketHandler, &OutgoingSocketHandler::connectedStatusChanged,
-            [this](const Cluster& cluster, const Cluster::Node& node) {
+            [this](const Cluster&, const Cluster::Node&) {
                 _incomingSocketHandler.sendMessageToAll(initializationInformation().toJson());
             }
         );
@@ -164,7 +164,7 @@ void Application::deinitalize(bool resetGUIconnection) {
     _programs.clear();
 }
 
-void Application::handleTrayProcessStatus(const Cluster& cluster,
+void Application::handleTrayProcessStatus(const Cluster&,
                                           const Cluster::Node& node,
                                           common::TrayProcessStatus status)
 {
@@ -217,7 +217,7 @@ void Application::handleTrayProcessStatus(const Cluster& cluster,
         }
 }
 
-void Application::handleTrayProcessLogMessage(const Cluster& cluster,
+void Application::handleTrayProcessLogMessage(const Cluster&,
                                               const Cluster::Node& node,
                                               common::TrayProcessLogMessage logMessage)
 {
