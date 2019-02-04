@@ -35,10 +35,11 @@
 #ifndef __JSONSOCKET_H__
 #define __JSONSOCKET_H__
 
-#include <QTcpSocket>
 #include <QObject>
-#include <deque>
+
+#include <QTcpSocket>
 #include <memory>
+#include <vector>
 #include <json/json.hpp>
 
 namespace common {
@@ -46,8 +47,9 @@ namespace common {
 class JsonSocket : public QObject {
 Q_OBJECT
 public:
-    JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject* parent = Q_NULLPTR);
-    virtual ~JsonSocket();
+    JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject* parent = nullptr);
+    virtual ~JsonSocket() = default;
+
     void write(nlohmann::json json);
     nlohmann::json read();
     QTcpSocket* socket();
@@ -57,8 +59,9 @@ signals:
 
 private: 
     void readToBuffer();
+
     std::unique_ptr<QTcpSocket> _socket;
-    std::deque<char> _buffer;
+    std::vector<char> _buffer;
     int _payloadSize = -1;
 };
 

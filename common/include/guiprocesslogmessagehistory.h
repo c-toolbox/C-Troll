@@ -44,11 +44,11 @@ namespace common {
 /// inform the GUI about a change in process status
 struct GuiProcessLogMessageHistory {
     struct LogMessage {
+        int id;
         std::string message;
         std::string outputType;
         std::string nodeId;
         double time;
-        int id;
     };
 
     /// The string representing this command type, for usage in the common::GenericMessage
@@ -70,7 +70,6 @@ void to_json(nlohmann::json& j, const GuiProcessLogMessageHistory& p);
 void to_json(nlohmann::json& j, const GuiProcessLogMessageHistory::LogMessage& p);
 void from_json(const nlohmann::json& j, GuiProcessLogMessageHistory& p);
 void from_json(const nlohmann::json& j, GuiProcessLogMessageHistory::LogMessage& p);
-
 
 } // namespace common
 

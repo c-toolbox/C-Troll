@@ -32,12 +32,13 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include <jsonsocket.h>
+#include "jsonsocket.h"
+
 #include <QNetworkProxy>
 
 namespace common {
 
-JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject *parent)
+JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject* parent)
     : QObject(parent)
     , _socket(std::move(socket))
 {
@@ -45,11 +46,9 @@ JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject *parent)
     _socket->setProxy(QNetworkProxy::NoProxy);
 }
 
-JsonSocket::~JsonSocket() {}
-
 void JsonSocket::write(nlohmann::json jsonDocument) {
     std::string jsonText = jsonDocument.dump();
-    QByteArray json(jsonText.c_str(), jsonText.size());
+    QByteArray json(jsonText.c_str(), static_cast<int>(jsonText.size()));
     QByteArray length = QString::number(json.size()).toUtf8();
 
     _socket->write(length);
