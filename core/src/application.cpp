@@ -179,40 +179,38 @@ void Application::handleTrayProcessStatus(const Cluster&,
 
     CoreProcess& p = *(*iProcess);
 
-    QString nodeId = QString::fromStdString(node.id);
-
     switch (status.status) {
         case common::TrayProcessStatus::Status::Starting:
-            p.pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::Starting);
-            sendGuiProcessStatus(*iProcess->get(), nodeId);
+            p.pushNodeStatus(node.id, CoreProcess::NodeStatus::Status::Starting);
+            sendGuiProcessStatus(*iProcess->get(), node.id);
             break;
         case common::TrayProcessStatus::Status::Running:
-            p.pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::Running);
-            sendGuiProcessStatus(*iProcess->get(), nodeId);
+            p.pushNodeStatus(node.id, CoreProcess::NodeStatus::Status::Running);
+            sendGuiProcessStatus(*iProcess->get(), node.id);
             break;
         case common::TrayProcessStatus::Status::NormalExit:
-            p.pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::NormalExit);
-            sendGuiProcessStatus(*iProcess->get(), nodeId);
+            p.pushNodeStatus(node.id, CoreProcess::NodeStatus::Status::NormalExit);
+            sendGuiProcessStatus(*iProcess->get(), node.id);
             break;
         case common::TrayProcessStatus::Status::FailedToStart:
-            p.pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::FailedToStart);
-            sendGuiProcessStatus(*iProcess->get(), nodeId);
+            p.pushNodeStatus(node.id, CoreProcess::NodeStatus::Status::FailedToStart);
+            sendGuiProcessStatus(*iProcess->get(), node.id);
             break;
         case common::TrayProcessStatus::Status::CrashExit:
-            p.pushNodeStatus(nodeId, CoreProcess::NodeStatus::Status::CrashExit);
-            sendGuiProcessStatus(*iProcess->get(), nodeId);
+            p.pushNodeStatus(node.id, CoreProcess::NodeStatus::Status::CrashExit);
+            sendGuiProcessStatus(*iProcess->get(), node.id);
             break;
         case common::TrayProcessStatus::Status::WriteError:
-            p.pushNodeError(nodeId, CoreProcess::NodeError::Error::WriteError);
+            p.pushNodeError(node.id, CoreProcess::NodeError::Error::WriteError);
             break;
         case common::TrayProcessStatus::Status::ReadError:
-            p.pushNodeError(nodeId, CoreProcess::NodeError::Error::ReadError);
+            p.pushNodeError(node.id, CoreProcess::NodeError::Error::ReadError);
             break;
         case common::TrayProcessStatus::Status::TimedOut:
-            p.pushNodeError(nodeId, CoreProcess::NodeError::Error::TimedOut);
+            p.pushNodeError(node.id, CoreProcess::NodeError::Error::TimedOut);
             break;
         case common::TrayProcessStatus::Status::UnknownError:
-            p.pushNodeError(nodeId, CoreProcess::NodeError::Error::UnknownError);
+            p.pushNodeError(node.id, CoreProcess::NodeError::Error::UnknownError);
             break;
         }
 }
@@ -237,17 +235,16 @@ void Application::handleTrayProcessLogMessage(const Cluster&,
     
     Log(logMessage.message);
 
-    QString nodeId = QString::fromStdString(node.id);
     switch (logMessage.outputType) {
         case common::TrayProcessLogMessage::OutputType::StdOut:
-            p.pushNodeStdOut(nodeId, QString::fromStdString(logMessage.message));
+            p.pushNodeStdOut(node.id, logMessage.message);
             break;
         case common::TrayProcessLogMessage::OutputType::StdErr:
-            p.pushNodeStdError(nodeId, QString::fromStdString(logMessage.message));
+            p.pushNodeStdError(node.id, logMessage.message);
             break;
     }
     
-    sendLatestLogMessage(*iProcess->get(), nodeId);
+    sendLatestLogMessage(*iProcess->get(), node.id);
 }
 
 void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
@@ -320,7 +317,7 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
 
     std::unique_ptr<CoreProcess> process = std::make_unique<CoreProcess>(
         iProgram->get(),
-        QString::fromStdString(configurationId),
+        configurationId,
         iCluster->get()
     );
     common::TrayCommand trayCommand = process->startProcessCommand();
@@ -430,7 +427,7 @@ common::GenericMessage Application::initializationInformation() {
     return msg;
 }
 
-void Application::sendGuiProcessStatus(const CoreProcess& process, const QString& nodeId)
+void Application::sendGuiProcessStatus(const CoreProcess& process, const std::string& nodeId)
 {
     common::GuiProcessStatus statusMsg = process.toGuiProcessStatus(nodeId);
 
@@ -442,7 +439,7 @@ void Application::sendGuiProcessStatus(const CoreProcess& process, const QString
     _incomingSocketHandler.sendMessageToAll(j);
 }
 
-void Application::sendLatestLogMessage(const CoreProcess& process, const QString& nodeId)
+void Application::sendLatestLogMessage(const CoreProcess& process, const std::string& nodeId)
 {
     common::GuiProcessLogMessage logMsg = process.latestGuiProcessLogMessage(nodeId);
 

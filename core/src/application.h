@@ -75,8 +75,8 @@ private:
     common::GenericMessage initializationInformation();
     common::GenericMessage guiProcessLogMessageHistory(const CoreProcess& process);
 
-    void sendGuiProcessStatus(const CoreProcess& process, const QString& nodeId);
-    void sendLatestLogMessage(const CoreProcess& process, const QString& nodeId);
+    void sendGuiProcessStatus(const CoreProcess& process, const std::string& nodeId);
+    void sendLatestLogMessage(const CoreProcess& process, const std::string& nodeId);
 
     void sendTrayCommand(const Cluster& cluster, const common::TrayCommand& command);
 

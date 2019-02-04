@@ -78,10 +78,10 @@ private:
      * was in the file previously.
      * \param application The name of the application that requested the log file
      */
-     Log(std::string application);
+    Log(std::string application);
     
     /// Destructor the will close the file.
-     ~Log();
+    ~Log();
 
     // The static Log that is returned in the Log::ref method.
     static Log* _log;

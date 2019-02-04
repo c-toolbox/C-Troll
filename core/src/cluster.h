@@ -36,6 +36,7 @@
 #define __CLUSTER_H__
 
 #include "guiinitialization.h"
+#include <QByteArray>
 #include <memory>
 #include <json/json.hpp>
 

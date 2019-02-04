@@ -84,16 +84,16 @@ public:
             StdOut,
             StdError
         };
-        QString message;
+        std::string message;
         std::chrono::system_clock::time_point time;
         OutputType outputType;
         int id;
     };
 
     struct NodeLog {
-        QVector<NodeStatus> statuses;
-        QVector<NodeError> errors;
-        QVector<NodeLogMessage> messages;
+        std::vector<NodeStatus> statuses;
+        std::vector<NodeError> errors;
+        std::vector<NodeLogMessage> messages;
     };
 
     struct ClusterStatus {
@@ -109,26 +109,26 @@ public:
         std::chrono::system_clock::time_point time;
     };
 
-    CoreProcess(Program* program, const QString& configurationId, Cluster* cluster);
+    CoreProcess(Program* program, const std::string& configurationId, Cluster* cluster);
     int id() const;
     Program* application() const;
-    QString configurationId() const;
+    std::string configurationId() const;
     Cluster* cluster() const;
 
     common::GuiInitialization::Process toGuiInitializationProcess() const;
-    common::GuiProcessStatus toGuiProcessStatus(const QString& nodeId) const;
-    common::GuiProcessLogMessage latestGuiProcessLogMessage(const QString& nodeId) const;
+    common::GuiProcessStatus toGuiProcessStatus(const std::string& nodeId) const;
+    common::GuiProcessLogMessage latestGuiProcessLogMessage(const std::string& nodeId) const;
     common::GuiProcessLogMessageHistory guiProcessLogMessageHistory() const;
     common::TrayCommand startProcessCommand() const;
     common::TrayCommand exitProcessCommand() const;
 
-    void pushNodeStatus(QString nodeId, NodeStatus::Status status);
-    void pushNodeError(QString nodeId, NodeError::Error error);
-    void pushNodeStdOut(QString nodeId, QString message);
-    void pushNodeStdError(QString nodeId, QString message);
+    void pushNodeStatus(std::string nodeId, NodeStatus::Status status);
+    void pushNodeError(std::string nodeId, NodeError::Error error);
+    void pushNodeStdOut(std::string nodeId, std::string message);
+    void pushNodeStdError(std::string nodeId, std::string message);
 
-    NodeStatus latestNodeStatus(QString nodeId) const;
-    NodeLogMessage latestLogMessage(QString nodeId) const;
+    NodeStatus latestNodeStatus(std::string nodeId) const;
+    NodeLogMessage latestLogMessage(std::string nodeId) const;
 
 private:
     bool allNodesHasStatus(NodeStatus::Status status);
@@ -140,11 +140,11 @@ private:
 
     int _id;
     Program* _application;
-    QString _configurationId;
+    std::string _configurationId;
     Cluster* _cluster;
     static int _nextId;
-    QMap<QString, CoreProcess::NodeLog> _nodeLogs;
-    CoreProcess::ClusterStatus _clusterStatus;
+    std::map<std::string, NodeLog> _nodeLogs;
+    ClusterStatus _clusterStatus;
 
     int _nextLogMessageId = 0;
     int _nextNodeErrorId = 0;

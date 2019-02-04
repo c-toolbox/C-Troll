@@ -44,7 +44,7 @@
 namespace Ui { class StandardMainWindow; }
  
 class StandardMainWindow : public QMainWindow {
-    Q_OBJECT
+Q_OBJECT
  
 public:
     explicit StandardMainWindow(const QString& title, QWidget* parent = nullptr);
@@ -58,8 +58,8 @@ protected:
      * Overridden to change the behavior of the application,
      * That it is minimized to tray when we want
      */
-    void closeEvent(QCloseEvent * event);
-    void changeEvent(QEvent * event);
+    void closeEvent(QCloseEvent* event);
+    void changeEvent(QEvent* event);
  
 private slots:
     /* The slot that will accept the signal from the event

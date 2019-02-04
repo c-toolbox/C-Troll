@@ -35,10 +35,7 @@
 #ifndef __GUIINITIALIZATION_H__
 #define __GUIINITIALIZATION_H__
 
-#include <QList>
-#include <QString>
 #include <vector>
-
 #include <json/json.hpp>
 
 namespace common {
