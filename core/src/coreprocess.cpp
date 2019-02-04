@@ -257,13 +257,13 @@ double CoreProcess::timeToGuiTime(std::chrono::system_clock::time_point time) {
 common::GuiProcessStatus CoreProcess::toGuiProcessStatus(const QString& nodeId) const {
     common::GuiProcessStatus g;
     g.processId = _id;
-    g.applicationId = _application->id();
-    g.clusterId = _cluster->id();
+    g.applicationId = _application->id().toStdString();
+    g.clusterId = _cluster->id().toStdString();
     CoreProcess::NodeStatus nodeStatus = latestNodeStatus(nodeId);
     g.id = nodeStatus.id;
-    g.nodeStatus[nodeId] = nodeStatusToGuiNodeStatus(nodeStatus.status);
+    g.nodeStatus[nodeId.toStdString()] = nodeStatusToGuiNodeStatus(nodeStatus.status).toStdString();
     g.time = timeToGuiTime(nodeStatus.time);
-    g.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status);
+    g.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status).toStdString();
     return g;
 }
 
@@ -272,12 +272,12 @@ CoreProcess::latestGuiProcessLogMessage(const QString& nodeId) const
 {
     common::GuiProcessLogMessage g;
     g.processId = _id;
-    g.applicationId = _application->id();
-    g.clusterId = _cluster->id();
-    g.nodeId = nodeId;
+    g.applicationId = _application->id().toStdString();
+    g.clusterId = _cluster->id().toStdString();
+    g.nodeId = nodeId.toStdString();
     CoreProcess::NodeLogMessage logMessage = latestLogMessage(nodeId);
     g.id = logMessage.id;
-    g.logMessage = logMessage.message;
+    g.logMessage = logMessage.message.toStdString();
     g.time = timeToGuiTime(logMessage.time);
     g.outputType = (logMessage.outputType == CoreProcess::NodeLogMessage::OutputType::StdOut ? "stdout" : "stderr");
     return g;
@@ -286,17 +286,17 @@ CoreProcess::latestGuiProcessLogMessage(const QString& nodeId) const
 common::GuiProcessLogMessageHistory CoreProcess::guiProcessLogMessageHistory() const {
     common::GuiProcessLogMessageHistory h;
     h.processId = _id;
-    h.applicationId = _application->id();
-    h.clusterId = _cluster->id();
+    h.applicationId = _application->id().toStdString();
+    h.clusterId = _cluster->id().toStdString();
 
     std::vector<common::GuiProcessLogMessageHistory::LogMessage> guiLog;
     for (const QString& node : _nodeLogs.keys()) {
         const NodeLog& nodeLog = _nodeLogs[node];
         for (const NodeLogMessage& logMessage : nodeLog.messages) {
             common::GuiProcessLogMessageHistory::LogMessage guiMessage;
-            guiMessage.nodeId = node;
+            guiMessage.nodeId = node.toStdString();
             guiMessage.id = logMessage.id;
-            guiMessage.message = logMessage.message;
+            guiMessage.message = logMessage.message.toStdString();
             guiMessage.time = timeToGuiTime(logMessage.time);
             switch (logMessage.outputType) {
                 case CoreProcess::NodeLogMessage::OutputType::StdOut:
@@ -325,15 +325,15 @@ common::GuiProcessLogMessageHistory CoreProcess::guiProcessLogMessageHistory() c
 common::TrayCommand CoreProcess::startProcessCommand() const {
     common::TrayCommand t;
     t.id = _id;
-    t.executable = _application->executable();
-    t.baseDirectory = _application->baseDirectory();
-    t.currentWorkingDirectory = _application->currentWorkingDirectory();
+    t.executable = _application->executable().toStdString();
+    t.baseDirectory = _application->baseDirectory().toStdString();
+    t.currentWorkingDirectory = _application->currentWorkingDirectory().toStdString();
     t.command = "Start";
 
     t.commandlineParameters = "";
 
     if (!_application->commandlineParameters().isEmpty()) {
-        t.commandlineParameters = _application->commandlineParameters();
+        t.commandlineParameters = _application->commandlineParameters().toStdString();
     }
 
     auto iConfiguration = std::find_if(
@@ -345,7 +345,7 @@ common::TrayCommand CoreProcess::startProcessCommand() const {
     
     if (iConfiguration != _application->configurations().cend()) {
         t.commandlineParameters = t.commandlineParameters + " " +
-            iConfiguration->clusterCommandlineParameters[_cluster->id()];
+            iConfiguration->clusterCommandlineParameters[_cluster->id()].toStdString();
     }
 
     return t;

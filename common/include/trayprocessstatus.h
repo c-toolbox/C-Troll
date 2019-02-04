@@ -35,8 +35,7 @@
 #ifndef __TRAYPROCESSSTATUS_H__
 #define __TRAYPROCESSSTATUS_H__
 
-#include <QJsonDocument>
-#include <QString>
+#include <json/json.hpp>
 
 namespace common {
     
@@ -58,34 +57,15 @@ struct TrayProcessStatus {
     /// The string representing this command type, for usage in the common::GenericMessage
     static constexpr const char* Type = "TrayProcessStatus";
     
-    /// Default constructor
-    TrayProcessStatus() = default;
-    
-    /**
-     * Creates a TrayProcessStatus from the passed \p document. The \p document must
-     * contain the following keys, all of type string:
-     * \c identifier
-     * \c status
-     * \param document The QJsonDocument that contains the information about this
-     * TrayProcessStatus
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    TrayProcessStatus(const QJsonDocument& document);
-    
-    /**
-     * Converts the TrayProcessStatus into a valid QJsonDocument object and returns
-     * it.
-     * \return The QJsonDocument representing this TrayProcessStatus
-     */
-    QJsonDocument toJson() const;
-    
     /// The unique identifier for the process that will be created
     int processId;
     /// The process status
     Status status;
 };
-    
+  
+void to_json(nlohmann::json& j, const TrayProcessStatus& p);
+void from_json(const nlohmann::json& j, TrayProcessStatus& p);
+
 } // namespace common
 
 #endif // __TRAYPROCESSSTATUS_H__

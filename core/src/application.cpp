@@ -341,7 +341,6 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
 
 void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd) {
     int processId = cmd.processId;
-    QString command = cmd.command;
 
     auto iProcess = std::find_if(
         _processes.begin(),
@@ -359,12 +358,12 @@ void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd)
 
     sendTrayCommand(*cluster, process->exitProcessCommand());
     
-    if (command == "Restart") {
+    if (cmd.command == "Restart") {
         sendTrayCommand(*cluster, process->startProcessCommand());
-    } else if (command == "Stop") {
+    } else if (cmd.command == "Stop") {
         //_processes.erase(iProcess);
     } else {
-        Log("Unknown command '" + command.toStdString() + "'");
+        Log("Unknown command '" + cmd.command + "'");
     }
 }
 
@@ -382,14 +381,10 @@ void Application::incomingGuiMessage(const QJsonDocument& message) {
 
         if (msg.type == common::GuiStartCommand::Type) {
             // We have received a message from the GUI to start a new application
-            handleIncomingGuiStartCommand(
-                common::GuiStartCommand(common::conv::to_qtjsondoc(msg.payload))
-            );
+            handleIncomingGuiStartCommand(msg.payload);
         } else if (msg.type == common::GuiProcessCommand::Type) {
             // We have received a message from the GUI to start a new application
-            handleIncomingGuiProcessCommand(
-                common::GuiProcessCommand(common::conv::to_qtjsondoc(msg.payload))
-            );
+            handleIncomingGuiProcessCommand(msg.payload);
         }
         else if (msg.type == "GuiReloadConfigCommand") {
              // We have received a message from the GUI to reload the configs
@@ -412,18 +407,10 @@ void Application::incomingTrayMessage(const Cluster& cluster, const Cluster::Nod
 
         if (msg.type == common::TrayProcessStatus::Type) {
             // We have received a message from the GUI to start a new application
-            handleTrayProcessStatus(
-                cluster,
-                node,
-                common::TrayProcessStatus(common::conv::to_qtjsondoc(msg.payload))
-            );
+            handleTrayProcessStatus(cluster, node, msg.payload);
         } else if (msg.type == common::TrayProcessLogMessage::Type) {
             // We have received a message from the GUI to start a new application
-            handleTrayProcessLogMessage(
-                cluster,
-                node,
-                common::TrayProcessLogMessage(common::conv::to_qtjsondoc(msg.payload))
-            );
+            handleTrayProcessLogMessage(cluster, node, msg.payload);
         }
     }
     catch (const std::runtime_error& e) {
@@ -459,7 +446,7 @@ void Application::sendGuiProcessStatus(const CoreProcess& process, const QString
 
     common::GenericMessage msg;
     msg.type = common::GuiProcessStatus::Type;
-    msg.payload = common::conv::from_qtjsondoc(statusMsg.toJson());
+    msg.payload = statusMsg;
 
     nlohmann::json j = msg;
     _incomingSocketHandler.sendMessageToAll(common::conv::to_qtjsondoc(j));
@@ -471,7 +458,7 @@ void Application::sendLatestLogMessage(const CoreProcess& process, const QString
 
     common::GenericMessage msg;
     msg.type = common::GuiProcessLogMessage::Type;
-    msg.payload = common::conv::from_qtjsondoc(logMsg.toJson());
+    msg.payload = logMsg;
 
     nlohmann::json j = msg;
     _incomingSocketHandler.sendMessageToAll(common::conv::to_qtjsondoc(j));
@@ -482,27 +469,28 @@ common::GenericMessage Application::guiProcessLogMessageHistory(const CoreProces
 
     common::GenericMessage msg;
     msg.type = common::GuiProcessLogMessageHistory::Type;
-    msg.payload = common::conv::from_qtjsondoc(historyMsg.toJson());
+    msg.payload = historyMsg;
     return msg;
 }
 
-void Application::sendTrayCommand(const Cluster& cluster, const common::TrayCommand& command) {
+void Application::sendTrayCommand(const Cluster& cluster,
+                                  const common::TrayCommand& command)
+{
     // Generate identifier
     
-    qDebug() << "Sending Message: ";
-    qDebug() << "Cluster:" << cluster.name() << cluster.id();
-    
-    qDebug() << "\tCommand: " << command.command;
-    qDebug() << "Executable: " << command.executable;
-    qDebug() << "\tIdentifier: " << command.id;
-    qDebug() << "\t:Base Directory:  " << command.baseDirectory;
-    qDebug() << "\tCommandline Parameters: " << command.commandlineParameters;
-    qDebug() << "\tCWD: " << command.currentWorkingDirectory;
+    Log("Sending Message: ");
+    Log("Cluster:" + cluster.name().toStdString() + cluster.id().toStdString());
+    Log("\tCommand: " + command.command);
+    Log("\tExecutable: " + command.executable);
+    Log("\tIdentifier: " + command.id);
+    Log("\tBase Directory: " + command.baseDirectory);
+    Log("\tCommandline Parameters: " + command.commandlineParameters);
+    Log("\tCWD: " + command.currentWorkingDirectory);
     
     // We have to wrap the TrayCommand into a GenericMessage first
     common::GenericMessage msg;
     msg.type = common::TrayCommand::Type;
-    msg.payload = common::conv::from_qtjsondoc(command.toJson());
+    msg.payload = command;
     
     nlohmann::json j = msg;
     _outgoingSocketHandler.sendMessage(cluster, common::conv::to_qtjsondoc(j));

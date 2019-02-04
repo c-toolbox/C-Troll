@@ -77,7 +77,7 @@ namespace {
 namespace common {
 
 void to_json(nlohmann::json& j, const GuiInitialization& p) {
-    j = nlohmann::json {
+    j = {
         { KeyApplications, p.applications },
         { KeyClusters, p.clusters },
         { KeyProcesses, p.processes }

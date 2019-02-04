@@ -35,9 +35,7 @@
 #ifndef __GUIPROCESSLOGMESSAGEHISTORY_H__
 #define __GUIPROCESSLOGMESSAGEHISTORY_H__
 
-#include <QJsonDocument>
-#include <QMap>
-#include <QString>
+#include <json/json.hpp>
 #include <vector>
 
 namespace common {
@@ -46,9 +44,9 @@ namespace common {
 /// inform the GUI about a change in process status
 struct GuiProcessLogMessageHistory {
     struct LogMessage {
-        QString message;
-        QString outputType;
-        QString nodeId;
+        std::string message;
+        std::string outputType;
+        std::string nodeId;
         double time;
         int id;
     };
@@ -56,43 +54,24 @@ struct GuiProcessLogMessageHistory {
     /// The string representing this command type, for usage in the common::GenericMessage
     static constexpr const char* Type = "GuiProcessLogMessageHistory";
     
-    /// Default constructor
-    GuiProcessLogMessageHistory() = default;
-    
-    /**
-     * Creates a GuiProcessLogMessageHistory from the passed \p document. The \p document
-     * must contain the following keys:
-     * \c processId (int)
-     * \c applicationId (string)
-     * \c clusterId (string)
-     * \c message (string)
-     * \c type (string)
-     * \param document The QJsonDocument that contains the information about this
-     * GuiProcessLogMessage
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    GuiProcessLogMessageHistory(const QJsonDocument& document);
-    
-    /**
-     * Converts the GuiProcessStatus into a valid QJsonDocument object and returns
-     * it.
-     * \return The QJsonDocument representing this GuiProcessStatus
-     */
-    QJsonDocument toJson() const;
-    
     /// The unique identifier for the process that will be created
     int processId;
     /// The application identifier
-    QString applicationId;
+    std::string applicationId;
     /// The cluster identifier
-    QString clusterId;
+    std::string clusterId;
     /// The configuration identifier
     int configurationId;
     /// The log messages
     std::vector<LogMessage> logMessages;
 };
-    
+   
+void to_json(nlohmann::json& j, const GuiProcessLogMessageHistory& p);
+void to_json(nlohmann::json& j, const GuiProcessLogMessageHistory::LogMessage& p);
+void from_json(const nlohmann::json& j, GuiProcessLogMessageHistory& p);
+void from_json(const nlohmann::json& j, GuiProcessLogMessageHistory::LogMessage& p);
+
+
 } // namespace common
 
 #endif // __GUIPROCESSSTATUS_H__

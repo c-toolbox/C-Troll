@@ -35,8 +35,7 @@
 #ifndef __TRAYPROCESSLOGMESSAGE_H__
 #define __TRAYPROCESSLOGMESSAGE_H__
 
-#include <QJsonDocument>
-#include <QString>
+#include <json/json.hpp>
 
 namespace common {
     
@@ -51,29 +50,6 @@ struct TrayProcessLogMessage {
         StdErr
     };
 
-    /// Default constructor
-    TrayProcessLogMessage() = default;
-    
-    /**
-     * Creates a TrayProcessLogMessage from the passed \p document. The \p document must
-     * contain the following keys, all of type string:
-     * \c identifier
-     * \c message
-     * \c type
-     * \param document The QJsonDocument that contains the information about this
-     * TrayProcessLogMessage
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    TrayProcessLogMessage(const QJsonDocument& document);
-    
-    /**
-     * Converts the TrayProcessLogMessage into a valid QJsonDocument object and returns
-     * it.
-     * \return The QJsonDocument representing this TrayProcessLogMessage
-     */
-    QJsonDocument toJson() const;
-    
     /// The unique identifier for the process
     int processId;
     /// The process stdout/stderr line
@@ -82,6 +58,9 @@ struct TrayProcessLogMessage {
     OutputType outputType;
 };
     
+void to_json(nlohmann::json& j, const TrayProcessLogMessage& p);
+void from_json(const nlohmann::json& j, TrayProcessLogMessage& p);
+
 } // namespace common
 
 #endif // __TRAYPROCESSLOGMESSAGE_H__

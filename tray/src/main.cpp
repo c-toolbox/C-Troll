@@ -37,6 +37,7 @@
 #include "sockethandler.h"
 #include "processhandler.h"
 #include <QApplication>
+#include <logging.h>
 #include <standardmainwindow.h>
 
 int main(int argc, char** argv) {
@@ -48,6 +49,8 @@ int main(int argc, char** argv) {
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 
     StandardMainWindow mainWindow("C-Troll-Tray");
+
+    common::Log::initialize("tray");
 
 #ifdef QT_DEBUG
     mainWindow.show();
@@ -71,5 +74,5 @@ int main(int argc, char** argv) {
     );
 
     app.exec();
-    qDebug() << "Application finished";
+    Log("Application finished");
 }

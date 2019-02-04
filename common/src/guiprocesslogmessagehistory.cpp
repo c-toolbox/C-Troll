@@ -38,66 +38,54 @@
 #include <QJsonObject>
 
 namespace {
-    const QString KeyProcessId = "processId";
-    const QString KeyApplicationId = "applicationId";
-    const QString KeyClusterId = "clusterId";
+    constexpr const char* KeyProcessId = "processId";
+    constexpr const char* KeyApplicationId = "applicationId";
+    constexpr const char* KeyClusterId = "clusterId";
 
-    const QString KeyConfigurationId = "configurationId";
-    const QString KeyMessages = "messages";
+    constexpr const char* KeyConfigurationId = "configurationId";
+    constexpr const char* KeyMessages = "messages";
 
-    const QString KeyLogMessageId = "id";
-    const QString KeyLogMessageNodeId = "nodeId";
-    const QString KeyLogMessageOutputType = "outputType";
-    const QString KeyLogMessageTime = "time";   
-    const QString KeyLogMessageMessage = "message";
+    constexpr const char* KeyLogMessageId = "id";
+    constexpr const char* KeyLogMessageNodeId = "nodeId";
+    constexpr const char* KeyLogMessageOutputType = "outputType";
+    constexpr const char* KeyLogMessageTime = "time";
+    constexpr const char* KeyLogMessageMessage = "message";
 } // namespace
 
 namespace common {
 
-GuiProcessLogMessageHistory::GuiProcessLogMessageHistory(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
-
-    processId = common::testAndReturnInt(obj, KeyProcessId);
-    applicationId = common::testAndReturnString(obj, KeyApplicationId);
-    clusterId = common::testAndReturnString(obj, KeyClusterId);
-    QJsonArray messageArray = common::testAndReturnArray(obj, KeyMessages);
-
-    for (int i = 0; i < messageArray.size(); i++) {
-        QJsonObject message = common::testAndReturnObject(messageArray, i);
-        GuiProcessLogMessageHistory::LogMessage logMessage;
-        logMessage.id = common::testAndReturnInt(obj, KeyLogMessageId);
-        logMessage.message = common::testAndReturnString(obj, KeyLogMessageMessage);
-        logMessage.nodeId = common::testAndReturnString(obj, KeyLogMessageNodeId);
-        logMessage.outputType = common::testAndReturnString(obj, KeyLogMessageOutputType);
-        logMessage.time = common::testAndReturnDouble(obj, KeyLogMessageTime);
-        logMessages.push_back(logMessage);
-    }
+void to_json(nlohmann::json& j, const GuiProcessLogMessageHistory& p) {
+    j = {
+        { KeyProcessId, p.processId },
+        { KeyApplicationId, p.applicationId },
+        { KeyClusterId, p.clusterId },
+        { KeyMessages, p.logMessages }
+    };
 }
 
-QJsonDocument GuiProcessLogMessageHistory::toJson() const {
-    QJsonObject obj;
-    obj[KeyProcessId] = processId;
-    obj[KeyApplicationId] = applicationId;
-    obj[KeyClusterId] = clusterId;
+void to_json(nlohmann::json& j, const GuiProcessLogMessageHistory::LogMessage& p) {
+    j = {
+        { KeyLogMessageId, p.id },
+        { KeyLogMessageNodeId, p.nodeId },
+        { KeyLogMessageMessage, p.message },
+        { KeyLogMessageOutputType, p.outputType },
+        { KeyLogMessageTime, p.time },
+    };
+}
 
-    QJsonArray messageArray;
-    std::transform(
-        logMessages.begin(),
-        logMessages.end(),
-        std::back_inserter(messageArray),
-        [](const GuiProcessLogMessageHistory::LogMessage& logMessage) {
-            QJsonObject message;
-            message[KeyLogMessageId] = logMessage.id;
-            message[KeyLogMessageNodeId] = logMessage.nodeId;
-            message[KeyLogMessageMessage] = logMessage.message;
-            message[KeyLogMessageOutputType] = logMessage.outputType;
-            message[KeyLogMessageTime] = logMessage.time;
-            return message;
-        }
-    );
-    obj[KeyMessages] = messageArray;
+void from_json(const nlohmann::json& j, GuiProcessLogMessageHistory& p) {
+    j.at(KeyProcessId).get_to(p.processId);
+    j.at(KeyApplicationId).get_to(p.applicationId);
+    j.at(KeyClusterId).get_to(p.clusterId);
+    j.at(KeyMessages).get_to(p.logMessages);
+}
 
-    return QJsonDocument(obj);
+void from_json(const nlohmann::json& j, GuiProcessLogMessageHistory::LogMessage& p) {
+    j.at(KeyLogMessageId).get_to(p.id);
+    j.at(KeyLogMessageMessage).get_to(p.message);
+    j.at(KeyLogMessageNodeId).get_to(p.nodeId);
+    j.at(KeyLogMessageOutputType).get_to(p.outputType);
+    j.at(KeyLogMessageTime).get_to(p.time);
 }
 
 } // namespace common

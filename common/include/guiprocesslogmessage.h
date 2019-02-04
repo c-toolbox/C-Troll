@@ -35,9 +35,7 @@
 #ifndef __GUIPROCESSLOGMESSAGE_H__
 #define __GUIPROCESSLOGMESSAGE_H__
 
-#include <QJsonDocument>
-#include <QString>
-#include <QMap>
+#include <json/json.hpp>
 
 namespace common {
     
@@ -47,51 +45,29 @@ struct GuiProcessLogMessage {
     /// The string representing this command type, for usage in the common::GenericMessage
     static constexpr const char* Type = "GuiProcessLogMessage";
     
-    /// Default constructor
-    GuiProcessLogMessage() = default;
-    
-    /**
-     * Creates a GuiProcessLogMessage from the passed \p document. The \p document must
-     * contain the following keys:
-     * \c processId (int)
-     * \c applicationId (string)
-     * \c clusterId (string)
-     * \c message (string)
-     * \c type (string)
-     * \param document The QJsonDocument that contains the information about this
-     * GuiProcessLogMessage
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    GuiProcessLogMessage(const QJsonDocument& document);
-    
-    /**
-     * Converts the GuiProcessStatus into a valid QJsonDocument object and returns
-     * it.
-     * \return The QJsonDocument representing this GuiProcessStatus
-     */
-    QJsonDocument toJson() const;
-    
     /// The per-process unique id for this log message.
     int id;
     /// The unique identifier for the process that will be created
     int processId;
     /// The application identifier
-    QString applicationId;
+    std::string applicationId;
     /// The cluster identifier
-    QString clusterId;
+    std::string clusterId;
     /// The node identifier
-    QString nodeId;
+    std::string nodeId;
     /// The configuration identifier
     int configurationId;
     /// The log message
-    QString logMessage;
+    std::string logMessage;
     /// The output type of log message ("stdout" or "stderr")
-    QString outputType;
+    std::string outputType;
     /// The time
     double time;
 };
     
+void to_json(nlohmann::json& j, const GuiProcessLogMessage& p);
+void from_json(const nlohmann::json& j, GuiProcessLogMessage& p);
+
 } // namespace common
 
 #endif // __GUIPROCESSSTATUS_H__

@@ -45,9 +45,6 @@
 
 class ProcessHandler : public QObject {
 Q_OBJECT
-public:
-    ProcessHandler();
-    ~ProcessHandler();
 
 public slots:
     void handleSocketMessage(const QJsonDocument& message);

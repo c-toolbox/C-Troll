@@ -35,8 +35,7 @@
 #ifndef __TRAYCOMMAND_H__
 #define __TRAYCOMMAND_H__
 
-#include <QJsonDocument>
-#include <QString>
+#include <json/json.hpp>
 
 namespace common {
 
@@ -46,47 +45,24 @@ struct TrayCommand {
     /// The string representing this command type, for usage in the common::GenericMessage
     static constexpr const char* Type = "TrayCommand";
     
-    /// Default constructor
-    TrayCommand() = default;
-
-    /**
-     * Creates a TrayCommand from the passed \p document. The \p document must  contain
-     * the following keys, all of type string:
-     * \c identifier
-     * \c command
-     * \c executable
-     * \c baseDirectory
-     * \c currentWorkingDirectory
-     * \c commandlineArguments
-     * \c environmentVariables
-     * \param document The QJsonDocument that contains the information about this
-     * TrayCommand
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    TrayCommand(const QJsonDocument& document);
-
-    /**
-     * Converts the TrayCommand into a valid QJsonDocument object and returns it.
-     * \return the QJsonDocument representing this TrayCommand
-     */
-    QJsonDocument toJson() const;
-
     /// The unique identifier for the process that will be created
     int id;
     /// The kind of command that is to be executed
-    QString command;
+    std::string command;
     /// The name of the executable
-    QString executable;
+    std::string executable;
     /// The directory in which the executable is located
-    QString baseDirectory;
+    std::string baseDirectory;
     /// The location that should be set as the working directory prior to execution
-    QString currentWorkingDirectory;
+    std::string currentWorkingDirectory;
     /// The list of commandline parameters to be passed to executable
-    QString commandlineParameters;
+    std::string commandlineParameters;
     /// The list of environment variables to be passed to executable, syntax: "NAME,VALUE;NAME,VALUE"
-    QString environmentVariables;
+    std::string environmentVariables;
 };
+
+void to_json(nlohmann::json& j, const TrayCommand& p);
+void from_json(const nlohmann::json& j, TrayCommand& p);
 
 } // namespace commmon
 

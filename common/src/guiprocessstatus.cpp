@@ -34,53 +34,38 @@
 
 #include "guiprocessstatus.h"
 
-#include "jsonsupport.h"
-#include <QJsonObject>
-
 namespace {
-    const QString KeyProcessId = "processId";
-    const QString KeyApplicationId = "applicationId";
-    const QString KeyClusterId = "clusterId";
-    const QString KeyConfigurationId = "configurationId";
-    const QString KeyClusterStatus = "clusterStatus";
-    const QString KeyNodeStatus = "nodeStatus";
-    const QString KeyTime = "time";
-    const QString KeyId = "id";
+    constexpr const char* KeyProcessId = "processId";
+    constexpr const char*  KeyApplicationId = "applicationId";
+    constexpr const char*  KeyClusterId = "clusterId";
+    constexpr const char*  KeyConfigurationId = "configurationId";
+    constexpr const char*  KeyClusterStatus = "clusterStatus";
+    constexpr const char*  KeyNodeStatus = "nodeStatus";
+    constexpr const char*  KeyTime = "time";
+    constexpr const char*  KeyId = "id";
 } // namespace
 
 namespace common {
     
-GuiProcessStatus::GuiProcessStatus(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
-    
-    id = common::testAndReturnInt(obj, KeyId);
-    processId = common::testAndReturnInt(obj, KeyProcessId);
-    clusterStatus = common::testAndReturnString(obj, KeyClusterStatus);
-    QJsonObject nodeStatusObject = common::testAndReturnObject(obj, KeyNodeStatus);
-    for (auto it = nodeStatusObject.begin(); it != nodeStatusObject.end(); it++) {
-        nodeStatus[it.key()] = common::testAndReturnString(nodeStatusObject, it.key());
-    }
-    time = common::testAndReturnDouble(nodeStatusObject, KeyTime);   
+void to_json(nlohmann::json& j, const GuiProcessStatus& p) {
+    j = {
+        { KeyId, p.id },
+        { KeyProcessId, p.processId },
+        { KeyApplicationId, p.applicationId },
+        { KeyClusterId, p.clusterId },
+        { KeyConfigurationId, p.configurationId },
+        { KeyClusterStatus, p.clusterStatus },
+        { KeyNodeStatus, p.nodeStatus },
+        { KeyTime, p.time }
+    };
 }
 
-QJsonDocument GuiProcessStatus::toJson() const {
-    QJsonObject obj;
-    obj[KeyId] = id;
-    obj[KeyProcessId] = processId;
-    obj[KeyApplicationId] = applicationId;
-    obj[KeyClusterId] = clusterId;
-    obj[KeyConfigurationId] = configurationId;
-    obj[KeyClusterStatus] = clusterStatus;
-
-    QJsonObject nodeStatusObject;
-    for (const std::pair<QString, QString>& p : nodeStatus) {
-        nodeStatusObject[p.first] = p.second;
-    }
-
-    obj[KeyNodeStatus] = nodeStatusObject;
-    obj[KeyTime] = time;
-
-    return QJsonDocument(obj);
+void from_json(const nlohmann::json& j, GuiProcessStatus& p) {
+    j.at(KeyId).get_to(p.id);
+    j.at(KeyProcessId).get_to(p.processId);
+    j.at(KeyClusterStatus).get_to(p.clusterStatus);
+    j.at(KeyNodeStatus).get_to(p.nodeStatus);
+    j.at(KeyTime).get_to(p.time);
 }
-    
+
 } // namespace common

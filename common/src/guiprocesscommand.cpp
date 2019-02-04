@@ -34,29 +34,23 @@
 
 #include "guiprocesscommand.h"
 
-#include "jsonsupport.h"
-#include <QJsonObject>
-
 namespace {
-    const QString KeyCommand = "command";
-    const QString KeyProcessId = "processId";
+    constexpr const char* KeyCommand = "command";
+    constexpr const char* KeyProcessId = "processId";
 } // namespace
 
 namespace common {
 
-GuiProcessCommand::GuiProcessCommand(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
-
-    processId = common::testAndReturnInt(obj, KeyProcessId);
-    command = common::testAndReturnString(obj, KeyCommand);
+void to_json(nlohmann::json& j, const GuiProcessCommand& p) {
+    j = {
+        { KeyProcessId, p.processId },
+        { KeyCommand, p.command }
+    };
 }
 
-QJsonDocument GuiProcessCommand::toJson() const {
-    QJsonObject obj;
-    obj[KeyProcessId] = processId;
-    obj[KeyCommand] = command;
-
-    return QJsonDocument(obj);
+void from_json(const nlohmann::json& j, GuiProcessCommand& p) {
+    j.at(KeyProcessId).get_to(p.processId);
+    j.at(KeyCommand).get_to(p.command);
 }
 
 } // namespace common

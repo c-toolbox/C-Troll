@@ -35,8 +35,7 @@
 #ifndef __GUIPROCESSCOMMAND_H__
 #define __GUIPROCESSCOMMAND_H__
 
-#include <QJsonDocument>
-#include <QString>
+#include <json/json.hpp>
 
 namespace common {
 
@@ -45,33 +44,15 @@ namespace common {
 struct GuiProcessCommand {
     /// The string representing this command type, for usage in the common::GenericMessage
     static constexpr const char* Type = "GuiProcessCommand";
-    
-    /// Default constructor
-    GuiProcessCommand() = default;
-
-    /**
-     * Creates a GuiProcessCommand from the passed \p document. The \p document must
-     * contain all of the following keys:
-     * \c processId (int)
-     * \c command (string)
-     * \param document The QJsonDocument that contains the information about this
-     * GuiStartCommand
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    GuiProcessCommand(const QJsonDocument& document);
-
-    /**
-     * Converts the GuiProcessCommand into a valid QJsonDocument object and returns it.
-     * \return the QJsonDocument representing this GuiProcessCommand
-     */
-    QJsonDocument toJson() const;
 
     /// The process to be controlled
     int processId;
     /// The command to be executed
-    QString command;
+    std::string command;
 };
+
+void to_json(nlohmann::json& j, const GuiProcessCommand& p);
+void from_json(const nlohmann::json& j, GuiProcessCommand& p);
 
 } // namespace
 

@@ -34,48 +34,42 @@
 
 #include "guiprocesslogmessage.h"
 
-#include "jsonsupport.h"
-#include <QJsonObject>
-
 namespace {
-    const QString KeyId = "id";
-    const QString KeyProcessId = "processId";
-    const QString KeyApplicationId = "applicationId";
-    const QString KeyClusterId = "clusterId";
-    const QString KeyNodeId = "nodeId";
-    const QString KeyConfigurationId = "configurationId";
-    const QString KeyMessage = "message";
-    const QString KeyOutputType = "outputType";
-    const QString KeyTime = "time";
+    constexpr const char* KeyId = "id";
+    constexpr const char* KeyProcessId = "processId";
+    constexpr const char* KeyApplicationId = "applicationId";
+    constexpr const char* KeyClusterId = "clusterId";
+    constexpr const char* KeyNodeId = "nodeId";
+    constexpr const char* KeyConfigurationId = "configurationId";
+    constexpr const char* KeyMessage = "message";
+    constexpr const char* KeyOutputType = "outputType";
+    constexpr const char* KeyTime = "time";
 } // namespace
 
 namespace common {
 
-GuiProcessLogMessage::GuiProcessLogMessage(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
-
-    id = common::testAndReturnInt(obj, KeyId);
-    processId = common::testAndReturnInt(obj, KeyProcessId);
-    applicationId = common::testAndReturnString(obj, KeyApplicationId);
-    clusterId = common::testAndReturnString(obj, KeyClusterId);
-    nodeId = common::testAndReturnString(obj, KeyNodeId);
-    logMessage = common::testAndReturnString(obj, KeyMessage);
-    outputType = common::testAndReturnString(obj, KeyOutputType);
-    time = common::testAndReturnDouble(obj, KeyTime);
+void to_json(nlohmann::json& j, const GuiProcessLogMessage& p) {
+    j = {
+        { KeyId, p.id },
+        { KeyProcessId, p.processId },
+        { KeyApplicationId, p.applicationId },
+        { KeyClusterId, p.clusterId },
+        { KeyNodeId, p.nodeId },
+        { KeyMessage, p.logMessage },
+        { KeyOutputType, p.outputType },
+        { KeyTime, p.time }
+    };
 }
 
-QJsonDocument GuiProcessLogMessage::toJson() const {
-    QJsonObject obj;
-    obj[KeyId] = id;
-    obj[KeyProcessId] = processId;
-    obj[KeyApplicationId] = applicationId;
-    obj[KeyClusterId] = clusterId;
-    obj[KeyNodeId] = nodeId;
-    obj[KeyMessage] = logMessage;
-    obj[KeyOutputType] = outputType;
-    obj[KeyTime] = time;
-
-    return QJsonDocument(obj);
+void from_json(const nlohmann::json& j, GuiProcessLogMessage& p) {
+    j.at(KeyId).get_to(p.id);
+    j.at(KeyProcessId).get_to(p.processId);
+    j.at(KeyApplicationId).get_to(p.applicationId);
+    j.at(KeyClusterId).get_to(p.clusterId);
+    j.at(KeyNodeId).get_to(p.nodeId);
+    j.at(KeyMessage).get_to(p.logMessage);
+    j.at(KeyOutputType).get_to(p.outputType);
+    j.at(KeyTime).get_to(p.time);
 }
 
 } // namespace common

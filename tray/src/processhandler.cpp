@@ -41,24 +41,43 @@
 #include <QJsonDocument>
 #include <functional>
 #include <jsonsupport.h>
+#include <logging.h>
 
-ProcessHandler::ProcessHandler() {}
+namespace {
 
-ProcessHandler::~ProcessHandler() {}
+std::vector<std::string> tokenizeString(const std::string& input, char separator) {
+    size_t separatorPos = input.find(separator);
+    if (separatorPos == std::string::npos) {
+        return { input };
+    }
+    else {
+        std::vector<std::string> result;
+        size_t prevSeparator = 0;
+        while (separatorPos != std::string::npos) {
+            result.push_back(input.substr(prevSeparator, separatorPos - prevSeparator));
+            prevSeparator = separatorPos + 1;
+            separatorPos = input.find(separator, separatorPos + 1);
+        }
+        result.push_back(input.substr(prevSeparator));
+        return result;
+    }
+}
+
+} // namespace
 
 void ProcessHandler::handleSocketMessage(const QJsonDocument& message) {
     // qDebug() << messageDoc;
-    common::TrayCommand command(message);
+    common::TrayCommand command = common::conv::from_qtjsondoc(message);
     
-    qDebug() << "Received TrayCommand";
-    qDebug() << "Command: " << command.command;
-    qDebug() << "Id: " << command.id;
-    qDebug() << "Executable: " << command.executable;
-    qDebug() << "CommandLineParameters: " << command.commandlineParameters;
-    qDebug() << "BaseDirectory: " << command.baseDirectory;
-    qDebug() << "CurrentWorkingDirectory: " << command.currentWorkingDirectory;
-    qDebug() << "EnvironmentVariables: " << command.environmentVariables;
-    
+    Log("Received TrayCommand");
+    Log("Command: " + command.command);
+    Log("Id: " + command.id);
+    Log("Executable: " + command.executable);
+    Log("CommandLineParameters: " + command.commandlineParameters);
+    Log("BaseDirectory: " + command.baseDirectory);
+    Log("CurrentWorkingDirectory: " + command.currentWorkingDirectory);
+    Log("EnvironmentVariables: " + command.environmentVariables);
+
     // Check if identifer of traycommand already is tied to a process
     // We don't allow the same id for multiple processes
     auto p = _processes.find(command.id);
@@ -115,7 +134,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
             // Send out the TrayProcessStatus with the error/status string
             common::GenericMessage msg;
             msg.type = common::TrayProcessStatus::Type;
-            msg.payload = common::conv::from_qtjsondoc(ps.toJson());
+            msg.payload = ps;
             nlohmann::json j = msg;
             emit sendSocketMessage(common::conv::to_qtjsondoc(j));
         }
@@ -139,7 +158,7 @@ void ProcessHandler::handleStarted() {
         ps.status = common::TrayProcessStatus::Status::Running;
         common::GenericMessage msg;
         msg.type = common::TrayProcessStatus::Type;
-        msg.payload = common::conv::from_qtjsondoc(ps.toJson());
+        msg.payload = ps;
         nlohmann::json j = msg;
         emit sendSocketMessage(common::conv::to_qtjsondoc(j));
     }
@@ -176,7 +195,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
         // Send out the TrayProcessStatus with the error/status string
         common::GenericMessage msg;
         msg.type = common::TrayProcessStatus::Type;
-        msg.payload = common::conv::from_qtjsondoc(ps.toJson());
+        msg.payload = ps;
         nlohmann::json j = msg;
         emit sendSocketMessage(common::conv::to_qtjsondoc(j));
         
@@ -203,7 +222,7 @@ void ProcessHandler::handleReadyReadStandardError() {
         pm.message = QString::fromLatin1(process->readAllStandardError()).toStdString();
         common::GenericMessage msg;
         msg.type = common::TrayProcessLogMessage::Type;
-        msg.payload = common::conv::from_qtjsondoc(pm.toJson());
+        msg.payload = pm;
         nlohmann::json j = msg;
         emit sendSocketMessage(common::conv::to_qtjsondoc(j));
     }
@@ -226,7 +245,7 @@ void ProcessHandler::handleReadyReadStandardOutput() {
         pm.outputType = common::TrayProcessLogMessage::OutputType::StdOut;
         common::GenericMessage msg;
         msg.type = common::TrayProcessLogMessage::Type;
-        msg.payload = common::conv::from_qtjsondoc(pm.toJson());
+        msg.payload = pm;
         nlohmann::json j = msg;
         emit sendSocketMessage(common::conv::to_qtjsondoc(j));
     }
@@ -236,34 +255,45 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
                                                    const common::TrayCommand& command)
 {
     if (command.command == "Start") {
-        if (!command.environmentVariables.isEmpty()) {
+        if (!command.environmentVariables.empty()) {
             QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
             // First split per variable, such that each string contains "name,value"
-            QStringList envVariables = command.environmentVariables.split(';');
-            foreach (QString var, envVariables) {
+            std::vector<std::string> envVariables = tokenizeString(
+                command.environmentVariables,
+                ';'
+            );
+            for (const std::string& var : envVariables) {
+                std::vector<std::string> envVariableNameValue = tokenizeString(
+                    var,
+                    ','
+                );
                 // Split name and value
-                QStringList envVariableNameValue = var.split(',');
                 if (envVariableNameValue.size() == 2) {
-                    env.insert(envVariableNameValue[0], envVariableNameValue[1]);
+                    env.insert(
+                        QString::fromStdString(envVariableNameValue[0]),
+                        QString::fromStdString(envVariableNameValue[1])
+                    );
                 }
             }
             process->setProcessEnvironment(env);
         }
         
-        if (!command.currentWorkingDirectory.isEmpty()) {
-            process->setWorkingDirectory(command.currentWorkingDirectory);
+        if (!command.currentWorkingDirectory.empty()) {
+            process->setWorkingDirectory(
+                QString::fromStdString(command.currentWorkingDirectory)
+            );
         }
-        else if (!command.baseDirectory.isEmpty()) {
-            process->setWorkingDirectory(command.baseDirectory);
+        else if (!command.baseDirectory.empty()) {
+            process->setWorkingDirectory(QString::fromStdString(command.baseDirectory));
         }
         
-        if (command.commandlineParameters.isEmpty()) {
-            process->start("\"" + command.executable + "\"");
+        if (command.commandlineParameters.empty()) {
+            process->start(QString::fromStdString("\"" + command.executable + "\""));
         }
         else {
-            process->start(
+            process->start(QString::fromStdString(
                 "\"" + command.executable + "\" " + command.commandlineParameters
-            );
+            ));
         }
     } else if (command.command == "Kill" || command.command == "Exit") {
         common::TrayProcessStatus ps;
@@ -287,7 +317,7 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
             // Send out the TrayProcessStatus with the error/status string
             common::GenericMessage msg;
             msg.type = common::TrayProcessStatus::Type;
-            msg.payload = common::conv::from_qtjsondoc(ps.toJson());
+            msg.payload = ps;
             nlohmann::json j = msg;
             emit sendSocketMessage(common::conv::to_qtjsondoc(j));
             // Remove this process from the list as we consider it finsihed

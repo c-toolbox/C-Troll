@@ -38,28 +38,25 @@
 #include <QJsonObject>
 
 namespace {
-    const QString KeyApplicationId = "applicationId";
-    const QString KeyConfigurationId = "configurationId";
-    const QString KeyClusterId = "clusterId";
+    constexpr const char* KeyApplicationId = "applicationId";
+    constexpr const char* KeyConfigurationId = "configurationId";
+    constexpr const char* KeyClusterId = "clusterId";
 } // namespace
 
 namespace common {
 
-GuiStartCommand::GuiStartCommand(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
-
-    applicationId = common::testAndReturnString(obj, KeyApplicationId).toStdString();
-    configurationId = common::testAndReturnString(obj, KeyConfigurationId).toStdString();
-    clusterId = common::testAndReturnString(obj, KeyClusterId).toStdString();
+void to_json(nlohmann::json& j, const GuiStartCommand& p) {
+    j = {
+        { KeyApplicationId, p.applicationId },
+        { KeyConfigurationId, p.configurationId },
+        { KeyClusterId, p.clusterId }
+    };
 }
 
-QJsonDocument GuiStartCommand::toJson() const {
-    QJsonObject obj;
-    obj[KeyApplicationId] = QString::fromStdString(applicationId);
-    obj[KeyConfigurationId] = QString::fromStdString(configurationId);
-    obj[KeyClusterId] = QString::fromStdString(clusterId);
-
-    return QJsonDocument(obj);
+void from_json(const nlohmann::json& j, GuiStartCommand& p) {
+    j.at(KeyApplicationId).get_to(p.applicationId);
+    j.at(KeyConfigurationId).get_to(p.configurationId);
+    j.at(KeyClusterId).get_to(p.clusterId);
 }
 
 } // namespace common

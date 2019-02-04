@@ -42,7 +42,7 @@ namespace {
 namespace common {
 
 void to_json(nlohmann::json& j, const GenericMessage& p) {
-    j = nlohmann::json {
+    j = {
         { KeyType, p.type },
         { KeyPayload, p.payload }
     };

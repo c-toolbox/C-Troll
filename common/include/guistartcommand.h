@@ -35,8 +35,7 @@
 #ifndef __GUISTARTCOMMAND_H__
 #define __GUISTARTCOMMAND_H__
 
-#include <QJsonDocument>
-#include <QString>
+#include <json/json.hpp>
 
 namespace common {
 
@@ -47,28 +46,6 @@ struct GuiStartCommand {
     /// The string representing this command type, for usage in the common::GenericMessage
     static constexpr const char* Type = "GuiStartCommand";
     
-    /// Default constructor
-    GuiStartCommand() = default;
-
-    /**
-     * Creates a GuiCommand from the passed \p document. The \p document must contain
-     * all of the following keys, all of type string:
-     * \c application_identifier
-     * \c configuration_identifier
-     * \c cluster_identifier
-     * \param document The QJsonDocument that contains the information about this
-     * CoreCommand
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    GuiStartCommand(const QJsonDocument& document);
-
-    /**
-     * Converts the GuiCommand into a valid QJsonDocument object and returns it.
-     * \return the QJsonDocument representing this GuiCommand
-     */
-    QJsonDocument toJson() const;
-
     /// The unique identifier of the application that is to be started
     std::string applicationId;
     /// The identifier of the application's configuration that is to be started
@@ -76,6 +53,9 @@ struct GuiStartCommand {
     /// The identifier of the cluster on which the application is to be started
     std::string clusterId;
 };
+
+void to_json(nlohmann::json& j, const GuiStartCommand& p);
+void from_json(const nlohmann::json& j, GuiStartCommand& p);
 
 } // namespace
 

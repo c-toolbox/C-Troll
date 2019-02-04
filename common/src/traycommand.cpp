@@ -34,45 +34,42 @@
 
 #include "traycommand.h"
 
-#include "jsonsupport.h"
-#include <QJsonObject>
-
 namespace {
-    const QString KeyId = "id";
-    const QString KeyCommand = "command";
-    const QString KeyExecutable = "executable";
-    const QString KeyBaseDirectory = "baseDirectory";
-    const QString KeyWorkingDirectory = "currentWorkingDirectory";
-    const QString KeyCommandlineArguments = "commandlineArguments";
-    const QString KeyEnvironmentVariables = "environmentVariables";
+    constexpr const char* KeyPayload = "payload";
+
+    constexpr const char* KeyId = "id";
+    constexpr const char* KeyCommand = "command";
+    constexpr const char* KeyExecutable = "executable";
+    constexpr const char* KeyBaseDirectory = "baseDirectory";
+    constexpr const char* KeyWorkingDirectory = "currentWorkingDirectory";
+    constexpr const char* KeyCommandlineArguments = "commandlineArguments";
+    constexpr const char* KeyEnvironmentVariables = "environmentVariables";
 } // namespace
 
 namespace common {
-    
-TrayCommand::TrayCommand(const QJsonDocument& document) {
-    QJsonObject payload = document.object();
-    QJsonObject obj = common::testAndReturnObject(payload, "payload");
 
-    id = common::testAndReturnInt(obj, KeyId);
-    command = common::testAndReturnString(obj, KeyCommand);
-    executable = common::testAndReturnString(obj, KeyExecutable);
-    baseDirectory = common::testAndReturnString(obj, KeyBaseDirectory);
-    currentWorkingDirectory = common::testAndReturnString(obj, KeyWorkingDirectory);
-    commandlineParameters = common::testAndReturnString(obj, KeyCommandlineArguments);
-    environmentVariables = common::testAndReturnString(obj, KeyEnvironmentVariables);
+void to_json(nlohmann::json& j, const TrayCommand& p) {
+    j = {
+        { KeyId, p.id },
+        { KeyCommand, p.command },
+        { KeyExecutable, p.executable },
+        { KeyBaseDirectory, p.baseDirectory },
+        { KeyWorkingDirectory, p.currentWorkingDirectory },
+        { KeyCommandlineArguments, p.commandlineParameters },
+        { KeyEnvironmentVariables, p.environmentVariables },
+    };
 }
 
-QJsonDocument TrayCommand::toJson() const {
-    QJsonObject obj;
-    obj[KeyId] = id;
-    obj[KeyCommand] = command;
-    obj[KeyExecutable] = executable;
-    obj[KeyBaseDirectory] = baseDirectory;
-    obj[KeyWorkingDirectory] = currentWorkingDirectory;
-    obj[KeyCommandlineArguments] = commandlineParameters;
-    obj[KeyEnvironmentVariables] = environmentVariables;
+void from_json(const nlohmann::json& j, TrayCommand& p) {
+    nlohmann::json payload = j.at(KeyPayload);
 
-    return QJsonDocument(obj);
+    payload.at(KeyId).get_to(p.id);
+    payload.at(KeyCommand).get_to(p.command);
+    payload.at(KeyExecutable).get_to(p.executable);
+    payload.at(KeyBaseDirectory).get_to(p.baseDirectory);
+    payload.at(KeyWorkingDirectory).get_to(p.currentWorkingDirectory);
+    payload.at(KeyCommandlineArguments).get_to(p.commandlineParameters);
+    payload.at(KeyEnvironmentVariables).get_to(p.environmentVariables);
 }
 
 } // namespace common
