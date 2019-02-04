@@ -44,61 +44,65 @@
 #include <assert.h>
 
 namespace {
-    const QString KeyName = "name";
-    const QString KeyId = "id";
-    const QString KeyEnabled = "enabled";
-    const QString KeyNodes = "nodes";
+    constexpr const char* KeyName = "name";
+    constexpr const char* KeyId = "id";
+    constexpr const char* KeyEnabled = "enabled";
+    constexpr const char* KeyNodes = "nodes";
 
-    const QString KeyNodeName = "name";
-    const QString KeyNodeIpAddress = "ip";
-    const QString KeyNodePort = "port";
+    constexpr const char* KeyNodeName = "name";
+    constexpr const char* KeyNodeIpAddress = "ip";
+    constexpr const char* KeyNodePort = "port";
 } // namespace
 
-Cluster::Cluster(const QJsonObject& jsonObject) {
-    _name = common::testAndReturnString(jsonObject, KeyName);
-    _id = common::testAndReturnString(jsonObject, KeyId);
-    _enabled = common::testAndReturnBool(jsonObject, KeyEnabled, Optional::Yes, true);
-    
-    QJsonObject nodes = common::testAndReturnObject(jsonObject, KeyNodes);
-    _nodes.clear();
+void to_json(nlohmann::json& j, const Cluster& p) {
+    j = {
+        { KeyName, p.name },
+        { KeyId, p.id },
+        { KeyEnabled, p.enabled }
+    };
 
-    for (auto iter = nodes.begin(); iter != nodes.end(); iter++) {
-        QString id = iter.key();
-        QJsonObject obj = iter.value().toObject();
-        assert(obj.size() == 3);
+    std::map<std::string, Cluster::Node> nodes;
+    for (const Cluster::Node& n : p.nodes) {
+        nodes[n.id] = n;
+    }
+    j[KeyNodes] = nodes;
+}
 
-        QString name = common::testAndReturnString(obj, KeyNodeName);
-        QString ipAddress = common::testAndReturnString(obj, KeyNodeIpAddress);
-        int port = common::testAndReturnInt(obj, KeyNodePort);
+void to_json(nlohmann::json& j, const Cluster::Node& p) {
+    j = {
+        { KeyNodeName, p.name },
+        { KeyNodeIpAddress, p.ipAddress },
+        { KeyNodePort, p.port }
+    };
+}
 
-        _nodes.push_back({ id, name, ipAddress, port });
+void from_json(const nlohmann::json& j, Cluster& p) {
+    j.at(KeyName).get_to(p.name);
+    j.at(KeyId).get_to(p.id);
+    p.enabled = true;
+    if (j.find(KeyEnabled) != j.end()) {
+        j.at(KeyEnabled).get_to(p.enabled);
+    }
+
+    std::map<std::string, Cluster::Node> nodes;
+    j.at(KeyNodes).get_to(nodes);
+    for (const std::pair<std::string, Cluster::Node>& node : nodes) {
+        Cluster::Node n = node.second;
+        n.id = node.first;
+        p.nodes.push_back(std::move(n));
     }
 }
 
-QString Cluster::name() const {
-    return _name;
-}
-
-QString Cluster::id() const {
-    return _id;
-}
-
-bool Cluster::enabled() const {
-    return _enabled;
-}
-
-QList<Cluster::Node>& Cluster::nodes() {
-    return _nodes;
-}
-
-const QList<Cluster::Node>& Cluster::nodes() const {
-    return _nodes;
+void from_json(const nlohmann::json& j, Cluster::Node& p) {
+    j.at(KeyNodeName).get_to(p.name);
+    j.at(KeyNodeIpAddress).get_to(p.ipAddress);
+    j.at(KeyNodePort).get_to(p.port);
 }
 
 bool Cluster::connected() const {
     return std::accumulate(
-        _nodes.begin(),
-        _nodes.end(),
+        nodes.begin(),
+        nodes.end(),
         true,
         [](bool othersConnected, const Node& node) {
             return othersConnected && node.connected;
@@ -106,29 +110,10 @@ bool Cluster::connected() const {
     );
 }
 
-QJsonObject Cluster::toJson() const {
-    QJsonObject cluster;
-
-    cluster[KeyId] = _id;
-    cluster[KeyName] = _name;
-    cluster[KeyEnabled] = _enabled;
-
-    QJsonObject nodes;
-    for (const Node& node : _nodes) {
-        QJsonObject nodeObject;
-        nodeObject[KeyNodeName] = node.name;
-        nodeObject[KeyNodeIpAddress] = node.ipAddress;
-        nodeObject[KeyNodePort] = node.port;
-        nodes[node.id] = nodeObject;
-    }
-    cluster[KeyNodes] = nodes;
-    return cluster;
-}
-
 QByteArray Cluster::hash() const {
-    QJsonDocument doc(toJson());
-    QString input = doc.toJson();
-    return QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha1);
+    nlohmann::json doc = *this;
+    std::string input = doc.dump();
+    return QCryptographicHash::hash(input.c_str(), QCryptographicHash::Sha1);
 }
 
 std::unique_ptr<Cluster> Cluster::loadCluster(QString jsonFile, QString baseDirectory) {
@@ -145,15 +130,12 @@ std::unique_ptr<Cluster> Cluster::loadCluster(QString jsonFile, QString baseDire
         id.size() - (baseDirectory.length() + 1) - 5
     );
     
-    QFile f(jsonFile);
-    f.open(QFile::ReadOnly);
-    QJsonParseError e;
-    QJsonDocument d = QJsonDocument::fromJson(f.readAll(), &e);
-    if (e.error != QJsonParseError::NoError) {
-        throw std::runtime_error(e.errorString().toLocal8Bit());
-    }
-    QJsonObject obj = d.object();
-    obj[KeyId] = id;
+    std::string file = jsonFile.toStdString();
+    std::ifstream f(file);
+    nlohmann::json obj;
+    f >> obj;
+    obj[KeyId] = id.toStdString();
+
     return std::make_unique<Cluster>(obj);
 }
 
@@ -187,9 +169,9 @@ Cluster::loadClustersFromDirectory(QString directory)
 
 common::GuiInitialization::Cluster Cluster::toGuiInitializationCluster() const {
     common::GuiInitialization::Cluster cluster;
-    cluster.name = name().toStdString();
-    cluster.id = id().toStdString();
-    cluster.enabled = enabled();
+    cluster.name = name;
+    cluster.id = id;
+    cluster.enabled = enabled;
     cluster.connected = connected();
     return cluster;
 }

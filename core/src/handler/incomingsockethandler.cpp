@@ -75,7 +75,7 @@ void IncomingSocketHandler::newConnection() {
 
 void IncomingSocketHandler::readyRead(common::JsonSocket* jsonSocket) {
     assert(jsonSocket);
-    QJsonDocument message = jsonSocket->read();
+    nlohmann::json message = jsonSocket->read();
     emit messageReceived(message);
 }
 
@@ -88,16 +88,16 @@ void IncomingSocketHandler::disconnectedConnection(common::JsonSocket* socket) {
     _sockets.erase(it);
 }
 
-void IncomingSocketHandler::sendMessage(common::JsonSocket* socket, QJsonDocument message) {
+void IncomingSocketHandler::sendMessage(common::JsonSocket* socket, nlohmann::json message) {
     assert(socket);
     assert(std::find(_sockets.begin(), _sockets.end(), socket) != _sockets.end());
-    assert(!message.isEmpty());
+    assert(!message.is_null());
 
     socket->write(message);
 }
 
-void IncomingSocketHandler::sendMessageToAll(QJsonDocument message) {
-    assert(!message.isEmpty());
+void IncomingSocketHandler::sendMessageToAll(nlohmann::json message) {
+    assert(!message.is_null());
     for (common::JsonSocket* socket : _sockets) {
         socket->write(message);
     }

@@ -51,18 +51,18 @@ public:
     void initialize(const QList<Cluster*>& clusters);
     void deinitialize();
 
-    void sendMessage(const Cluster& cluster, QJsonDocument message) const;
+    void sendMessage(const Cluster& cluster, nlohmann::json message) const;
 
 signals:
     void messageReceived(const Cluster& cluster, const Cluster::Node& node,
-        QJsonDocument message);
+        nlohmann::json message);
     void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);
 
 private:
     void readyRead(const Cluster& cluster, const Cluster::Node& node);
 
     QList<Cluster*> _clusters;
-    std::map<QString, std::unique_ptr<common::JsonSocket>> _sockets;
+    std::map<std::string, std::unique_ptr<common::JsonSocket>> _sockets;
 };
 
 #endif // __OUTGOINGSOCKETHANDLER_H__

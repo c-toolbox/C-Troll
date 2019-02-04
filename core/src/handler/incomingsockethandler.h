@@ -38,6 +38,7 @@
 #include <QObject>
 #include <QJsonDocument>
 #include <QTcpServer>
+#include <json/json.hpp>
 
 namespace common { class JsonSocket; }
 
@@ -47,12 +48,12 @@ public:
     void initialize(quint16 port);
     void deinitialize();
     
-    void sendMessage(common::JsonSocket* socket, QJsonDocument message);
-    void sendMessageToAll(QJsonDocument message);
+    void sendMessage(common::JsonSocket* socket, nlohmann::json message);
+    void sendMessageToAll(nlohmann::json message);
 
 signals:
     void newConnectionEstablished(common::JsonSocket* socket);
-    void messageReceived(QJsonDocument message);
+    void messageReceived(nlohmann::json message);
 
 private:
     void newConnection();

@@ -65,9 +65,9 @@ std::vector<std::string> tokenizeString(const std::string& input, char separator
 
 } // namespace
 
-void ProcessHandler::handleSocketMessage(const QJsonDocument& message) {
+void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
     // qDebug() << messageDoc;
-    common::TrayCommand command = common::conv::from_qtjsondoc(message);
+    common::TrayCommand command = message;
     
     Log("Received TrayCommand");
     Log("Command: " + command.command);
@@ -136,7 +136,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
             msg.type = common::TrayProcessStatus::Type;
             msg.payload = ps;
             nlohmann::json j = msg;
-            emit sendSocketMessage(common::conv::to_qtjsondoc(j));
+            emit sendSocketMessage(j);
         }
     }
 }
@@ -160,7 +160,7 @@ void ProcessHandler::handleStarted() {
         msg.type = common::TrayProcessStatus::Type;
         msg.payload = ps;
         nlohmann::json j = msg;
-        emit sendSocketMessage(common::conv::to_qtjsondoc(j));
+        emit sendSocketMessage(j);
     }
 }
 
@@ -197,7 +197,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
         msg.type = common::TrayProcessStatus::Type;
         msg.payload = ps;
         nlohmann::json j = msg;
-        emit sendSocketMessage(common::conv::to_qtjsondoc(j));
+        emit sendSocketMessage(j);
         
         // Remove this process from the list as we consider it finsihed
         _processes.erase(p2T);
@@ -224,7 +224,7 @@ void ProcessHandler::handleReadyReadStandardError() {
         msg.type = common::TrayProcessLogMessage::Type;
         msg.payload = pm;
         nlohmann::json j = msg;
-        emit sendSocketMessage(common::conv::to_qtjsondoc(j));
+        emit sendSocketMessage(j);
     }
 }
 
@@ -247,7 +247,7 @@ void ProcessHandler::handleReadyReadStandardOutput() {
         msg.type = common::TrayProcessLogMessage::Type;
         msg.payload = pm;
         nlohmann::json j = msg;
-        emit sendSocketMessage(common::conv::to_qtjsondoc(j));
+        emit sendSocketMessage(j);
     }
 }
 
@@ -319,7 +319,7 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
             msg.type = common::TrayProcessStatus::Type;
             msg.payload = ps;
             nlohmann::json j = msg;
-            emit sendSocketMessage(common::conv::to_qtjsondoc(j));
+            emit sendSocketMessage(j);
             // Remove this process from the list as we consider it finsihed
             _processes.erase(p2T);
         }

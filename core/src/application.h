@@ -60,9 +60,9 @@ private:
     void initalize(bool resetGUIconnection = true);
     void deinitalize(bool resetGUIconnection = true);
 
-    void incomingGuiMessage(const QJsonDocument& message);
+    void incomingGuiMessage(const nlohmann::json& message);
     void incomingTrayMessage(const Cluster& cluster, const Cluster::Node& node,
-        const QJsonDocument& message);
+        const nlohmann::json& message);
     
     void handleTrayProcessStatus(const Cluster& cluster, const Cluster::Node& node,
         common::TrayProcessStatus status);

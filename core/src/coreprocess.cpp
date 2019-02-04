@@ -182,7 +182,7 @@ common::GuiInitialization::Process CoreProcess::toGuiInitializationProcess() con
     common::GuiInitialization::Process p;
     p.id = _id;
     p.applicationId = _application->id().toStdString();
-    p.clusterId = _cluster->id().toStdString();
+    p.clusterId = _cluster->id;
     p.configurationId = _configurationId.toStdString();
     p.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status).toStdString();
     p.clusterStatusTime = timeToGuiTime(_clusterStatus.time);
@@ -258,7 +258,7 @@ common::GuiProcessStatus CoreProcess::toGuiProcessStatus(const QString& nodeId) 
     common::GuiProcessStatus g;
     g.processId = _id;
     g.applicationId = _application->id().toStdString();
-    g.clusterId = _cluster->id().toStdString();
+    g.clusterId = _cluster->id;
     CoreProcess::NodeStatus nodeStatus = latestNodeStatus(nodeId);
     g.id = nodeStatus.id;
     g.nodeStatus[nodeId.toStdString()] = nodeStatusToGuiNodeStatus(nodeStatus.status).toStdString();
@@ -273,7 +273,7 @@ CoreProcess::latestGuiProcessLogMessage(const QString& nodeId) const
     common::GuiProcessLogMessage g;
     g.processId = _id;
     g.applicationId = _application->id().toStdString();
-    g.clusterId = _cluster->id().toStdString();
+    g.clusterId = _cluster->id;
     g.nodeId = nodeId.toStdString();
     CoreProcess::NodeLogMessage logMessage = latestLogMessage(nodeId);
     g.id = logMessage.id;
@@ -287,7 +287,7 @@ common::GuiProcessLogMessageHistory CoreProcess::guiProcessLogMessageHistory() c
     common::GuiProcessLogMessageHistory h;
     h.processId = _id;
     h.applicationId = _application->id().toStdString();
-    h.clusterId = _cluster->id().toStdString();
+    h.clusterId = _cluster->id;
 
     std::vector<common::GuiProcessLogMessageHistory::LogMessage> guiLog;
     for (const QString& node : _nodeLogs.keys()) {
@@ -345,7 +345,7 @@ common::TrayCommand CoreProcess::startProcessCommand() const {
     
     if (iConfiguration != _application->configurations().cend()) {
         t.commandlineParameters = t.commandlineParameters + " " +
-            iConfiguration->clusterCommandlineParameters[_cluster->id()].toStdString();
+            iConfiguration->clusterCommandlineParameters[QString::fromStdString(_cluster->id)].toStdString();
     }
 
     return t;

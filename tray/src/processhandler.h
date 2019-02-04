@@ -37,17 +37,17 @@
 
 #include <QObject>
 
-#include <QJsonDocument>
-#include <QProcess>
 #include <traycommand.h>
+#include <QProcess>
 #include <map>
 #include <string>
+#include <json/json.hpp>
 
 class ProcessHandler : public QObject {
 Q_OBJECT
 
 public slots:
-    void handleSocketMessage(const QJsonDocument& message);
+    void handleSocketMessage(const nlohmann::json& message);
     // Process slots
     void handlerErrorOccurred(QProcess::ProcessError error);
     void handleFinished(int exitCode);
@@ -57,7 +57,7 @@ public slots:
     void handleStarted();
 
 signals:
-    void sendSocketMessage(const QJsonDocument& message);
+    void sendSocketMessage(const nlohmann::json& message);
 
 private:
     void executeProcessWithTrayCommand(QProcess* process,

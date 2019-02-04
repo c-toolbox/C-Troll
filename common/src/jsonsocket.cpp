@@ -41,16 +41,17 @@ JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject *parent)
     : QObject(parent)
     , _socket(std::move(socket))
 {
-
     QObject::connect(_socket.get(), &QTcpSocket::readyRead, [this]() { readToBuffer(); });
     _socket->setProxy(QNetworkProxy::NoProxy);
 }
 
 JsonSocket::~JsonSocket() {}
 
-void JsonSocket::write(QJsonDocument jsonDocument) {
-    QByteArray json = jsonDocument.toJson();
+void JsonSocket::write(nlohmann::json jsonDocument) {
+    std::string jsonText = jsonDocument.dump();
+    QByteArray json(jsonText.c_str(), jsonText.size());
     QByteArray length = QString::number(json.size()).toUtf8();
+
     _socket->write(length);
     _socket->write("#");
     _socket->write(json);
@@ -76,22 +77,17 @@ void JsonSocket::readToBuffer() {
     }
 }
 
-QJsonDocument JsonSocket::read() {
+nlohmann::json JsonSocket::read() {
     if (_payloadSize > _buffer.size()) {
-        return QJsonDocument::fromJson("");
+        return nlohmann::json();
     }
 
     std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
-    QByteArray json(data.data(), _payloadSize);       
+    std::string json(data.data(), _payloadSize);
     _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
     _payloadSize = -1;
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(json, &error);
-    if (error.error != QJsonParseError::NoError) {
-        qDebug() << "\nJson parse error:\n" << error.errorString() <<
-            "\nJson string:\n" << json;
-    }
-    return doc;
+
+    return nlohmann::json::parse(json);
 }
 
 QTcpSocket* JsonSocket::socket() {

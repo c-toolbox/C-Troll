@@ -39,6 +39,7 @@
 #include <QApplication>
 #include <logging.h>
 #include <standardmainwindow.h>
+#include <json/json.hpp>
 
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
@@ -65,12 +66,12 @@ int main(int argc, char** argv) {
     
     // Connect the sockethandler and the processhandler
     QObject::connect(
-        &socketHandler, SIGNAL(messageRecieved(QJsonDocument)),
-        &processHandler, SLOT(handleSocketMessage(QJsonDocument))
+        &socketHandler, SIGNAL(messageRecieved(nlohmann::json)),
+        &processHandler, SLOT(handleSocketMessage(nlohmann::json))
     );
     QObject::connect(
-        &processHandler, SIGNAL(sendSocketMessage(QJsonDocument)),
-        &socketHandler, SLOT(sendMessage(QJsonDocument))
+        &processHandler, SIGNAL(sendSocketMessage(nlohmann::json)),
+        &socketHandler, SLOT(sendMessage(nlohmann::json))
     );
 
     app.exec();

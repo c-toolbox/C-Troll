@@ -39,6 +39,8 @@
 #include <QTcpSocket.h>
 #include <iostream>
 #include <memory>
+#include <jsonsupport.h>
+#include <logging.h>
 
 SocketHandler::SocketHandler() {}
 
@@ -47,7 +49,7 @@ SocketHandler::~SocketHandler() {}
 void SocketHandler::initialize() {
     const int port = 5000;
     
-    qDebug() << "Listening on port:" << port;
+    Log("Listening on port: " + std::to_string(port));
     
     _server.listen(QHostAddress::Any, port);
     QObject::connect(
@@ -57,15 +59,16 @@ void SocketHandler::initialize() {
 }
 
 void SocketHandler::readyRead(common::JsonSocket* socket) {
-    QJsonDocument message = socket->read();
-    emit messageRecieved(message);
+    nlohmann::json message = socket->read();
+    emit messageRecieved(std::move(message));
 }
 
-void SocketHandler::sendMessage(const QJsonDocument& message) {
-    qDebug() << "Sending message: " << message;
+void SocketHandler::sendMessage(const nlohmann::json& message) {
+    Log("Sending message:\n" + message.dump());
     for (common::JsonSocket* jsonSocket : _sockets) {
-        qDebug() << jsonSocket->socket()->localAddress() << " -> " <<
-            jsonSocket->socket()->peerAddress();
+        std::string local = jsonSocket->socket()->localAddress().toString().toStdString();
+        std::string peer = jsonSocket->socket()->peerAddress().toString().toStdString();
+        Log(local + " -> " + peer);
         jsonSocket->write(message);
     }
 }

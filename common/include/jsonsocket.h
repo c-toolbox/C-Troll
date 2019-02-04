@@ -37,9 +37,9 @@
 
 #include <QTcpSocket>
 #include <QObject>
-#include <QJsonDocument>
 #include <deque>
 #include <memory>
+#include <json/json.hpp>
 
 namespace common {
 
@@ -48,8 +48,8 @@ Q_OBJECT
 public:
     JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject* parent = Q_NULLPTR);
     virtual ~JsonSocket();
-    void write(QJsonDocument json);
-    QJsonDocument read();
+    void write(nlohmann::json json);
+    nlohmann::json read();
     QTcpSocket* socket();
 
 signals:

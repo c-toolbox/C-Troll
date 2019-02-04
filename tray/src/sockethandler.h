@@ -36,8 +36,8 @@
 #define __SOCKETHANDLER_H__
 
 #include <QObject>
-#include <QJsonDocument>
 #include <QTcpServer>
+#include <json/json.hpp>
 
 namespace common { class JsonSocket; }
 
@@ -52,10 +52,10 @@ public:
     void initialize();
 
 public slots:    
-    void sendMessage(const QJsonDocument& message);
+    void sendMessage(const nlohmann::json& message);
 
 signals:
-    void messageRecieved(const QJsonDocument& message);
+    void messageRecieved(const nlohmann::json& message);
 
 private:
     QTcpServer _server;

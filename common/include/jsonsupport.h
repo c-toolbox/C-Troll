@@ -45,13 +45,6 @@ enum class Optional { Yes, No };
 
 namespace common {
 
-namespace conv {
-    nlohmann::json from_qtjsonobj(QJsonObject obj);
-    nlohmann::json from_qtjsondoc(QJsonDocument obj);
-    QJsonObject to_qtjsonobj(nlohmann::json obj);
-    QJsonDocument to_qtjsondoc(nlohmann::json obj);
-}
-
 /**
  * Tests whether the \p key exists in the QJsonObject \p obj and if it is of the string
  * type. If the value is \p optional and does not exist, the \p defaultValue is returned.
