@@ -35,14 +35,10 @@
 #include "coreprocess.h"
 
 #include "cluster.h"
-#include "jsonsupport.h"
 #include "program.h"
 #include "guiprocessstatus.h"
 #include <logging.h>
-#include <QDebug>
 #include <QDirIterator>
-#include <QJsonArray>
-#include <QJsonParseError>
 #include <cassert>
 
 int CoreProcess::_nextId = 0;

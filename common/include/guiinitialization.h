@@ -35,8 +35,6 @@
 #ifndef __GUIINITIALIZATION_H__
 #define __GUIINITIALIZATION_H__
 
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QList>
 #include <QString>
 #include <vector>

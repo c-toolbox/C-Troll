@@ -34,11 +34,8 @@
 
 #include "cluster.h"
 
-#include "jsonsupport.h"
 #include <logging.h>
 #include <QDirIterator>
-#include <QJsonArray>
-#include <QJsonDocument>
 #include <QVector>
 #include <QCryptographicHash>
 #include <assert.h>

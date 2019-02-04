@@ -35,11 +35,9 @@
 #include "sockethandler.h"
 
 #include "jsonsocket.h"
-#include <QDebug>
 #include <QTcpSocket.h>
 #include <iostream>
 #include <memory>
-#include <jsonsupport.h>
 #include <logging.h>
 
 SocketHandler::SocketHandler() {}
@@ -78,7 +76,7 @@ void SocketHandler::disconnected(common::JsonSocket* socket) {
     if (ptr != _sockets.end()) {
         (*ptr)->deleteLater();
         _sockets.erase(ptr);
-        qDebug() << "Socket disconnected";
+        Log("Socket disconnected");
     }
 }
 
@@ -100,6 +98,6 @@ void SocketHandler::newConnection() {
         );
 
         _sockets.push_back(jsonSocket);
-        qDebug() << "Socket connected";
+        Log("Socket connected");
     }
 }

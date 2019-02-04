@@ -37,14 +37,10 @@
 #include <guistartcommand.h>
 #include <guiprocesscommand.h>
 #include <guiprocessstatus.h>
-#include <jsonsupport.h>
 #include <logging.h>
 #include <trayprocesslogmessage.h>
 #include <trayprocessstatus.h>
 #include <QFile>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QObject>
 #include <QTcpSocket>
 #include <QThread>
@@ -371,7 +367,7 @@ void Application::incomingGuiMessage(const nlohmann::json& message) {
         // The message contains a JSON object of the GenericMessage
         common::GenericMessage msg = message;
             
-        qDebug() << "Received message of type " << QString::fromStdString(msg.type);
+        Log("Received message of type " + msg.type);
 
         if (msg.type == common::GuiStartCommand::Type) {
             // We have received a message from the GUI to start a new application
@@ -397,7 +393,7 @@ void Application::incomingTrayMessage(const Cluster& cluster, const Cluster::Nod
         // The message contains a JSON object of the GenericMessage
         common::GenericMessage msg = message;
 
-        qDebug() << "Received message of type " << QString::fromStdString(msg.type);
+        Log("Received message of type " + msg.type);
 
         if (msg.type == common::TrayProcessStatus::Type) {
             // We have received a message from the GUI to start a new application

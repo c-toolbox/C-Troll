@@ -34,14 +34,10 @@
 
 #include "program.h"
 
-#include <QDebug>
 #include <QDirIterator>
-#include <QJsonArray>
-#include <QJsonParseError>
 #include <QCryptographicHash>
 #include <cassert>
 #include <logging.h>
-#include "jsonsupport.h"
 
 namespace {
     constexpr const char* KeyId = "id";
@@ -179,7 +175,6 @@ common::GuiInitialization::Application Program::toGuiInitializationApplication()
         app.configurations.push_back(c);
     }
 
-    QJsonObject defaults;
     app.defaultCluster = defaultCluster;
     app.defaultConfiguration = defaultConfiguration;
     

@@ -36,7 +36,6 @@
 #define __INCOMINGSOCKETHANDLER_H__
 
 #include <QObject>
-#include <QJsonDocument>
 #include <QTcpServer>
 #include <json/json.hpp>
 

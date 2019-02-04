@@ -37,10 +37,7 @@
 #include <genericmessage.h>
 #include <trayprocesslogmessage.h>
 #include <trayprocessstatus.h>
-#include <QDebug>
-#include <QJsonDocument>
 #include <functional>
-#include <jsonsupport.h>
 #include <logging.h>
 
 namespace {
@@ -66,7 +63,6 @@ std::vector<std::string> tokenizeString(const std::string& input, char separator
 } // namespace
 
 void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
-    // qDebug() << messageDoc;
     common::TrayCommand command = message;
     
     Log("Received TrayCommand");
@@ -96,7 +92,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
 }
 
 void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
-    qDebug() << "Error occurred: " << error;
+    Log("Error occurred: " + error);
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
