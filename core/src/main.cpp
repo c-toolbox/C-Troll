@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
     }
 
-    Application application(configurationFile);
+    Application application(configurationFile.toStdString());
 
     app.exec();
 }

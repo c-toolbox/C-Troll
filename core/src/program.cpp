@@ -44,23 +44,101 @@
 #include "jsonsupport.h"
 
 namespace {
-    const QString KeyId = "id";
-    const QString KeyName = "name";
-    const QString KeyExecutable = "executable";
-    const QString KeyBaseDirectory = "baseDirectory";
-    const QString KeyCommandlineParameters = "commandlineParameters";
-    const QString KeyCurrentWorkingDirectory = "currentWorkingDirectory";
-    const QString KeyClusterCommandlineParameters = "clusters";
-    const QString KeyDefaults = "defaults";
-    const QString KeyDefaultCluster = "cluster";
-    const QString KeyDefaultConfiguration = "configuration";
-    const QString KeyTags = "tags";
-    const QString KeyConfigurations = "configurations";
+    constexpr const char* KeyId = "id";
+    constexpr const char* KeyName = "name";
+    constexpr const char* KeyExecutable = "executable";
+    constexpr const char* KeyBaseDirectory = "baseDirectory";
+    constexpr const char* KeyCommandlineParameters = "commandlineParameters";
+    constexpr const char* KeyCurrentWorkingDirectory = "currentWorkingDirectory";
+    constexpr const char* KeyClusterCommandlineParameters = "clusters";
+    constexpr const char* KeyDefaults = "defaults";
+    constexpr const char* KeyDefaultCluster = "cluster";
+    constexpr const char* KeyDefaultConfiguration = "configuration";
+    constexpr const char* KeyTags = "tags";
+    constexpr const char* KeyConfigurations = "configurations";
 
-    const QString KeyConfigurationName = "name";
-    const QString KeyConfigurationIdentifier = "identifier";
-    const QString KeyConfigurationParameters = "commandlineParameters";
+    constexpr const char* KeyConfigurationName = "name";
+    constexpr const char* KeyConfigurationIdentifier = "identifier";
+    constexpr const char* KeyConfigurationParameters = "commandlineParameters";
 } // namespace
+
+void to_json(nlohmann::json& j, const Program& p) {
+    j = {
+        { KeyId, p.id },
+        { KeyName, p.name },
+        { KeyExecutable, p.executable },
+    };
+    if (!p.baseDirectory.empty()) {
+        j[KeyBaseDirectory] = p.baseDirectory;
+    }
+    if (!p.commandlineParameters.empty()) {
+        j[KeyCommandlineParameters] = p.commandlineParameters;
+    }
+    if (!p.currentWorkingDirectory.empty()) {
+        j[KeyCurrentWorkingDirectory] = p.currentWorkingDirectory;
+    }
+    if (!p.tags.empty()) {
+        j[KeyTags] = p.tags;
+    }
+    if (!p.configurations.empty()) {
+        std::map<std::string, Program::Configuration> confs;
+        for (const Program::Configuration& c : p.configurations) {
+            confs[c.id] = c;
+        }
+
+        j[KeyConfigurations] = confs;
+    }
+
+    if (!p.defaultConfiguration.empty() || !p.defaultCluster.empty()) {
+        j[KeyDefaults][KeyDefaultCluster] = p.defaultCluster;
+        j[KeyDefaults][KeyDefaultConfiguration] = p.defaultConfiguration;
+    }
+}
+
+void to_json(nlohmann::json& j, const Program::Configuration& p) {
+    j = {
+        { KeyConfigurationName, p.name },
+        { KeyClusterCommandlineParameters, p.clusterCommandlineParameters }
+    };
+}
+
+void from_json(const nlohmann::json& j, Program& p) {
+    j.at(KeyId).get_to(p.id);
+    j.at(KeyName).get_to(p.name);
+    j.at(KeyExecutable).get_to(p.executable);
+    if (j.find(KeyBaseDirectory) != j.end()) {
+        j.at(KeyBaseDirectory).get_to(p.baseDirectory);
+    }
+    if (j.find(KeyCommandlineParameters) != j.end()) {
+        j.at(KeyCommandlineParameters).get_to(p.commandlineParameters);
+    }
+    p.currentWorkingDirectory = p.baseDirectory;
+    if (j.find(KeyCurrentWorkingDirectory) != j.end()) {
+        j.at(KeyCurrentWorkingDirectory).get_to(p.currentWorkingDirectory);
+    }
+    if (j.find(KeyTags) != j.end()) {
+        j.at(KeyTags).get_to(p.tags);
+    }
+    if (j.find(KeyDefaults) != j.end()) {
+        nlohmann::json defaults = j.at(KeyDefaults);
+        defaults.at(KeyDefaultConfiguration).get_to(p.defaultConfiguration);
+        defaults.at(KeyDefaultCluster).get_to(p.defaultCluster);
+    }
+    if (j.find(KeyConfigurations) != j.end()) {
+        std::map<std::string, Program::Configuration> confs;
+        j.at(KeyConfigurations).get_to(confs);
+        for (const std::pair<std::string, Program::Configuration>& conf : confs) {
+            Program::Configuration c = conf.second;
+            c.id = conf.first;
+            p.configurations.push_back(std::move(c));
+        }
+    }
+}
+
+void from_json(const nlohmann::json& j, Program::Configuration& p) {
+    j.at(KeyConfigurationName).get_to(p.name);
+    j.at(KeyClusterCommandlineParameters).get_to(p.clusterCommandlineParameters);
+}
 
 std::unique_ptr<Program> Program::loadProgram(QString jsonFile, QString baseDirectory) {
     QString identifier = QDir(baseDirectory).relativeFilePath(jsonFile);
@@ -76,45 +154,34 @@ std::unique_ptr<Program> Program::loadProgram(QString jsonFile, QString baseDire
         identifier.size() - (baseDirectory.length() + 1) - 5
     );
 
-    QFile f(jsonFile);
-    f.open(QFile::ReadOnly);
-
-    QJsonParseError err;
-    QJsonDocument d = QJsonDocument::fromJson(f.readAll(), &err);
-
-    if (d.isEmpty()) {
-        throw std::runtime_error(
-            std::to_string(err.offset) + ": " + err.errorString().toStdString()
-        );
-    }
-    
-    QJsonObject obj = d.object();
-    obj["id"] = identifier;
+    std::string file = jsonFile.toStdString();
+    std::ifstream f(file);
+    nlohmann::json obj;
+    f >> obj;
+    obj["id"] = identifier.toStdString();
     return std::make_unique<Program>(obj);
 }
 
 common::GuiInitialization::Application Program::toGuiInitializationApplication() const {
     common::GuiInitialization::Application app;
-    app.name = name().toStdString();
-    app.id = id().toStdString();
-    foreach (QString str, tags()) {
-        app.tags.push_back(str.toStdString());
-    }
+    app.name = name;
+    app.id = id;
+    app.tags = tags;
 
-    for (const Program::Configuration& conf : configurations()) {
+    for (const Program::Configuration& conf : configurations) {
         common::GuiInitialization::Application::Configuration c;
-        c.name = conf.name.toStdString();
-        c.id = conf.id.toStdString();
-        foreach (QString str, conf.clusterCommandlineParameters.keys()) {
-            c.clusters.push_back(str.toStdString());
+        c.name = conf.name;
+        c.id = conf.id;
+        for (const std::pair<std::string, std::string>& p : conf.clusterCommandlineParameters) {
+            c.clusters.push_back(p.first);
         }
 
         app.configurations.push_back(c);
     }
 
     QJsonObject defaults;
-    app.defaultCluster = _defaultCluster.toStdString();
-    app.defaultConfiguration = _defaultConfiguration.toStdString();
+    app.defaultCluster = defaultCluster;
+    app.defaultConfiguration = defaultConfiguration;
     
     return app;
 }
@@ -143,168 +210,12 @@ Program::loadProgramsFromDirectory(QString directory)
     return std::move(programs);
 }
 
-Program::Program(const QJsonObject& jsonObject) {
-    _id = common::testAndReturnString(jsonObject, KeyId);
-    _name = common::testAndReturnString(jsonObject, KeyName);
-    _executable = common::testAndReturnString(jsonObject, KeyExecutable);
-    _baseDirectory = common::testAndReturnString(
-        jsonObject,
-        KeyBaseDirectory,
-        Optional::Yes
-    );
-    _commandlineParameters = common::testAndReturnString(
-        jsonObject,
-        KeyCommandlineParameters,
-        Optional::Yes
-    );
-    _currentWorkingDirectory = common::testAndReturnString(
-        jsonObject,
-        KeyCurrentWorkingDirectory,
-        Optional::Yes,
-        _baseDirectory
-    );
-    
-    _tags = common::testAndReturnStringList(jsonObject, KeyTags, Optional::Yes);
-
-    QJsonObject defaults = common::testAndReturnObject(
-        jsonObject,
-        KeyDefaults,
-        Optional::Yes
-    );
-    if (!defaults.empty()) {
-        _defaultConfiguration = common::testAndReturnString(
-            defaults,
-            KeyDefaultConfiguration
-        );
-        _defaultCluster = common::testAndReturnString(defaults, KeyDefaultCluster);
-    }
-
-    QJsonObject configurationObject = common::testAndReturnObject(
-        jsonObject,
-        KeyConfigurations,
-        Optional::Yes
-    );
-
-    for (auto it = configurationObject.begin();
-        it != configurationObject.end();
-        it++)
-    {
-        Configuration conf;
-        conf.id = it.key();
-
-        QJsonValueRef value = it.value();
-        
-        if (!value.isObject()) {
-            continue;
-        }
-        QJsonObject obj = value.toObject();
-        conf.name = common::testAndReturnString(obj, KeyConfigurationName);
-
-        QJsonObject clusters = common::testAndReturnObject(
-            obj,
-            KeyClusterCommandlineParameters
-        );
-
-        for (QString key : clusters.keys()) {
-            conf.clusterCommandlineParameters[key] = common::testAndReturnString(
-                clusters,
-                key
-            );
-        }
-
-        _configurations.push_back(conf);
-    }
-}
-
 Program::~Program() {
-    assert(_processes.empty());
-}
-
-QString Program::id() const {
-    return _id;
-}
-
-QString Program::name() const {
-    return _name;
-}
-
-QString Program::executable() const {
-    return _executable;
-}
-
-QString Program::baseDirectory() const {
-    return _baseDirectory;
-}
-
-QString Program::commandlineParameters() const {
-    return _commandlineParameters;
-}
-
-QString Program::currentWorkingDirectory() const {
-    return _currentWorkingDirectory;
-}
-
-QStringList Program::tags() const {
-    return _tags;
-}
-
-QList<Program::Configuration> Program::configurations() const {
-    return _configurations;
-}
-
-QJsonObject Program::toJson() const {
-    QJsonObject program;
-
-    program[KeyId] = _id;
-    program[KeyName] = _name;
-    program[KeyExecutable] = _executable;
-    if (!_baseDirectory.isEmpty()) {
-        program[KeyBaseDirectory] = _baseDirectory;
-    }
-    if (!_commandlineParameters.isEmpty()) {
-        program[KeyCommandlineParameters] = _commandlineParameters;
-    }
-    if (!_currentWorkingDirectory.isEmpty()) {
-        program[KeyCurrentWorkingDirectory] = _currentWorkingDirectory;
-    }
-
-    if (!_tags.empty()) {
-        QJsonArray tags;
-        for (const QString& tag : _tags) {
-            tags.push_back(tag);
-        }
-        program[KeyTags] = tags;
-    }
-    
-    if (!_configurations.empty()) {
-        QJsonObject configurations;
-        for (const Program::Configuration& configuration : _configurations) {
-            QJsonObject configurationObject;
-            configurationObject[KeyConfigurationName] = configuration.name;
-
-            QJsonObject clusterParams;
-            for (const QString& c : configuration.clusterCommandlineParameters.keys()) {
-                clusterParams[c] = configuration.clusterCommandlineParameters[c];
-            }
-            configurationObject[KeyClusterCommandlineParameters] = clusterParams;
-
-            configurations[configuration.id] = configurationObject;
-        }
-        program[KeyConfigurations] = configurations;
-    }
-
-    if (!_defaultConfiguration.isEmpty() || !_defaultCluster.isEmpty()) {
-        QJsonObject defaults;
-        defaults[KeyDefaultCluster] = _defaultCluster;
-        defaults[KeyDefaultConfiguration] = _defaultConfiguration;
-        program[KeyDefaults] = defaults;
-    }
-
-    return program;
+    assert(processes.empty());
 }
 
 QByteArray Program::hash() const {
-    QJsonDocument doc(toJson());
-    QString input = doc.toJson();
-    return QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha1);
+    nlohmann::json doc = *this;
+    std::string input = doc.dump();
+    return QCryptographicHash::hash(input.c_str(), QCryptographicHash::Sha1);
 }

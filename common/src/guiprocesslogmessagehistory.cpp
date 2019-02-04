@@ -34,9 +34,6 @@
 
 #include "guiprocesslogmessagehistory.h"
 
-#include "jsonsupport.h"
-#include <QJsonObject>
-
 namespace {
     constexpr const char* KeyProcessId = "processId";
     constexpr const char* KeyApplicationId = "applicationId";

@@ -34,10 +34,6 @@
 
 #include "guiinitialization.h"
 
-#include "jsonsupport.h"
-#include <QJsonArray>
-#include <QJsonObject>
-
 namespace {
     constexpr const char* KeyApplications = "applications";
     constexpr const char* KeyClusters = "clusters";

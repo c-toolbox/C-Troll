@@ -41,7 +41,6 @@ set(HEADER_FILES
     include/guiprocesslogmessage.h
     include/guiprocesslogmessagehistory.h
     include/jsonsocket.h
-    include/jsonsupport.h
     include/logging.h
     include/standardmainwindow.h
     include/traycommand.h
@@ -58,7 +57,6 @@ set(SOURCE_FILES
     src/guiprocesslogmessage.cpp
     src/guiprocesslogmessagehistory.cpp
     src/jsonsocket.cpp
-    src/jsonsupport.cpp
     src/logging.cpp
     src/standardmainwindow.cpp
     src/traycommand.cpp

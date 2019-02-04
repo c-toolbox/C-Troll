@@ -181,7 +181,7 @@ void CoreProcess::pushNodeStdError(QString nodeId, QString message) {
 common::GuiInitialization::Process CoreProcess::toGuiInitializationProcess() const {
     common::GuiInitialization::Process p;
     p.id = _id;
-    p.applicationId = _application->id().toStdString();
+    p.applicationId = _application->id;
     p.clusterId = _cluster->id;
     p.configurationId = _configurationId.toStdString();
     p.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status).toStdString();
@@ -257,7 +257,7 @@ double CoreProcess::timeToGuiTime(std::chrono::system_clock::time_point time) {
 common::GuiProcessStatus CoreProcess::toGuiProcessStatus(const QString& nodeId) const {
     common::GuiProcessStatus g;
     g.processId = _id;
-    g.applicationId = _application->id().toStdString();
+    g.applicationId = _application->id;
     g.clusterId = _cluster->id;
     CoreProcess::NodeStatus nodeStatus = latestNodeStatus(nodeId);
     g.id = nodeStatus.id;
@@ -272,7 +272,7 @@ CoreProcess::latestGuiProcessLogMessage(const QString& nodeId) const
 {
     common::GuiProcessLogMessage g;
     g.processId = _id;
-    g.applicationId = _application->id().toStdString();
+    g.applicationId = _application->id;
     g.clusterId = _cluster->id;
     g.nodeId = nodeId.toStdString();
     CoreProcess::NodeLogMessage logMessage = latestLogMessage(nodeId);
@@ -286,7 +286,7 @@ CoreProcess::latestGuiProcessLogMessage(const QString& nodeId) const
 common::GuiProcessLogMessageHistory CoreProcess::guiProcessLogMessageHistory() const {
     common::GuiProcessLogMessageHistory h;
     h.processId = _id;
-    h.applicationId = _application->id().toStdString();
+    h.applicationId = _application->id;
     h.clusterId = _cluster->id;
 
     std::vector<common::GuiProcessLogMessageHistory::LogMessage> guiLog;
@@ -325,27 +325,27 @@ common::GuiProcessLogMessageHistory CoreProcess::guiProcessLogMessageHistory() c
 common::TrayCommand CoreProcess::startProcessCommand() const {
     common::TrayCommand t;
     t.id = _id;
-    t.executable = _application->executable().toStdString();
-    t.baseDirectory = _application->baseDirectory().toStdString();
-    t.currentWorkingDirectory = _application->currentWorkingDirectory().toStdString();
+    t.executable = _application->executable;
+    t.baseDirectory = _application->baseDirectory;
+    t.currentWorkingDirectory = _application->currentWorkingDirectory;
     t.command = "Start";
 
     t.commandlineParameters = "";
 
-    if (!_application->commandlineParameters().isEmpty()) {
-        t.commandlineParameters = _application->commandlineParameters().toStdString();
+    if (!_application->commandlineParameters.empty()) {
+        t.commandlineParameters = _application->commandlineParameters;
     }
 
     auto iConfiguration = std::find_if(
-        _application->configurations().cbegin(),
-        _application->configurations().cend(),
-        [id =_configurationId](const Program::Configuration& config) {
+        _application->configurations.cbegin(),
+        _application->configurations.cend(),
+        [id =_configurationId.toStdString()](const Program::Configuration& config) {
             return config.id == id;
         });
     
-    if (iConfiguration != _application->configurations().cend()) {
+    if (iConfiguration != _application->configurations.cend()) {
         t.commandlineParameters = t.commandlineParameters + " " +
-            iConfiguration->clusterCommandlineParameters[QString::fromStdString(_cluster->id)].toStdString();
+            iConfiguration->clusterCommandlineParameters.at(_cluster->id);
     }
 
     return t;

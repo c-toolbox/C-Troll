@@ -57,40 +57,40 @@ namespace {
     const QString KeyListeningPort = "listeningPort";
 } // namespace
 
-Application::Application(QString configurationFile) {
-    _configurationFile = configurationFile;
+Application::Application(std::string configurationFile)
+    : _configurationFile(std::move(configurationFile))
+{
     initalize();
 }
 
 void Application::initalize(bool resetGUIconnection) {
-    QFile f(_configurationFile);
-    f.open(QFile::ReadOnly);
-    QJsonDocument d = QJsonDocument::fromJson(f.readAll());
-    QJsonObject jsonObject = d.object();
+    std::fstream f(_configurationFile);
+    nlohmann::json json;
+    f >> json;
 
-    QString programPath = jsonObject.value("applicationPath").toString();
-    QString clusterPath = jsonObject.value("clusterPath").toString();
-    int listeningPort = jsonObject.value("listeningPort").toInt();
+    std::string programPath = json.at("applicationPath").get<std::string>();
+    std::string clusterPath = json.at("clusterPath").get<std::string>();
+    int listeningPort = json.at("listeningPort").get<int>();
 
-    QJsonArray services = common::testAndReturnArray(
-        jsonObject,
-        "services",
-        Optional::Yes
-    );
-    for (const QJsonValueRef& s : services) {
-        if (!s.isString()) {
-            Log("Error when parsing service command.");
-            continue;
+    if (json.find("services") != json.end()) {
+        nlohmann::json services = json.at("services");
+
+        for (const nlohmann::json& s : services) {
+            if (!s.is_string()) {
+                Log("Error when parsing service command.");
+                continue;
+            }
+
+            std::string command = s.get<std::string>();
+            std::unique_ptr<QProcess> p = std::make_unique<QProcess>();
+            p->start(QString::fromStdString(command));
+            _services.push_back(std::move(p));
         }
-        QString command = s.toString();
-        std::unique_ptr<QProcess> p = std::make_unique<QProcess>();
-        p->start(command);
-        _services.push_back(std::move(p));
     }
 
     // Load all program descriptions from the path provided by the configuration file
     std::unique_ptr<std::vector<std::unique_ptr<Program>>> programs =
-        Program::loadProgramsFromDirectory(programPath);
+        Program::loadProgramsFromDirectory(QString::fromStdString(programPath));
 
     std::transform(
         programs->begin(),
@@ -101,7 +101,7 @@ void Application::initalize(bool resetGUIconnection) {
 
     // Load all cluster descriptions from the path provided by the configuration file
     std::unique_ptr<std::vector<std::unique_ptr<Cluster>>> uniqueClisters =
-        Cluster::loadClustersFromDirectory(clusterPath);
+        Cluster::loadClustersFromDirectory(QString::fromStdString(clusterPath));
     std::transform(
         uniqueClisters->begin(),
         uniqueClisters->end(),
@@ -262,9 +262,7 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     auto iProgram = std::find_if(
         _programs.begin(),
         _programs.end(),
-        [&](const std::unique_ptr<Program>& p) {
-            return p->id().toStdString() == cmd.applicationId;
-        }
+        [&](const std::unique_ptr<Program>& p) { return p->id == cmd.applicationId; }
     );
         
     if (iProgram == _programs.end()) {
@@ -291,14 +289,12 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     std::string configurationId;
 
     if (!cmd.configurationId.empty()) {
-        const QList<Program::Configuration>& confs = (*iProgram)->configurations();
+        const std::vector<Program::Configuration>& confs = (*iProgram)->configurations;
 
         auto iConfiguration = std::find_if(
             confs.begin(),
             confs.end(),
-            [&](const Program::Configuration& c) {
-                return c.id.toStdString() == cmd.configurationId;
-            }
+            [&](const Program::Configuration& c) { return c.id == cmd.configurationId; }
         );
 
         if (iConfiguration == confs.end()) {
@@ -312,9 +308,9 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
         }
         configurationId = cmd.configurationId;
 
-        const QMap<QString, QString>& clusterParamsList =
+        const std::map<std::string, std::string>& clusterParamsList =
             iConfiguration->clusterCommandlineParameters;
-        auto clusterParams = clusterParamsList.find(QString::fromStdString(cmd.clusterId));
+        auto clusterParams = clusterParamsList.find(cmd.clusterId);
 
         if (clusterParams == clusterParamsList.end()) {
             // The requested configuration does not exist for the application

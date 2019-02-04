@@ -54,7 +54,7 @@ namespace common {
 
 class Application {
 public:
-    Application(QString configurationFile);
+    Application(std::string configurationFile);
 
 private:
     void initalize(bool resetGUIconnection = true);
@@ -87,7 +87,7 @@ private:
     OutgoingSocketHandler _outgoingSocketHandler;
 
     std::vector<std::unique_ptr<QProcess>> _services;
-    QString _configurationFile;
+    std::string _configurationFile;
 };
 
 #endif // __APPLICATION_H__

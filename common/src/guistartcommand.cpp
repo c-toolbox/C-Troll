@@ -34,9 +34,6 @@
 
 #include "guistartcommand.h"
 
-#include "jsonsupport.h"
-#include <QJsonObject>
-
 namespace {
     constexpr const char* KeyApplicationId = "applicationId";
     constexpr const char* KeyConfigurationId = "configurationId";
