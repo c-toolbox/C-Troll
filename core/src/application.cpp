@@ -48,9 +48,9 @@
 #include <json/json.hpp>
 
 namespace {
-    const QString KeyApplicationPath = "applicationPath";
-    const QString KeyClusterPath = "clusterPath";
-    const QString KeyListeningPort = "listeningPort";
+    constexpr const char* KeyApplicationPath = "applicationPath";
+    constexpr const char* KeyClusterPath = "clusterPath";
+    constexpr const char* KeyListeningPort = "listeningPort";
 } // namespace
 
 Application::Application(std::string configurationFile)
@@ -64,9 +64,9 @@ void Application::initalize(bool resetGUIconnection) {
     nlohmann::json json;
     f >> json;
 
-    std::string programPath = json.at("applicationPath").get<std::string>();
-    std::string clusterPath = json.at("clusterPath").get<std::string>();
-    int listeningPort = json.at("listeningPort").get<int>();
+    std::string programPath = json.at(KeyApplicationPath).get<std::string>();
+    std::string clusterPath = json.at(KeyClusterPath).get<std::string>();
+    int listeningPort = json.at(KeyListeningPort).get<int>();
 
     if (json.find("services") != json.end()) {
         nlohmann::json services = json.at("services");
@@ -85,25 +85,10 @@ void Application::initalize(bool resetGUIconnection) {
     }
 
     // Load all program descriptions from the path provided by the configuration file
-    std::unique_ptr<std::vector<std::unique_ptr<Program>>> programs =
-        Program::loadProgramsFromDirectory(QString::fromStdString(programPath));
-
-    std::transform(
-        programs->begin(),
-        programs->end(),
-        std::back_inserter(_programs),
-        [](std::unique_ptr<Program>& program) { return std::move(program); }
-    );
+    _programs = loadProgramsFromDirectory(programPath);
 
     // Load all cluster descriptions from the path provided by the configuration file
-    std::unique_ptr<std::vector<std::unique_ptr<Cluster>>> uniqueClisters =
-        Cluster::loadClustersFromDirectory(QString::fromStdString(clusterPath));
-    std::transform(
-        uniqueClisters->begin(),
-        uniqueClisters->end(),
-        std::back_inserter(_clusters),
-        [](std::unique_ptr<Cluster>& cluster) { return std::move(cluster); }
-    );
+    _clusters = loadClustersFromDirectory(clusterPath);
 
     if (resetGUIconnection) {
         // The incoming socket handler takes care of messages from the GUI
@@ -116,7 +101,7 @@ void Application::initalize(bool resetGUIconnection) {
         _clusters.begin(),
         _clusters.end(),
         std::back_inserter(clusters),
-        [](std::unique_ptr<Cluster>& cluster) { return cluster.get(); }
+        [](Cluster& cluster) { return &cluster; }
     );
     _outgoingSocketHandler.initialize(clusters);
 
@@ -144,8 +129,8 @@ void Application::initalize(bool resetGUIconnection) {
             [this](common::JsonSocket* socket) {
                 nlohmann::json j = initializationInformation();
                 _incomingSocketHandler.sendMessage(socket, j);
-                for (std::unique_ptr<CoreProcess>& process : _processes) {
-                    nlohmann::json jo = guiProcessLogMessageHistory(*process);
+                for (CoreProcess& process : _processes) {
+                    nlohmann::json jo = guiProcessLogMessageHistory(process);
                     _incomingSocketHandler.sendMessage(socket, jo);
                 }
             }
@@ -171,34 +156,34 @@ void Application::handleTrayProcessStatus(const Cluster&,
     auto iProcess = std::find_if(
         _processes.begin(),
         _processes.end(),
-        [&status](std::unique_ptr<CoreProcess>& p) { return p->id() == status.processId; }
+        [&status](CoreProcess& p) { return p.id() == status.processId; }
     );
     if (iProcess == _processes.end()) {
         return;
     }
 
-    CoreProcess& p = *(*iProcess);
+    CoreProcess& p = *iProcess;
 
     switch (status.status) {
         case common::TrayProcessStatus::Status::Starting:
             p.pushNodeStatus(node.id, CoreProcess::NodeStatus::Status::Starting);
-            sendGuiProcessStatus(*iProcess->get(), node.id);
+            sendGuiProcessStatus(p, node.id);
             break;
         case common::TrayProcessStatus::Status::Running:
             p.pushNodeStatus(node.id, CoreProcess::NodeStatus::Status::Running);
-            sendGuiProcessStatus(*iProcess->get(), node.id);
+            sendGuiProcessStatus(p, node.id);
             break;
         case common::TrayProcessStatus::Status::NormalExit:
             p.pushNodeStatus(node.id, CoreProcess::NodeStatus::Status::NormalExit);
-            sendGuiProcessStatus(*iProcess->get(), node.id);
+            sendGuiProcessStatus(p, node.id);
             break;
         case common::TrayProcessStatus::Status::FailedToStart:
             p.pushNodeStatus(node.id, CoreProcess::NodeStatus::Status::FailedToStart);
-            sendGuiProcessStatus(*iProcess->get(), node.id);
+            sendGuiProcessStatus(p, node.id);
             break;
         case common::TrayProcessStatus::Status::CrashExit:
             p.pushNodeStatus(node.id, CoreProcess::NodeStatus::Status::CrashExit);
-            sendGuiProcessStatus(*iProcess->get(), node.id);
+            sendGuiProcessStatus(p, node.id);
             break;
         case common::TrayProcessStatus::Status::WriteError:
             p.pushNodeError(node.id, CoreProcess::NodeError::Error::WriteError);
@@ -222,29 +207,25 @@ void Application::handleTrayProcessLogMessage(const Cluster&,
     auto iProcess = std::find_if(
         _processes.begin(),
         _processes.end(),
-        [&logMessage](std::unique_ptr<CoreProcess>& p) {
-            return p->id() == logMessage.processId;
-        }
+        [&logMessage](CoreProcess& p) { return p.id() == logMessage.processId; }
     );
 
     if (iProcess == _processes.end()) {
         return;
     }
 
-    CoreProcess& p = **iProcess;
-    
     Log(logMessage.message);
 
     switch (logMessage.outputType) {
         case common::TrayProcessLogMessage::OutputType::StdOut:
-            p.pushNodeStdOut(node.id, logMessage.message);
+            iProcess->pushNodeStdOut(node.id, logMessage.message);
             break;
         case common::TrayProcessLogMessage::OutputType::StdErr:
-            p.pushNodeStdError(node.id, logMessage.message);
+            iProcess->pushNodeStdError(node.id, logMessage.message);
             break;
     }
     
-    sendLatestLogMessage(*iProcess->get(), node.id);
+    sendLatestLogMessage(*iProcess, node.id);
 }
 
 void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
@@ -255,7 +236,7 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     auto iProgram = std::find_if(
         _programs.begin(),
         _programs.end(),
-        [&](const std::unique_ptr<Program>& p) { return p->id == cmd.applicationId; }
+        [&](const Program& p) { return p.id == cmd.applicationId; }
     );
         
     if (iProgram == _programs.end()) {
@@ -269,7 +250,7 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     auto iCluster = std::find_if(
         _clusters.begin(),
         _clusters.end(),
-        [&](const std::unique_ptr<Cluster>& c) { return c->id == cmd.clusterId; }
+        [&](const Cluster& c) { return c.id == cmd.clusterId; }
     );
             
     if (iCluster == _clusters.end()) {
@@ -282,7 +263,7 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     std::string configurationId;
 
     if (!cmd.configurationId.empty()) {
-        const std::vector<Program::Configuration>& confs = (*iProgram)->configurations;
+        const std::vector<Program::Configuration>& confs = iProgram->configurations;
 
         auto iConfiguration = std::find_if(
             confs.begin(),
@@ -315,15 +296,11 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
         }
     }
 
-    std::unique_ptr<CoreProcess> process = std::make_unique<CoreProcess>(
-        iProgram->get(),
-        configurationId,
-        iCluster->get()
-    );
-    common::TrayCommand trayCommand = process->startProcessCommand();
+    CoreProcess process(*iProgram, configurationId, *iCluster);
+    common::TrayCommand trayCommand = process.startProcessCommand();
     _processes.push_back(std::move(process));
 
-    sendTrayCommand(*(iCluster->get()), trayCommand);
+    sendTrayCommand(*iCluster, trayCommand);
 }
 
 void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd) {
@@ -332,7 +309,7 @@ void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd)
     auto iProcess = std::find_if(
         _processes.begin(),
         _processes.end(),
-        [&](const std::unique_ptr<CoreProcess>& p) { return p->id() == processId; }
+        [&](const CoreProcess& p) { return p.id() == processId; }
     );
 
     if (iProcess == _processes.end()) {
@@ -340,13 +317,12 @@ void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd)
         return;
     }
 
-    CoreProcess* process = iProcess->get();
-    Cluster* cluster = process->cluster();
+    Cluster& cluster = iProcess->cluster();
 
-    sendTrayCommand(*cluster, process->exitProcessCommand());
+    sendTrayCommand(cluster, iProcess->exitProcessCommand());
     
     if (cmd.command == "Restart") {
-        sendTrayCommand(*cluster, process->startProcessCommand());
+        sendTrayCommand(cluster, iProcess->startProcessCommand());
     } else if (cmd.command == "Stop") {
         //_processes.erase(iProcess);
     } else {
@@ -411,16 +387,16 @@ common::GenericMessage Application::initializationInformation() {
     msg.type = common::GuiInitialization::Type;
 
     common::GuiInitialization initMsg;
-    for (const std::unique_ptr<Program>& p : _programs) {
-        initMsg.applications.push_back(p->toGuiInitializationApplication());
+    for (const Program& p : _programs) {
+        initMsg.applications.push_back(p.toGuiInitializationApplication());
     }
 
-    for (const std::unique_ptr<Cluster>& c : _clusters) {
-        initMsg.clusters.push_back(c->toGuiInitializationCluster());
+    for (const Cluster& c : _clusters) {
+        initMsg.clusters.push_back(c.toGuiInitializationCluster());
     }
 
-    for (const std::unique_ptr<CoreProcess>& p : _processes) {
-        initMsg.processes.push_back(p->toGuiInitializationProcess());
+    for (const CoreProcess& p : _processes) {
+        initMsg.processes.push_back(p.toGuiInitializationProcess());
     }
 
     msg.payload = initMsg;

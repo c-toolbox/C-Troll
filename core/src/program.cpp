@@ -136,9 +136,9 @@ void from_json(const nlohmann::json& j, Program::Configuration& p) {
     j.at(KeyClusterCommandlineParameters).get_to(p.clusterCommandlineParameters);
 }
 
-std::unique_ptr<Program> Program::loadProgram(QString jsonFile, QString baseDirectory) {
-    QString identifier = QDir(baseDirectory).relativeFilePath(jsonFile);
-    
+Program loadProgram(const std::string& jsonFile, const std::string& baseDirectory) {
+    QString identifier = QDir(QString::fromStdString(baseDirectory)).relativeFilePath(QString::fromStdString(jsonFile));
+
     // relativeFilePath will have the baseDirectory in the beginning of the relative path
     // and we want to remove it:  baseDirectory.length() + 1
     // then, we want to remove the extension of 5 characters (.json)
@@ -150,12 +150,35 @@ std::unique_ptr<Program> Program::loadProgram(QString jsonFile, QString baseDire
         identifier.size() - (baseDirectory.length() + 1) - 5
     );
 
-    std::string file = jsonFile.toStdString();
-    std::ifstream f(file);
+    std::ifstream f(jsonFile);
     nlohmann::json obj;
     f >> obj;
     obj["id"] = identifier.toStdString();
-    return std::make_unique<Program>(obj);
+    return Program(obj);
+}
+
+std::vector<Program> loadProgramsFromDirectory(const std::string& directory) {
+    std::vector<Program> res;
+
+    // First, get all the *.json files from the directory and subdirectories
+    QDirIterator it(
+        QString::fromStdString(directory),
+        QStringList() << "*.json",
+        QDir::Files,
+        QDirIterator::Subdirectories
+    );
+    while (it.hasNext()) {
+        QString file = it.next();
+        Log("Loading application file " + file.toStdString());
+        try {
+            Program program = loadProgram(file.toStdString(), directory);
+            res.push_back(std::move(program));
+        }
+        catch (const std::runtime_error& e) {
+            Log("Failed to load application file " + file.toStdString() + ". " + e.what());
+        }
+    }
+    return res;
 }
 
 common::GuiInitialization::Application Program::toGuiInitializationApplication() const {
@@ -179,30 +202,6 @@ common::GuiInitialization::Application Program::toGuiInitializationApplication()
     app.defaultConfiguration = defaultConfiguration;
     
     return app;
-}
-
-std::unique_ptr<std::vector<std::unique_ptr<Program>>>
-Program::loadProgramsFromDirectory(QString directory)
-{
-    auto programs = std::make_unique<std::vector<std::unique_ptr<Program>>>();
-    // First, get all the *.json files from the directory and subdirectories
-    QDirIterator it(
-        directory,
-        QStringList() << "*.json",
-        QDir::Files,
-        QDirIterator::Subdirectories
-    );
-    while (it.hasNext()) {
-        QString file = it.next();
-        Log("Loading application file " + file.toStdString());
-        try {
-            std::unique_ptr<Program> program = loadProgram(file, directory);
-            programs->push_back(std::move(program));
-        } catch (const std::runtime_error& e) {
-            Log("Failed to load application file " + file.toStdString() + ". " + e.what());
-        }
-    }
-    return std::move(programs);
 }
 
 Program::~Program() {

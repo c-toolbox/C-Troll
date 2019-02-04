@@ -80,9 +80,9 @@ private:
 
     void sendTrayCommand(const Cluster& cluster, const common::TrayCommand& command);
 
-    std::vector<std::unique_ptr<Program>> _programs;
-    std::vector<std::unique_ptr<Cluster>> _clusters;
-    std::vector<std::unique_ptr<CoreProcess>> _processes;
+    std::vector<Program> _programs;
+    std::vector<Cluster> _clusters;
+    std::vector<CoreProcess> _processes;
     IncomingSocketHandler _incomingSocketHandler;
     OutgoingSocketHandler _outgoingSocketHandler;
 

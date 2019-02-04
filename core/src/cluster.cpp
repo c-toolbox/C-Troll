@@ -96,6 +96,54 @@ void from_json(const nlohmann::json& j, Cluster::Node& p) {
     j.at(KeyNodePort).get_to(p.port);
 }
 
+std::vector<Cluster> loadClustersFromDirectory(const std::string& directory) {
+    std::vector<Cluster> res;
+
+    // First, get all the *.json files from the directory and subdirectories
+    QDirIterator it(
+        QString::fromStdString(directory),
+        QStringList() << "*.json",
+        QDir::Files,
+        QDirIterator::Subdirectories
+    );
+    while (it.hasNext()) {
+        QString file = it.next();
+
+        Log("Loading cluster file " + file.toStdString());
+        try {
+            Cluster c = loadCluster(file.toStdString(), directory);
+            res.push_back(std::move(c));
+        }
+        catch (const std::runtime_error& e) {
+            Log(std::string("Error loading cluster: ") + e.what());
+        }
+    }
+
+    return res;
+}
+
+Cluster loadCluster(const std::string& jsonFile, const std::string& baseDirectory) {
+    QString id = QDir(QString::fromStdString(baseDirectory)).relativeFilePath(QString::fromStdString(jsonFile));
+
+    // relativeFilePath will have the baseDirectory in the beginning of the relative path
+    // and we want to remove it:  baseDirectory.length() + 1
+    // then, we want to remove the extension of 5 characters (.json)
+    // So we take the middle part of the string:
+    id = id.mid(
+        // length of the base directory + '/'
+        baseDirectory.length() + 1,
+        // total length - (stuff we removed in the beginning) - length('.json')
+        id.size() - (baseDirectory.length() + 1) - 5
+    );
+
+    std::ifstream f(jsonFile);
+    nlohmann::json obj;
+    f >> obj;
+    obj[KeyId] = id.toStdString();
+
+    return Cluster(obj);
+}
+
 bool Cluster::connected() const {
     return std::accumulate(
         nodes.begin(),
@@ -111,57 +159,6 @@ QByteArray Cluster::hash() const {
     nlohmann::json doc = *this;
     std::string input = doc.dump();
     return QCryptographicHash::hash(input.c_str(), QCryptographicHash::Sha1);
-}
-
-std::unique_ptr<Cluster> Cluster::loadCluster(QString jsonFile, QString baseDirectory) {
-    QString id = QDir(baseDirectory).relativeFilePath(jsonFile);
-    
-    // relativeFilePath will have the baseDirectory in the beginning of the relative path
-    // and we want to remove it:  baseDirectory.length() + 1
-    // then, we want to remove the extension of 5 characters (.json)
-    // So we take the middle part of the string:
-    id = id.mid(
-        // length of the base directory + '/'
-        baseDirectory.length() + 1,
-        // total length - (stuff we removed in the beginning) - length('.json')
-        id.size() - (baseDirectory.length() + 1) - 5
-    );
-    
-    std::string file = jsonFile.toStdString();
-    std::ifstream f(file);
-    nlohmann::json obj;
-    f >> obj;
-    obj[KeyId] = id.toStdString();
-
-    return std::make_unique<Cluster>(obj);
-}
-
-std::unique_ptr<std::vector<std::unique_ptr<Cluster>>>
-Cluster::loadClustersFromDirectory(QString directory)
-{
-    auto result = std::make_unique<std::vector<std::unique_ptr<Cluster>>>();
-
-    // First, get all the *.json files from the directory and subdirectories
-    QDirIterator it(
-        directory,
-        QStringList() << "*.json",
-        QDir::Files,
-        QDirIterator::Subdirectories
-    );
-    while (it.hasNext()) {
-        QString file = it.next();
-        
-        Log("Loading cluster file " + file.toStdString());
-        try {
-            std::unique_ptr<Cluster> c = loadCluster(file, directory);
-            result->push_back(std::move(c));
-        }
-        catch (const std::runtime_error& e) {
-            Log(std::string("Error loading cluster: ") + e.what());
-        }
-    }
-
-    return std::move(result);
 }
 
 common::GuiInitialization::Cluster Cluster::toGuiInitializationCluster() const {

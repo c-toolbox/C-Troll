@@ -43,8 +43,8 @@
 
 int CoreProcess::_nextId = 0;
 
-CoreProcess::CoreProcess(Program* application, const std::string& configurationId,
-                         Cluster* cluster)
+CoreProcess::CoreProcess(Program& application, const std::string& configurationId,
+                         Cluster& cluster)
     : _id(_nextId++)
     , _application(application)
     , _configurationId(std::move(configurationId))
@@ -56,7 +56,7 @@ int CoreProcess::id() const {
     return _id;
 }
 
-Program* CoreProcess::application() const {
+Program& CoreProcess::application() const {
     return _application;
 }
 
@@ -64,7 +64,7 @@ std::string CoreProcess::configurationId() const {
     return _configurationId;
 }
 
-Cluster* CoreProcess::cluster() const {
+Cluster& CoreProcess::cluster() const {
     return _cluster;
 }
 
@@ -181,17 +181,17 @@ void CoreProcess::pushNodeStdError(std::string nodeId, std::string message) {
 common::GuiInitialization::Process CoreProcess::toGuiInitializationProcess() const {
     common::GuiInitialization::Process proc;
     proc.id = _id;
-    proc.applicationId = _application->id;
-    proc.clusterId = _cluster->id;
+    proc.applicationId = _application.id;
+    proc.clusterId = _cluster.id;
     proc.configurationId = _configurationId;
-    proc.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status).toStdString();
+    proc.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status);
     proc.clusterStatusTime = timeToGuiTime(_clusterStatus.time);
 
     std::vector<common::GuiInitialization::Process::NodeStatus> nodeStatusHistory;
     for (const std::pair<std::string, NodeLog>& p : _nodeLogs) {
         for (NodeStatus status : p.second.statuses) {
             common::GuiInitialization::Process::NodeStatus nodeStatusObject;
-            nodeStatusObject.status = nodeStatusToGuiNodeStatus(status.status).toStdString();
+            nodeStatusObject.status = nodeStatusToGuiNodeStatus(status.status);
             nodeStatusObject.time = timeToGuiTime(status.time);
             nodeStatusObject.node = p.first;
             nodeStatusObject.id = status.id;
@@ -211,7 +211,7 @@ common::GuiInitialization::Process CoreProcess::toGuiInitializationProcess() con
     return proc;
 }
 
-QString CoreProcess::nodeStatusToGuiNodeStatus(CoreProcess::NodeStatus::Status status) {
+std::string CoreProcess::nodeStatusToGuiNodeStatus(CoreProcess::NodeStatus::Status status) {
     switch (status) {
         case CoreProcess::NodeStatus::Status::Starting:
             return "Starting";
@@ -229,7 +229,7 @@ QString CoreProcess::nodeStatusToGuiNodeStatus(CoreProcess::NodeStatus::Status s
     }
 }
 
-QString CoreProcess::clusterStatusToGuiClusterStatus(CoreProcess::ClusterStatus::Status status) {
+std::string CoreProcess::clusterStatusToGuiClusterStatus(CoreProcess::ClusterStatus::Status status) {
     switch (status) {
         case CoreProcess::ClusterStatus::Status::Starting:
             return "Starting";
@@ -256,13 +256,13 @@ double CoreProcess::timeToGuiTime(std::chrono::system_clock::time_point time) {
 common::GuiProcessStatus CoreProcess::toGuiProcessStatus(const std::string& nodeId) const {
     common::GuiProcessStatus g;
     g.processId = _id;
-    g.applicationId = _application->id;
-    g.clusterId = _cluster->id;
+    g.applicationId = _application.id;
+    g.clusterId = _cluster.id;
     CoreProcess::NodeStatus nodeStatus = latestNodeStatus(nodeId);
     g.id = nodeStatus.id;
-    g.nodeStatus[nodeId] = nodeStatusToGuiNodeStatus(nodeStatus.status).toStdString();
+    g.nodeStatus[nodeId] = nodeStatusToGuiNodeStatus(nodeStatus.status);
     g.time = timeToGuiTime(nodeStatus.time);
-    g.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status).toStdString();
+    g.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status);
     return g;
 }
 
@@ -271,8 +271,8 @@ CoreProcess::latestGuiProcessLogMessage(const std::string& nodeId) const
 {
     common::GuiProcessLogMessage g;
     g.processId = _id;
-    g.applicationId = _application->id;
-    g.clusterId = _cluster->id;
+    g.applicationId = _application.id;
+    g.clusterId = _cluster.id;
     g.nodeId = nodeId;
     CoreProcess::NodeLogMessage logMessage = latestLogMessage(nodeId);
     g.id = logMessage.id;
@@ -285,8 +285,8 @@ CoreProcess::latestGuiProcessLogMessage(const std::string& nodeId) const
 common::GuiProcessLogMessageHistory CoreProcess::guiProcessLogMessageHistory() const {
     common::GuiProcessLogMessageHistory h;
     h.processId = _id;
-    h.applicationId = _application->id;
-    h.clusterId = _cluster->id;
+    h.applicationId = _application.id;
+    h.clusterId = _cluster.id;
 
     std::vector<common::GuiProcessLogMessageHistory::LogMessage> guiLog;
     for (const std::pair<std::string, NodeLog>& p : _nodeLogs) {
@@ -323,27 +323,27 @@ common::GuiProcessLogMessageHistory CoreProcess::guiProcessLogMessageHistory() c
 common::TrayCommand CoreProcess::startProcessCommand() const {
     common::TrayCommand t;
     t.id = _id;
-    t.executable = _application->executable;
-    t.baseDirectory = _application->baseDirectory;
-    t.currentWorkingDirectory = _application->currentWorkingDirectory;
+    t.executable = _application.executable;
+    t.baseDirectory = _application.baseDirectory;
+    t.currentWorkingDirectory = _application.currentWorkingDirectory;
     t.command = "Start";
 
-    t.commandlineParameters = "";
+    t.commandlineParameters.clear();
 
-    if (!_application->commandlineParameters.empty()) {
-        t.commandlineParameters = _application->commandlineParameters;
+    if (!_application.commandlineParameters.empty()) {
+        t.commandlineParameters = _application.commandlineParameters;
     }
 
     auto iConfiguration = std::find_if(
-        _application->configurations.cbegin(),
-        _application->configurations.cend(),
+        _application.configurations.cbegin(),
+        _application.configurations.cend(),
         [id = _configurationId](const Program::Configuration& config) {
             return config.id == id;
         });
     
-    if (iConfiguration != _application->configurations.cend()) {
+    if (iConfiguration != _application.configurations.cend()) {
         t.commandlineParameters = t.commandlineParameters + " " +
-            iConfiguration->clusterCommandlineParameters.at(_cluster->id);
+            iConfiguration->clusterCommandlineParameters.at(_cluster.id);
     }
 
     return t;

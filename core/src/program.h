@@ -64,11 +64,6 @@ public:
     */
     QByteArray hash() const;
 
-    static std::unique_ptr<std::vector<std::unique_ptr<Program>>>
-        loadProgramsFromDirectory(QString directory);
-
-    static std::unique_ptr<Program> loadProgram(QString jsonFile, QString baseDirectory);
-
     /// A unique identifier
     std::string id;
     /// A human readable name for this Program
@@ -92,6 +87,10 @@ public:
     /// A vector of processes that derive from this program.
     std::vector<Process*> processes;
 };
+
+std::vector<Program> loadProgramsFromDirectory(const std::string& directory);
+Program loadProgram(const std::string& jsonFile, const std::string& baseDirectory);
+
 
 void to_json(nlohmann::json& j, const Program& p);
 void to_json(nlohmann::json& j, const Program::Configuration& p);

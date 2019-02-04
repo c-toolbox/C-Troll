@@ -109,11 +109,11 @@ public:
         std::chrono::system_clock::time_point time;
     };
 
-    CoreProcess(Program* program, const std::string& configurationId, Cluster* cluster);
+    CoreProcess(Program& program, const std::string& configurationId, Cluster& cluster);
     int id() const;
-    Program* application() const;
+    Program& application() const;
     std::string configurationId() const;
-    Cluster* cluster() const;
+    Cluster& cluster() const;
 
     common::GuiInitialization::Process toGuiInitializationProcess() const;
     common::GuiProcessStatus toGuiProcessStatus(const std::string& nodeId) const;
@@ -134,14 +134,14 @@ private:
     bool allNodesHasStatus(NodeStatus::Status status);
     bool anyNodeHasStatus(NodeStatus::Status status);
 
-    static QString nodeStatusToGuiNodeStatus(NodeStatus::Status status);
-    static QString clusterStatusToGuiClusterStatus(ClusterStatus::Status status);
+    static std::string nodeStatusToGuiNodeStatus(NodeStatus::Status status);
+    static std::string clusterStatusToGuiClusterStatus(ClusterStatus::Status status);
     static double timeToGuiTime(std::chrono::system_clock::time_point time);
 
     int _id;
-    Program* _application;
+    Program& _application;
     std::string _configurationId;
-    Cluster* _cluster;
+    Cluster& _cluster;
     static int _nextId;
     std::map<std::string, NodeLog> _nodeLogs;
     ClusterStatus _clusterStatus;

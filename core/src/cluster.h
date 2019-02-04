@@ -89,22 +89,6 @@ public:
      */
     QByteArray hash() const;
 
-    /**
-     * This method walks the passed \p directory and looks for all <code>*.json</code>
-     * files in it. Any \c JSON file in it will be interpreted as a cluster configuration
-     * and returned.
-     * \param directory The directory that is walked in search for <code>*.json</code>
-     * files
-     * \return A list of all Cluster%s that were found by walking the \p directory
-     */
-    static std::unique_ptr<std::vector<std::unique_ptr<Cluster>>>
-        loadClustersFromDirectory(QString directory);
-
-    /**
-     * Load a cluster from file.
-     */
-    static std::unique_ptr<Cluster> loadCluster(QString jsonFile, QString baseDirectory);
-
     /// The human readable name of this Cluster
     std::string name;
     /// The unique identifier of this Cluster
@@ -121,5 +105,20 @@ void to_json(nlohmann::json& j, const Cluster& p);
 void to_json(nlohmann::json& j, const Cluster::Node& p);
 void from_json(const nlohmann::json& j, Cluster& p);
 void from_json(const nlohmann::json& j, Cluster::Node& p);
+
+/**
+ * This method walks the passed \p directory and looks for all <code>*.json</code>
+ * files in it. Any \c JSON file in it will be interpreted as a cluster configuration
+ * and returned.
+ * \param directory The directory that is walked in search for <code>*.json</code>
+ * files
+ * \return A list of all Cluster%s that were found by walking the \p directory
+ */
+std::vector<Cluster> loadClustersFromDirectory(const std::string& directory);
+
+/**
+ * Load a cluster from file.
+ */
+Cluster loadCluster(const std::string& jsonFile, const std::string& baseDirectory);
 
 #endif // __CLUSTER_H__
