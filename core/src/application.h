@@ -52,7 +52,9 @@ namespace common {
     class JsonSocket;
 } // namespace common
 
-class Application {
+class Application : public QObject {
+Q_OBJECT
+
 public:
     Application(std::string configurationFile);
 

@@ -68,6 +68,7 @@ find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
 set(MOC_FILES "")
 qt5_wrap_cpp(
     MOC_FILES 
+    src/application.h
     src/handler/incomingsockethandler.h
     src/handler/outgoingsockethandler.h
 )

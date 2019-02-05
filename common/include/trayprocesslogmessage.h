@@ -51,7 +51,7 @@ struct TrayProcessLogMessage {
     };
 
     /// The unique identifier for the process
-    int processId;
+    int processId = -1;
     /// The process stdout/stderr line
     std::string message;
     /// The type of output

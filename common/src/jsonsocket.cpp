@@ -42,7 +42,7 @@ JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket)
     : QObject()
     , _socket(std::move(socket))
 {
-    connect(_socket.get(), &QTcpSocket::readyRead, [this]() { readToBuffer(); });
+    connect(_socket.get(), &QTcpSocket::readyRead, this, &JsonSocket::readToBuffer);
     connect(_socket.get(), &QTcpSocket::disconnected, this, &JsonSocket::disconnected);
     _socket->setProxy(QNetworkProxy::NoProxy);
 }

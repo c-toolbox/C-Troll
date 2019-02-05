@@ -325,37 +325,34 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
 void ProcessHandler::createAndRunProcessFromTrayCommand(
                                                        const common::TrayCommand& command)
 {
-    QProcess* newProcess = new QProcess(this);
+    QProcess* proc = new QProcess(this);
     
     // Connect all process signals for logging feedback to core
     QObject::connect(
-        newProcess, SIGNAL(errorOccurred(QProcess::ProcessError)),
-        this, SLOT(handlerErrorOccurred(QProcess::ProcessError))
+        proc, &QProcess::errorOccurred,
+        this, &ProcessHandler::handlerErrorOccurred
     );
     QObject::connect(
-        newProcess, SIGNAL(finished(int)),
+        proc, SIGNAL(finished(int)),
         this, SLOT(handleFinished(int))
     );
     QObject::connect(
-        newProcess, SIGNAL(finished(int, QProcess::ExitStatus)),
+        proc, SIGNAL(finished(int, QProcess::ExitStatus)),
         this, SLOT(handleFinished(int, QProcess::ExitStatus))
     );
     QObject::connect(
-        newProcess, SIGNAL(readyReadStandardError()),
-        this, SLOT(handleReadyReadStandardError())
+        proc, &QProcess::readyReadStandardError,
+        this, &ProcessHandler::handleReadyReadStandardError
     );
     QObject::connect(
-        newProcess, SIGNAL(readyReadStandardOutput()),
-        this, SLOT(handleReadyReadStandardOutput())
+        proc, &QProcess::readyReadStandardOutput,
+        this, &ProcessHandler::handleReadyReadStandardOutput
     );
-    QObject::connect(
-        newProcess, SIGNAL(started()),
-        this, SLOT(handleStarted())
-    );
+    QObject::connect(proc, &QProcess::started, this, &ProcessHandler::handleStarted);
     
     // Insert command identifier and process into out lists
-    _processes.insert(std::make_pair(command.id, newProcess));
+    _processes.insert(std::make_pair(command.id, proc));
     
     // Run the process with the command
-    executeProcessWithTrayCommand(newProcess, command);
+    executeProcessWithTrayCommand(proc, command);
 }

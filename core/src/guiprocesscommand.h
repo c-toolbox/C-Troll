@@ -46,7 +46,7 @@ struct GuiProcessCommand {
     static constexpr const char* Type = "GuiProcessCommand";
 
     /// The process to be controlled
-    int processId;
+    int processId = -1;
     /// The command to be executed
     std::string command;
 };

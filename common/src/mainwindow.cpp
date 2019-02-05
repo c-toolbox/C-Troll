@@ -40,9 +40,8 @@
 
 QTextEdit* MainWindow::_staticTextEdit = 0;
 
-void MainWindow::myMessageOutput(QtMsgType type,
-                                         const QMessageLogContext& context,
-                                         const QString& msg)
+void MainWindow::myMessageOutput(QtMsgType type, const QMessageLogContext& context,
+                                 const QString& msg)
 {
     if (!_staticTextEdit) {
         QByteArray localMsg = msg.toLocal8Bit();
@@ -80,8 +79,8 @@ void MainWindow::myMessageOutput(QtMsgType type,
     }
 }
  
-MainWindow::MainWindow(const QString& title, QWidget* parent)
-    : QMainWindow(parent)
+MainWindow::MainWindow(const QString& title)
+    : QMainWindow()
 {
     setWindowTitle(title);
     setMinimumSize(512, 256);
@@ -98,12 +97,12 @@ MainWindow::MainWindow(const QString& title, QWidget* parent)
     QMenu* menu = new QMenu(this);
     // The first menu item expands the application from the tray,
     QAction* viewWindow = new QAction(trUtf8("Show"), this);
-    connect(viewWindow, SIGNAL(triggered()), this, SLOT(show()));
+    connect(viewWindow, &QAction::triggered, this, &MainWindow::show);
     menu->addAction(viewWindow);
 
     // The second menu item terminates the application
     QAction* quitAction = new QAction(trUtf8("Quit"), this);
-    connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
+    connect(quitAction, &QAction::triggered, this, &MainWindow::close);
     menu->addAction(quitAction);
  
     // Set the context menu on the icon and show the application icon in the system tray
@@ -111,10 +110,7 @@ MainWindow::MainWindow(const QString& title, QWidget* parent)
     _trayIcon->show();
  
     // Also connect clicking on the icon to the signal processor of this press 
-    connect(
-        _trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-        this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason))
-    );
+    connect(_trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
 }
  
 // The method that handles the closing event of the application window

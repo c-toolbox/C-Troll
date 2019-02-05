@@ -46,7 +46,7 @@ struct TrayCommand {
     static constexpr const char* Type = "TrayCommand";
     
     /// The unique identifier for the process that will be created
-    int id;
+    int id = -1;
     /// The kind of command that is to be executed
     std::string command;
     /// The name of the executable

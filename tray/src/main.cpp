@@ -66,12 +66,12 @@ int main(int argc, char** argv) {
     
     // Connect the sockethandler and the processhandler
     QObject::connect(
-        &socketHandler, SIGNAL(messageRecieved(nlohmann::json)),
-        &processHandler, SLOT(handleSocketMessage(nlohmann::json))
+        &socketHandler, &SocketHandler::messageRecieved,
+        &processHandler, &ProcessHandler::handleSocketMessage
     );
     QObject::connect(
-        &processHandler, SIGNAL(sendSocketMessage(nlohmann::json)),
-        &socketHandler, SLOT(sendMessage(nlohmann::json))
+        &processHandler, &ProcessHandler::sendSocketMessage,
+        &socketHandler, &SocketHandler::sendMessage
     );
 
     app.exec();

@@ -42,8 +42,8 @@ namespace common {
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
 struct TrayProcessStatus {
-    enum class Status {
-        Starting,
+    enum class Status : int {
+        Starting = 0,
         Running,
         NormalExit,
         CrashExit,

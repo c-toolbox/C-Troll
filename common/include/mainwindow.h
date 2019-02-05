@@ -47,7 +47,7 @@ class MainWindow : public QMainWindow {
 Q_OBJECT
  
 public:
-    explicit MainWindow(const QString& title, QWidget* parent = nullptr);
+    explicit MainWindow(const QString& title);
 
     static QTextEdit* _staticTextEdit;
     static void myMessageOutput(QtMsgType type, const QMessageLogContext& context,

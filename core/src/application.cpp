@@ -108,12 +108,12 @@ void Application::initalize(bool resetGUIconnection) {
     if (resetGUIconnection) {
         QObject::connect(
             &_incomingSocketHandler, &IncomingSocketHandler::messageReceived,
-            [this](const nlohmann::json& message) { incomingGuiMessage(message); }
+            this, &Application::incomingGuiMessage
         );
 
         QObject::connect(
             &_outgoingSocketHandler, &OutgoingSocketHandler::messageReceived,
-            [this](const Cluster& cluster, const Cluster::Node& node, const nlohmann::json& message) { incomingTrayMessage(cluster, node, message); }
+            this, &Application::incomingTrayMessage
         );
 
         QObject::connect(

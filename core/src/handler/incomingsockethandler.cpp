@@ -42,7 +42,10 @@
 void IncomingSocketHandler::initialize(quint16 port) {
     _server.listen(QHostAddress::Any, port);
 
-    QObject::connect(&_server, &QTcpServer::newConnection, [this]() { newConnection(); });
+    QObject::connect(
+        &_server, &QTcpServer::newConnection,
+        this, &IncomingSocketHandler::newConnection
+    );
 }
 
 void IncomingSocketHandler::deinitialize() {

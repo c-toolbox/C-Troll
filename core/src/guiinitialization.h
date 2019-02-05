@@ -71,7 +71,7 @@ struct GuiInitialization {
         /// The unique identifier for the cluster
         std::string id;
         /// Whether the cluster is currently enabled or not
-        bool enabled;
+        bool enabled = false;
         /// Whether the cluster is currently connected or not
         bool connected = false;
     };
@@ -80,19 +80,19 @@ struct GuiInitialization {
     /// the Core library
     struct Process {
         struct NodeStatus {
-            int id;
+            int id = -1;
             std::string node;
             std::string status;
-            double time;
+            double time = -1.0;
         };
 
         /// The unique identifier for the process
-        int id;
+        int id = -1;
         std::string applicationId;
         std::string configurationId;
         std::string clusterId;
         std::string clusterStatus;
-        double clusterStatusTime;
+        double clusterStatusTime = -1.0;
         std::vector<GuiInitialization::Process::NodeStatus> nodeStatusHistory;
     };
     

@@ -46,9 +46,9 @@ struct GuiProcessLogMessage {
     static constexpr const char* Type = "GuiProcessLogMessage";
     
     /// The per-process unique id for this log message.
-    int id;
+    int id = -1;
     /// The unique identifier for the process that will be created
-    int processId;
+    int processId = -1;
     /// The application identifier
     std::string applicationId;
     /// The cluster identifier
@@ -56,13 +56,13 @@ struct GuiProcessLogMessage {
     /// The node identifier
     std::string nodeId;
     /// The configuration identifier
-    int configurationId;
+    int configurationId = -1;
     /// The log message
     std::string logMessage;
     /// The output type of log message ("stdout" or "stderr")
     std::string outputType;
     /// The time
-    double time;
+    double time = -1.0;
 };
     
 void to_json(nlohmann::json& j, const GuiProcessLogMessage& p);

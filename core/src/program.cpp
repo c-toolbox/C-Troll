@@ -145,9 +145,9 @@ Program loadProgram(const std::string& jsonFile, const std::string& baseDirector
     // So we take the middle part of the string:
     identifier = identifier.mid(
         // length of the base directory + '/'
-        baseDirectory.length() + 1,
+        static_cast<int>(baseDirectory.length() + 1),
         // total length - (stuff we removed in the beginning) - length('.json')
-        identifier.size() - (baseDirectory.length() + 1) - 5
+        static_cast<int>(identifier.size() - (baseDirectory.length() + 1) - 5)
     );
 
     std::ifstream f(jsonFile);

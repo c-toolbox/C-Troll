@@ -47,21 +47,21 @@ struct GuiProcessStatus {
     static constexpr const char* Type = "GuiProcessStatus";
 
     /// The per-process unique identifier for this process status.
-    int id;
+    int id = -1;
     /// The unique identifier for the process that will be created
-    int processId;
+    int processId = -1;
     /// The application identifier
     std::string applicationId;
     /// The cluster identifier
     std::string clusterId;
     /// The configuration identifier
-    int configurationId;
+    int configurationId = -1;
     /// The cluster status
     std::string clusterStatus;
     /// The process status
     std::map<std::string, std::string> nodeStatus;
     /// The time
-    double time;
+    double time = -1.0;
 };
     
 void to_json(nlohmann::json& j, const GuiProcessStatus& p);
