@@ -34,15 +34,9 @@
 
 set(HEADER_FILES
     include/genericmessage.h
-    include/guistartcommand.h
-    include/guiprocesscommand.h
-    include/guiinitialization.h
-    include/guiprocessstatus.h
-    include/guiprocesslogmessage.h
-    include/guiprocesslogmessagehistory.h
     include/jsonsocket.h
     include/logging.h
-    include/standardmainwindow.h
+    include/mainwindow.h
     include/traycommand.h
     include/trayprocesslogmessage.h
     include/trayprocessstatus.h
@@ -50,15 +44,9 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
     src/genericmessage.cpp
-    src/guistartcommand.cpp
-    src/guiprocesscommand.cpp
-    src/guiinitialization.cpp
-    src/guiprocessstatus.cpp
-    src/guiprocesslogmessage.cpp
-    src/guiprocesslogmessagehistory.cpp
     src/jsonsocket.cpp
     src/logging.cpp
-    src/standardmainwindow.cpp
+    src/mainwindow.cpp
     src/traycommand.cpp
     src/trayprocesslogmessage.cpp
     src/trayprocessstatus.cpp
@@ -70,7 +58,7 @@ set(MOC_FILES "")
 qt5_wrap_cpp(
     MOC_FILES 
     include/jsonsocket.h
-    include/standardmainwindow.h
+    include/mainwindow.h
 )
 
 set(LIBRARY_NAME C-Troll-Common)

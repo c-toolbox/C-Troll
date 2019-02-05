@@ -32,15 +32,15 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include <standardmainwindow.h>
+#include "mainwindow.h"
 
 #include <QMenu>
 #include <QHBoxLayout>
 #include <iostream>
 
-QTextEdit* StandardMainWindow::_staticTextEdit = 0;
+QTextEdit* MainWindow::_staticTextEdit = 0;
 
-void StandardMainWindow::myMessageOutput(QtMsgType type,
+void MainWindow::myMessageOutput(QtMsgType type,
                                          const QMessageLogContext& context,
                                          const QString& msg)
 {
@@ -80,7 +80,7 @@ void StandardMainWindow::myMessageOutput(QtMsgType type,
     }
 }
  
-StandardMainWindow::StandardMainWindow(const QString& title, QWidget* parent)
+MainWindow::MainWindow(const QString& title, QWidget* parent)
     : QMainWindow(parent)
 {
     setWindowTitle(title);
@@ -118,7 +118,7 @@ StandardMainWindow::StandardMainWindow(const QString& title, QWidget* parent)
 }
  
 // The method that handles the closing event of the application window
-void StandardMainWindow::closeEvent(QCloseEvent* event) {
+void MainWindow::closeEvent(QCloseEvent* event) {
     // If the window is visible, and the checkbox is checked, then the completion of the
     // application. Ignored, and the window simply hides that accompanied the
     // corresponding pop-up message
@@ -135,7 +135,7 @@ void StandardMainWindow::closeEvent(QCloseEvent* event) {
     }
 }
 
-void StandardMainWindow::changeEvent(QEvent* event) {
+void MainWindow::changeEvent(QEvent* event) {
     if (event->type() == QEvent::WindowStateChange) {
         // Hide the taskbar icon if the window is minimized
         if (isMinimized()) {
@@ -146,7 +146,7 @@ void StandardMainWindow::changeEvent(QEvent* event) {
 }
  
 // The method that handles click on the application icon in the system tray
-void StandardMainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason) {
+void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason) {
     if (reason == QSystemTrayIcon::Trigger) {
         // If the window is visible, it is hidden
         // Conversely, if hidden, it unfolds on the screen

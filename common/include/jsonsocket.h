@@ -47,15 +47,21 @@ namespace common {
 class JsonSocket : public QObject {
 Q_OBJECT
 public:
-    JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject* parent = nullptr);
+    JsonSocket(std::unique_ptr<QTcpSocket> socket);
     virtual ~JsonSocket() = default;
+
+    void connectToHost(const std::string& host, int port);
+    QTcpSocket::SocketState state() const;
 
     void write(nlohmann::json json);
     nlohmann::json read();
-    QTcpSocket* socket();
+
+    std::string localAddress() const;
+    std::string peerAddress() const;
 
 signals:
     void readyRead();
+    void disconnected();
 
 private: 
     void readToBuffer();

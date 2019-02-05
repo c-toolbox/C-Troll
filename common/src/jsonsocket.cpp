@@ -38,34 +38,42 @@
 
 namespace common {
 
-JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject* parent)
-    : QObject(parent)
+JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket)
+    : QObject()
     , _socket(std::move(socket))
 {
-    QObject::connect(_socket.get(), &QTcpSocket::readyRead, [this]() { readToBuffer(); });
+    connect(_socket.get(), &QTcpSocket::readyRead, [this]() { readToBuffer(); });
+    connect(_socket.get(), &QTcpSocket::disconnected, this, &JsonSocket::disconnected);
     _socket->setProxy(QNetworkProxy::NoProxy);
+}
+void JsonSocket::connectToHost(const std::string& host, int port) {
+    _socket->connectToHost(QString::fromStdString(host), port);
+}
+
+QTcpSocket::SocketState JsonSocket::state() const {
+    return _socket->state();
 }
 
 void JsonSocket::write(nlohmann::json jsonDocument) {
     std::string jsonText = jsonDocument.dump();
-    QByteArray json(jsonText.c_str(), static_cast<int>(jsonText.size()));
-    QByteArray length = QString::number(json.size()).toUtf8();
+    std::string length = std::to_string(jsonText.size());
+    std::string msg = length + '#' + jsonText;
 
-    _socket->write(length);
-    _socket->write("#");
-    _socket->write(json);
+    _socket->write(msg.c_str());
     _socket->flush();
 }
 
 void JsonSocket::readToBuffer() {
     QByteArray incomingData = _socket->readAll();
-    std::copy(incomingData.begin(), incomingData.end(), std::back_inserter(_buffer));
+    _buffer.resize(incomingData.size());
+    std::copy(incomingData.begin(), incomingData.end(), _buffer.begin());
+
+    // If it is the first package to arrive, we extract the expected length of the message
     if (_payloadSize == -1) {
         auto it = std::find(_buffer.begin(), _buffer.end(), '#');
         if (it != _buffer.end()) {
-            std::string sizeString;
-            std::copy(_buffer.begin(), it, std::back_inserter(sizeString));
-            _payloadSize = QString::fromStdString(sizeString).toInt();
+            std::string sizeString(_buffer.begin(), it);
+            _payloadSize = std::stoi(sizeString);
             _buffer.erase(_buffer.begin(), it + 1);
         }
     }
@@ -89,8 +97,13 @@ nlohmann::json JsonSocket::read() {
     return nlohmann::json::parse(json);
 }
 
-QTcpSocket* JsonSocket::socket() {
-    return _socket.get();
+std::string JsonSocket::localAddress() const {
+    return _socket->localAddress().toString().toStdString();
+
+}
+
+std::string JsonSocket::peerAddress() const {
+    return _socket->peerAddress().toString().toStdString();
 }
 
 } // namespace common

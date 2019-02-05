@@ -64,8 +64,8 @@ void SocketHandler::readyRead(common::JsonSocket* socket) {
 void SocketHandler::sendMessage(const nlohmann::json& message) {
     Log("Sending message:\n" + message.dump());
     for (common::JsonSocket* jsonSocket : _sockets) {
-        std::string local = jsonSocket->socket()->localAddress().toString().toStdString();
-        std::string peer = jsonSocket->socket()->peerAddress().toString().toStdString();
+        std::string local = jsonSocket->localAddress();
+        std::string peer = jsonSocket->peerAddress();
         Log(local + " -> " + peer);
         jsonSocket->write(message);
     }
@@ -85,10 +85,8 @@ void SocketHandler::newConnection() {
         common::JsonSocket* jsonSocket = new common::JsonSocket(
             std::unique_ptr<QTcpSocket>(_server.nextPendingConnection()));
         
-        QTcpSocket* rawSocket = jsonSocket->socket();
-
         QObject::connect(
-            rawSocket, &QTcpSocket::disconnected,
+            jsonSocket, &common::JsonSocket::disconnected,
             [this, jsonSocket]() { disconnected(jsonSocket); }
         );
 

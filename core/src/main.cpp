@@ -34,7 +34,7 @@
 
 #include "application.h"
 #include "logging.h"
-#include "standardmainwindow.h"
+#include "mainwindow.h"
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -42,12 +42,12 @@
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
 
-    qInstallMessageHandler(StandardMainWindow::myMessageOutput);
+    qInstallMessageHandler(MainWindow::myMessageOutput);
 
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 
-    StandardMainWindow mainWindow("C-Troll-Core");
+    MainWindow mainWindow("C-Troll-Core");
 #ifdef QT_DEBUG
     mainWindow.show();
 #else

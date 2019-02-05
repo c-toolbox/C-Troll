@@ -93,10 +93,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
                 [this, c, node]() { readyRead(*c, node); }
             );
 
-            jsonSocket->socket()->connectToHost(
-                QString::fromStdString(node.ipAddress),
-                node.port
-            );
+            jsonSocket->connectToHost(node.ipAddress, node.port);
             std::string h = hash(*c, node);
             _sockets[h] = std::move(jsonSocket);
         }
@@ -112,9 +109,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
                     auto it = _sockets.find(h);
                     assert(it != _sockets.end());
 
-                    auto socket = it->second->socket();
-                               
-                    if (socket->state() == QAbstractSocket::SocketState::UnconnectedState) {
+                    if (it->second->state() == QAbstractSocket::SocketState::UnconnectedState) {
                         Log(
                             "Unconnected: " + node.ipAddress + ":" +
                             std::to_string(node.port)
@@ -123,10 +118,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
                             node.connected = false;
                             emit connectedStatusChanged(*c, node);
                         }
-                        socket->connectToHost(
-                            QString::fromStdString(node.ipAddress),
-                            node.port
-                        );
+                        it->second->connectToHost(node.ipAddress, node.port);
                     }
                 }
             }
@@ -156,7 +148,6 @@ void OutgoingSocketHandler::sendMessage(const Cluster& cluster, nlohmann::json m
         auto it = _sockets.find(h);
         assert(it != _sockets.end());
 
-        it->second->socket()->dumpObjectInfo();
         it->second->write(msg);
     }
 }

@@ -36,6 +36,12 @@ set(HEADER_FILES
     src/application.h
     src/cluster.h
     src/coreprocess.h
+    src/guiinitialization.h
+    src/guiprocesscommand.h
+    src/guistartcommand.h
+    src/guiprocessstatus.h
+    src/guiprocesslogmessage.h
+    src/guiprocesslogmessagehistory.h
     src/program.h
     src/handler/incomingsockethandler.h
     src/handler/outgoingsockethandler.h
@@ -45,6 +51,12 @@ set(SOURCE_FILES
     src/application.cpp
     src/cluster.cpp
     src/coreprocess.cpp
+    src/guiinitialization.cpp
+    src/guiprocesscommand.cpp
+    src/guistartcommand.cpp
+    src/guiprocessstatus.cpp
+    src/guiprocesslogmessage.cpp
+    src/guiprocesslogmessagehistory.cpp
     src/main.cpp
     src/program.cpp
     src/handler/incomingsockethandler.cpp

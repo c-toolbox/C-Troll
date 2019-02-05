@@ -34,22 +34,22 @@
 
 #include <iostream>
 
+#include "logging.h"
 #include "sockethandler.h"
+#include "mainwindow.h"
 #include "processhandler.h"
 #include <QApplication>
-#include <logging.h>
-#include <standardmainwindow.h>
 #include <json/json.hpp>
 
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
 
-    qInstallMessageHandler(StandardMainWindow::myMessageOutput);
+    qInstallMessageHandler(MainWindow::myMessageOutput);
 
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 
-    StandardMainWindow mainWindow("C-Troll-Tray");
+    MainWindow mainWindow("C-Troll-Tray");
 
     common::Log::initialize("tray");
 

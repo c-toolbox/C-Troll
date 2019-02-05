@@ -60,7 +60,7 @@ void IncomingSocketHandler::newConnection() {
         _sockets.push_back(jsonSocket);
 
         QObject::connect(
-            jsonSocket->socket(), &QTcpSocket::disconnected,
+            jsonSocket, &common::JsonSocket::disconnected,
             [this, jsonSocket]() { disconnectedConnection(jsonSocket); }
         );
 
