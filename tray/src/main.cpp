@@ -44,19 +44,50 @@
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
 
-    qInstallMessageHandler(MainWindow::myMessageOutput);
+    qInstallMessageHandler(
+        // The first message handler is used for Qt error messages that show up before
+        // the main window is initialized
+        [](QtMsgType type, const QMessageLogContext& context, const QString& msg) {
+            QByteArray localMsg = msg.toLocal8Bit();
+            switch (type) {
+            case QtDebugMsg:
+                std::cerr << "Debug: ";
+                break;
+            case QtWarningMsg:
+                std::cerr << "Warning: ";
+                break;
+            case QtCriticalMsg:
+                std::cerr << "Critical: ";
+                break;
+            case QtFatalMsg:
+                std::cerr << "Fatal: ";
+                break;
+            }
+
+            std::cerr << localMsg.constData() << " (" << context.file << ":" <<
+                context.line << ", " << context.function << ")\n";
+        }
+    );
+
 
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 
-    MainWindow mainWindow("C-Troll-Tray");
+    MainWindow mw("C-Troll-Tray");
 
-    common::Log::initialize("tray");
+    common::Log::initialize("tray", [&mw](std::string msg) { mw.log(msg); });
+
+    qInstallMessageHandler(
+        // Now that the log is enabled and available, we can pipe all Qt messages to that
+        [](QtMsgType, const QMessageLogContext&, const QString& msg) {
+            Log(msg.toStdString());
+        }
+    );
 
 #ifdef QT_DEBUG
-    mainWindow.show();
+    mw.show();
 #else
-    mainWindow.hide();
+    mw.hide();
 #endif // QT_DEBUG
 
     SocketHandler socketHandler;

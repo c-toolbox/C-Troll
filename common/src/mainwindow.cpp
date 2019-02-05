@@ -38,55 +38,63 @@
 #include <QHBoxLayout>
 #include <iostream>
 
-QTextEdit* MainWindow::_staticTextEdit = 0;
-
-void MainWindow::myMessageOutput(QtMsgType type, const QMessageLogContext& context,
-                                 const QString& msg)
-{
-    if (!_staticTextEdit) {
-        QByteArray localMsg = msg.toLocal8Bit();
-        switch (type) {
-            case QtDebugMsg:
-                std::cerr << "Debug: ";
-                break;
-            case QtWarningMsg:
-                std::cerr << "Warning: ";
-                break;
-            case QtCriticalMsg:
-                std::cerr << "Critical: ";
-                break;
-            case QtFatalMsg:
-                std::cerr << "Fatal: ";
-                break;
-        }
-        std::cerr << localMsg.constData() << " (" << context.file << ":" <<
-            context.line << ", " << context.function << ")\n";
-
-        if (type == QtFatalMsg) {
-            abort();
-        }
-    }
-    else {
-        switch (type) {
-            case QtDebugMsg:
-            case QtWarningMsg:
-            case QtCriticalMsg:
-                _staticTextEdit->append(msg);
-                break;
-            case QtFatalMsg:
-                abort();
-        }
-    }
+void MainWindow::log(std::string msg) {
+    _messageBox->append(QString::fromStdString(std::move(msg)));
 }
- 
+
+//QTextEdit* MainWindow::_staticTextEdit = 0;
+//
+//void MainWindow::myMessageOutput(QtMsgType type, const QMessageLogContext& context,
+//                                 const QString& msg)
+//{
+//    if (!_staticTextEdit) {
+//        QByteArray localMsg = msg.toLocal8Bit();
+//        switch (type) {
+//            case QtDebugMsg:
+//                std::cerr << "Debug: ";
+//                break;
+//            case QtInfoMsg:
+//                std::cerr << "Info: ";
+//                break;
+//            case QtWarningMsg:
+//                std::cerr << "Warning: ";
+//                break;
+//            case QtCriticalMsg:
+//                std::cerr << "Critical: ";
+//                break;
+//            case QtFatalMsg:
+//                std::cerr << "Fatal: ";
+//                break;
+//        }
+//        std::cerr << localMsg.constData() << " (" << context.file << ":" <<
+//            context.line << ", " << context.function << ")\n";
+//
+//        if (type == QtFatalMsg) {
+//            abort();
+//        }
+//    }
+//    else {
+//        switch (type) {
+//            case QtDebugMsg:
+//            case QtInfoMsg:
+//            case QtWarningMsg:
+//            case QtCriticalMsg:
+//                _staticTextEdit->append(msg);
+//                break;
+//            case QtFatalMsg:
+//                abort();
+//        }
+//    }
+//}
+// 
 MainWindow::MainWindow(const QString& title)
     : QMainWindow()
 {
     setWindowTitle(title);
     setMinimumSize(512, 256);
 
-    _staticTextEdit = new QTextEdit();
-    setCentralWidget(_staticTextEdit);
+    _messageBox = new QTextEdit();
+    setCentralWidget(_messageBox);
  
     // Initialize the tray icon, set the icon of a set of system icons,
     // as well as set a tooltip

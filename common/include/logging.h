@@ -36,6 +36,7 @@
 #define __LOGGING_H__
 
 #include <fstream>
+#include <functional>
 #include <string>
 
 namespace common {
@@ -55,7 +56,8 @@ public:
      * \param application The name of the application. This is used for creating
      * unique(ish) names for the log.
      */
-    static void initialize(std::string application);
+    static void initialize(std::string application,
+        std::function<void(std::string)> loggingFunction);
     
     /**
      * Returns the static reference to the Log instance.
@@ -88,6 +90,8 @@ private:
     
     /// The log file to which all messages from the logMessage method get logged
     std::ofstream _file;
+
+    std::function<void(std::string)> _loggingFunction;
 };
     
 } // namespace common

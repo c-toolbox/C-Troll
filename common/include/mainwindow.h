@@ -45,14 +45,11 @@ namespace Ui { class MainWindow; }
  
 class MainWindow : public QMainWindow {
 Q_OBJECT
- 
 public:
     explicit MainWindow(const QString& title);
 
-    static QTextEdit* _staticTextEdit;
-    static void myMessageOutput(QtMsgType type, const QMessageLogContext& context,
-        const QString& msg);
- 
+    void log(std::string msg);
+
 protected:
     void closeEvent(QCloseEvent* event);
     void changeEvent(QEvent* event);
@@ -62,6 +59,7 @@ private slots:
  
 private:
     // Declare the object of future applications for the tray icon
+    QTextEdit* _messageBox;
     QSystemTrayIcon* _trayIcon;
 };
  

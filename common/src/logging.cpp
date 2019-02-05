@@ -34,7 +34,6 @@
 
 #include "logging.h"
 
-#include <QDebug>
 #include <assert.h>
 
 #ifdef WIN32
@@ -50,9 +49,12 @@ namespace common {
 
 Log* Log::_log;
     
-void Log::initialize(std::string application) {
+void Log::initialize(std::string application,
+                     std::function<void(std::string)> loggingFunction)
+{
     assert(!application.empty());
     _log = new Log(std::move(application));
+    _log->_loggingFunction = std::move(loggingFunction);
 }
     
 Log& Log::ref() {
@@ -73,8 +75,7 @@ void Log::logMessage(std::string message) {
     _file << message << '\n';
     _file.flush();
 
-    // Then the console
-    qDebug() << QString::fromStdString(message);
+    _loggingFunction(message);
 
     // And if we are running in Visual Studio, this output, too
 #ifdef WIN32
