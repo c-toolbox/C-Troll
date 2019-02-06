@@ -45,19 +45,13 @@ namespace {
     }
 } // namespace
 
-// This is just here so that we can use a forward declaration in the header file
-OutgoingSocketHandler::~OutgoingSocketHandler() = default;
+OutgoingSocketHandler::OutgoingSocketHandler(std::vector<Cluster>& clusters)
+    : _clusters(clusters)
+{}
 
-void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
-    std::copy_if(
-        clusters.cbegin(),
-        clusters.cend(),
-        std::back_inserter(_clusters),
-        [](const Cluster* cluster) { return cluster->isEnabled; }
-    );
-
-    for (Cluster* c : _clusters) {
-        for (Cluster::Node& node : c->nodes) {
+void OutgoingSocketHandler::initialize() {
+    for (Cluster& c : _clusters) {
+        for (Cluster::Node& node : c.nodes) {
             // This handler keeps the sockets to the tray applications open
             std::unique_ptr<QTcpSocket> socket = std::make_unique<QTcpSocket>();
             connect(
@@ -70,7 +64,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
                         );
                         if (!node.connected) {
                             node.connected = true;
-                            emit connectedStatusChanged(*c, node);
+                            emit connectedStatusChanged(c, node);
                         }
                     }
                     else if (state == QAbstractSocket::SocketState::ClosingState) {
@@ -80,7 +74,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
                         );
                         if (node.connected) {
                             node.connected = false;
-                            emit connectedStatusChanged(*c, node);
+                            emit connectedStatusChanged(c, node);
                         }
                     }
                 }
@@ -90,11 +84,11 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
 
             connect(
                 jsonSocket.get(), &common::JsonSocket::readyRead,
-                [this, c, node]() { readyRead(*c, node); }
+                [this, c, node]() { readyRead(c, node); }
             );
 
             jsonSocket->connectToHost(node.ipAddress, node.port);
-            std::string h = hash(*c, node);
+            std::string h = hash(c, node);
             _sockets[h] = std::move(jsonSocket);
         }
     }
@@ -103,9 +97,9 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
     connect(
         timer, &QTimer::timeout,
         [this]() {
-            for (Cluster* c : _clusters) {
-                for (Cluster::Node& node : c->nodes) {
-                    std::string h = hash(*c, node);
+            for (Cluster& c : _clusters) {
+                for (Cluster::Node& node : c.nodes) {
+                    std::string h = hash(c, node);
                     auto it = _sockets.find(h);
                     assert(it != _sockets.end());
 
@@ -116,7 +110,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
                         );
                         if (node.connected) {
                             node.connected = false;
-                            emit connectedStatusChanged(*c, node);
+                            emit connectedStatusChanged(c, node);
                         }
                         it->second->connectToHost(node.ipAddress, node.port);
                     }

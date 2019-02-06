@@ -44,15 +44,15 @@ class Process;
 
 class Program {
 public:
-    Program() = default;
-    ~Program();
-    
     struct Configuration {
         std::string id;
         std::string name;
         std::map<std::string, std::string> clusterCommandlineParameters;
     };
 
+    Program() = default;
+    ~Program();
+    
     /// A unique identifier
     std::string id;
     /// A human readable name for this Program

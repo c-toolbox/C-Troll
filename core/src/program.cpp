@@ -69,7 +69,6 @@ void from_json(const nlohmann::json& j, Program::Configuration& p) {
     j.at(KeyClusterCommandlineParameters).get_to(p.clusterCommandlineParameters);
 }
 
-
 void to_json(nlohmann::json& j, const Program& p) {
     j = {
         { KeyId, p.id },

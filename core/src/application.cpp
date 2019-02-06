@@ -55,6 +55,7 @@ namespace {
 
 Application::Application(std::string configurationFile)
     : _configurationFile(std::move(configurationFile))
+    , _outgoingSocketHandler(_clusters)
 {
     initalize();
 }
@@ -95,15 +96,7 @@ void Application::initalize(bool resetGUIconnection) {
         _incomingSocketHandler.initialize(listeningPort);
     }
 
-    // The outgoing socket handler takes care of messages to the Tray
-    QList<Cluster*> clusters;
-    std::transform(
-        _clusters.begin(),
-        _clusters.end(),
-        std::back_inserter(clusters),
-        [](Cluster& cluster) { return &cluster; }
-    );
-    _outgoingSocketHandler.initialize(clusters);
+    _outgoingSocketHandler.initialize();
 
     if (resetGUIconnection) {
         QObject::connect(
@@ -216,15 +209,10 @@ void Application::handleTrayProcessLogMessage(const Cluster&,
 
     Log(logMessage.message);
 
-    CoreProcess::NodeLogMessage::OutputType type;
-    switch (logMessage.outputType) {
-        case common::TrayProcessLogMessage::OutputType::StdOut:
-            type = CoreProcess::NodeLogMessage::OutputType::StdOut;
-            break;
-        case common::TrayProcessLogMessage::OutputType::StdErr:
-            type = CoreProcess::NodeLogMessage::OutputType::StdError;
-            break;
-    }
+    CoreProcess::NodeLogMessage::OutputType type =
+        logMessage.outputType == common::TrayProcessLogMessage::OutputType::StdOut ?
+        CoreProcess::NodeLogMessage::OutputType::StdOut :
+        CoreProcess::NodeLogMessage::OutputType::StdError;
     iProcess->pushNodeMessage(node.id, type, logMessage.message);
 
     sendLatestLogMessage(*iProcess, node.id);
@@ -442,7 +430,6 @@ void Application::sendTrayCommand(const Cluster& cluster,
                                   const common::TrayCommand& command)
 {
     // Generate identifier
-    
     Log("Sending Message: ");
     Log("Cluster:" + cluster.name + cluster.id);
     Log("\tCommand: " + command.command);

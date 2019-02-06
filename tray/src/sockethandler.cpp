@@ -40,10 +40,6 @@
 #include <memory>
 #include <logging.h>
 
-SocketHandler::SocketHandler() {}
-
-SocketHandler::~SocketHandler() {}
-
 void SocketHandler::initialize() {
     const int port = 5000;
     
@@ -83,7 +79,8 @@ void SocketHandler::disconnected(common::JsonSocket* socket) {
 void SocketHandler::newConnection() {
     while (_server.hasPendingConnections()) {
         common::JsonSocket* jsonSocket = new common::JsonSocket(
-            std::unique_ptr<QTcpSocket>(_server.nextPendingConnection()));
+            std::unique_ptr<QTcpSocket>(_server.nextPendingConnection())
+        );
         
         QObject::connect(
             jsonSocket, &common::JsonSocket::disconnected,

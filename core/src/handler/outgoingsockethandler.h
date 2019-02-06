@@ -46,9 +46,9 @@
 class OutgoingSocketHandler : public QObject {
 Q_OBJECT
 public:
-    ~OutgoingSocketHandler();
+    OutgoingSocketHandler(std::vector<Cluster>& clusters);
 
-    void initialize(const QList<Cluster*>& clusters);
+    void initialize();
     void deinitialize();
 
     void sendMessage(const Cluster& cluster, nlohmann::json message) const;
@@ -61,7 +61,7 @@ signals:
 private:
     void readyRead(const Cluster& cluster, const Cluster::Node& node);
 
-    QList<Cluster*> _clusters;
+    std::vector<Cluster>& _clusters;
     std::map<std::string, std::unique_ptr<common::JsonSocket>> _sockets;
 };
 

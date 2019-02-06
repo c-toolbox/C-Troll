@@ -44,8 +44,6 @@ namespace common { class JsonSocket; }
 class SocketHandler : public QObject {
 Q_OBJECT
 public:
-    SocketHandler();
-    ~SocketHandler();
     void newConnection();
     void disconnected(common::JsonSocket*);
     void readyRead(common::JsonSocket*);

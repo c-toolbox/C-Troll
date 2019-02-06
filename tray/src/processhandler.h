@@ -48,7 +48,7 @@ Q_OBJECT
 
 public slots:
     void handleSocketMessage(const nlohmann::json& message);
-    // Process slots
+
     void handlerErrorOccurred(QProcess::ProcessError error);
     void handleFinished(int exitCode);
     void handleFinished(int exitCode, QProcess::ExitStatus exitStatus);
@@ -64,10 +64,9 @@ private:
         const common::TrayCommand& command);
     void createAndRunProcessFromTrayCommand(const common::TrayCommand& command);
     
-    // The key of this map is a unique id (recieved from core)
+    // The key of this map is a unique id (received from core)
     // The value is the process which is running
-    using ProcessMap = std::map<int, QProcess*>;
-    ProcessMap _processes;
+    std::map<int, QProcess*> _processes;
 };
 
 #endif
