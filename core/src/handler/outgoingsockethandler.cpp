@@ -53,7 +53,7 @@ void OutgoingSocketHandler::initialize(const QList<Cluster*>& clusters) {
         clusters.cbegin(),
         clusters.cend(),
         std::back_inserter(_clusters),
-        [](const Cluster* cluster) { return cluster->enabled; }
+        [](const Cluster* cluster) { return cluster->isEnabled; }
     );
 
     for (Cluster* c : _clusters) {

@@ -108,7 +108,7 @@ void to_json(nlohmann::json& j, const GuiInitialization::Cluster& p) {
     j = nlohmann::json {
         { KeyClusterName, p.name },
         { KeyClusterId, p.id },
-        { KeyClusterEnabled, p.enabled },
+        { KeyClusterEnabled, p.isEnabled },
         { KeyClusterConnected, p.connected }
     };
 }
@@ -161,7 +161,7 @@ void from_json(const nlohmann::json& j, GuiInitialization::Application::Configur
 void from_json(const nlohmann::json& j, GuiInitialization::Cluster& p) {
     j.at(KeyClusterName).get_to(p.name);
     j.at(KeyClusterId).get_to(p.id);
-    j.at(KeyClusterEnabled).get_to(p.enabled);
+    j.at(KeyClusterEnabled).get_to(p.isEnabled);
 }
 
 void from_json(const nlohmann::json& j, GuiInitialization::Process& p) {

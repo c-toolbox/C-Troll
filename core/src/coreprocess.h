@@ -35,23 +35,15 @@
 #ifndef __COREPROCESS_H__
 #define __COREPROCESS_H__
 
-#include "cluster.h"
 #include "guiinitialization.h"
 #include "guiprocesslogmessage.h"
 #include "guiprocesslogmessagehistory.h"
-#include "program.h"
+#include "guiprocessstatus.h"
 #include "traycommand.h"
-#include "handler/incomingsockethandler.h"
-#include "handler/outgoingsockethandler.h"
 #include <chrono>
 
-namespace common {
-    struct GuiCommand;
-    struct GuiProcessStatus;
-    struct TrayProcessStatus;
-    struct TrayProcessLogMessage;
-    class JsonSocket;
-} // namespace common
+class Cluster;
+class Program;
 
 class CoreProcess {
 public:
@@ -70,7 +62,7 @@ public:
 
     struct NodeError {
         enum class Error {
-            TimedOut,
+            TimedOut = 0,
             WriteError,
             ReadError,
             UnknownError
@@ -110,45 +102,35 @@ public:
     };
 
     CoreProcess(Program& program, const std::string& configurationId, Cluster& cluster);
-    int id() const;
-    Program& application() const;
-    std::string configurationId() const;
-    Cluster& cluster() const;
-
-    common::GuiInitialization::Process toGuiInitializationProcess() const;
-    common::GuiProcessStatus toGuiProcessStatus(const std::string& nodeId) const;
-    common::GuiProcessLogMessage latestGuiProcessLogMessage(const std::string& nodeId) const;
-    common::GuiProcessLogMessageHistory guiProcessLogMessageHistory() const;
-    common::TrayCommand startProcessCommand() const;
-    common::TrayCommand exitProcessCommand() const;
 
     void pushNodeStatus(std::string nodeId, NodeStatus::Status status);
     void pushNodeError(std::string nodeId, NodeError::Error error);
-    void pushNodeStdOut(std::string nodeId, std::string message);
-    void pushNodeStdError(std::string nodeId, std::string message);
+    void pushNodeMessage(const std::string& nodeId, NodeLogMessage::OutputType type,
+        std::string message);
 
-    NodeStatus latestNodeStatus(std::string nodeId) const;
-    NodeLogMessage latestLogMessage(std::string nodeId) const;
+    int id;
+    Program& application;
+    std::string configurationId;
+    Cluster& cluster;
+    std::map<std::string, NodeLog> nodeLogs;
+    ClusterStatus clusterStatus = { CoreProcess::ClusterStatus::Status::Starting };
 
 private:
-    bool allNodesHasStatus(NodeStatus::Status status);
-    bool anyNodeHasStatus(NodeStatus::Status status);
+    static int nextId;
 
-    static std::string nodeStatusToGuiNodeStatus(NodeStatus::Status status);
-    static std::string clusterStatusToGuiClusterStatus(ClusterStatus::Status status);
-    static double timeToGuiTime(std::chrono::system_clock::time_point time);
-
-    int _id;
-    Program& _application;
-    std::string _configurationId;
-    Cluster& _cluster;
-    static int _nextId;
-    std::map<std::string, NodeLog> _nodeLogs;
-    ClusterStatus _clusterStatus;
-
-    int _nextLogMessageId = 0;
-    int _nextNodeErrorId = 0;
-    int _nextNodeStatusId = 0;
+    int nextLogMessageId = 0;
+    int nextNodeErrorId = 0;
+    int nextNodeStatusId = 0;
 };
+
+common::GuiInitialization::Process coreProcessToGuiProcess(const CoreProcess& process);
+common::GuiProcessStatus coreProcessToProcessStatus(const CoreProcess& process,
+    const std::string& nodeId);
+common::GuiProcessLogMessage latestGuiProcessLogMessage(const CoreProcess& process,
+    const std::string& nodeId);
+common::GuiProcessLogMessageHistory logMessageHistory(const CoreProcess& proc);
+
+common::TrayCommand startProcessCommand(const CoreProcess& proc);
+common::TrayCommand exitProcessCommand(const CoreProcess& proc);
 
 #endif // __COREPROCESS_H__

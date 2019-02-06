@@ -34,10 +34,9 @@
 
 #include "program.h"
 
-#include <QDirIterator>
-#include <QCryptographicHash>
-#include <cassert>
-#include <logging.h>
+#include "jsonload.h"
+#include "logging.h"
+#include <assert.h>
 
 namespace {
     constexpr const char* KeyId = "id";
@@ -57,6 +56,19 @@ namespace {
     constexpr const char* KeyConfigurationIdentifier = "identifier";
     constexpr const char* KeyConfigurationParameters = "commandlineParameters";
 } // namespace
+
+void to_json(nlohmann::json& j, const Program::Configuration& p) {
+    j = {
+        { KeyConfigurationName, p.name },
+        { KeyClusterCommandlineParameters, p.clusterCommandlineParameters }
+    };
+}
+
+void from_json(const nlohmann::json& j, Program::Configuration& p) {
+    j.at(KeyConfigurationName).get_to(p.name);
+    j.at(KeyClusterCommandlineParameters).get_to(p.clusterCommandlineParameters);
+}
+
 
 void to_json(nlohmann::json& j, const Program& p) {
     j = {
@@ -89,13 +101,6 @@ void to_json(nlohmann::json& j, const Program& p) {
         j[KeyDefaults][KeyDefaultCluster] = p.defaultCluster;
         j[KeyDefaults][KeyDefaultConfiguration] = p.defaultConfiguration;
     }
-}
-
-void to_json(nlohmann::json& j, const Program::Configuration& p) {
-    j = {
-        { KeyConfigurationName, p.name },
-        { KeyClusterCommandlineParameters, p.clusterCommandlineParameters }
-    };
 }
 
 void from_json(const nlohmann::json& j, Program& p) {
@@ -131,85 +136,35 @@ void from_json(const nlohmann::json& j, Program& p) {
     }
 }
 
-void from_json(const nlohmann::json& j, Program::Configuration& p) {
-    j.at(KeyConfigurationName).get_to(p.name);
-    j.at(KeyClusterCommandlineParameters).get_to(p.clusterCommandlineParameters);
-}
-
-Program loadProgram(const std::string& jsonFile, const std::string& baseDirectory) {
-    QString identifier = QDir(QString::fromStdString(baseDirectory)).relativeFilePath(QString::fromStdString(jsonFile));
-
-    // relativeFilePath will have the baseDirectory in the beginning of the relative path
-    // and we want to remove it:  baseDirectory.length() + 1
-    // then, we want to remove the extension of 5 characters (.json)
-    // So we take the middle part of the string:
-    identifier = identifier.mid(
-        // length of the base directory + '/'
-        static_cast<int>(baseDirectory.length() + 1),
-        // total length - (stuff we removed in the beginning) - length('.json')
-        static_cast<int>(identifier.size() - (baseDirectory.length() + 1) - 5)
-    );
-
-    std::ifstream f(jsonFile);
-    nlohmann::json obj;
-    f >> obj;
-    obj["id"] = identifier.toStdString();
-    return Program(obj);
-}
-
 std::vector<Program> loadProgramsFromDirectory(const std::string& directory) {
-    std::vector<Program> res;
-
-    // First, get all the *.json files from the directory and subdirectories
-    QDirIterator it(
-        QString::fromStdString(directory),
-        QStringList() << "*.json",
-        QDir::Files,
-        QDirIterator::Subdirectories
-    );
-    while (it.hasNext()) {
-        QString file = it.next();
-        Log("Loading application file " + file.toStdString());
-        try {
-            Program program = loadProgram(file.toStdString(), directory);
-            res.push_back(std::move(program));
-        }
-        catch (const std::runtime_error& e) {
-            Log("Failed to load application file " + file.toStdString() + ". " + e.what());
-        }
-    }
-    return res;
+    return common::loadJsonFromDirectory<Program>(directory, "application");
 }
 
-common::GuiInitialization::Application Program::toGuiInitializationApplication() const {
+common::GuiInitialization::Application programToGuiApplication(const Program& prog) {
     common::GuiInitialization::Application app;
-    app.name = name;
-    app.id = id;
-    app.tags = tags;
+    app.name = prog.name;
+    app.id = prog.id;
+    app.tags = prog.tags;
 
-    for (const Program::Configuration& conf : configurations) {
+    for (const Program::Configuration& conf : prog.configurations) {
         common::GuiInitialization::Application::Configuration c;
         c.name = conf.name;
         c.id = conf.id;
-        for (const std::pair<std::string, std::string>& p : conf.clusterCommandlineParameters) {
+        for (const std::pair<std::string, std::string>& p :
+             conf.clusterCommandlineParameters)
+        {
             c.clusters.push_back(p.first);
         }
 
         app.configurations.push_back(c);
     }
 
-    app.defaultCluster = defaultCluster;
-    app.defaultConfiguration = defaultConfiguration;
+    app.defaultCluster = prog.defaultCluster;
+    app.defaultConfiguration = prog.defaultConfiguration;
     
     return app;
 }
 
 Program::~Program() {
     assert(processes.empty());
-}
-
-QByteArray Program::hash() const {
-    nlohmann::json doc = *this;
-    std::string input = doc.dump();
-    return QCryptographicHash::hash(input.c_str(), QCryptographicHash::Sha1);
 }

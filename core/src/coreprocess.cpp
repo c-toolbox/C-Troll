@@ -38,180 +38,36 @@
 #include "program.h"
 #include "guiprocessstatus.h"
 #include <logging.h>
-#include <QDirIterator>
 #include <cassert>
 
-int CoreProcess::_nextId = 0;
+namespace {
 
-CoreProcess::CoreProcess(Program& application, const std::string& configurationId,
-                         Cluster& cluster)
-    : _id(_nextId++)
-    , _application(application)
-    , _configurationId(std::move(configurationId))
-    , _cluster(cluster)
-    , _clusterStatus({ CoreProcess::ClusterStatus::Status::Starting })
-{}
-
-int CoreProcess::id() const {
-    return _id;
+bool hasStatus(const CoreProcess::NodeLog& l, CoreProcess::NodeStatus::Status status) {
+    return !l.statuses.empty() && l.statuses.back().status == status;
 }
 
-Program& CoreProcess::application() const {
-    return _application;
-}
-
-std::string CoreProcess::configurationId() const {
-    return _configurationId;
-}
-
-Cluster& CoreProcess::cluster() const {
-    return _cluster;
-}
-
-bool CoreProcess::allNodesHasStatus(CoreProcess::NodeStatus::Status status) {
-    bool allHasStatus = true;
-    if (_nodeLogs.size() == 0) return false;
-
-    for (const std::pair<std::string, NodeLog>& p : _nodeLogs) {
-        if (p.second.statuses.size() == 0) {
-            allHasStatus = false;
-            break;
-        }
-        if (p.second.statuses.back().status != status) {
-            allHasStatus = false;
-            break;
-        }
-    }
-
-    for (auto iNode = _nodeLogs.begin(); iNode != _nodeLogs.end(); iNode++) {
-    }
-    return allHasStatus;
-}
-
-bool CoreProcess::anyNodeHasStatus(CoreProcess::NodeStatus::Status status) {
-    for (const std::pair<std::string, NodeLog>& p : _nodeLogs) {
-        if (p.second.statuses.empty()) {
-            continue;
-        }
-        if (p.second.statuses.back().status == status) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void CoreProcess::pushNodeStatus(std::string nodeId,
-                                 CoreProcess::NodeStatus::Status nodeStatus)
-{
-    CoreProcess::ClusterStatus::Status clusterStatus = _clusterStatus.status;
-    _nodeLogs[nodeId].statuses.push_back(
-        { nodeStatus, std::chrono::system_clock::now(), _nextNodeStatusId++ }
-    );
-
-    switch (nodeStatus) {
-        case CoreProcess::NodeStatus::Status::Starting:
-            clusterStatus = CoreProcess::ClusterStatus::Status::Starting;
-            break;
-        case CoreProcess::NodeStatus::Status::Running:
-            if (allNodesHasStatus(CoreProcess::NodeStatus::Status::Running)) {
-                clusterStatus = CoreProcess::ClusterStatus::Status::Running;
+bool allNodesHaveStatus(const CoreProcess& proc, CoreProcess::NodeStatus::Status status) {
+    return !proc.nodeLogs.empty() &&
+        std::all_of(
+            proc.nodeLogs.begin(),
+            proc.nodeLogs.end(),
+            [status](const std::pair<std::string, CoreProcess::NodeLog>& p) {
+                return hasStatus(p.second, status);
             }
-            break;
-        case CoreProcess::NodeStatus::Status::NormalExit:
-            if (allNodesHasStatus(CoreProcess::NodeStatus::Status::NormalExit)) {
-                clusterStatus = CoreProcess::ClusterStatus::Status::Exit;
-            }
-            else if (!anyNodeHasStatus(CoreProcess::NodeStatus::Status::CrashExit)) {
-                clusterStatus = CoreProcess::ClusterStatus::Status::PartialExit;
-            }
-            break;
-        case CoreProcess::NodeStatus::Status::CrashExit:
-            clusterStatus = CoreProcess::ClusterStatus::Status::CrashExit;
-            break;
-        case CoreProcess::NodeStatus::Status::FailedToStart:
-            clusterStatus = CoreProcess::ClusterStatus::Status::FailedToStart;
-            break;
-    }
-
-    if (_clusterStatus.status != clusterStatus) {
-        _clusterStatus = { clusterStatus, std::chrono::system_clock::now() };
-    }
+        );
 }
 
-CoreProcess::NodeStatus CoreProcess::latestNodeStatus(std::string nodeId) const {
-    auto iNodeLog = _nodeLogs.find(nodeId);
-    if (iNodeLog == _nodeLogs.end()) {
-        return { NodeStatus::Status::Unknown, std::chrono::system_clock::now() };
-    }
-    return iNodeLog->second.statuses.back();
-}
-
-CoreProcess::NodeLogMessage CoreProcess::latestLogMessage(std::string nodeId) const {
-    auto iNodeLog = _nodeLogs.find(nodeId);
-    if (iNodeLog == _nodeLogs.end()) {
-        return CoreProcess::NodeLogMessage();
-    }
-    return iNodeLog->second.messages.back();
-}
-
-void CoreProcess::pushNodeError(std::string nodeId, NodeError::Error nodeError) {
-    _nodeLogs[nodeId].errors.push_back(
-        { nodeError, std::chrono::system_clock::now(), _nextNodeErrorId++ }
+bool anyNodeHasStatus(const CoreProcess& proc, CoreProcess::NodeStatus::Status status) {
+    return std::any_of(
+        proc.nodeLogs.begin(),
+        proc.nodeLogs.end(),
+        [status](const std::pair<std::string, CoreProcess::NodeLog>& p) {
+            return hasStatus(p.second, status);
+        }
     );
 }
 
-void CoreProcess::pushNodeStdOut(std::string nodeId, std::string message) {
-    _nodeLogs[nodeId].messages.push_back({
-        message,
-        std::chrono::system_clock::now(),
-        CoreProcess::NodeLogMessage::OutputType::StdOut,
-        _nextLogMessageId++
-    });
-}
-
-void CoreProcess::pushNodeStdError(std::string nodeId, std::string message) {
-    _nodeLogs[nodeId].messages.push_back({
-        message,
-        std::chrono::system_clock::now(),
-        CoreProcess::NodeLogMessage::OutputType::StdError,
-        _nextLogMessageId++
-    });
-}
-
-common::GuiInitialization::Process CoreProcess::toGuiInitializationProcess() const {
-    common::GuiInitialization::Process proc;
-    proc.id = _id;
-    proc.applicationId = _application.id;
-    proc.clusterId = _cluster.id;
-    proc.configurationId = _configurationId;
-    proc.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status);
-    proc.clusterStatusTime = timeToGuiTime(_clusterStatus.time);
-
-    std::vector<common::GuiInitialization::Process::NodeStatus> nodeStatusHistory;
-    for (const std::pair<std::string, NodeLog>& p : _nodeLogs) {
-        for (NodeStatus status : p.second.statuses) {
-            common::GuiInitialization::Process::NodeStatus nodeStatusObject;
-            nodeStatusObject.status = nodeStatusToGuiNodeStatus(status.status);
-            nodeStatusObject.time = timeToGuiTime(status.time);
-            nodeStatusObject.node = p.first;
-            nodeStatusObject.id = status.id;
-            nodeStatusHistory.push_back(nodeStatusObject);
-        }
-    }
-
-    using NS = common::GuiInitialization::Process::NodeStatus;
-    std::sort(
-        nodeStatusHistory.begin(),
-        nodeStatusHistory.end(),
-        [](NS& a, NS& b) { return a.time < b.time; }
-    );
-    
-    proc.nodeStatusHistory = std::move(nodeStatusHistory);
-
-    return proc;
-}
-
-std::string CoreProcess::nodeStatusToGuiNodeStatus(CoreProcess::NodeStatus::Status status) {
+std::string nodeStatusToGuiNodeStatus(CoreProcess::NodeStatus::Status status) {
     switch (status) {
         case CoreProcess::NodeStatus::Status::Starting:
             return "Starting";
@@ -229,7 +85,7 @@ std::string CoreProcess::nodeStatusToGuiNodeStatus(CoreProcess::NodeStatus::Stat
     }
 }
 
-std::string CoreProcess::clusterStatusToGuiClusterStatus(CoreProcess::ClusterStatus::Status status) {
+std::string clusterStatusToGuiClusterStatus(CoreProcess::ClusterStatus::Status status) {
     switch (status) {
         case CoreProcess::ClusterStatus::Status::Starting:
             return "Starting";
@@ -249,32 +105,88 @@ std::string CoreProcess::clusterStatusToGuiClusterStatus(CoreProcess::ClusterSta
     }
 }
 
-double CoreProcess::timeToGuiTime(std::chrono::system_clock::time_point time) {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count();
+double timeToGuiTime(std::chrono::system_clock::time_point time) {
+    using namespace std::chrono;
+    return duration_cast<milliseconds>(time.time_since_epoch()).count();
 }
 
-common::GuiProcessStatus CoreProcess::toGuiProcessStatus(const std::string& nodeId) const {
+
+} // namespace
+
+common::GuiInitialization::Process coreProcessToGuiProcess(const CoreProcess& process) {
+    common::GuiInitialization::Process proc;
+    proc.id = process.id;
+    proc.applicationId = process.application.id;
+    proc.clusterId = process.cluster.id;
+    proc.configurationId = process.configurationId;
+    proc.clusterStatus = clusterStatusToGuiClusterStatus(process.clusterStatus.status);
+    proc.clusterStatusTime = timeToGuiTime(process.clusterStatus.time);
+
+    std::vector<common::GuiInitialization::Process::NodeStatus> nodeStatusHistory;
+    for (const std::pair<std::string, CoreProcess::NodeLog>& p : process.nodeLogs) {
+        for (CoreProcess::NodeStatus status : p.second.statuses) {
+            common::GuiInitialization::Process::NodeStatus nodeStatusObject;
+            nodeStatusObject.status = nodeStatusToGuiNodeStatus(status.status);
+            nodeStatusObject.time = timeToGuiTime(status.time);
+            nodeStatusObject.node = p.first;
+            nodeStatusObject.id = status.id;
+            nodeStatusHistory.push_back(nodeStatusObject);
+        }
+    }
+
+    using NS = common::GuiInitialization::Process::NodeStatus;
+    std::sort(
+        nodeStatusHistory.begin(),
+        nodeStatusHistory.end(),
+        [](NS& a, NS& b) { return a.time < b.time; }
+    );
+
+    proc.nodeStatusHistory = std::move(nodeStatusHistory);
+
+    return proc;
+}
+
+common::GuiProcessStatus coreProcessToProcessStatus(const CoreProcess& proc,
+                                                    const std::string& nodeId)
+{
     common::GuiProcessStatus g;
-    g.processId = _id;
-    g.applicationId = _application.id;
-    g.clusterId = _cluster.id;
-    CoreProcess::NodeStatus nodeStatus = latestNodeStatus(nodeId);
+    g.processId = proc.id;
+    g.applicationId = proc.application.id;
+    g.clusterId = proc.cluster.id;
+
+    auto iNodeLog = proc.nodeLogs.find(nodeId);
+    CoreProcess::NodeStatus nodeStatus;
+    if (iNodeLog == proc.nodeLogs.end()) {
+        nodeStatus = {
+            CoreProcess::NodeStatus::Status::Unknown,
+            std::chrono::system_clock::now()
+        };
+    }
+    else {
+        nodeStatus = iNodeLog->second.statuses.back();
+    }
+
     g.id = nodeStatus.id;
     g.nodeStatus[nodeId] = nodeStatusToGuiNodeStatus(nodeStatus.status);
     g.time = timeToGuiTime(nodeStatus.time);
-    g.clusterStatus = clusterStatusToGuiClusterStatus(_clusterStatus.status);
+    g.clusterStatus = clusterStatusToGuiClusterStatus(proc.clusterStatus.status);
     return g;
 }
 
-common::GuiProcessLogMessage
-CoreProcess::latestGuiProcessLogMessage(const std::string& nodeId) const
+common::GuiProcessLogMessage latestGuiProcessLogMessage(const CoreProcess& proc,
+                                                        const std::string& nodeId)
 {
     common::GuiProcessLogMessage g;
-    g.processId = _id;
-    g.applicationId = _application.id;
-    g.clusterId = _cluster.id;
+    g.processId = proc.id;
+    g.applicationId = proc.application.id;
+    g.clusterId = proc.cluster.id;
     g.nodeId = nodeId;
-    CoreProcess::NodeLogMessage logMessage = latestLogMessage(nodeId);
+
+    CoreProcess::NodeLogMessage logMessage;
+    auto iNodeLog = proc.nodeLogs.find(nodeId);
+    if (iNodeLog != proc.nodeLogs.end()) {
+        logMessage = iNodeLog->second.messages.back();
+    }
     g.id = logMessage.id;
     g.logMessage = logMessage.message;
     g.time = timeToGuiTime(logMessage.time);
@@ -282,27 +194,27 @@ CoreProcess::latestGuiProcessLogMessage(const std::string& nodeId) const
     return g;
 }
 
-common::GuiProcessLogMessageHistory CoreProcess::guiProcessLogMessageHistory() const {
+common::GuiProcessLogMessageHistory logMessageHistory(const CoreProcess& proc) {
     common::GuiProcessLogMessageHistory h;
-    h.processId = _id;
-    h.applicationId = _application.id;
-    h.clusterId = _cluster.id;
+    h.processId = proc.id;
+    h.applicationId = proc.application.id;
+    h.clusterId = proc.cluster.id;
 
     std::vector<common::GuiProcessLogMessageHistory::LogMessage> guiLog;
-    for (const std::pair<std::string, NodeLog>& p : _nodeLogs) {
-        for (const NodeLogMessage& logMessage : p.second.messages) {
+    for (const std::pair<std::string, CoreProcess::NodeLog>& p : proc.nodeLogs) {
+        for (const CoreProcess::NodeLogMessage& logMessage : p.second.messages) {
             common::GuiProcessLogMessageHistory::LogMessage guiMessage;
             guiMessage.nodeId = p.first;
             guiMessage.id = logMessage.id;
             guiMessage.message = logMessage.message;
             guiMessage.time = timeToGuiTime(logMessage.time);
             switch (logMessage.outputType) {
-                case CoreProcess::NodeLogMessage::OutputType::StdOut:
-                    guiMessage.outputType = "stdout";
-                    break;
-                case CoreProcess::NodeLogMessage::OutputType::StdError:
-                    guiMessage.outputType = "stderr";
-                    break;
+            case CoreProcess::NodeLogMessage::OutputType::StdOut:
+                guiMessage.outputType = "stdout";
+                break;
+            case CoreProcess::NodeLogMessage::OutputType::StdError:
+                guiMessage.outputType = "stderr";
+                break;
             }
             guiLog.push_back(guiMessage);
         }
@@ -320,38 +232,101 @@ common::GuiProcessLogMessageHistory CoreProcess::guiProcessLogMessageHistory() c
     return h;
 }
 
-common::TrayCommand CoreProcess::startProcessCommand() const {
+common::TrayCommand startProcessCommand(const CoreProcess& proc) {
     common::TrayCommand t;
-    t.id = _id;
-    t.executable = _application.executable;
-    t.baseDirectory = _application.baseDirectory;
-    t.currentWorkingDirectory = _application.currentWorkingDirectory;
+    t.id = proc.id;
+    t.executable = proc.application.executable;
+    t.baseDirectory = proc.application.baseDirectory;
+    t.currentWorkingDirectory = proc.application.currentWorkingDirectory;
     t.command = "Start";
 
-    t.commandlineParameters.clear();
-
-    if (!_application.commandlineParameters.empty()) {
-        t.commandlineParameters = _application.commandlineParameters;
-    }
+    t.commandlineParameters = proc.application.commandlineParameters;
 
     auto iConfiguration = std::find_if(
-        _application.configurations.cbegin(),
-        _application.configurations.cend(),
-        [id = _configurationId](const Program::Configuration& config) {
+        proc.application.configurations.cbegin(),
+        proc.application.configurations.cend(),
+        [id = proc.configurationId](const Program::Configuration& config) {
             return config.id == id;
-        });
-    
-    if (iConfiguration != _application.configurations.cend()) {
+        }
+    );
+
+    if (iConfiguration != proc.application.configurations.cend()) {
         t.commandlineParameters = t.commandlineParameters + " " +
-            iConfiguration->clusterCommandlineParameters.at(_cluster.id);
+            iConfiguration->clusterCommandlineParameters.at(proc.cluster.id);
     }
 
     return t;
 }
 
-common::TrayCommand CoreProcess::exitProcessCommand() const {
+common::TrayCommand exitProcessCommand(const CoreProcess& proc) {
     common::TrayCommand t;
-    t.id = _id;
+    t.id = proc.id;
     t.command = "Exit";
     return t;
 }
+
+
+
+int CoreProcess::nextId = 0;
+
+CoreProcess::CoreProcess(Program& application, const std::string& configurationId,
+                         Cluster& cluster)
+    : id(nextId++)
+    , application(application)
+    , configurationId(std::move(configurationId))
+    , cluster(cluster)
+{}
+
+
+void CoreProcess::pushNodeStatus(std::string nodeId, NodeStatus::Status nodeStatus) {
+    ClusterStatus::Status status = clusterStatus.status;
+    nodeLogs[nodeId].statuses.push_back(
+        { nodeStatus, std::chrono::system_clock::now(), nextNodeStatusId++ }
+    );
+
+    switch (nodeStatus) {
+        case NodeStatus::Status::Starting:
+            status = ClusterStatus::Status::Starting;
+            break;
+        case NodeStatus::Status::Running:
+            if (allNodesHaveStatus(*this, NodeStatus::Status::Running)) {
+                status = ClusterStatus::Status::Running;
+            }
+            break;
+        case NodeStatus::Status::NormalExit:
+            if (allNodesHaveStatus(*this, NodeStatus::Status::NormalExit)) {
+                status = ClusterStatus::Status::Exit;
+            }
+            else if (!anyNodeHasStatus(*this, NodeStatus::Status::CrashExit)) {
+                status = ClusterStatus::Status::PartialExit;
+            }
+            break;
+        case NodeStatus::Status::CrashExit:
+            status = ClusterStatus::Status::CrashExit;
+            break;
+        case NodeStatus::Status::FailedToStart:
+            status = ClusterStatus::Status::FailedToStart;
+            break;
+    }
+
+    if (clusterStatus.status != status) {
+        clusterStatus = { status, std::chrono::system_clock::now() };
+    }
+}
+
+void CoreProcess::pushNodeError(std::string nodeId, NodeError::Error nodeError) {
+    nodeLogs[nodeId].errors.push_back(
+        { nodeError, std::chrono::system_clock::now(), nextNodeErrorId++ }
+    );
+}
+
+void CoreProcess::pushNodeMessage(const std::string& nodeId,
+                                  CoreProcess::NodeLogMessage::OutputType type,
+                                  std::string message)
+{
+    nodeLogs[nodeId].messages.push_back(
+        { std::move(message), std::chrono::system_clock::now(), type, nextLogMessageId++ }
+    );
+}
+
+

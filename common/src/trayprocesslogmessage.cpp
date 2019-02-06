@@ -46,14 +46,14 @@ void to_json(nlohmann::json& j, const TrayProcessLogMessage& p) {
     j = {
         { KeyIdentifier, p.processId },
         { KeyMessage, p.message },
-        { KeyType, static_cast<int>(p.outputType) }
+        { KeyType, static_cast<int>(p.outputType) } // @TODO: Replace with string
     };
 }
 
 void from_json(const nlohmann::json& j, TrayProcessLogMessage& p) {
     j.at(KeyIdentifier).get_to(p.processId);
     j.at(KeyMessage).get_to(p.message);
-    int type = j.at(KeyType).get<int>();
+    int type = j.at(KeyType).get<int>();  // @TODO: Replace with string
     p.outputType = static_cast<TrayProcessLogMessage::OutputType>(type);
 }
     

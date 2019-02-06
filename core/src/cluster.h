@@ -70,31 +70,12 @@ public:
         bool connected;
     };
 
-    /**
-     * This method converts a Cluster information into the
-     * common::GuiInitialization::Cluster format so that it can be send to connected GUIs.
-     * \param cluster The Cluster information that is to be converte
-     * \return A common::GuiInitialization::Cluster structure that contains all relevant
-     * information for the GUI initialization step
-     */
-    common::GuiInitialization::Cluster toGuiInitializationCluster() const;
-
-    /**
-     * Return true if all nodes of the cluster are connected.
-     */
-    bool connected() const;
-   
-    /**
-     * Return a unique hash that represents this cluster configuration.
-     */
-    QByteArray hash() const;
-
     /// The human readable name of this Cluster
     std::string name;
     /// The unique identifier of this Cluster
     std::string id;
     /// A flag whether this Cluster is enabled or disabled
-    bool enabled;
+    bool isEnabled;
     /// A list of all nodes belonging to this cluster
     std::vector<Node> nodes;
     /// A vector of processes that are active on this cluster
@@ -102,9 +83,7 @@ public:
 };
 
 void to_json(nlohmann::json& j, const Cluster& p);
-void to_json(nlohmann::json& j, const Cluster::Node& p);
 void from_json(const nlohmann::json& j, Cluster& p);
-void from_json(const nlohmann::json& j, Cluster::Node& p);
 
 /**
  * This method walks the passed \p directory and looks for all <code>*.json</code>
@@ -117,8 +96,13 @@ void from_json(const nlohmann::json& j, Cluster::Node& p);
 std::vector<Cluster> loadClustersFromDirectory(const std::string& directory);
 
 /**
- * Load a cluster from file.
+ * This method converts a Cluster information into the
+ * common::GuiInitialization::Cluster format so that it can be send to connected GUIs.
+ * \param cluster The Cluster information that is to be converte
+ * \return A common::GuiInitialization::Cluster structure that contains all relevant
+ * information for the GUI initialization step
  */
-Cluster loadCluster(const std::string& jsonFile, const std::string& baseDirectory);
+common::GuiInitialization::Cluster clusterToGuiCluster(const Cluster& cluster);
+
 
 #endif // __CLUSTER_H__

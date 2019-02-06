@@ -34,6 +34,7 @@
 
 set(HEADER_FILES
     include/genericmessage.h
+    include/jsonload.h
     include/jsonsocket.h
     include/logging.h
     include/mainwindow.h

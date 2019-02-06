@@ -44,13 +44,13 @@ namespace common {
 void to_json(nlohmann::json& j, const TrayProcessStatus& p) {
     j = {
         { KeyProcessId, p.processId },
-        { KeyStatus, static_cast<int>(p.status) }
+        { KeyStatus, static_cast<int>(p.status) } // @TODO: Replace with string
     };
 }
 
 void from_json(const nlohmann::json& j, TrayProcessStatus& p) {
     j.at(KeyProcessId).get_to(p.processId);
-    int status = j.at(KeyStatus).get<int>();
+    int status = j.at(KeyStatus).get<int>(); // @TODO: Replace with string
     p.status = static_cast<common::TrayProcessStatus::Status>(status);
 }
     

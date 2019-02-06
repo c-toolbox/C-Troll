@@ -71,7 +71,7 @@ struct GuiInitialization {
         /// The unique identifier for the cluster
         std::string id;
         /// Whether the cluster is currently enabled or not
-        bool enabled = false;
+        bool isEnabled = false;
         /// Whether the cluster is currently connected or not
         bool connected = false;
     };

@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016 - 2019                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -32,56 +32,61 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __PROGRAM_H__
-#define __PROGRAM_H__
+#ifndef __JSONLOAD_H__
+#define __JSONLOAD_H__
 
-#include "guiinitialization.h"
-#include <json/json.hpp>
+#include "logging.h"
+#include <filesystem>
 #include <string>
 #include <vector>
+#include <QDirIterator>
 
-class Process;
+namespace common {
 
-class Program {
-public:
-    Program() = default;
-    ~Program();
-    
-    struct Configuration {
-        std::string id;
-        std::string name;
-        std::map<std::string, std::string> clusterCommandlineParameters;
-    };
+template <typename T>
+T loadFromJson(const std::string& jsonFile, const std::string& baseDirectory) {
+    std::string id = std::filesystem::relative(jsonFile, baseDirectory).string();
 
-    /// A unique identifier
-    std::string id;
-    /// A human readable name for this Program
-    std::string name;
-    /// The full path to the executable
-    std::string executable;
-    /// The base directory of the application
-    std::string baseDirectory;
-    /// A fixed set of commandline parameters
-    std::string commandlineParameters;
-    /// The current working directory from which the Program is started
-    std::string currentWorkingDirectory;
-    /// A list of tags that are associated with this Program
-    std::vector<std::string> tags;
-    // List of all configurations
-    std::vector<Configuration> configurations;
-    // Default configuration id
-    std::string defaultConfiguration;
-    // Default cluster id
-    std::string defaultCluster;
-    /// A vector of processes that derive from this program.
-    std::vector<Process*> processes;
-};
+    // Remove the last 5 characters '.json'
+    id = id.substr(0, id.length() - 5);
 
-std::vector<Program> loadProgramsFromDirectory(const std::string& directory);
+#ifdef WIN32
+    std::replace(id.begin(), id.end(), '\\', '/');
+#endif // WIN32
 
-common::GuiInitialization::Application programToGuiApplication(const Program& p);
+    std::ifstream f(jsonFile);
+    nlohmann::json obj;
+    f >> obj;
+    obj["id"] = id;
 
-void to_json(nlohmann::json& j, const Program& p);
-void from_json(const nlohmann::json& j, Program& p);
+    return T(obj);
+}
 
-#endif // __PROGRAM_H__
+template <typename T>
+std::vector<T> loadJsonFromDirectory(const std::string& directory, const std::string& type) {
+    std::vector<T> res;
+
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& p : fs::recursive_directory_iterator(directory)) {
+        if (p.is_regular_file()) {
+            fs::path ext = p.path().extension();
+            if (ext == ".json") {
+                std::string file = p.path().string();
+                ::Log("Loading " + type + " file " + file);
+                try {
+                    T obj = common::loadFromJson<T>(file, directory);
+                    res.push_back(std::move(obj));
+                }
+                catch (const std::runtime_error& e) {
+                    ::Log("Failed to load " + type + " file " + file + ". " + e.what());
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
+} // namespace common
+
+#endif // __JSONLOAD_H__

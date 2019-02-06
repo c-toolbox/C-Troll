@@ -156,7 +156,7 @@ void Application::handleTrayProcessStatus(const Cluster&,
     auto iProcess = std::find_if(
         _processes.begin(),
         _processes.end(),
-        [&status](CoreProcess& p) { return p.id() == status.processId; }
+        [&status](CoreProcess& p) { return p.id == status.processId; }
     );
     if (iProcess == _processes.end()) {
         return;
@@ -207,7 +207,7 @@ void Application::handleTrayProcessLogMessage(const Cluster&,
     auto iProcess = std::find_if(
         _processes.begin(),
         _processes.end(),
-        [&logMessage](CoreProcess& p) { return p.id() == logMessage.processId; }
+        [&logMessage](CoreProcess& p) { return p.id == logMessage.processId; }
     );
 
     if (iProcess == _processes.end()) {
@@ -216,15 +216,17 @@ void Application::handleTrayProcessLogMessage(const Cluster&,
 
     Log(logMessage.message);
 
+    CoreProcess::NodeLogMessage::OutputType type;
     switch (logMessage.outputType) {
         case common::TrayProcessLogMessage::OutputType::StdOut:
-            iProcess->pushNodeStdOut(node.id, logMessage.message);
+            type = CoreProcess::NodeLogMessage::OutputType::StdOut;
             break;
         case common::TrayProcessLogMessage::OutputType::StdErr:
-            iProcess->pushNodeStdError(node.id, logMessage.message);
+            type = CoreProcess::NodeLogMessage::OutputType::StdError;
             break;
     }
-    
+    iProcess->pushNodeMessage(node.id, type, logMessage.message);
+
     sendLatestLogMessage(*iProcess, node.id);
 }
 
@@ -297,7 +299,7 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     }
 
     CoreProcess process(*iProgram, configurationId, *iCluster);
-    common::TrayCommand trayCommand = process.startProcessCommand();
+    common::TrayCommand trayCommand = startProcessCommand(process);
     _processes.push_back(std::move(process));
 
     sendTrayCommand(*iCluster, trayCommand);
@@ -309,7 +311,7 @@ void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd)
     auto iProcess = std::find_if(
         _processes.begin(),
         _processes.end(),
-        [&](const CoreProcess& p) { return p.id() == processId; }
+        [&](const CoreProcess& p) { return p.id == processId; }
     );
 
     if (iProcess == _processes.end()) {
@@ -317,12 +319,12 @@ void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd)
         return;
     }
 
-    Cluster& cluster = iProcess->cluster();
+    Cluster& cluster = iProcess->cluster;
 
-    sendTrayCommand(cluster, iProcess->exitProcessCommand());
+    sendTrayCommand(cluster, exitProcessCommand(*iProcess));
     
     if (cmd.command == "Restart") {
-        sendTrayCommand(cluster, iProcess->startProcessCommand());
+        sendTrayCommand(cluster, startProcessCommand(*iProcess));
     } else if (cmd.command == "Stop") {
         //_processes.erase(iProcess);
     } else {
@@ -387,16 +389,16 @@ common::GenericMessage Application::initializationInformation() {
     msg.type = common::GuiInitialization::Type;
 
     common::GuiInitialization initMsg;
-    for (const Program& p : _programs) {
-        initMsg.applications.push_back(p.toGuiInitializationApplication());
+    for (const Program& prog : _programs) {
+        initMsg.applications.push_back(programToGuiApplication(prog));
     }
 
-    for (const Cluster& c : _clusters) {
-        initMsg.clusters.push_back(c.toGuiInitializationCluster());
+    for (const Cluster& cluster : _clusters) {
+        initMsg.clusters.push_back(clusterToGuiCluster(cluster));
     }
 
-    for (const CoreProcess& p : _processes) {
-        initMsg.processes.push_back(p.toGuiInitializationProcess());
+    for (const CoreProcess& proc : _processes) {
+        initMsg.processes.push_back(coreProcessToGuiProcess(proc));
     }
 
     msg.payload = initMsg;
@@ -405,7 +407,7 @@ common::GenericMessage Application::initializationInformation() {
 
 void Application::sendGuiProcessStatus(const CoreProcess& process, const std::string& nodeId)
 {
-    common::GuiProcessStatus statusMsg = process.toGuiProcessStatus(nodeId);
+    common::GuiProcessStatus statusMsg = coreProcessToProcessStatus(process, nodeId);
 
     common::GenericMessage msg;
     msg.type = common::GuiProcessStatus::Type;
@@ -417,7 +419,7 @@ void Application::sendGuiProcessStatus(const CoreProcess& process, const std::st
 
 void Application::sendLatestLogMessage(const CoreProcess& process, const std::string& nodeId)
 {
-    common::GuiProcessLogMessage logMsg = process.latestGuiProcessLogMessage(nodeId);
+    common::GuiProcessLogMessage logMsg = latestGuiProcessLogMessage(process, nodeId);
 
     common::GenericMessage msg;
     msg.type = common::GuiProcessLogMessage::Type;
@@ -428,7 +430,7 @@ void Application::sendLatestLogMessage(const CoreProcess& process, const std::st
 }
 
 common::GenericMessage Application::guiProcessLogMessageHistory(const CoreProcess& proc) {
-    common::GuiProcessLogMessageHistory historyMsg = proc.guiProcessLogMessageHistory();
+    common::GuiProcessLogMessageHistory historyMsg = logMessageHistory(proc);
 
     common::GenericMessage msg;
     msg.type = common::GuiProcessLogMessageHistory::Type;

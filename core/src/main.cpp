@@ -39,6 +39,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <iostream>
+#include <filesystem>
 
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
@@ -88,20 +89,14 @@ int main(int argc, char** argv) {
         }
     );
     
-    // Load configuration file
-    QString configurationFile = QDir::current().relativeFilePath("config.json");
-    if (argc == 2) {
-        // If someone passed us a second argument, we assume this to be the configuration
-        configurationFile = QString::fromLatin1(argv[1]);
-    }
-
-    QFileInfo info(configurationFile);
-    if (!info.exists()) {
-        Log("Could not find configuration file " + info.absolutePath().toStdString());
+    // Load configuration file;  use the passed argument if it exists
+    std::string configurationFile = (argc == 2) ? argv[1] : "config.json";
+    if (!std::filesystem::exists(configurationFile)) {
+        std::string absPath = std::filesystem::absolute(configurationFile).string();
+        Log("Could not find configuration file " + absPath);
         exit(EXIT_FAILURE);
     }
 
-    Application application(configurationFile.toStdString());
-
+    Application application(configurationFile);
     app.exec();
 }

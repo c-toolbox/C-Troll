@@ -34,11 +34,10 @@
 
 #include "cluster.h"
 
-#include <logging.h>
-#include <QDirIterator>
-#include <QVector>
-#include <QCryptographicHash>
+#include "jsonload.h"
+#include "logging.h"
 #include <assert.h>
+#include <filesystem>
 
 namespace {
     constexpr const char* KeyName = "name";
@@ -51,19 +50,6 @@ namespace {
     constexpr const char* KeyNodePort = "port";
 } // namespace
 
-void to_json(nlohmann::json& j, const Cluster& p) {
-    j = {
-        { KeyName, p.name },
-        { KeyId, p.id },
-        { KeyEnabled, p.enabled }
-    };
-
-    std::map<std::string, Cluster::Node> nodes;
-    for (const Cluster::Node& n : p.nodes) {
-        nodes[n.id] = n;
-    }
-    j[KeyNodes] = nodes;
-}
 
 void to_json(nlohmann::json& j, const Cluster::Node& p) {
     j = {
@@ -73,12 +59,32 @@ void to_json(nlohmann::json& j, const Cluster::Node& p) {
     };
 }
 
+void from_json(const nlohmann::json& j, Cluster::Node& p) {
+    j.at(KeyNodeName).get_to(p.name);
+    j.at(KeyNodeIpAddress).get_to(p.ipAddress);
+    j.at(KeyNodePort).get_to(p.port);
+}
+
+void to_json(nlohmann::json& j, const Cluster& p) {
+    j = {
+        { KeyName, p.name },
+        { KeyId, p.id },
+        { KeyEnabled, p.isEnabled }
+    };
+
+    std::map<std::string, Cluster::Node> nodes;
+    for (const Cluster::Node& n : p.nodes) {
+        nodes[n.id] = n;
+    }
+    j[KeyNodes] = nodes;
+}
+
 void from_json(const nlohmann::json& j, Cluster& p) {
     j.at(KeyName).get_to(p.name);
     j.at(KeyId).get_to(p.id);
-    p.enabled = true;
+    p.isEnabled = true;
     if (j.find(KeyEnabled) != j.end()) {
-        j.at(KeyEnabled).get_to(p.enabled);
+        j.at(KeyEnabled).get_to(p.isEnabled);
     }
 
     std::map<std::string, Cluster::Node> nodes;
@@ -90,82 +96,22 @@ void from_json(const nlohmann::json& j, Cluster& p) {
     }
 }
 
-void from_json(const nlohmann::json& j, Cluster::Node& p) {
-    j.at(KeyNodeName).get_to(p.name);
-    j.at(KeyNodeIpAddress).get_to(p.ipAddress);
-    j.at(KeyNodePort).get_to(p.port);
-}
-
 std::vector<Cluster> loadClustersFromDirectory(const std::string& directory) {
-    std::vector<Cluster> res;
-
-    // First, get all the *.json files from the directory and subdirectories
-    QDirIterator it(
-        QString::fromStdString(directory),
-        QStringList() << "*.json",
-        QDir::Files,
-        QDirIterator::Subdirectories
-    );
-    while (it.hasNext()) {
-        QString file = it.next();
-
-        Log("Loading cluster file " + file.toStdString());
-        try {
-            Cluster c = loadCluster(file.toStdString(), directory);
-            res.push_back(std::move(c));
-        }
-        catch (const std::runtime_error& e) {
-            Log(std::string("Error loading cluster: ") + e.what());
-        }
-    }
-
-    return res;
+    return common::loadJsonFromDirectory<Cluster>(directory, "cluster");
 }
 
-Cluster loadCluster(const std::string& jsonFile, const std::string& baseDirectory) {
-    QString id = QDir(QString::fromStdString(baseDirectory)).relativeFilePath(QString::fromStdString(jsonFile));
-
-    // relativeFilePath will have the baseDirectory in the beginning of the relative path
-    // and we want to remove it:  baseDirectory.length() + 1
-    // then, we want to remove the extension of 5 characters (.json)
-    // So we take the middle part of the string:
-    id = id.mid(
-        // length of the base directory + '/'
-        static_cast<int>(baseDirectory.length() + 1),
-        // total length - (stuff we removed in the beginning) - length('.json')
-        static_cast<int>(id.size() - (baseDirectory.length() + 1) - 5)
-    );
-
-    std::ifstream f(jsonFile);
-    nlohmann::json obj;
-    f >> obj;
-    obj[KeyId] = id.toStdString();
-
-    return Cluster(obj);
-}
-
-bool Cluster::connected() const {
-    return std::accumulate(
-        nodes.begin(),
-        nodes.end(),
+common::GuiInitialization::Cluster clusterToGuiCluster(const Cluster& c) {
+    common::GuiInitialization::Cluster cluster;
+    cluster.name = c.name;
+    cluster.id = c.id;
+    cluster.isEnabled = c.isEnabled;
+    cluster.connected = std::accumulate(
+        c.nodes.begin(),
+        c.nodes.end(),
         true,
-        [](bool othersConnected, const Node& node) {
+        [](bool othersConnected, const Cluster::Node& node) {
             return othersConnected && node.connected;
         }
     );
-}
-
-QByteArray Cluster::hash() const {
-    nlohmann::json doc = *this;
-    std::string input = doc.dump();
-    return QCryptographicHash::hash(input.c_str(), QCryptographicHash::Sha1);
-}
-
-common::GuiInitialization::Cluster Cluster::toGuiInitializationCluster() const {
-    common::GuiInitialization::Cluster cluster;
-    cluster.name = name;
-    cluster.id = id;
-    cluster.enabled = enabled;
-    cluster.connected = connected();
     return cluster;
 }
