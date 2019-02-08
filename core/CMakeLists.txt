@@ -42,6 +42,7 @@ set(HEADER_FILES
     src/guiprocessstatus.h
     src/guiprocesslogmessage.h
     src/guiprocesslogmessagehistory.h
+    src/mainwindow.h
     src/program.h
     src/handler/incomingsockethandler.h
     src/handler/outgoingsockethandler.h
@@ -58,6 +59,7 @@ set(SOURCE_FILES
     src/guiprocesslogmessage.cpp
     src/guiprocesslogmessagehistory.cpp
     src/main.cpp
+    src/mainwindow.cpp
     src/program.cpp
     src/handler/incomingsockethandler.cpp
     src/handler/outgoingsockethandler.cpp
@@ -69,6 +71,7 @@ set(MOC_FILES "")
 qt5_wrap_cpp(
     MOC_FILES 
     src/application.h
+    src/mainwindow.h
     src/handler/incomingsockethandler.h
     src/handler/outgoingsockethandler.h
 )

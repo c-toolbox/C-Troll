@@ -37,7 +37,6 @@ set(HEADER_FILES
     include/jsonload.h
     include/jsonsocket.h
     include/logging.h
-    include/mainwindow.h
     include/traycommand.h
     include/trayprocesslogmessage.h
     include/trayprocessstatus.h
@@ -47,7 +46,6 @@ set(SOURCE_FILES
     src/genericmessage.cpp
     src/jsonsocket.cpp
     src/logging.cpp
-    src/mainwindow.cpp
     src/traycommand.cpp
     src/trayprocesslogmessage.cpp
     src/trayprocessstatus.cpp
@@ -59,7 +57,6 @@ set(MOC_FILES "")
 qt5_wrap_cpp(
     MOC_FILES 
     include/jsonsocket.h
-    include/mainwindow.h
 )
 
 set(LIBRARY_NAME C-Troll-Common)

@@ -33,12 +33,14 @@
 ##########################################################################################
 
 set(HEADER_FILES
+	src/mainwindow.h
     src/processhandler.h
     src/sockethandler.h
 )
 
 set(SOURCE_FILES
     src/main.cpp
+    src/mainwindow.cpp
     src/processhandler.cpp
     src/sockethandler.cpp
 )
