@@ -46,6 +46,7 @@
 #include <QThread>
 #include <assert.h>
 #include <json/json.hpp>
+#include <fmt/format.h>
 
 namespace {
     constexpr const char* KeyApplicationPath = "applicationPath";
@@ -57,7 +58,7 @@ Application::Application(std::string configurationFile)
     : _configurationFile(std::move(configurationFile))
     , _outgoingSocketHandler(_clusters)
 {
-    initalize();
+    initalize(true);
 }
 
 void Application::initalize(bool resetGUIconnection) {
@@ -86,13 +87,16 @@ void Application::initalize(bool resetGUIconnection) {
     }
 
     // Load all program descriptions from the path provided by the configuration file
+    ::Log(fmt::format("Loading programs from directory {}", programPath));
     _programs = loadProgramsFromDirectory(programPath);
 
     // Load all cluster descriptions from the path provided by the configuration file
+    ::Log(fmt::format("Loading clusters from directory {}", clusterPath));
     _clusters = loadClustersFromDirectory(clusterPath);
 
     if (resetGUIconnection) {
         // The incoming socket handler takes care of messages from the GUI
+        ::Log(fmt::format("Listening for GUI on socket {}", listeningPort));
         _incomingSocketHandler.initialize(listeningPort);
     }
 
@@ -219,9 +223,9 @@ void Application::handleTrayProcessLogMessage(const Cluster&,
 }
 
 void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
-    Log("Application: " + cmd.applicationId);
-    Log("Configuration: " + cmd.configurationId);
-    Log("Cluster: " + cmd.clusterId);
+    Log(fmt::format("Application: {}", cmd.applicationId));
+    Log(fmt::format("Configuration: {}", cmd.configurationId));
+    Log(fmt::format("Cluster: {}", cmd.clusterId));
 
     auto iProgram = std::find_if(
         _programs.begin(),
@@ -232,7 +236,7 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     if (iProgram == _programs.end()) {
         // We didn't find the program you were looking for
         // TODO(alex): Signal this back to the GUI
-        Log("Could not find application id " + cmd.applicationId);
+        Log(fmt::format("Could not find application id {}", cmd.applicationId));
         return;
     }
     
@@ -246,7 +250,7 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
     if (iCluster == _clusters.end()) {
         // We didn't find the cluster you were looking for
         // TODO(alex): Signal this back to the GUI
-        Log("Could not find cluster id " + cmd.clusterId);
+        Log(fmt::format("Could not find cluster id {}", cmd.clusterId));
         return;
     }
     
@@ -264,11 +268,11 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
         if (iConfiguration == confs.end()) {
             // The requested configuration does not exist for the application
             // TODO: Signal this back to the GUI
-            Log("The configuration " + cmd.configurationId +
-                " does not exist for the application id " + cmd.applicationId
-            );
+            Log(fmt::format(
+                "The configuration {} does not exist for the application id {}",
+                cmd.configurationId, cmd.applicationId
+            ));
             return;
-
         }
         configurationId = cmd.configurationId;
 
@@ -279,9 +283,10 @@ void Application::handleIncomingGuiStartCommand(common::GuiStartCommand cmd) {
         if (clusterParams == clusterParamsList.end()) {
             // The requested configuration does not exist for the application
             // TODO: Signal this back to the GUI
-            Log("The configuration " + cmd.configurationId +
-                " is not supported on cluster id " + cmd.clusterId
-            );
+            Log(fmt::format(
+                "The configuration {} is not supported on cluster id {}",
+                cmd.configurationId, cmd.clusterId
+            ));
             return;
         }
     }
@@ -303,7 +308,7 @@ void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd)
     );
 
     if (iProcess == _processes.end()) {
-        Log("There is no process with id " + std::to_string(processId));
+        Log(fmt::format("There is no process with id {}", processId));
         return;
     }
 
@@ -316,7 +321,7 @@ void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd)
     } else if (cmd.command == "Stop") {
         //_processes.erase(iProcess);
     } else {
-        Log("Unknown command '" + cmd.command + "'");
+        Log(fmt::format("Unknown command '{}'", cmd.command));
     }
 }
 
@@ -344,7 +349,7 @@ void Application::incomingGuiMessage(const nlohmann::json& message) {
             handleIncomingGuiReloadConfigCommand();
          }
     } catch (const std::runtime_error& e) {
-        Log(std::string("Error with incoming gui message: ") + e.what());
+        Log(fmt::format("Error with incoming gui message: {}", e.what()));
         Log(message.dump());
     }
 }
@@ -356,7 +361,7 @@ void Application::incomingTrayMessage(const Cluster& cluster, const Cluster::Nod
         // The message contains a JSON object of the GenericMessage
         common::GenericMessage msg = message;
 
-        Log("Received message of type " + msg.type);
+        Log(fmt::format("Received message of type {}", msg.type));
 
         if (msg.type == common::TrayProcessStatus::Type) {
             // We have received a message from the GUI to start a new application
@@ -367,7 +372,7 @@ void Application::incomingTrayMessage(const Cluster& cluster, const Cluster::Nod
         }
     }
     catch (const std::runtime_error& e) {
-        Log(std::string("Error with incoming tray message: ") + e.what());
+        Log(fmt::format("Error with incoming tray message: {}", e.what()));
         Log(message.dump());
     }
 }
@@ -393,7 +398,8 @@ common::GenericMessage Application::initializationInformation() {
     return msg;
 }
 
-void Application::sendGuiProcessStatus(const CoreProcess& process, const std::string& nodeId)
+void Application::sendGuiProcessStatus(const CoreProcess& process,
+                                       const std::string& nodeId)
 {
     common::GuiProcessStatus statusMsg = coreProcessToProcessStatus(process, nodeId);
 
@@ -405,7 +411,8 @@ void Application::sendGuiProcessStatus(const CoreProcess& process, const std::st
     _incomingSocketHandler.sendMessageToAll(j);
 }
 
-void Application::sendLatestLogMessage(const CoreProcess& process, const std::string& nodeId)
+void Application::sendLatestLogMessage(const CoreProcess& process,
+                                       const std::string& nodeId)
 {
     common::GuiProcessLogMessage logMsg = latestGuiProcessLogMessage(process, nodeId);
 
@@ -430,14 +437,14 @@ void Application::sendTrayCommand(const Cluster& cluster,
                                   const common::TrayCommand& command)
 {
     // Generate identifier
-    Log("Sending Message: ");
-    Log("Cluster:" + cluster.name + cluster.id);
-    Log("\tCommand: " + command.command);
-    Log("\tExecutable: " + command.executable);
-    Log("\tIdentifier: " + command.id);
-    Log("\tBase Directory: " + command.baseDirectory);
-    Log("\tCommandline Parameters: " + command.commandlineParameters);
-    Log("\tCWD: " + command.currentWorkingDirectory);
+    Log("Sending Message:");
+    Log(fmt::format("Cluster: {} {}", cluster.name, cluster.id));
+    Log(fmt::format("\tCommand: {}", command.command));
+    Log(fmt::format("\tExecutable: {}", command.executable));
+    Log(fmt::format("\tIdentifier: {}", command.id));
+    Log(fmt::format("\tBase Directory: {}", command.baseDirectory));
+    Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
+    Log(fmt::format("\tCWD: {}", command.currentWorkingDirectory));
     
     // We have to wrap the TrayCommand into a GenericMessage first
     common::GenericMessage msg;

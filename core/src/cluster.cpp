@@ -89,7 +89,7 @@ void from_json(const nlohmann::json& j, Cluster& p) {
 
     std::map<std::string, Cluster::Node> nodes;
     j.at(KeyNodes).get_to(nodes);
-    for (const std::pair<std::string, Cluster::Node>& node : nodes) {
+    for (const std::pair<const std::string, Cluster::Node>& node : nodes) {
         Cluster::Node n = node.second;
         n.id = node.first;
         p.nodes.push_back(std::move(n));

@@ -33,7 +33,7 @@
 ##########################################################################################
 
 set(HEADER_FILES
-	src/mainwindow.h
+    src/mainwindow.h
     src/processhandler.h
     src/sockethandler.h
 )

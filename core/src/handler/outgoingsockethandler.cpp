@@ -38,6 +38,7 @@
 #include <QTimer>
 #include <assert.h>
 #include <logging.h>
+#include <fmt/format.h>
 
 namespace {
     std::string hash(const Cluster& cluster, const Cluster::Node& node) {
@@ -58,20 +59,18 @@ void OutgoingSocketHandler::initialize() {
                 socket.get(), &QAbstractSocket::stateChanged,
                 [this, c, &node](QAbstractSocket::SocketState state) {
                     if (state == QAbstractSocket::SocketState::ConnectedState) {
-                        Log(
-                            "Socket state change: " + node.ipAddress + ":" +
-                            std::to_string(node.port) + ": " + std::to_string(state)
-                        );
+                        Log(fmt::format("Socket state change: {}:{}  {}",
+                            node.ipAddress, node.port, state 
+                        ));
                         if (!node.connected) {
                             node.connected = true;
                             emit connectedStatusChanged(c, node);
                         }
                     }
                     else if (state == QAbstractSocket::SocketState::ClosingState) {
-                        Log(
-                            "Socket state change: " + node.ipAddress + ":" +
-                            std::to_string(node.port) + ": " + std::to_string(state)
-                        );
+                        Log(fmt::format("Socket state change: {}:{}  {}",
+                            node.ipAddress, node.port, state
+                        ));
                         if (node.connected) {
                             node.connected = false;
                             emit connectedStatusChanged(c, node);
@@ -103,11 +102,9 @@ void OutgoingSocketHandler::initialize() {
                     auto it = _sockets.find(h);
                     assert(it != _sockets.end());
 
-                    if (it->second->state() == QAbstractSocket::SocketState::UnconnectedState) {
-                        Log(
-                            "Unconnected: " + node.ipAddress + ":" +
-                            std::to_string(node.port)
-                        );
+                    QAbstractSocket::SocketState state = it->second->state();
+                    if (state == QAbstractSocket::SocketState::UnconnectedState) {
+                        Log(fmt::format("Unconnected: {}:{}", node.ipAddress, node.port));
                         if (node.connected) {
                             node.connected = false;
                             emit connectedStatusChanged(c, node);

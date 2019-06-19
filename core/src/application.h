@@ -59,8 +59,8 @@ public:
     Application(std::string configurationFile);
 
 private:
-    void initalize(bool resetGUIconnection = true);
-    void deinitalize(bool resetGUIconnection = true);
+    void initalize(bool resetGUIconnection);
+    void deinitalize(bool resetGUIconnection);
 
     void incomingGuiMessage(const nlohmann::json& message);
     void incomingTrayMessage(const Cluster& cluster, const Cluster::Node& node,

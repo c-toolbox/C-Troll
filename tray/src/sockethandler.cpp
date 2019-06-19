@@ -39,11 +39,12 @@
 #include <iostream>
 #include <memory>
 #include <logging.h>
+#include <fmt/format.h>
 
 void SocketHandler::initialize() {
     const int port = 5000;
     
-    Log("Listening on port: " + std::to_string(port));
+    Log(fmt::format("Listening on port: {}", port));
     
     _server.listen(QHostAddress::Any, port);
     QObject::connect(
@@ -58,7 +59,7 @@ void SocketHandler::readyRead(common::JsonSocket* socket) {
 }
 
 void SocketHandler::sendMessage(const nlohmann::json& message) {
-    Log("Sending message:\n" + message.dump());
+    Log(fmt::format("Sending message:\n{}", message.dump()));
     for (common::JsonSocket* jsonSocket : _sockets) {
         std::string local = jsonSocket->localAddress();
         std::string peer = jsonSocket->peerAddress();

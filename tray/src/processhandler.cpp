@@ -39,6 +39,7 @@
 #include <trayprocessstatus.h>
 #include <functional>
 #include <logging.h>
+#include <fmt/format.h>
 
 namespace {
 
@@ -66,13 +67,13 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
     common::TrayCommand command = message;
     
     Log("Received TrayCommand");
-    Log("Command: " + command.command);
-    Log("Id: " + command.id);
-    Log("Executable: " + command.executable);
-    Log("CommandLineParameters: " + command.commandlineParameters);
-    Log("BaseDirectory: " + command.baseDirectory);
-    Log("CurrentWorkingDirectory: " + command.currentWorkingDirectory);
-    Log("EnvironmentVariables: " + command.environmentVariables);
+    Log(fmt::format("Command: {}", command.command));
+    Log(fmt::format("Id: {}", command.id));
+    Log(fmt::format("Executable: {}", command.executable));
+    Log(fmt::format("CommandLineParameters: {}", command.commandlineParameters));
+    Log(fmt::format("BaseDirectory: {}", command.baseDirectory));
+    Log(fmt::format("CurrentWorkingDirectory: {}", command.currentWorkingDirectory));
+    Log(fmt::format("EnvironmentVariables: {}", command.environmentVariables));
 
     // Check if identifer of traycommand already is tied to a process
     // We don't allow the same id for multiple processes
@@ -281,12 +282,14 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
         }
         
         if (command.commandlineParameters.empty()) {
-            process->start(QString::fromStdString("\"" + command.executable + "\""));
+            std::string cmd = fmt::format("\"{}\"", command.executable);
+            process->start(QString::fromStdString(cmd));
         }
         else {
-            process->start(QString::fromStdString(
-                "\"" + command.executable + "\" " + command.commandlineParameters
-            ));
+            std::string cmd = fmt::format(
+                "\"{}\" {}", command.executable, command.commandlineParameters
+            );
+            process->start(QString::fromStdString(cmd));
         }
     } else if (command.command == "Kill" || command.command == "Exit") {
         common::TrayProcessStatus ps;

@@ -40,6 +40,7 @@
 #include <string>
 #include <vector>
 #include <QDirIterator>
+#include <fmt/format.h>
 
 namespace common {
 
@@ -72,13 +73,15 @@ std::vector<T> loadJsonFromDirectory(const std::string& directory, const std::st
             fs::path ext = p.path().extension();
             if (ext == ".json") {
                 std::string file = p.path().string();
-                ::Log("Loading " + type + " file " + file);
+                ::Log(fmt::format("Loading {} file {}", type, file));
                 try {
                     T obj = common::loadFromJson<T>(file, directory);
                     res.push_back(std::move(obj));
                 }
                 catch (const std::runtime_error& e) {
-                    ::Log("Failed to load " + type + " file " + file + ". " + e.what());
+                    ::Log(
+                        fmt::format("Failed to load {} file {}. {}", type, file, e.what())
+                    );
                 }
             }
         }

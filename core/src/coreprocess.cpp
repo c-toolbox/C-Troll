@@ -190,7 +190,10 @@ common::GuiProcessLogMessage latestGuiProcessLogMessage(const CoreProcess& proc,
     g.id = logMessage.id;
     g.logMessage = logMessage.message;
     g.time = timeToGuiTime(logMessage.time);
-    g.outputType = (logMessage.outputType == CoreProcess::NodeLogMessage::OutputType::StdOut ? "stdout" : "stderr");
+    g.outputType =
+        logMessage.outputType == CoreProcess::NodeLogMessage::OutputType::StdOut ?
+        "stdout" :
+        "stderr";
     return g;
 }
 
@@ -328,5 +331,3 @@ void CoreProcess::pushNodeMessage(const std::string& nodeId,
         { std::move(message), std::chrono::system_clock::now(), type, nextLogMessageId++ }
     );
 }
-
-

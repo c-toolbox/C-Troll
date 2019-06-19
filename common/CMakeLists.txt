@@ -55,7 +55,7 @@ find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
 
 set(MOC_FILES "")
 qt5_wrap_cpp(
-    MOC_FILES 
+    MOC_FILES
     include/jsonsocket.h
 )
 
@@ -68,11 +68,15 @@ add_library(${LIBRARY_NAME}
     ${RESOURCE_FILES}
 )
 
-target_include_directories(${LIBRARY_NAME} PUBLIC "include" "ext")
-target_link_libraries(${LIBRARY_NAME} Qt5::Widgets Qt5::Network)
+add_subdirectory(ext/fmt)
+
+target_include_directories(${LIBRARY_NAME} PUBLIC "include" "ext" "ext/fmt/include")
+target_link_libraries(${LIBRARY_NAME} fmt Qt5::Widgets Qt5::Network)
 
 set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD 17)
 set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD_REQUIRED On)
+
+
 
 if (MSVC)
     target_compile_options(
@@ -83,7 +87,7 @@ if (MSVC)
         "/W4"
         "/std:c++latest"
         "/permissive-"
-        "/wd4127" # conditional expression is constant (thrown in Qt)
+        "/wd4127"           # conditional expression is constant (thrown in Qt)
     )
     target_compile_definitions(
         ${LIBRARY_NAME}
@@ -91,17 +95,23 @@ if (MSVC)
         "_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING"
     )
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if (APPLE)
+        target_compile_options(${LIBRARY_NAME} PUBLIC "-stdlib=libc++")
+    endif ()
     target_compile_options(
         ${LIBRARY_NAME}
         PUBLIC
-        "-stdlib=libc++"
+        "-Wall"
         "-Wextra"
+        "-Wpedantic"
     )
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     target_compile_options(
         ${LIBRARY_NAME}
         PUBLIC
         "-ggdb"
+        "-Wall"
         "-Wextra"
+        "-Wpedantic"
     )
 endif ()
