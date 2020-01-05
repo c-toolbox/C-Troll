@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __COREPROCESS_H__
-#define __COREPROCESS_H__
+#ifndef __CORE__COREPROCESS_H__
+#define __CORE__COREPROCESS_H__
 
 #include "guiinitialization.h"
 #include "guiprocesslogmessage.h"
@@ -133,4 +133,4 @@ common::GuiProcessLogMessageHistory logMessageHistory(const CoreProcess& proc);
 common::TrayCommand startProcessCommand(const CoreProcess& proc);
 common::TrayCommand exitProcessCommand(const CoreProcess& proc);
 
-#endif // __COREPROCESS_H__
+#endif // __CORE__COREPROCESS_H__

@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GUIPROCESSSTATUS_H__
-#define __GUIPROCESSSTATUS_H__
+#ifndef __CORE__GUIPROCESSSTATUS_H__
+#define __CORE__GUIPROCESSSTATUS_H__
 
 #include <json/json.hpp>
 #include <map>
@@ -69,4 +69,4 @@ void from_json(const nlohmann::json& j, GuiProcessStatus& p);
 
 } // namespace common
 
-#endif // __GUIPROCESSSTATUS_H__
+#endif // __CORE__GUIPROCESSSTATUS_H__

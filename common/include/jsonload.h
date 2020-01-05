@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __JSONLOAD_H__
-#define __JSONLOAD_H__
+#ifndef __COMMON__JSONLOAD_H__
+#define __COMMON__JSONLOAD_H__
 
 #include "logging.h"
 #include <filesystem>

@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GENERICMESSAGE_H__
-#define __GENERICMESSAGE_H__
+#ifndef __COMMON__GENERICMESSAGE_H__
+#define __COMMON__GENERICMESSAGE_H__
 
 #include <json/json.hpp>
 
@@ -51,4 +51,4 @@ void from_json(const nlohmann::json& j, GenericMessage& p);
     
 } // namespace common
     
-#endif // __GENERICMESSAGE_H__
+#endif // __COMMON__GENERICMESSAGE_H__

@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __JSONSOCKET_H__
-#define __JSONSOCKET_H__
+#ifndef __COMMON__JSONSOCKET_H__
+#define __COMMON__JSONSOCKET_H__
 
 #include <QObject>
 
@@ -73,4 +73,4 @@ private:
 
 } // namespace common
 
-#endif // __JSONSOCKET_H__
+#endif // __COMMON__JSONSOCKET_H__

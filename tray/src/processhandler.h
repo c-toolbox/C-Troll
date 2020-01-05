@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __PROCESSHANDLER_H__
-#define __PROCESSHANDLER_H__
+#ifndef __TRAY__PROCESSHANDLER_H__
+#define __TRAY__PROCESSHANDLER_H__
 
 #include <QObject>
 
@@ -69,4 +69,4 @@ private:
     std::map<int, QProcess*> _processes;
 };
 
-#endif
+#endif // __TRAY__PROCESSHANDLER_H__

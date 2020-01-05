@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __TRAYCOMMAND_H__
-#define __TRAYCOMMAND_H__
+#ifndef __COMMON__TRAYCOMMAND_H__
+#define __COMMON__TRAYCOMMAND_H__
 
 #include <json/json.hpp>
 
@@ -66,4 +66,4 @@ void from_json(const nlohmann::json& j, TrayCommand& p);
 
 } // namespace commmon
 
-#endif // __TRAYCOMMAND_H__
+#endif // __COMMON__TRAYCOMMAND_H__

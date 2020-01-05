@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __LOGGING_H__
-#define __LOGGING_H__
+#ifndef __COMMON__LOGGING_H__
+#define __COMMON__LOGGING_H__
 
 #include <fstream>
 #include <functional>
@@ -104,4 +104,4 @@ private:
  */
 void Log(std::string message);
 
-#endif // __LOGGING_H__
+#endif // __COMMON__LOGGING_H__

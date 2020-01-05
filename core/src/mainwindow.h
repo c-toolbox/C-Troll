@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __MAINWINDOW_H__
-#define __MAINWINDOW_H__
+#ifndef __CORE__MAINWINDOW_H__
+#define __CORE__MAINWINDOW_H__
  
 #include <QMainWindow>
 #include <QCloseEvent>
@@ -63,4 +63,4 @@ private:
     QSystemTrayIcon* _trayIcon;
 };
  
-#endif // __MAINWINDOW_H__
+#endif // __CORE__MAINWINDOW_H__

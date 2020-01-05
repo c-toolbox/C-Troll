@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __APPLICATION_H__
-#define __APPLICATION_H__
+#ifndef __CORE__APPLICATION_H__
+#define __CORE__APPLICATION_H__
 
 #include "cluster.h"
 #include "program.h"
@@ -92,4 +92,4 @@ private:
     std::string _configurationFile;
 };
 
-#endif // __APPLICATION_H__
+#endif // __CORE__APPLICATION_H__

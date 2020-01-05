@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CLUSTER_H__
-#define __CLUSTER_H__
+#ifndef __CORE__CLUSTER_H__
+#define __CORE__CLUSTER_H__
 
 #include "guiinitialization.h"
 #include <QByteArray>
@@ -105,4 +105,4 @@ std::vector<Cluster> loadClustersFromDirectory(const std::string& directory);
 common::GuiInitialization::Cluster clusterToGuiCluster(const Cluster& cluster);
 
 
-#endif // __CLUSTER_H__
+#endif // __CORE__CLUSTER_H__

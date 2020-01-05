@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GUIPROCESSLOGMESSAGEHISTORY_H__
-#define __GUIPROCESSLOGMESSAGEHISTORY_H__
+#ifndef __CORE__GUIPROCESSLOGMESSAGEHISTORY_H__
+#define __CORE__GUIPROCESSLOGMESSAGEHISTORY_H__
 
 #include <json/json.hpp>
 #include <vector>
@@ -73,4 +73,4 @@ void from_json(const nlohmann::json& j, GuiProcessLogMessageHistory::LogMessage&
 
 } // namespace common
 
-#endif // __GUIPROCESSSTATUS_H__
+#endif // __CORE__GUIPROCESSSTATUS_H__

@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __PROGRAM_H__
-#define __PROGRAM_H__
+#ifndef __CORE__PROGRAM_H__
+#define __CORE__PROGRAM_H__
 
 #include "guiinitialization.h"
 #include <json/json.hpp>
@@ -84,4 +84,4 @@ common::GuiInitialization::Application programToGuiApplication(const Program& p)
 void to_json(nlohmann::json& j, const Program& p);
 void from_json(const nlohmann::json& j, Program& p);
 
-#endif // __PROGRAM_H__
+#endif // __CORE__PROGRAM_H__

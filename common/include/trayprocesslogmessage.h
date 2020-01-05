@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __TRAYPROCESSLOGMESSAGE_H__
-#define __TRAYPROCESSLOGMESSAGE_H__
+#ifndef __COMMON__TRAYPROCESSLOGMESSAGE_H__
+#define __COMMON__TRAYPROCESSLOGMESSAGE_H__
 
 #include <json/json.hpp>
 
@@ -63,4 +63,4 @@ void from_json(const nlohmann::json& j, TrayProcessLogMessage& p);
 
 } // namespace common
 
-#endif // __TRAYPROCESSLOGMESSAGE_H__
+#endif // __COMMON__TRAYPROCESSLOGMESSAGE_H__

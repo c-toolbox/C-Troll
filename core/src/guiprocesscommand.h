@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GUIPROCESSCOMMAND_H__
-#define __GUIPROCESSCOMMAND_H__
+#ifndef __CORE__GUIPROCESSCOMMAND_H__
+#define __CORE__GUIPROCESSCOMMAND_H__
 
 #include <json/json.hpp>
 
@@ -56,4 +56,4 @@ void from_json(const nlohmann::json& j, GuiProcessCommand& p);
 
 } // namespace
 
-#endif // __GUIPROCESSCOMMAND_H__
+#endif // __CORE__GUIPROCESSCOMMAND_H__

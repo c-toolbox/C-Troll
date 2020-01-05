@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __OUTGOINGSOCKETHANDLER_H__
-#define __OUTGOINGSOCKETHANDLER_H__
+#ifndef __CORE__OUTGOINGSOCKETHANDLER_H__
+#define __CORE__OUTGOINGSOCKETHANDLER_H__
 
 #include <QObject>
 
@@ -65,4 +65,4 @@ private:
     std::map<std::string, std::unique_ptr<common::JsonSocket>> _sockets;
 };
 
-#endif // __OUTGOINGSOCKETHANDLER_H__
+#endif // __CORE__OUTGOINGSOCKETHANDLER_H__

@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GUISTARTCOMMAND_H__
-#define __GUISTARTCOMMAND_H__
+#ifndef __CORE__GUISTARTCOMMAND_H__
+#define __CORE__GUISTARTCOMMAND_H__
 
 #include <json/json.hpp>
 
@@ -59,4 +59,4 @@ void from_json(const nlohmann::json& j, GuiStartCommand& p);
 
 } // namespace
 
-#endif // __GUISTARTCOMMAND_H__
+#endif // __CORE__GUISTARTCOMMAND_H__

@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __SOCKETHANDLER_H__
-#define __SOCKETHANDLER_H__
+#ifndef __TRAY__SOCKETHANDLER_H__
+#define __TRAY__SOCKETHANDLER_H__
 
 #include <QObject>
 #include <QTcpServer>
@@ -60,4 +60,4 @@ private:
     std::vector<common::JsonSocket*> _sockets;
 };
 
-#endif
+#endif // __TRAY__SOCKETHANDLER_H__

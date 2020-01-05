@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GUIINITIALIZATION_H__
-#define __GUIINITIALIZATION_H__
+#ifndef __CORE__GUIINITIALIZATION_H__
+#define __CORE__GUIINITIALIZATION_H__
 
 #include <vector>
 #include <json/json.hpp>
@@ -119,4 +119,4 @@ void from_json(const nlohmann::json& j, GuiInitialization::Process::NodeStatus& 
 
 } // namespace
 
-#endif // __CORECOMMAND_H__
+#endif // __CORE__CORECOMMAND_H__

@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __INCOMINGSOCKETHANDLER_H__
-#define __INCOMINGSOCKETHANDLER_H__
+#ifndef __CORE__INCOMINGSOCKETHANDLER_H__
+#define __CORE__INCOMINGSOCKETHANDLER_H__
 
 #include <QObject>
 #include <QTcpServer>
@@ -64,4 +64,4 @@ private:
     std::vector<common::JsonSocket*> _sockets;
 };
 
-#endif // __INCOMINGSOCKETHANDLER_H__
+#endif // __CORE__INCOMINGSOCKETHANDLER_H__

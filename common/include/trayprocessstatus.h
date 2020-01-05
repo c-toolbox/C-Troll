@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __TRAYPROCESSSTATUS_H__
-#define __TRAYPROCESSSTATUS_H__
+#ifndef __COMMON__TRAYPROCESSSTATUS_H__
+#define __COMMON__TRAYPROCESSSTATUS_H__
 
 #include <json/json.hpp>
 
@@ -68,4 +68,4 @@ void from_json(const nlohmann::json& j, TrayProcessStatus& p);
 
 } // namespace common
 
-#endif // __TRAYPROCESSSTATUS_H__
+#endif // __COMMON__TRAYPROCESSSTATUS_H__
