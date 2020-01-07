@@ -37,8 +37,8 @@
 #include "cluster.h"
 #include "program.h"
 #include "guiprocessstatus.h"
-#include <logging.h>
-#include <cassert>
+#include "logging.h"
+#include <assert.h>
 
 namespace {
 

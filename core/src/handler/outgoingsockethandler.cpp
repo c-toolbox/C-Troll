@@ -34,10 +34,10 @@
 
 #include "outgoingsockethandler.h"
 
-#include <jsonsocket.h>
+#include "jsonsocket.h"
+#include "logging.h"
 #include <QTimer>
 #include <assert.h>
-#include <logging.h>
 #include <fmt/format.h>
 
 namespace {

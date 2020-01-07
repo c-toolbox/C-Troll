@@ -34,12 +34,12 @@
 
 #include "application.h"
 
-#include <guistartcommand.h>
-#include <guiprocesscommand.h>
-#include <guiprocessstatus.h>
-#include <logging.h>
-#include <trayprocesslogmessage.h>
-#include <trayprocessstatus.h>
+#include "guistartcommand.h"
+#include "guiprocesscommand.h"
+#include "guiprocessstatus.h"
+#include "logging.h"
+#include "trayprocesslogmessage.h"
+#include "trayprocessstatus.h"
 #include <QFile>
 #include <QObject>
 #include <QTcpSocket>

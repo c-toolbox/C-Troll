@@ -34,7 +34,7 @@
 
 #include "incomingsockethandler.h"
 
-#include <jsonsocket.h>
+#include "jsonsocket.h"
 #include <QTcpSocket>
 #include <assert.h>
 #include <memory>
