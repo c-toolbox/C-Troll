@@ -32,7 +32,7 @@
 #                                                                                        #
 ##########################################################################################
 
-cmake_minimum_required (VERSION 3.0 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.10 FATAL_ERROR)
 
 project (C-Troll)
 
@@ -50,5 +50,3 @@ endif ()
 add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(tray)
-
-message(STATUS "Generating C-Troll project")

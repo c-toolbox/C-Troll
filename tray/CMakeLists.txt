@@ -53,12 +53,14 @@ qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
 set(RESOURCE_FILES "")
 qt5_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
 
-set(APPLICATION_NAME C-Troll-Tray)
-add_executable(${APPLICATION_NAME} WIN32 MACOSX_BUNDLE
+add_executable(C-Troll-Tray WIN32 MACOSX_BUNDLE
     ${SOURCE_FILES}
     ${HEADER_FILES}
     ${MOC_FILES}
     ${RESOURCE_FILES}
 )
 
-target_link_libraries(${APPLICATION_NAME} PUBLIC C-Troll-Common Qt5::Widgets Qt5::Network)
+target_link_libraries(C-Troll-Tray PUBLIC C-Troll-Common Qt5::Widgets Qt5::Network)
+
+set_property(TARGET C-Troll-Tray PROPERTY CXX_STANDARD 17)
+set_property(TARGET C-Troll-Tray PROPERTY CXX_STANDARD_REQUIRED On)

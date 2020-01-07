@@ -59,9 +59,7 @@ qt5_wrap_cpp(
     include/jsonsocket.h
 )
 
-set(LIBRARY_NAME C-Troll-Common)
-
-add_library(${LIBRARY_NAME}
+add_library(C-Troll-Common
     ${SOURCE_FILES}
     ${HEADER_FILES}
     ${MOC_FILES}
@@ -70,17 +68,15 @@ add_library(${LIBRARY_NAME}
 
 add_subdirectory(ext/fmt)
 
-target_include_directories(${LIBRARY_NAME} PUBLIC "include" "ext" "ext/fmt/include")
-target_link_libraries(${LIBRARY_NAME} fmt Qt5::Widgets Qt5::Network)
+target_include_directories(C-Troll-Common PUBLIC "include" "ext" "ext/fmt/include")
+target_link_libraries(C-Troll-Common fmt Qt5::Widgets Qt5::Network)
 
-set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD 17)
-set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD_REQUIRED On)
-
-
+set_property(TARGET C-Troll-Common PROPERTY CXX_STANDARD 17)
+set_property(TARGET C-Troll-Common PROPERTY CXX_STANDARD_REQUIRED On)
 
 if (MSVC)
     target_compile_options(
-        ${LIBRARY_NAME}
+        C-Troll-Common
         PUBLIC
         "/ZI"
         "/MP"
@@ -90,16 +86,16 @@ if (MSVC)
         "/wd4127"           # conditional expression is constant (thrown in Qt)
     )
     target_compile_definitions(
-        ${LIBRARY_NAME}
+        C-Troll-Common
         PUBLIC
         "_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING"
     )
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if (APPLE)
-        target_compile_options(${LIBRARY_NAME} PUBLIC "-stdlib=libc++")
+        target_compile_options(C-Troll-Common PUBLIC "-stdlib=libc++")
     endif ()
     target_compile_options(
-        ${LIBRARY_NAME}
+        C-Troll-Common
         PUBLIC
         "-Wall"
         "-Wextra"
@@ -107,7 +103,7 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     )
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     target_compile_options(
-        ${LIBRARY_NAME}
+        C-Troll-Common
         PUBLIC
         "-ggdb"
         "-Wall"
