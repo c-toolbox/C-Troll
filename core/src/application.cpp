@@ -44,9 +44,10 @@
 #include <QObject>
 #include <QTcpSocket>
 #include <QThread>
-#include <assert.h>
 #include <json/json.hpp>
 #include <fmt/format.h>
+#include <assert.h>
+#include <filesystem>
 
 namespace {
     constexpr const char* KeyApplicationPath = "applicationPath";

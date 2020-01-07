@@ -54,7 +54,6 @@ namespace common {
 
 class Application : public QObject {
 Q_OBJECT
-
 public:
     Application(std::string configurationFile);
 

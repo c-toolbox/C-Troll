@@ -70,9 +70,9 @@ void JsonSocket::readToBuffer() {
 
     // If it is the first package to arrive, we extract the expected length of the message
     if (_payloadSize == -1) {
-        auto it = std::find(_buffer.begin(), _buffer.end(), '#');
+        const auto it = std::find(_buffer.cbegin(), _buffer.cend(), '#');
         if (it != _buffer.end()) {
-            std::string sizeString(_buffer.begin(), it);
+            std::string sizeString(_buffer.cbegin(), it);
             _payloadSize = std::stoi(sizeString);
             _buffer.erase(_buffer.begin(), it + 1);
         }
@@ -99,7 +99,6 @@ nlohmann::json JsonSocket::read() {
 
 std::string JsonSocket::localAddress() const {
     return _socket->localAddress().toString().toStdString();
-
 }
 
 std::string JsonSocket::peerAddress() const {

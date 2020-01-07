@@ -57,7 +57,8 @@ struct TrayCommand {
     std::string currentWorkingDirectory;
     /// The list of commandline parameters to be passed to executable
     std::string commandlineParameters;
-    /// The list of environment variables to be passed to executable, syntax: "NAME,VALUE;NAME,VALUE"
+    /// The list of environment variables to be passed to executable, syntax:
+    /// "NAME,VALUE;NAME,VALUE"
     std::string environmentVariables;
 };
 

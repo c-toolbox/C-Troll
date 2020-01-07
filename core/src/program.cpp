@@ -136,7 +136,7 @@ void from_json(const nlohmann::json& j, Program& p) {
 }
 
 std::vector<Program> loadProgramsFromDirectory(const std::string& directory) {
-    return common::loadJsonFromDirectory<Program>(directory, "application");
+    return common::loadJsonFromDirectory<Program>(directory);
 }
 
 common::GuiInitialization::Application programToGuiApplication(const Program& prog) {

@@ -64,26 +64,30 @@ T loadFromJson(const std::string& jsonFile, const std::string& baseDirectory) {
 }
 
 template <typename T>
-std::vector<T> loadJsonFromDirectory(const std::string& directory, const std::string& type) {
+std::vector<T> loadJsonFromDirectory(const std::string& directory) {
     std::vector<T> res;
 
     namespace fs = std::filesystem;
     for (const fs::directory_entry& p : fs::recursive_directory_iterator(directory)) {
-        if (p.is_regular_file()) {
-            fs::path ext = p.path().extension();
-            if (ext == ".json") {
-                std::string file = p.path().string();
-                ::Log(fmt::format("Loading {} file {}", type, file));
-                try {
-                    T obj = common::loadFromJson<T>(file, directory);
-                    res.push_back(std::move(obj));
-                }
-                catch (const std::runtime_error& e) {
-                    ::Log(
-                        fmt::format("Failed to load {} file {}. {}", type, file, e.what())
-                    );
-                }
-            }
+        if (!p.is_regular_file()) {
+            continue;
+        }
+
+        fs::path ext = p.path().extension();
+        if (ext != ".json") {
+            continue;
+        }
+
+        std::string file = p.path().string();
+        ::Log(fmt::format("Loading {} file {}", type, file));
+        try {
+            T obj = common::loadFromJson<T>(file, directory);
+            res.push_back(std::move(obj));
+        }
+        catch (const std::runtime_error& e) {
+            ::Log(
+                fmt::format("Failed to load file {}. {}", file, e.what())
+            );
         }
     }
 
@@ -92,4 +96,4 @@ std::vector<T> loadJsonFromDirectory(const std::string& directory, const std::st
 
 } // namespace common
 
-#endif // __JSONLOAD_H__
+#endif // __COMMON__JSONLOAD_H__

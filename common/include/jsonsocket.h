@@ -38,9 +38,9 @@
 #include <QObject>
 
 #include <QTcpSocket>
+#include <json/json.hpp>
 #include <memory>
 #include <vector>
-#include <json/json.hpp>
 
 namespace common {
 
