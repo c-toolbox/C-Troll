@@ -42,8 +42,7 @@
 
 class Process;
 
-class Program {
-public:
+struct Program {
     struct Configuration {
         std::string id;
         std::string name;

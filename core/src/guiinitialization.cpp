@@ -109,7 +109,7 @@ void to_json(nlohmann::json& j, const GuiInitialization::Cluster& p) {
         { KeyClusterName, p.name },
         { KeyClusterId, p.id },
         { KeyClusterEnabled, p.isEnabled },
-        { KeyClusterConnected, p.connected }
+        { KeyClusterConnected, p.isConnected }
     };
 }
 

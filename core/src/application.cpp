@@ -34,9 +34,11 @@
 
 #include "application.h"
 
+#include "configuration.h"
 #include "guistartcommand.h"
 #include "guiprocesscommand.h"
 #include "guiprocessstatus.h"
+#include "jsonload.h"
 #include "logging.h"
 #include "trayprocesslogmessage.h"
 #include "trayprocessstatus.h"
@@ -49,12 +51,6 @@
 #include <assert.h>
 #include <filesystem>
 
-namespace {
-    constexpr const char* KeyApplicationPath = "applicationPath";
-    constexpr const char* KeyClusterPath = "clusterPath";
-    constexpr const char* KeyListeningPort = "listeningPort";
-} // namespace
-
 Application::Application(std::string configurationFile)
     : _configurationFile(std::move(configurationFile))
     , _outgoingSocketHandler(_clusters)
@@ -63,44 +59,7 @@ Application::Application(std::string configurationFile)
 }
 
 void Application::initalize(bool resetGUIconnection) {
-    std::fstream f(_configurationFile);
-    nlohmann::json json;
-    f >> json;
-
-    std::string programPath = json.at(KeyApplicationPath).get<std::string>();
-    std::string clusterPath = json.at(KeyClusterPath).get<std::string>();
-    int listeningPort = json.at(KeyListeningPort).get<int>();
-
-    if (json.find("services") != json.end()) {
-        nlohmann::json services = json.at("services");
-
-        for (const nlohmann::json& s : services) {
-            if (!s.is_string()) {
-                Log("Error when parsing service command.");
-                continue;
-            }
-
-            std::string command = s.get<std::string>();
-            std::unique_ptr<QProcess> p = std::make_unique<QProcess>();
-            p->start(QString::fromStdString(command));
-            _services.push_back(std::move(p));
-        }
-    }
-
-    // Load all program descriptions from the path provided by the configuration file
-    ::Log(fmt::format("Loading programs from directory {}", programPath));
-    _programs = loadProgramsFromDirectory(programPath);
-
-    // Load all cluster descriptions from the path provided by the configuration file
-    ::Log(fmt::format("Loading clusters from directory {}", clusterPath));
-    _clusters = loadClustersFromDirectory(clusterPath);
-
-    if (resetGUIconnection) {
-        // The incoming socket handler takes care of messages from the GUI
-        ::Log(fmt::format("Listening for GUI on socket {}", listeningPort));
-        _incomingSocketHandler.initialize(listeningPort);
-    }
-
+    loadConfiguration(resetGUIconnection);
     _outgoingSocketHandler.initialize();
 
     if (resetGUIconnection) {
@@ -145,6 +104,24 @@ void Application::deinitalize(bool resetGUIconnection) {
     _processes.clear();
     _clusters.clear();
     _programs.clear();
+}
+
+void Application::loadConfiguration(bool resetGUIconnection) {
+    Configuration config = common::loadFromJson<Configuration>(_configurationFile, "");
+
+    // Load all program descriptions from the path provided by the configuration file
+    ::Log(fmt::format("Loading programs from directory {}", config.applicationPath));
+    _programs = loadProgramsFromDirectory(config.applicationPath);
+
+    // Load all cluster descriptions from the path provided by the configuration file
+    ::Log(fmt::format("Loading clusters from directory {}", config.clusterPath));
+    _clusters = loadClustersFromDirectory(config.clusterPath);
+
+    if (resetGUIconnection) {
+        // The incoming socket handler takes care of messages from the GUI
+        ::Log(fmt::format("Listening for GUI on socket {}", config.listeningPort));
+        _incomingSocketHandler.initialize(config.listeningPort);
+    }
 }
 
 void Application::handleTrayProcessStatus(const Cluster&,
@@ -319,9 +296,11 @@ void Application::handleIncomingGuiProcessCommand(common::GuiProcessCommand cmd)
     
     if (cmd.command == "Restart") {
         sendTrayCommand(cluster, startProcessCommand(*iProcess));
-    } else if (cmd.command == "Stop") {
+    }
+    else if (cmd.command == "Stop") {
         //_processes.erase(iProcess);
-    } else {
+    }
+    else {
         Log(fmt::format("Unknown command '{}'", cmd.command));
     }
 }
@@ -341,7 +320,8 @@ void Application::incomingGuiMessage(const nlohmann::json& message) {
         if (msg.type == common::GuiStartCommand::Type) {
             // We have received a message from the GUI to start a new application
             handleIncomingGuiStartCommand(msg.payload);
-        } else if (msg.type == common::GuiProcessCommand::Type) {
+        }
+        else if (msg.type == common::GuiProcessCommand::Type) {
             // We have received a message from the GUI to start a new application
             handleIncomingGuiProcessCommand(msg.payload);
         }
@@ -367,7 +347,8 @@ void Application::incomingTrayMessage(const Cluster& cluster, const Cluster::Nod
         if (msg.type == common::TrayProcessStatus::Type) {
             // We have received a message from the GUI to start a new application
             handleTrayProcessStatus(cluster, node, msg.payload);
-        } else if (msg.type == common::TrayProcessLogMessage::Type) {
+        }
+        else if (msg.type == common::TrayProcessLogMessage::Type) {
             // We have received a message from the GUI to start a new application
             handleTrayProcessLogMessage(cluster, node, msg.payload);
         }

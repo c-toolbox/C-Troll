@@ -267,11 +267,9 @@ common::TrayCommand exitProcessCommand(const CoreProcess& proc) {
     return t;
 }
 
-
-
 int CoreProcess::nextId = 0;
 
-CoreProcess::CoreProcess(Program& application, const std::string& configurationId,
+CoreProcess::CoreProcess(Program& application, std::string configurationId,
                          Cluster& cluster)
     : id(nextId++)
     , application(application)

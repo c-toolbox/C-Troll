@@ -42,8 +42,8 @@
 #include "traycommand.h"
 #include <chrono>
 
-class Cluster;
-class Program;
+struct Cluster;
+struct Program;
 
 class CoreProcess {
 public:
@@ -101,7 +101,7 @@ public:
         std::chrono::system_clock::time_point time;
     };
 
-    CoreProcess(Program& program, const std::string& configurationId, Cluster& cluster);
+    CoreProcess(Program& program, std::string configurationId, Cluster& cluster);
 
     void pushNodeStatus(std::string nodeId, NodeStatus::Status status);
     void pushNodeError(std::string nodeId, NodeError::Error error);

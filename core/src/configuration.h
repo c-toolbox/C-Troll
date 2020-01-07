@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016 - 2020                                                             *
- * Alexander Bock, Erik SundÃ©n, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -32,82 +32,20 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "cluster.h"
+#ifndef __CORE__CONFIGURATION_H__
+#define __CORE__CONFIGURATION_H__
 
-#include "jsonload.h"
-#include "logging.h"
-#include <assert.h>
-#include <filesystem>
+#include <json/json.hpp>
 
-namespace {
-    constexpr const char* KeyName = "name";
-    constexpr const char* KeyId = "id";
-    constexpr const char* KeyEnabled = "enabled";
-    constexpr const char* KeyNodes = "nodes";
+/// This structure represents the configuration loaded at startup
+struct Configuration {
+    /// The path that contains the JSON objects describing the available applications
+    std::string applicationPath;
+    /// The path that contains the JSON objects describing the available clusters
+    std::string clusterPath;
+    int listeningPort;
+};
 
-    constexpr const char* KeyNodeName = "name";
-    constexpr const char* KeyNodeIpAddress = "ip";
-    constexpr const char* KeyNodePort = "port";
-} // namespace
+void from_json(const nlohmann::json& j, Configuration& c);
 
-void to_json(nlohmann::json& j, const Cluster::Node& p) {
-    j = {
-        { KeyNodeName, p.name },
-        { KeyNodeIpAddress, p.ipAddress },
-        { KeyNodePort, p.port }
-    };
-}
-
-void from_json(const nlohmann::json& j, Cluster::Node& p) {
-    j.at(KeyNodeName).get_to(p.name);
-    j.at(KeyNodeIpAddress).get_to(p.ipAddress);
-    j.at(KeyNodePort).get_to(p.port);
-}
-
-void to_json(nlohmann::json& j, const Cluster& p) {
-    j = {
-        { KeyName, p.name },
-        { KeyId, p.id },
-        { KeyEnabled, p.isEnabled }
-    };
-
-    std::map<std::string, Cluster::Node> nodes;
-    for (const Cluster::Node& n : p.nodes) {
-        nodes[n.id] = n;
-    }
-    j[KeyNodes] = nodes;
-}
-
-void from_json(const nlohmann::json& j, Cluster& p) {
-    j.at(KeyName).get_to(p.name);
-    j.at(KeyId).get_to(p.id);
-    p.isEnabled = true;
-    if (j.find(KeyEnabled) != j.end()) {
-        j.at(KeyEnabled).get_to(p.isEnabled);
-    }
-
-    std::map<std::string, Cluster::Node> nodes;
-    j.at(KeyNodes).get_to(nodes);
-    for (const std::pair<const std::string, Cluster::Node>& node : nodes) {
-        Cluster::Node n = node.second;
-        n.id = node.first;
-        p.nodes.push_back(std::move(n));
-    }
-}
-
-std::vector<Cluster> loadClustersFromDirectory(const std::string& directory) {
-    return common::loadJsonFromDirectory<Cluster>(directory);
-}
-
-common::GuiInitialization::Cluster clusterToGuiCluster(const Cluster& c) {
-    common::GuiInitialization::Cluster cluster;
-    cluster.name = c.name;
-    cluster.id = c.id;
-    cluster.isEnabled = c.isEnabled;
-    cluster.isConnected = std::all_of(
-        c.nodes.begin(),
-        c.nodes.end(),
-        std::mem_fn(&Cluster::Node::isConnected)
-    );
-    return cluster;
-}
+#endif // __CORE_CONFIGURATION_H__

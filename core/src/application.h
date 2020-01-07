@@ -61,6 +61,8 @@ private:
     void initalize(bool resetGUIconnection);
     void deinitalize(bool resetGUIconnection);
 
+    void loadConfiguration(bool resetGUIconnection);
+
     void incomingGuiMessage(const nlohmann::json& message);
     void incomingTrayMessage(const Cluster& cluster, const Cluster::Node& node,
         const nlohmann::json& message);
@@ -87,7 +89,6 @@ private:
     IncomingSocketHandler _incomingSocketHandler;
     OutgoingSocketHandler _outgoingSocketHandler;
 
-    std::vector<std::unique_ptr<QProcess>> _services;
     std::string _configurationFile;
 };
 

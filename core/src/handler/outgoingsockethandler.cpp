@@ -62,8 +62,8 @@ void OutgoingSocketHandler::initialize() {
                         Log(fmt::format("Socket state change: {}:{}  {}",
                             node.ipAddress, node.port, state 
                         ));
-                        if (!node.connected) {
-                            node.connected = true;
+                        if (!node.isConnected) {
+                            node.isConnected = true;
                             emit connectedStatusChanged(c, node);
                         }
                     }
@@ -71,8 +71,8 @@ void OutgoingSocketHandler::initialize() {
                         Log(fmt::format("Socket state change: {}:{}  {}",
                             node.ipAddress, node.port, state
                         ));
-                        if (node.connected) {
-                            node.connected = false;
+                        if (node.isConnected) {
+                            node.isConnected = false;
                             emit connectedStatusChanged(c, node);
                         }
                     }
@@ -105,8 +105,8 @@ void OutgoingSocketHandler::initialize() {
                     QAbstractSocket::SocketState state = it->second->state();
                     if (state == QAbstractSocket::SocketState::UnconnectedState) {
                         Log(fmt::format("Unconnected: {}:{}", node.ipAddress, node.port));
-                        if (node.connected) {
-                            node.connected = false;
+                        if (node.isConnected) {
+                            node.isConnected = false;
                             emit connectedStatusChanged(c, node);
                         }
                         it->second->connectToHost(node.ipAddress, node.port);

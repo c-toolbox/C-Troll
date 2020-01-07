@@ -73,7 +73,7 @@ struct GuiInitialization {
         /// Whether the cluster is currently enabled or not
         bool isEnabled = false;
         /// Whether the cluster is currently connected or not
-        bool connected = false;
+        bool isConnected = false;
     };
 
     /// This struct represents the information about the processes that are registered with

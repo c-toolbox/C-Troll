@@ -35,6 +35,7 @@
 set(HEADER_FILES
     src/application.h
     src/cluster.h
+    src/configuration.h
     src/coreprocess.h
     src/guiinitialization.h
     src/guiprocesscommand.h
@@ -51,6 +52,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
     src/application.cpp
     src/cluster.cpp
+    src/configuration.cpp
     src/coreprocess.cpp
     src/guiinitialization.cpp
     src/guiprocesscommand.cpp

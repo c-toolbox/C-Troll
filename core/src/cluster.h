@@ -44,13 +44,11 @@ class JsonObject;
 class Process;
 
 /**
- * This class represents a cluster setup, that is, a collection of computers that are
- * addressed as a unit. Each cluster has a human readable \m _name, a unique
- * \m _id, a setting whether or not it is \m _enabled and a list of computer
- * \m _nodes.
+ * This structure represents a cluster setup, that is, a collection of computers that are
+ * addressed as a unit. Each cluster has a human readable \m name, a unique
+ * \m id, a setting whether or not it is \m enabled and a list of computer \m nodes.
  */
-class Cluster {
-public:
+struct Cluster {
     /**
      * This struct contains information about individual computer nodes of the cluster.
      * Each node has a human-readable \m name, an \m ipAddress, and a \m port on which the
@@ -67,7 +65,7 @@ public:
         /// The port on which the Tray application on that computer is listening
         int port;
         /// A flag representing whether the node is connected or not
-        bool connected;
+        bool isConnected;
     };
 
     /// The human readable name of this Cluster
