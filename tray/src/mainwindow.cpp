@@ -34,8 +34,8 @@
 
 #include "mainwindow.h"
 
-#include <QMenu>
 #include <QHBoxLayout>
+#include <QMenu>
 #include <iostream>
 
 void MainWindow::log(std::string msg) {

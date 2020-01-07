@@ -443,7 +443,6 @@ void Application::sendTrayCommand(const Cluster& cluster,
     Log(fmt::format("\tCommand: {}", command.command));
     Log(fmt::format("\tExecutable: {}", command.executable));
     Log(fmt::format("\tIdentifier: {}", command.id));
-    Log(fmt::format("\tBase Directory: {}", command.baseDirectory));
     Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
     Log(fmt::format("\tCWD: {}", command.currentWorkingDirectory));
     

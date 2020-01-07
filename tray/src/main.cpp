@@ -32,14 +32,13 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include <iostream>
-
 #include "logging.h"
-#include "sockethandler.h"
 #include "mainwindow.h"
 #include "processhandler.h"
+#include "sockethandler.h"
 #include <QApplication>
 #include <json/json.hpp>
+#include <iostream>
 
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);

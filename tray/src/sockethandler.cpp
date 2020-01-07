@@ -35,18 +35,21 @@
 #include "sockethandler.h"
 
 #include "jsonsocket.h"
+#include "logging.h"
 #include <QTcpSocket.h>
+#include <fmt/format.h>
 #include <iostream>
 #include <memory>
-#include <logging.h>
-#include <fmt/format.h>
 
 void SocketHandler::initialize() {
     const int port = 5000;
     
     Log(fmt::format("Listening on port: {}", port));
     
-    _server.listen(QHostAddress::Any, port);
+    const bool success = _server.listen(QHostAddress::Any, port);
+    if (!success) {
+        Log(fmt::format("Error creating socket to listen on port: {}", port));
+    }
     QObject::connect(
         &_server, &QTcpServer::newConnection,
         this, &SocketHandler::newConnection

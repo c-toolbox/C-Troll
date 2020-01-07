@@ -42,24 +42,28 @@ namespace common {
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
 struct TrayCommand {
+    enum class Command {
+        Start = 0,
+        Kill,
+        Exit,
+        None
+    };
+
     /// The string representing this command type, for usage in the common::GenericMessage
     static constexpr const char* Type = "TrayCommand";
     
     /// The unique identifier for the process that will be created
     int id = -1;
+    /// This value determines whether the process should send back console messages
+    bool forwardStdOutStdErr = false;
     /// The kind of command that is to be executed
-    std::string command;
+    Command command;
     /// The name of the executable
     std::string executable;
-    /// The directory in which the executable is located
-    std::string baseDirectory;
     /// The location that should be set as the working directory prior to execution
     std::string currentWorkingDirectory;
     /// The list of commandline parameters to be passed to executable
     std::string commandlineParameters;
-    /// The list of environment variables to be passed to executable, syntax:
-    /// "NAME,VALUE;NAME,VALUE"
-    std::string environmentVariables;
 };
 
 void to_json(nlohmann::json& j, const TrayCommand& p);

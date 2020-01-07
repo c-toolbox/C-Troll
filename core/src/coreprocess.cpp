@@ -239,9 +239,8 @@ common::TrayCommand startProcessCommand(const CoreProcess& proc) {
     common::TrayCommand t;
     t.id = proc.id;
     t.executable = proc.application.executable;
-    t.baseDirectory = proc.application.baseDirectory;
     t.currentWorkingDirectory = proc.application.currentWorkingDirectory;
-    t.command = "Start";
+    t.command = common::TrayCommand::Command::Start;
 
     t.commandlineParameters = proc.application.commandlineParameters;
 
@@ -264,7 +263,7 @@ common::TrayCommand startProcessCommand(const CoreProcess& proc) {
 common::TrayCommand exitProcessCommand(const CoreProcess& proc) {
     common::TrayCommand t;
     t.id = proc.id;
-    t.command = "Exit";
+    t.command = common::TrayCommand::Command::Exit;
     return t;
 }
 
