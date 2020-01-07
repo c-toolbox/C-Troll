@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,62 +32,24 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include <standardmainwindow.h>
+#include "mainwindow.h"
 
 #include <QMenu>
 #include <QHBoxLayout>
 #include <iostream>
 
-QTextEdit* StandardMainWindow::_staticTextEdit = 0;
-
-void StandardMainWindow::myMessageOutput(QtMsgType type,
-                                         const QMessageLogContext& context,
-                                         const QString& msg)
-{
-    if (!_staticTextEdit) {
-        QByteArray localMsg = msg.toLocal8Bit();
-        switch (type) {
-            case QtDebugMsg:
-                std::cerr << "Debug: ";
-                break;
-            case QtWarningMsg:
-                std::cerr << "Warning: ";
-                break;
-            case QtCriticalMsg:
-                std::cerr << "Critical: ";
-                break;
-            case QtFatalMsg:
-                std::cerr << "Fatal: ";
-                break;
-        }
-        std::cerr << localMsg.constData() << " (" << context.file << ":" <<
-            context.line << ", " << context.function << ")\n";
-
-        if (type == QtFatalMsg) {
-            abort();
-        }
-    }
-    else {
-        switch (type) {
-            case QtDebugMsg:
-            case QtWarningMsg:
-            case QtCriticalMsg:
-                _staticTextEdit->append(msg);
-                break;
-            case QtFatalMsg:
-                abort();
-        }
-    }
+void MainWindow::log(std::string msg) {
+    _messageBox->append(QString::fromStdString(std::move(msg)));
 }
- 
-StandardMainWindow::StandardMainWindow(const QString& title, QWidget* parent)
-    : QMainWindow(parent)
+
+MainWindow::MainWindow(const QString& title)
+    : QMainWindow()
 {
     setWindowTitle(title);
     setMinimumSize(512, 256);
 
-    _staticTextEdit = new QTextEdit();
-    setCentralWidget(_staticTextEdit);
+    _messageBox = new QTextEdit();
+    setCentralWidget(_messageBox);
  
     // Initialize the tray icon, set the icon of a set of system icons,
     // as well as set a tooltip
@@ -98,12 +60,12 @@ StandardMainWindow::StandardMainWindow(const QString& title, QWidget* parent)
     QMenu* menu = new QMenu(this);
     // The first menu item expands the application from the tray,
     QAction* viewWindow = new QAction(trUtf8("Show"), this);
-    connect(viewWindow, SIGNAL(triggered()), this, SLOT(show()));
+    connect(viewWindow, &QAction::triggered, this, &MainWindow::show);
     menu->addAction(viewWindow);
 
     // The second menu item terminates the application
     QAction* quitAction = new QAction(trUtf8("Quit"), this);
-    connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
+    connect(quitAction, &QAction::triggered, this, &MainWindow::close);
     menu->addAction(quitAction);
  
     // Set the context menu on the icon and show the application icon in the system tray
@@ -111,14 +73,11 @@ StandardMainWindow::StandardMainWindow(const QString& title, QWidget* parent)
     _trayIcon->show();
  
     // Also connect clicking on the icon to the signal processor of this press 
-    connect(
-        _trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-        this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason))
-    );
+    connect(_trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
 }
  
 // The method that handles the closing event of the application window
-void StandardMainWindow::closeEvent(QCloseEvent* event) {
+void MainWindow::closeEvent(QCloseEvent* event) {
     // If the window is visible, and the checkbox is checked, then the completion of the
     // application. Ignored, and the window simply hides that accompanied the
     // corresponding pop-up message
@@ -135,7 +94,7 @@ void StandardMainWindow::closeEvent(QCloseEvent* event) {
     }
 }
 
-void StandardMainWindow::changeEvent(QEvent* event) {
+void MainWindow::changeEvent(QEvent* event) {
     if (event->type() == QEvent::WindowStateChange) {
         // Hide the taskbar icon if the window is minimized
         if (isMinimized()) {
@@ -146,7 +105,7 @@ void StandardMainWindow::changeEvent(QEvent* event) {
 }
  
 // The method that handles click on the application icon in the system tray
-void StandardMainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason) {
+void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason) {
     if (reason == QSystemTrayIcon::Trigger) {
         // If the window is visible, it is hidden
         // Conversely, if hidden, it unfolds on the screen

@@ -1,6 +1,6 @@
 ##########################################################################################
 #                                                                                        #
-# Copyright (c) 2016 - 2019                                                              #
+# Copyright (c) 2016 - 2020                                                              #
 # Alexander Bock, Erik Sunden, Emil Axelsson                                             #
 #                                                                                        #
 # All rights reserved.                                                                   #
@@ -34,16 +34,9 @@
 
 set(HEADER_FILES
     include/genericmessage.h
-    include/guistartcommand.h
-    include/guiprocesscommand.h
-    include/guiinitialization.h
-    include/guiprocessstatus.h
-    include/guiprocesslogmessage.h
-    include/guiprocesslogmessagehistory.h
+    include/jsonload.h
     include/jsonsocket.h
-    include/jsonsupport.h
     include/logging.h
-    include/standardmainwindow.h
     include/traycommand.h
     include/trayprocesslogmessage.h
     include/trayprocessstatus.h
@@ -51,16 +44,8 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
     src/genericmessage.cpp
-    src/guistartcommand.cpp
-    src/guiprocesscommand.cpp
-    src/guiinitialization.cpp
-    src/guiprocessstatus.cpp
-    src/guiprocesslogmessage.cpp
-    src/guiprocesslogmessagehistory.cpp
     src/jsonsocket.cpp
-    src/jsonsupport.cpp
     src/logging.cpp
-    src/standardmainwindow.cpp
     src/traycommand.cpp
     src/trayprocesslogmessage.cpp
     src/trayprocessstatus.cpp
@@ -70,9 +55,8 @@ find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
 
 set(MOC_FILES "")
 qt5_wrap_cpp(
-    MOC_FILES 
+    MOC_FILES
     include/jsonsocket.h
-    include/standardmainwindow.h
 )
 
 set(LIBRARY_NAME C-Troll-Common)
@@ -84,11 +68,15 @@ add_library(${LIBRARY_NAME}
     ${RESOURCE_FILES}
 )
 
-target_include_directories(${LIBRARY_NAME} PUBLIC "include") 
-target_link_libraries(${LIBRARY_NAME} Qt5::Widgets Qt5::Network)
+add_subdirectory(ext/fmt)
+
+target_include_directories(${LIBRARY_NAME} PUBLIC "include" "ext" "ext/fmt/include")
+target_link_libraries(${LIBRARY_NAME} fmt Qt5::Widgets Qt5::Network)
 
 set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD 17)
 set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD_REQUIRED On)
+
+
 
 if (MSVC)
     target_compile_options(
@@ -99,20 +87,31 @@ if (MSVC)
         "/W4"
         "/std:c++latest"
         "/permissive-"
-        "/wd4127" # conditional expression is constant (thrown in Qt)
+        "/wd4127"           # conditional expression is constant (thrown in Qt)
+    )
+    target_compile_definitions(
+        ${LIBRARY_NAME}
+        PUBLIC
+        "_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING"
     )
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if (APPLE)
+        target_compile_options(${LIBRARY_NAME} PUBLIC "-stdlib=libc++")
+    endif ()
     target_compile_options(
         ${LIBRARY_NAME}
         PUBLIC
-        "-stdlib=libc++"
+        "-Wall"
         "-Wextra"
+        "-Wpedantic"
     )
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     target_compile_options(
         ${LIBRARY_NAME}
         PUBLIC
         "-ggdb"
+        "-Wall"
         "-Wextra"
+        "-Wpedantic"
     )
 endif ()

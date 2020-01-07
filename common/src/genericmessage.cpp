@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -34,29 +34,23 @@
 
 #include "genericmessage.h"
 
-#include "jsonsupport.h"
-#include <QJsonObject>
-
 namespace {
-    const QString KeyType = "type";
-    const QString KeyPayload = "payload";
+    constexpr const char* KeyType = "type";
+    constexpr const char* KeyPayload = "payload";
 } // namespace
 
 namespace common {
 
-GenericMessage::GenericMessage(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
-    
-    type = common::testAndReturnString(obj, KeyType);
-    payload = common::testAndReturnObject(obj, KeyPayload);
+void to_json(nlohmann::json& j, const GenericMessage& p) {
+    j = {
+        { KeyType, p.type },
+        { KeyPayload, p.payload }
+    };
 }
-    
-QJsonDocument GenericMessage::toJson() const {
-    QJsonObject obj;
-    obj[KeyType] = type;
-    obj[KeyPayload] = payload;
-    
-    return QJsonDocument(obj);
+
+void from_json(const nlohmann::json& j, GenericMessage& p) {
+    j.at(KeyType).get_to(p.type);
+    p.payload = j.at(KeyPayload);
 }
-    
+
 } // namespace common

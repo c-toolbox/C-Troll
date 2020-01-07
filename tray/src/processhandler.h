@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,26 +32,23 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __PROCESSHANDLER_H__
-#define __PROCESSHANDLER_H__
+#ifndef __TRAY__PROCESSHANDLER_H__
+#define __TRAY__PROCESSHANDLER_H__
 
 #include <QObject>
 
-#include <QJsonDocument>
-#include <QProcess>
 #include <traycommand.h>
+#include <QProcess>
 #include <map>
 #include <string>
+#include <json/json.hpp>
 
 class ProcessHandler : public QObject {
 Q_OBJECT
-public:
-    ProcessHandler();
-    ~ProcessHandler();
 
 public slots:
-    void handleSocketMessage(const QJsonDocument& message);
-    // Process slots
+    void handleSocketMessage(const nlohmann::json& message);
+
     void handlerErrorOccurred(QProcess::ProcessError error);
     void handleFinished(int exitCode);
     void handleFinished(int exitCode, QProcess::ExitStatus exitStatus);
@@ -60,17 +57,16 @@ public slots:
     void handleStarted();
 
 signals:
-    void sendSocketMessage(const QJsonDocument& message);
+    void sendSocketMessage(const nlohmann::json& message);
 
 private:
     void executeProcessWithTrayCommand(QProcess* process,
         const common::TrayCommand& command);
     void createAndRunProcessFromTrayCommand(const common::TrayCommand& command);
     
-    // The key of this map is a unique id (recieved from core)
+    // The key of this map is a unique id (received from core)
     // The value is the process which is running
-    using ProcessMap = std::map<int, QProcess*>;
-    ProcessMap _processes;
+    std::map<int, QProcess*> _processes;
 };
 
-#endif
+#endif // __TRAY__PROCESSHANDLER_H__

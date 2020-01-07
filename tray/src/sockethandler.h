@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,34 +32,32 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __SOCKETHANDLER_H__
-#define __SOCKETHANDLER_H__
+#ifndef __TRAY__SOCKETHANDLER_H__
+#define __TRAY__SOCKETHANDLER_H__
 
 #include <QObject>
-#include <QJsonDocument>
 #include <QTcpServer>
+#include <json/json.hpp>
 
 namespace common { class JsonSocket; }
 
 class SocketHandler : public QObject {
 Q_OBJECT
 public:
-    SocketHandler();
-    ~SocketHandler();
     void newConnection();
     void disconnected(common::JsonSocket*);
     void readyRead(common::JsonSocket*);
     void initialize();
 
 public slots:    
-    void sendMessage(const QJsonDocument& message);
+    void sendMessage(const nlohmann::json& message);
 
 signals:
-    void messageRecieved(const QJsonDocument& message);
+    void messageRecieved(const nlohmann::json& message);
 
 private:
     QTcpServer _server;
     std::vector<common::JsonSocket*> _sockets;
 };
 
-#endif
+#endif // __TRAY__SOCKETHANDLER_H__

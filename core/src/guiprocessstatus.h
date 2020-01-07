@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,33 +32,41 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "guiprocesscommand.h"
+#ifndef __CORE__GUIPROCESSSTATUS_H__
+#define __CORE__GUIPROCESSSTATUS_H__
 
-#include "jsonsupport.h"
-#include <QJsonObject>
-
-namespace {
-    const QString KeyCommand = "command";
-    const QString KeyProcessId = "processId";
-} // namespace
+#include <json/json.hpp>
+#include <map>
 
 namespace common {
-
-const QString GuiProcessCommand::Type = "GuiProcessCommand";
     
-GuiProcessCommand::GuiProcessCommand(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
+/// This struct is the data structure that gets send from the Core to the GUI to 
+/// inform the GUI about a change in process status
+struct GuiProcessStatus {
+    /// The string representing this command type, for usage in the common::GenericMessage
+    static constexpr const char* Type = "GuiProcessStatus";
 
-    processId = common::testAndReturnInt(obj, KeyProcessId);
-    command = common::testAndReturnString(obj, KeyCommand);
-}
-
-QJsonDocument GuiProcessCommand::toJson() const {
-    QJsonObject obj;
-    obj[KeyProcessId] = processId;
-    obj[KeyCommand] = command;
-
-    return QJsonDocument(obj);
-}
+    /// The per-process unique identifier for this process status.
+    int id = -1;
+    /// The unique identifier for the process that will be created
+    int processId = -1;
+    /// The application identifier
+    std::string applicationId;
+    /// The cluster identifier
+    std::string clusterId;
+    /// The configuration identifier
+    int configurationId = -1;
+    /// The cluster status
+    std::string clusterStatus;
+    /// The process status
+    std::map<std::string, std::string> nodeStatus;
+    /// The time
+    double time = -1.0;
+};
+    
+void to_json(nlohmann::json& j, const GuiProcessStatus& p);
+void from_json(const nlohmann::json& j, GuiProcessStatus& p);
 
 } // namespace common
+
+#endif // __CORE__GUIPROCESSSTATUS_H__

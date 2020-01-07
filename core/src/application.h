@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __APPLICATION_H__
-#define __APPLICATION_H__
+#ifndef __CORE__APPLICATION_H__
+#define __CORE__APPLICATION_H__
 
 #include "cluster.h"
 #include "program.h"
@@ -52,17 +52,19 @@ namespace common {
     class JsonSocket;
 } // namespace common
 
-class Application {
+class Application : public QObject {
+Q_OBJECT
+
 public:
-    Application(QString configurationFile);
+    Application(std::string configurationFile);
 
 private:
-    void initalize(bool resetGUIconnection = true);
-    void deinitalize(bool resetGUIconnection = true);
+    void initalize(bool resetGUIconnection);
+    void deinitalize(bool resetGUIconnection);
 
-    void incomingGuiMessage(const QJsonDocument& message);
+    void incomingGuiMessage(const nlohmann::json& message);
     void incomingTrayMessage(const Cluster& cluster, const Cluster::Node& node,
-        const QJsonDocument& message);
+        const nlohmann::json& message);
     
     void handleTrayProcessStatus(const Cluster& cluster, const Cluster::Node& node,
         common::TrayProcessStatus status);
@@ -75,19 +77,19 @@ private:
     common::GenericMessage initializationInformation();
     common::GenericMessage guiProcessLogMessageHistory(const CoreProcess& process);
 
-    void sendGuiProcessStatus(const CoreProcess& process, const QString& nodeId);
-    void sendLatestLogMessage(const CoreProcess& process, const QString& nodeId);
+    void sendGuiProcessStatus(const CoreProcess& process, const std::string& nodeId);
+    void sendLatestLogMessage(const CoreProcess& process, const std::string& nodeId);
 
     void sendTrayCommand(const Cluster& cluster, const common::TrayCommand& command);
 
-    std::vector<std::unique_ptr<Program>> _programs;
-    std::vector<std::unique_ptr<Cluster>> _clusters;
-    std::vector<std::unique_ptr<CoreProcess>> _processes;
+    std::vector<Program> _programs;
+    std::vector<Cluster> _clusters;
+    std::vector<CoreProcess> _processes;
     IncomingSocketHandler _incomingSocketHandler;
     OutgoingSocketHandler _outgoingSocketHandler;
 
     std::vector<std::unique_ptr<QProcess>> _services;
-    QString _configurationFile;
+    std::string _configurationFile;
 };
 
-#endif // __APPLICATION_H__
+#endif // __CORE__APPLICATION_H__

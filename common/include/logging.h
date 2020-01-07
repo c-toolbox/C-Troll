@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,11 +32,12 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __LOGGING_H__
-#define __LOGGING_H__
+#ifndef __COMMON__LOGGING_H__
+#define __COMMON__LOGGING_H__
 
-#include <QFile>
-#include <QString>
+#include <fstream>
+#include <functional>
+#include <string>
 
 namespace common {
     
@@ -55,7 +56,8 @@ public:
      * \param application The name of the application. This is used for creating
      * unique(ish) names for the log.
      */
-    static void initialize(QString application);
+    static void initialize(std::string application,
+        std::function<void(std::string)> loggingFunction);
     
     /**
      * Returns the static reference to the Log instance.
@@ -70,7 +72,7 @@ public:
      * immediately.
      * \param message The message that is to be logged
      */
-    void logMessage(QString message);
+    void logMessage(std::string message);
   
 private:
     /**
@@ -78,16 +80,18 @@ private:
      * was in the file previously.
      * \param application The name of the application that requested the log file
      */
-     Log(QString application);
+    Log(std::string application);
     
     /// Destructor the will close the file.
-     ~Log();
+    ~Log();
 
     // The static Log that is returned in the Log::ref method.
     static Log* _log;
     
     /// The log file to which all messages from the logMessage method get logged
-    QFile _file;
+    std::ofstream _file;
+
+    std::function<void(std::string)> _loggingFunction;
 };
     
 } // namespace common
@@ -98,6 +102,6 @@ private:
  * \param message The message that is to be logged and passed to the Log::logMessage
  * function
  */
-void Log(QString message);
+void Log(std::string message);
 
-#endif // __LOGGING_H__
+#endif // __COMMON__LOGGING_H__

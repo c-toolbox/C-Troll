@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016 - 2020                                                             *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -32,36 +32,28 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "guistartcommand.h"
+#ifndef __CORE__GUIPROCESSCOMMAND_H__
+#define __CORE__GUIPROCESSCOMMAND_H__
 
-#include "jsonsupport.h"
-#include <QJsonObject>
-
-namespace {
-    const QString KeyApplicationId = "applicationId";
-    const QString KeyConfigurationId = "configurationId";
-    const QString KeyClusterId = "clusterId";
-} // namespace
+#include <json/json.hpp>
 
 namespace common {
 
-const QString GuiStartCommand::Type = "GuiStartCommand";
-    
-GuiStartCommand::GuiStartCommand(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
+/// This struct is the data structure that gets send from the GUI to the Core
+/// to signal that the Core should perform a command on a process with the given id.
+struct GuiProcessCommand {
+    /// The string representing this command type, for usage in the common::GenericMessage
+    static constexpr const char* Type = "GuiProcessCommand";
 
-    applicationId = common::testAndReturnString(obj, KeyApplicationId);
-    configurationId = common::testAndReturnString(obj, KeyConfigurationId);
-    clusterId = common::testAndReturnString(obj, KeyClusterId);
-}
+    /// The process to be controlled
+    int processId = -1;
+    /// The command to be executed
+    std::string command;
+};
 
-QJsonDocument GuiStartCommand::toJson() const {
-    QJsonObject obj;
-    obj[KeyApplicationId] = applicationId;
-    obj[KeyConfigurationId] = configurationId;
-    obj[KeyClusterId] = clusterId;
+void to_json(nlohmann::json& j, const GuiProcessCommand& p);
+void from_json(const nlohmann::json& j, GuiProcessCommand& p);
 
-    return QJsonDocument(obj);
-}
+} // namespace
 
-} // namespace common
+#endif // __CORE__GUIPROCESSCOMMAND_H__

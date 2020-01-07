@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
- * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
+ * Copyright (c) 2016 - 2020                                                             *
+ * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -32,47 +32,28 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GUIPROCESSCOMMAND_H__
-#define __GUIPROCESSCOMMAND_H__
+#include "guistartcommand.h"
 
-#include <QJsonDocument>
-#include <QString>
+namespace {
+    constexpr const char* KeyApplicationId = "applicationId";
+    constexpr const char* KeyConfigurationId = "configurationId";
+    constexpr const char* KeyClusterId = "clusterId";
+} // namespace
 
 namespace common {
 
-/// This struct is the data structure that gets send from the GUI to the Core
-/// to signal that the Core should perform a command on a process with the given id.
-struct GuiProcessCommand {
-    /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
-    
-    /// Default constructor
-    GuiProcessCommand() = default;
+void to_json(nlohmann::json& j, const GuiStartCommand& p) {
+    j = {
+        { KeyApplicationId, p.applicationId },
+        { KeyConfigurationId, p.configurationId },
+        { KeyClusterId, p.clusterId }
+    };
+}
 
-    /**
-     * Creates a GuiProcessCommand from the passed \p document. The \p document must
-     * contain all of the following keys:
-     * \c processId (int)
-     * \c command (string)
-     * \param document The QJsonDocument that contains the information about this
-     * GuiStartCommand
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    GuiProcessCommand(const QJsonDocument& document);
+void from_json(const nlohmann::json& j, GuiStartCommand& p) {
+    j.at(KeyApplicationId).get_to(p.applicationId);
+    j.at(KeyConfigurationId).get_to(p.configurationId);
+    j.at(KeyClusterId).get_to(p.clusterId);
+}
 
-    /**
-     * Converts the GuiProcessCommand into a valid QJsonDocument object and returns it.
-     * \return the QJsonDocument representing this GuiProcessCommand
-     */
-    QJsonDocument toJson() const;
-
-    /// The process to be controlled
-    int processId;
-    /// The command to be executed
-    QString command;
-};
-
-} // namespace
-
-#endif // __GUIPROCESSCOMMAND_H__
+} // namespace common

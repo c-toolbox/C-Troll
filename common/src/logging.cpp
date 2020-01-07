@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -34,7 +34,6 @@
 
 #include "logging.h"
 
-#include <QDebug>
 #include <assert.h>
 
 #ifdef WIN32
@@ -42,17 +41,20 @@
 #endif
 
 namespace {
-    const QString LogPrefix = "log_";
-    const QString LogPostfix = ".txt";
+    constexpr const char* LogPrefix = "log_";
+    constexpr const char* LogPostfix = ".txt";
 } // namespace
 
 namespace common {
 
 Log* Log::_log;
     
-void Log::initialize(QString application) {
-    assert(!application.isEmpty());
+void Log::initialize(std::string application,
+                     std::function<void(std::string)> loggingFunction)
+{
+    assert(!application.empty());
     _log = new Log(std::move(application));
+    _log->_loggingFunction = std::move(loggingFunction);
 }
     
 Log& Log::ref() {
@@ -60,33 +62,30 @@ Log& Log::ref() {
     return *_log;
 }
     
-Log::Log(QString componentName) : _file(LogPrefix + componentName + LogPostfix) {
-    assert(!componentName.isEmpty());
-    _file.open(QIODevice::WriteOnly);
+Log::Log(std::string componentName) : _file(LogPrefix + componentName + LogPostfix) {
+    assert(!componentName.empty());
 }
     
 Log::~Log() {
     _file.close();
 }
     
-void Log::logMessage(QString message) {
+void Log::logMessage(std::string message) {
     // First the file
-    _file.write(message.toUtf8());
-    _file.write("\n");
+    _file << message << '\n';
     _file.flush();
 
-    // Then the console
-    qDebug() << message.toUtf8();
+    _loggingFunction(message);
 
     // And if we are running in Visual Studio, this output, too
 #ifdef WIN32
     message = message + "\n";
-    OutputDebugString(message.toStdString().c_str());
+    OutputDebugString(message.c_str());
 #endif
 }
     
 } // namespace common
 
-void Log(QString msg) {
+void Log(std::string msg) {
     common::Log::ref().logMessage(std::move(msg));
 }

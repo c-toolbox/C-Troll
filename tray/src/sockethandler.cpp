@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -35,19 +35,16 @@
 #include "sockethandler.h"
 
 #include "jsonsocket.h"
-#include <QDebug>
 #include <QTcpSocket.h>
 #include <iostream>
 #include <memory>
-
-SocketHandler::SocketHandler() {}
-
-SocketHandler::~SocketHandler() {}
+#include <logging.h>
+#include <fmt/format.h>
 
 void SocketHandler::initialize() {
     const int port = 5000;
     
-    qDebug() << "Listening on port:" << port;
+    Log(fmt::format("Listening on port: {}", port));
     
     _server.listen(QHostAddress::Any, port);
     QObject::connect(
@@ -57,15 +54,16 @@ void SocketHandler::initialize() {
 }
 
 void SocketHandler::readyRead(common::JsonSocket* socket) {
-    QJsonDocument message = socket->read();
-    emit messageRecieved(message);
+    nlohmann::json message = socket->read();
+    emit messageRecieved(std::move(message));
 }
 
-void SocketHandler::sendMessage(const QJsonDocument& message) {
-    qDebug() << "Sending message: " << message;
+void SocketHandler::sendMessage(const nlohmann::json& message) {
+    Log(fmt::format("Sending message:\n{}", message.dump()));
     for (common::JsonSocket* jsonSocket : _sockets) {
-        qDebug() << jsonSocket->socket()->localAddress() << " -> " <<
-            jsonSocket->socket()->peerAddress();
+        std::string local = jsonSocket->localAddress();
+        std::string peer = jsonSocket->peerAddress();
+        Log(local + " -> " + peer);
         jsonSocket->write(message);
     }
 }
@@ -75,19 +73,18 @@ void SocketHandler::disconnected(common::JsonSocket* socket) {
     if (ptr != _sockets.end()) {
         (*ptr)->deleteLater();
         _sockets.erase(ptr);
-        qDebug() << "Socket disconnected";
+        Log("Socket disconnected");
     }
 }
 
 void SocketHandler::newConnection() {
     while (_server.hasPendingConnections()) {
         common::JsonSocket* jsonSocket = new common::JsonSocket(
-            std::unique_ptr<QTcpSocket>(_server.nextPendingConnection()));
+            std::unique_ptr<QTcpSocket>(_server.nextPendingConnection())
+        );
         
-        QTcpSocket* rawSocket = jsonSocket->socket();
-
         QObject::connect(
-            rawSocket, &QTcpSocket::disconnected,
+            jsonSocket, &common::JsonSocket::disconnected,
             [this, jsonSocket]() { disconnected(jsonSocket); }
         );
 
@@ -97,6 +94,6 @@ void SocketHandler::newConnection() {
         );
 
         _sockets.push_back(jsonSocket);
-        qDebug() << "Socket connected";
+        Log("Socket connected");
     }
 }

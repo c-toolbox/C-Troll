@@ -1,6 +1,6 @@
 ##########################################################################################
 #                                                                                        #
-# Copyright (c) 2016 - 2019                                                              #
+# Copyright (c) 2016 - 2020                                                              #
 # Alexander Bock, Erik Sunden, Emil Axelsson                                             #
 #                                                                                        #
 # All rights reserved.                                                                   #
@@ -33,12 +33,14 @@
 ##########################################################################################
 
 set(HEADER_FILES
+    src/mainwindow.h
     src/processhandler.h
     src/sockethandler.h
 )
 
 set(SOURCE_FILES
     src/main.cpp
+    src/mainwindow.cpp
     src/processhandler.cpp
     src/sockethandler.cpp
 )

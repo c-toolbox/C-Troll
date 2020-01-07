@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,61 +32,45 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GUIPROCESSSTATUS_H__
-#define __GUIPROCESSSTATUS_H__
+#ifndef __CORE__GUIPROCESSLOGMESSAGEHISTORY_H__
+#define __CORE__GUIPROCESSLOGMESSAGEHISTORY_H__
 
-#include <QJsonDocument>
-#include <QMap>
-#include <QString>
+#include <json/json.hpp>
+#include <vector>
 
 namespace common {
     
 /// This struct is the data structure that gets send from the Core to the GUI to 
 /// inform the GUI about a change in process status
-struct GuiProcessStatus {
-    /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
-    
-    /// Default constructor
-    GuiProcessStatus() = default;
-    
-    /**
-     * Creates a GuiProcessStatus from the passed \p document. The \p document must
-     * contain the following keys, all of type string:
-     * \c identifier
-     * \c status
-     * \param document The QJsonDocument that contains the information about this
-     * GuiProcessStatus
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    GuiProcessStatus(const QJsonDocument& document);
-    
-    /**
-     * Converts the GuiProcessStatus into a valid QJsonDocument object and returns
-     * it.
-     * \return The QJsonDocument representing this GuiProcessStatus
-     */
-    QJsonDocument toJson() const;
+struct GuiProcessLogMessageHistory {
+    struct LogMessage {
+        int id;
+        std::string message;
+        std::string outputType;
+        std::string nodeId;
+        double time;
+    };
 
-    /// The per-process unique identifier for this process status.
-    int id;
+    /// The string representing this command type, for usage in the common::GenericMessage
+    static constexpr const char* Type = "GuiProcessLogMessageHistory";
+    
     /// The unique identifier for the process that will be created
     int processId;
     /// The application identifier
-    QString applicationId;
+    std::string applicationId;
     /// The cluster identifier
-    QString clusterId;
+    std::string clusterId;
     /// The configuration identifier
     int configurationId;
-    /// The cluster status
-    QString clusterStatus;
-    /// The process status
-    QMap<QString, QString> nodeStatus;
-    /// The time
-    double time;
+    /// The log messages
+    std::vector<LogMessage> logMessages;
 };
-    
+   
+void to_json(nlohmann::json& j, const GuiProcessLogMessageHistory& p);
+void to_json(nlohmann::json& j, const GuiProcessLogMessageHistory::LogMessage& p);
+void from_json(const nlohmann::json& j, GuiProcessLogMessageHistory& p);
+void from_json(const nlohmann::json& j, GuiProcessLogMessageHistory::LogMessage& p);
+
 } // namespace common
 
-#endif // __GUIPROCESSSTATUS_H__
+#endif // __CORE__GUIPROCESSSTATUS_H__

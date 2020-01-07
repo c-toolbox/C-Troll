@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016 - 2020                                                             *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -32,74 +32,64 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "guiprocesslogmessagehistory.h"
+#ifndef __COMMON__JSONLOAD_H__
+#define __COMMON__JSONLOAD_H__
 
-#include "jsonsupport.h"
-#include <QJsonObject>
-
-namespace {
-    const QString KeyProcessId = "processId";
-    const QString KeyApplicationId = "applicationId";
-    const QString KeyClusterId = "clusterId";
-
-    const QString KeyConfigurationId = "configurationId";
-    const QString KeyMessages = "messages";
-
-    const QString KeyLogMessageId = "id";
-    const QString KeyLogMessageNodeId = "nodeId";
-    const QString KeyLogMessageOutputType = "outputType";
-    const QString KeyLogMessageTime = "time";   
-    const QString KeyLogMessageMessage = "message";
-} // namespace
+#include "logging.h"
+#include <filesystem>
+#include <string>
+#include <vector>
+#include <QDirIterator>
+#include <fmt/format.h>
 
 namespace common {
 
-const QString GuiProcessLogMessageHistory::Type = "GuiProcessLogMessageHistory";
+template <typename T>
+T loadFromJson(const std::string& jsonFile, const std::string& baseDirectory) {
+    std::string id = std::filesystem::relative(jsonFile, baseDirectory).string();
 
-GuiProcessLogMessageHistory::GuiProcessLogMessageHistory(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
+    // Remove the last 5 characters '.json'
+    id = id.substr(0, id.length() - 5);
 
-    processId = common::testAndReturnInt(obj, KeyProcessId);
-    applicationId = common::testAndReturnString(obj, KeyApplicationId);
-    clusterId = common::testAndReturnString(obj, KeyClusterId);
-    QJsonArray messageArray = common::testAndReturnArray(obj, KeyMessages);
+#ifdef WIN32
+    std::replace(id.begin(), id.end(), '\\', '/');
+#endif // WIN32
 
-    for (int i = 0; i < messageArray.size(); i++) {
-        QJsonObject message = common::testAndReturnObject(messageArray, i);
-        GuiProcessLogMessageHistory::LogMessage logMessage;
-        logMessage.id = common::testAndReturnInt(obj, KeyLogMessageId);
-        logMessage.message = common::testAndReturnString(obj, KeyLogMessageMessage);
-        logMessage.nodeId = common::testAndReturnString(obj, KeyLogMessageNodeId);
-        logMessage.outputType = common::testAndReturnString(obj, KeyLogMessageOutputType);
-        logMessage.time = common::testAndReturnDouble(obj, KeyLogMessageTime);
-        logMessages.push_back(logMessage);
-    }
+    std::ifstream f(jsonFile);
+    nlohmann::json obj;
+    f >> obj;
+    obj["id"] = id;
+
+    return T(obj);
 }
 
-QJsonDocument GuiProcessLogMessageHistory::toJson() const {
-    QJsonObject obj;
-    obj[KeyProcessId] = processId;
-    obj[KeyApplicationId] = applicationId;
-    obj[KeyClusterId] = clusterId;
+template <typename T>
+std::vector<T> loadJsonFromDirectory(const std::string& directory, const std::string& type) {
+    std::vector<T> res;
 
-    QJsonArray messageArray;
-    std::transform(
-        logMessages.begin(),
-        logMessages.end(),
-        std::back_inserter(messageArray),
-        [](const GuiProcessLogMessageHistory::LogMessage& logMessage) {
-            QJsonObject message;
-            message[KeyLogMessageId] = logMessage.id;
-            message[KeyLogMessageNodeId] = logMessage.nodeId;
-            message[KeyLogMessageMessage] = logMessage.message;
-            message[KeyLogMessageOutputType] = logMessage.outputType;
-            message[KeyLogMessageTime] = logMessage.time;
-            return message;
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& p : fs::recursive_directory_iterator(directory)) {
+        if (p.is_regular_file()) {
+            fs::path ext = p.path().extension();
+            if (ext == ".json") {
+                std::string file = p.path().string();
+                ::Log(fmt::format("Loading {} file {}", type, file));
+                try {
+                    T obj = common::loadFromJson<T>(file, directory);
+                    res.push_back(std::move(obj));
+                }
+                catch (const std::runtime_error& e) {
+                    ::Log(
+                        fmt::format("Failed to load {} file {}. {}", type, file, e.what())
+                    );
+                }
+            }
         }
-    );
-    obj[KeyMessages] = messageArray;
+    }
 
-    return QJsonDocument(obj);
+    return res;
 }
 
 } // namespace common
+
+#endif // __JSONLOAD_H__

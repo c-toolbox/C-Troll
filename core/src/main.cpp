@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -34,42 +34,69 @@
 
 #include "application.h"
 #include "logging.h"
-#include "standardmainwindow.h"
+#include "mainwindow.h"
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <iostream>
+#include <filesystem>
 
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
 
-    qInstallMessageHandler(StandardMainWindow::myMessageOutput);
+    qInstallMessageHandler(
+        // The first message handler is used for Qt error messages that show up before
+        // the main window is initialized
+        [](QtMsgType type, const QMessageLogContext& context, const QString& msg) {
+            QByteArray localMsg = msg.toLocal8Bit();
+            switch (type) {
+                case QtDebugMsg:
+                std::cerr << "Debug: ";
+                break;
+            case QtWarningMsg:
+                std::cerr << "Warning: ";
+                break;
+            case QtCriticalMsg:
+                std::cerr << "Critical: ";
+                break;
+            case QtFatalMsg:
+                std::cerr << "Fatal: ";
+                break;
+            }
+
+            std::cerr << localMsg.constData() << " (" << context.file << ":" <<
+                context.line << ", " << context.function << ")\n";
+        }
+    );
+
 
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 
-    StandardMainWindow mainWindow("C-Troll-Core");
+    MainWindow mw("C-Troll-Core");
 #ifdef QT_DEBUG
-    mainWindow.show();
+    mw.show();
 #else
-    mainWindow.hide();
+    mw.hide();
 #endif // QT_DEBUG
     
-    common::Log::initialize("core");
-    
-    // Load configuration file
-    QString configurationFile = QDir::current().relativeFilePath("config.json");
-    if (argc == 2) {
-        // If someone passed us a second argument, we assume this to be the configuration
-        configurationFile = QString::fromLatin1(argv[1]);
-    }
+    common::Log::initialize("core", [&mw](std::string msg) { mw.log(msg); });
 
-    QFileInfo info(configurationFile);
-    if (!info.exists()) {
-        Log("Could not find configuration file " + info.absolutePath());
+    qInstallMessageHandler(
+        // Now that the log is enabled and available, we can pipe all Qt messages to that
+        [](QtMsgType, const QMessageLogContext&, const QString& msg) {
+            Log(msg.toStdString());
+        }
+    );
+    
+    // Load configuration file;  use the passed argument if it exists
+    std::string configurationFile = (argc == 2) ? argv[1] : "config.json";
+    if (!std::filesystem::exists(configurationFile)) {
+        std::string absPath = std::filesystem::absolute(configurationFile).string();
+        Log("Could not find configuration file " + absPath);
         exit(EXIT_FAILURE);
     }
 
     Application application(configurationFile);
-
     app.exec();
 }

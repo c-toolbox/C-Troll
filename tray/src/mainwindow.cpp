@@ -32,78 +32,89 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "jsonsocket.h"
+#include "mainwindow.h"
 
-#include <QNetworkProxy>
+#include <QMenu>
+#include <QHBoxLayout>
+#include <iostream>
 
-namespace common {
+void MainWindow::log(std::string msg) {
+    _messageBox->append(QString::fromStdString(std::move(msg)));
+}
 
-JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket)
-    : QObject()
-    , _socket(std::move(socket))
+MainWindow::MainWindow(const QString& title)
+    : QMainWindow()
 {
-    connect(_socket.get(), &QTcpSocket::readyRead, this, &JsonSocket::readToBuffer);
-    connect(_socket.get(), &QTcpSocket::disconnected, this, &JsonSocket::disconnected);
-    _socket->setProxy(QNetworkProxy::NoProxy);
+    setWindowTitle(title);
+    setMinimumSize(512, 256);
+
+    _messageBox = new QTextEdit();
+    setCentralWidget(_messageBox);
+ 
+    // Initialize the tray icon, set the icon of a set of system icons,
+    // as well as set a tooltip
+    _trayIcon = new QSystemTrayIcon(QIcon(":/images/C_transparent.png"), this);
+    _trayIcon->setToolTip(title + QString("\nCluster Launcher Application"));
+
+    // After that create a context menu of two items
+    QMenu* menu = new QMenu(this);
+    // The first menu item expands the application from the tray,
+    QAction* viewWindow = new QAction(trUtf8("Show"), this);
+    connect(viewWindow, &QAction::triggered, this, &MainWindow::show);
+    menu->addAction(viewWindow);
+
+    // The second menu item terminates the application
+    QAction* quitAction = new QAction(trUtf8("Quit"), this);
+    connect(quitAction, &QAction::triggered, this, &MainWindow::close);
+    menu->addAction(quitAction);
+ 
+    // Set the context menu on the icon and show the application icon in the system tray
+    _trayIcon->setContextMenu(menu);
+    _trayIcon->show();
+ 
+    // Also connect clicking on the icon to the signal processor of this press 
+    connect(_trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
 }
-void JsonSocket::connectToHost(const std::string& host, int port) {
-    _socket->connectToHost(QString::fromStdString(host), port);
+ 
+// The method that handles the closing event of the application window
+void MainWindow::closeEvent(QCloseEvent* event) {
+    // If the window is visible, and the checkbox is checked, then the completion of the
+    // application. Ignored, and the window simply hides that accompanied the
+    // corresponding pop-up message
+    if (isVisible()) {
+        event->ignore();
+        hide();
+ 
+        _trayIcon->showMessage(
+            windowTitle(),
+            trUtf8("The application is still running in the background"),
+            QSystemTrayIcon::Information,
+            2000
+        );
+    }
 }
 
-QTcpSocket::SocketState JsonSocket::state() const {
-    return _socket->state();
+void MainWindow::changeEvent(QEvent* event) {
+    if (event->type() == QEvent::WindowStateChange) {
+        // Hide the taskbar icon if the window is minimized
+        if (isMinimized()) {
+            hide();
+        }
+        event->ignore();
+    }
 }
-
-void JsonSocket::write(nlohmann::json jsonDocument) {
-    std::string jsonText = jsonDocument.dump();
-    std::string length = std::to_string(jsonText.size());
-    std::string msg = length + '#' + jsonText;
-
-    _socket->write(msg.c_str());
-    _socket->flush();
-}
-
-void JsonSocket::readToBuffer() {
-    QByteArray incomingData = _socket->readAll();
-    _buffer.resize(incomingData.size());
-    std::copy(incomingData.begin(), incomingData.end(), _buffer.begin());
-
-    // If it is the first package to arrive, we extract the expected length of the message
-    if (_payloadSize == -1) {
-        auto it = std::find(_buffer.begin(), _buffer.end(), '#');
-        if (it != _buffer.end()) {
-            std::string sizeString(_buffer.begin(), it);
-            _payloadSize = std::stoi(sizeString);
-            _buffer.erase(_buffer.begin(), it + 1);
+ 
+// The method that handles click on the application icon in the system tray
+void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason) {
+    if (reason == QSystemTrayIcon::Trigger) {
+        // If the window is visible, it is hidden
+        // Conversely, if hidden, it unfolds on the screen
+        if (isVisible()) {
+            hide(); // Hide the taskbar icon
+        }
+        else {
+            show(); // Show the taskbar icon
+            showNormal(); // Bring the window to the front
         }
     }
-
-    if (_payloadSize > 0 && (_payloadSize <= _buffer.size())) {
-        emit readyRead();
-        readToBuffer();
-    }
 }
-
-nlohmann::json JsonSocket::read() {
-    if (_payloadSize > _buffer.size()) {
-        return nlohmann::json();
-    }
-
-    std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
-    std::string json(data.data(), _payloadSize);
-    _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
-    _payloadSize = -1;
-
-    return nlohmann::json::parse(json);
-}
-
-std::string JsonSocket::localAddress() const {
-    return _socket->localAddress().toString().toStdString();
-
-}
-
-std::string JsonSocket::peerAddress() const {
-    return _socket->peerAddress().toString().toStdString();
-}
-
-} // namespace common

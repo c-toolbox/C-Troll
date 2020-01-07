@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,26 +32,18 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __COREPROCESS_H__
-#define __COREPROCESS_H__
+#ifndef __CORE__COREPROCESS_H__
+#define __CORE__COREPROCESS_H__
 
-#include "cluster.h"
 #include "guiinitialization.h"
 #include "guiprocesslogmessage.h"
 #include "guiprocesslogmessagehistory.h"
-#include "program.h"
+#include "guiprocessstatus.h"
 #include "traycommand.h"
-#include "handler/incomingsockethandler.h"
-#include "handler/outgoingsockethandler.h"
 #include <chrono>
 
-namespace common {
-    struct GuiCommand;
-    struct GuiProcessStatus;
-    struct TrayProcessStatus;
-    struct TrayProcessLogMessage;
-    class JsonSocket;
-} // namespace common
+class Cluster;
+class Program;
 
 class CoreProcess {
 public:
@@ -70,7 +62,7 @@ public:
 
     struct NodeError {
         enum class Error {
-            TimedOut,
+            TimedOut = 0,
             WriteError,
             ReadError,
             UnknownError
@@ -84,16 +76,16 @@ public:
             StdOut,
             StdError
         };
-        QString message;
+        std::string message;
         std::chrono::system_clock::time_point time;
         OutputType outputType;
         int id;
     };
 
     struct NodeLog {
-        QVector<NodeStatus> statuses;
-        QVector<NodeError> errors;
-        QVector<NodeLogMessage> messages;
+        std::vector<NodeStatus> statuses;
+        std::vector<NodeError> errors;
+        std::vector<NodeLogMessage> messages;
     };
 
     struct ClusterStatus {
@@ -109,46 +101,36 @@ public:
         std::chrono::system_clock::time_point time;
     };
 
-    CoreProcess(Program* program, const QString& configurationId, Cluster* cluster);
-    int id() const;
-    Program* application() const;
-    QString configurationId() const;
-    Cluster* cluster() const;
+    CoreProcess(Program& program, const std::string& configurationId, Cluster& cluster);
 
-    common::GuiInitialization::Process toGuiInitializationProcess() const;
-    common::GuiProcessStatus toGuiProcessStatus(const QString& nodeId) const;
-    common::GuiProcessLogMessage latestGuiProcessLogMessage(const QString& nodeId) const;
-    common::GuiProcessLogMessageHistory guiProcessLogMessageHistory() const;
-    common::TrayCommand startProcessCommand() const;
-    common::TrayCommand exitProcessCommand() const;
+    void pushNodeStatus(std::string nodeId, NodeStatus::Status status);
+    void pushNodeError(std::string nodeId, NodeError::Error error);
+    void pushNodeMessage(const std::string& nodeId, NodeLogMessage::OutputType type,
+        std::string message);
 
-    void pushNodeStatus(QString nodeId, NodeStatus::Status status);
-    void pushNodeError(QString nodeId, NodeError::Error error);
-    void pushNodeStdOut(QString nodeId, QString message);
-    void pushNodeStdError(QString nodeId, QString message);
-
-    NodeStatus latestNodeStatus(QString nodeId) const;
-    NodeLogMessage latestLogMessage(QString nodeId) const;
+    int id;
+    Program& application;
+    std::string configurationId;
+    Cluster& cluster;
+    std::map<std::string, NodeLog> nodeLogs;
+    ClusterStatus clusterStatus = { CoreProcess::ClusterStatus::Status::Starting };
 
 private:
-    bool allNodesHasStatus(NodeStatus::Status status);
-    bool anyNodeHasStatus(NodeStatus::Status status);
+    static int nextId;
 
-    static QString nodeStatusToGuiNodeStatus(NodeStatus::Status status);
-    static QString clusterStatusToGuiClusterStatus(ClusterStatus::Status status);
-    static double timeToGuiTime(std::chrono::system_clock::time_point time);
-
-    int _id;
-    Program* _application;
-    QString _configurationId;
-    Cluster* _cluster;
-    static int _nextId;
-    QMap<QString, CoreProcess::NodeLog> _nodeLogs;
-    CoreProcess::ClusterStatus _clusterStatus;
-
-    int _nextLogMessageId = 0;
-    int _nextNodeErrorId = 0;
-    int _nextNodeStatusId = 0;
+    int nextLogMessageId = 0;
+    int nextNodeErrorId = 0;
+    int nextNodeStatusId = 0;
 };
 
-#endif // __COREPROCESS_H__
+common::GuiInitialization::Process coreProcessToGuiProcess(const CoreProcess& process);
+common::GuiProcessStatus coreProcessToProcessStatus(const CoreProcess& process,
+    const std::string& nodeId);
+common::GuiProcessLogMessage latestGuiProcessLogMessage(const CoreProcess& process,
+    const std::string& nodeId);
+common::GuiProcessLogMessageHistory logMessageHistory(const CoreProcess& proc);
+
+common::TrayCommand startProcessCommand(const CoreProcess& proc);
+common::TrayCommand exitProcessCommand(const CoreProcess& proc);
+
+#endif // __CORE__COREPROCESS_H__

@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -34,33 +34,24 @@
 
 #include "trayprocessstatus.h"
 
-#include "jsonsupport.h"
-#include <QJsonObject>
-
 namespace {
-    const QString KeyProcessId = "processId";
-    const QString KeyStatus = "status";
+    constexpr const char* KeyProcessId = "processId";
+    constexpr const char* KeyStatus = "status";
 } // namespace
 
 namespace common {
     
-const QString TrayProcessStatus::Type = "TrayProcessStatus";
-
-TrayProcessStatus::TrayProcessStatus(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
-    
-    processId = common::testAndReturnInt(obj, KeyProcessId);
-    status = static_cast<common::TrayProcessStatus::Status>(
-        common::testAndReturnInt(obj, KeyStatus)
-    );
+void to_json(nlohmann::json& j, const TrayProcessStatus& p) {
+    j = {
+        { KeyProcessId, p.processId },
+        { KeyStatus, static_cast<int>(p.status) } // @TODO: Replace with string
+    };
 }
 
-QJsonDocument TrayProcessStatus::toJson() const {
-    QJsonObject obj;
-    obj[KeyProcessId] = processId;
-    obj[KeyStatus] = static_cast<int>(status);
-    
-    return QJsonDocument(obj);
+void from_json(const nlohmann::json& j, TrayProcessStatus& p) {
+    j.at(KeyProcessId).get_to(p.processId);
+    int status = j.at(KeyStatus).get<int>(); // @TODO: Replace with string
+    p.status = static_cast<common::TrayProcessStatus::Status>(status);
 }
     
 } // namespace common

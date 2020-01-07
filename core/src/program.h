@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,123 +32,56 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __PROGRAM_H__
-#define __PROGRAM_H__
+#ifndef __CORE__PROGRAM_H__
+#define __CORE__PROGRAM_H__
 
 #include "guiinitialization.h"
-#include "traycommand.h"
-#include <QJsonObject>
-#include <QList>
-#include <QString>
-#include <QVector>
-#include <QMap>
-#include <memory>
+#include <json/json.hpp>
+#include <string>
+#include <vector>
 
 class Process;
 
 class Program {
 public:
-    Program() = default;
-    Program(const QJsonObject& jsonObject);
-    ~Program();
-    
     struct Configuration {
-        QString id;
-        QString name;
-        QMap<QString, QString> clusterCommandlineParameters;
+        std::string id;
+        std::string name;
+        std::map<std::string, std::string> clusterCommandlineParameters;
     };
 
-    /**
-     * Returns the unique identifier for this Program.
-     * \return The unique identifier for this Program
-     */
-    QString id() const;
+    Program() = default;
+    ~Program();
     
-    /**
-     * Returns the human readable name for this Program.
-     * \return The human readable name for this Program
-     */
-    QString name() const;
-    
-    /**
-     * Returns the full path to the executable for this Program.
-     * \return The full path to the executable for this Program
-     */
-    QString executable() const;
-    
-    /**
-     * Returns the base directory for this Program.
-     * \return The base directory for this Program
-     */
-    QString baseDirectory() const;
-    
-    /**
-     * Returns the commandline parameters for this Program.
-     * \return The commandline parameters for this Program
-     */
-    QString commandlineParameters() const;
-    
-    /**
-     * Returns the current working directory from which the application will be 
-     * started.
-     * \return The application's working directory
-     */
-    QString currentWorkingDirectory() const;
-    
-    /**
-     * Returns a (potentially empty) list of relevant tags for this application.
-     * \return A (potentially empty) list of relevant tags for this application.
-     */
-    QStringList tags() const;
-    
-    /**
-     * Returns A list of (potentially empty) configurations for this Program. A 
-     * Configuration is a set of extra commandline arguments that can toggle parts of 
-     * the program as the configurator desires.
-     * \return A list of (potentially empty) configuratins for this Program
-     */
-    QList<Configuration> configurations() const;
-
-    common::GuiInitialization::Application toGuiInitializationApplication() const;
-
-    /**
-    * Return a JSON string that represents this program.
-    */
-    QJsonObject toJson() const;
-
-    /**
-    * Return a unique hash that represents this program configuration.
-    */
-    QByteArray hash() const;
-
-    static std::unique_ptr<std::vector<std::unique_ptr<Program>>>
-        loadProgramsFromDirectory(QString directory);
-
-    static std::unique_ptr<Program> loadProgram(QString jsonFile, QString baseDirectory);
-
-private:
     /// A unique identifier
-    QString _id;
+    std::string id;
     /// A human readable name for this Program
-    QString _name;
+    std::string name;
     /// The full path to the executable
-    QString _executable;
+    std::string executable;
     /// The base directory of the application
-    QString _baseDirectory;
+    std::string baseDirectory;
     /// A fixed set of commandline parameters
-    QString _commandlineParameters;
+    std::string commandlineParameters;
     /// The current working directory from which the Program is started
-    QString _currentWorkingDirectory;
+    std::string currentWorkingDirectory;
     /// A list of tags that are associated with this Program
-    QList<QString> _tags;
+    std::vector<std::string> tags;
     // List of all configurations
-    QList<Configuration> _configurations;
+    std::vector<Configuration> configurations;
     // Default configuration id
-    QString _defaultConfiguration;
+    std::string defaultConfiguration;
     // Default cluster id
-    QString _defaultCluster;
+    std::string defaultCluster;
     /// A vector of processes that derive from this program.
-    QVector<Process*> _processes;
+    std::vector<Process*> processes;
 };
 
-#endif // __PROGRAM_H__
+std::vector<Program> loadProgramsFromDirectory(const std::string& directory);
+
+common::GuiInitialization::Application programToGuiApplication(const Program& p);
+
+void to_json(nlohmann::json& j, const Program& p);
+void from_json(const nlohmann::json& j, Program& p);
+
+#endif // __CORE__PROGRAM_H__

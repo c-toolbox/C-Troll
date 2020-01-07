@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,66 +32,35 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __GUIPROCESSLOGMESSAGE_H__
-#define __GUIPROCESSLOGMESSAGE_H__
+#ifndef __TRAY__MAINWINDOW_H__
+#define __TRAY__MAINWINDOW_H__
+ 
+#include <QMainWindow>
+#include <QCloseEvent>
+#include <QSystemTrayIcon>
+#include <QAction>
+#include <QTextEdit>
+ 
+namespace Ui { class MainWindow; }
+ 
+class MainWindow : public QMainWindow {
+Q_OBJECT
+public:
+    explicit MainWindow(const QString& title);
 
-#include <QJsonDocument>
-#include <QString>
-#include <QMap>
+    void log(std::string msg);
 
-namespace common {
-    
-/// This struct is the data structure that gets send from the Core to the GUI to 
-/// inform the GUI about a change in process status
-struct GuiProcessLogMessage {
-    /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
-    
-    /// Default constructor
-    GuiProcessLogMessage() = default;
-    
-    /**
-     * Creates a GuiProcessLogMessage from the passed \p document. The \p document must
-     * contain the following keys:
-     * \c processId (int)
-     * \c applicationId (string)
-     * \c clusterId (string)
-     * \c message (string)
-     * \c type (string)
-     * \param document The QJsonDocument that contains the information about this
-     * GuiProcessLogMessage
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    GuiProcessLogMessage(const QJsonDocument& document);
-    
-    /**
-     * Converts the GuiProcessStatus into a valid QJsonDocument object and returns
-     * it.
-     * \return The QJsonDocument representing this GuiProcessStatus
-     */
-    QJsonDocument toJson() const;
-    
-    /// The per-process unique id for this log message.
-    int id;
-    /// The unique identifier for the process that will be created
-    int processId;
-    /// The application identifier
-    QString applicationId;
-    /// The cluster identifier
-    QString clusterId;
-    /// The node identifier
-    QString nodeId;
-    /// The configuration identifier
-    int configurationId;
-    /// The log message
-    QString logMessage;
-    /// The output type of log message ("stdout" or "stderr")
-    QString outputType;
-    /// The time
-    double time;
+protected:
+    void closeEvent(QCloseEvent* event);
+    void changeEvent(QEvent* event);
+ 
+private slots:
+    void iconActivated(QSystemTrayIcon::ActivationReason reason);
+ 
+private:
+    // Declare the object of future applications for the tray icon
+    QTextEdit* _messageBox;
+    QSystemTrayIcon* _trayIcon;
 };
-    
-} // namespace common
-
-#endif // __GUIPROCESSSTATUS_H__
+ 
+#endif // __TRAY__MAINWINDOW_H__

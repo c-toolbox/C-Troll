@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,36 +32,45 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __JSONSOCKET_H__
-#define __JSONSOCKET_H__
+#ifndef __COMMON__JSONSOCKET_H__
+#define __COMMON__JSONSOCKET_H__
+
+#include <QObject>
 
 #include <QTcpSocket>
-#include <QObject>
-#include <QJsonDocument>
-#include <deque>
 #include <memory>
+#include <vector>
+#include <json/json.hpp>
 
 namespace common {
 
 class JsonSocket : public QObject {
 Q_OBJECT
 public:
-    JsonSocket(std::unique_ptr<QTcpSocket> socket, QObject* parent = Q_NULLPTR);
-    virtual ~JsonSocket();
-    void write(QJsonDocument json);
-    QJsonDocument read();
-    QTcpSocket* socket();
+    JsonSocket(std::unique_ptr<QTcpSocket> socket);
+    virtual ~JsonSocket() = default;
+
+    void connectToHost(const std::string& host, int port);
+    QTcpSocket::SocketState state() const;
+
+    void write(nlohmann::json json);
+    nlohmann::json read();
+
+    std::string localAddress() const;
+    std::string peerAddress() const;
 
 signals:
     void readyRead();
+    void disconnected();
 
 private: 
     void readToBuffer();
+
     std::unique_ptr<QTcpSocket> _socket;
-    std::deque<char> _buffer;
+    std::vector<char> _buffer;
     int _payloadSize = -1;
 };
 
 } // namespace common
 
-#endif // __JSONSOCKET_H__
+#endif // __COMMON__JSONSOCKET_H__

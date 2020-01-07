@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016                                                                    *
+ * Copyright (c) 2016 - 2019                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -137,7 +137,7 @@ app.use( '/**', (req, res) => {
 });
 
 let httpServer = http.createServer(app);
-guiSocketServer.installHandlers(httpServer, {prefix:'/api'});
+guiSocketServer.installHandlers(httpServer, { prefix: '/api' });
 httpServer.listen(config.webPort, config.webAddress);
 
 logNConnections();

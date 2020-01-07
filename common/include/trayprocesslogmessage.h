@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,11 +32,10 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __TRAYPROCESSLOGMESSAGE_H__
-#define __TRAYPROCESSLOGMESSAGE_H__
+#ifndef __COMMON__TRAYPROCESSLOGMESSAGE_H__
+#define __COMMON__TRAYPROCESSLOGMESSAGE_H__
 
-#include <QJsonDocument>
-#include <QString>
+#include <json/json.hpp>
 
 namespace common {
     
@@ -44,44 +43,24 @@ namespace common {
 /// that the Tray should perform a task
 struct TrayProcessLogMessage {
     /// The string representing this command type, for usage in the common::GenericMessage
-    static const QString Type;
+    static constexpr const char* Type = "TrayProcessLogMessage";
 
     enum class OutputType : int {
         StdOut = 0,
         StdErr
     };
 
-    /// Default constructor
-    TrayProcessLogMessage() = default;
-    
-    /**
-     * Creates a TrayProcessLogMessage from the passed \p document. The \p document must
-     * contain the following keys, all of type string:
-     * \c identifier
-     * \c message
-     * \c type
-     * \param document The QJsonDocument that contains the information about this
-     * TrayProcessLogMessage
-     * \throws std::runtime_error If one of the required keys were not present or of the
-     * wrong type
-     */
-    TrayProcessLogMessage(const QJsonDocument& document);
-    
-    /**
-     * Converts the TrayProcessLogMessage into a valid QJsonDocument object and returns
-     * it.
-     * \return The QJsonDocument representing this TrayProcessLogMessage
-     */
-    QJsonDocument toJson() const;
-    
     /// The unique identifier for the process
-    int processId;
+    int processId = -1;
     /// The process stdout/stderr line
-    QString message;
+    std::string message;
     /// The type of output
     OutputType outputType;
 };
     
+void to_json(nlohmann::json& j, const TrayProcessLogMessage& p);
+void from_json(const nlohmann::json& j, TrayProcessLogMessage& p);
+
 } // namespace common
 
-#endif // __TRAYPROCESSLOGMESSAGE_H__
+#endif // __COMMON__TRAYPROCESSLOGMESSAGE_H__

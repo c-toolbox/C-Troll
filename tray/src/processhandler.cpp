@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -37,27 +37,44 @@
 #include <genericmessage.h>
 #include <trayprocesslogmessage.h>
 #include <trayprocessstatus.h>
-#include <QDebug>
-#include <QJsonDocument>
 #include <functional>
+#include <logging.h>
+#include <fmt/format.h>
 
-ProcessHandler::ProcessHandler() {}
+namespace {
 
-ProcessHandler::~ProcessHandler() {}
+std::vector<std::string> tokenizeString(const std::string& input, char separator) {
+    size_t separatorPos = input.find(separator);
+    if (separatorPos == std::string::npos) {
+        return { input };
+    }
+    else {
+        std::vector<std::string> result;
+        size_t prevSeparator = 0;
+        while (separatorPos != std::string::npos) {
+            result.push_back(input.substr(prevSeparator, separatorPos - prevSeparator));
+            prevSeparator = separatorPos + 1;
+            separatorPos = input.find(separator, separatorPos + 1);
+        }
+        result.push_back(input.substr(prevSeparator));
+        return result;
+    }
+}
 
-void ProcessHandler::handleSocketMessage(const QJsonDocument& message) {
-    // qDebug() << messageDoc;
-    common::TrayCommand command(message);
+} // namespace
+
+void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
+    common::TrayCommand command = message;
     
-    qDebug() << "Received TrayCommand";
-    qDebug() << "Command: " << command.command;
-    qDebug() << "Id: " << command.id;
-    qDebug() << "Executable: " << command.executable;
-    qDebug() << "CommandLineParameters: " << command.commandlineParameters;
-    qDebug() << "BaseDirectory: " << command.baseDirectory;
-    qDebug() << "CurrentWorkingDirectory: " << command.currentWorkingDirectory;
-    qDebug() << "EnvironmentVariables: " << command.environmentVariables;
-    
+    Log("Received TrayCommand");
+    Log(fmt::format("Command: {}", command.command));
+    Log(fmt::format("Id: {}", command.id));
+    Log(fmt::format("Executable: {}", command.executable));
+    Log(fmt::format("CommandLineParameters: {}", command.commandlineParameters));
+    Log(fmt::format("BaseDirectory: {}", command.baseDirectory));
+    Log(fmt::format("CurrentWorkingDirectory: {}", command.currentWorkingDirectory));
+    Log(fmt::format("EnvironmentVariables: {}", command.environmentVariables));
+
     // Check if identifer of traycommand already is tied to a process
     // We don't allow the same id for multiple processes
     auto p = _processes.find(command.id);
@@ -76,13 +93,13 @@ void ProcessHandler::handleSocketMessage(const QJsonDocument& message) {
 }
 
 void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
-    qDebug() << "Error occurred: " << error;
+    Log("Error occurred: " + error);
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    ProcessMap::iterator p2T = std::find_if(
-        _processes.begin(),
-        _processes.end(),
+    auto p2T = std::find_if(
+        _processes.cbegin(),
+        _processes.cend(),
         [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
     );
     
@@ -114,8 +131,9 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
             // Send out the TrayProcessStatus with the error/status string
             common::GenericMessage msg;
             msg.type = common::TrayProcessStatus::Type;
-            msg.payload = ps.toJson().object();
-            emit sendSocketMessage(msg.toJson());
+            msg.payload = ps;
+            nlohmann::json j = msg;
+            emit sendSocketMessage(j);
         }
     }
 }
@@ -124,9 +142,9 @@ void ProcessHandler::handleStarted() {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    ProcessMap::iterator p2T = std::find_if(
-        _processes.begin(),
-        _processes.end(),
+    auto p2T = std::find_if(
+        _processes.cbegin(),
+        _processes.cend(),
         [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
     );
     
@@ -137,8 +155,9 @@ void ProcessHandler::handleStarted() {
         ps.status = common::TrayProcessStatus::Status::Running;
         common::GenericMessage msg;
         msg.type = common::TrayProcessStatus::Type;
-        msg.payload = ps.toJson().object();
-        emit sendSocketMessage(msg.toJson());
+        msg.payload = ps;
+        nlohmann::json j = msg;
+        emit sendSocketMessage(j);
     }
 }
 
@@ -151,9 +170,9 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    ProcessMap::iterator p2T = std::find_if(
-        _processes.begin(),
-        _processes.end(),
+    auto p2T = std::find_if(
+        _processes.cbegin(),
+        _processes.cend(),
         [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
     );
     
@@ -173,8 +192,9 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
         // Send out the TrayProcessStatus with the error/status string
         common::GenericMessage msg;
         msg.type = common::TrayProcessStatus::Type;
-        msg.payload = ps.toJson().object();
-        emit sendSocketMessage(msg.toJson());
+        msg.payload = ps;
+        nlohmann::json j = msg;
+        emit sendSocketMessage(j);
         
         // Remove this process from the list as we consider it finsihed
         _processes.erase(p2T);
@@ -185,9 +205,9 @@ void ProcessHandler::handleReadyReadStandardError() {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    ProcessMap::iterator p2T = std::find_if(
-        _processes.begin(),
-        _processes.end(),
+    auto p2T = std::find_if(
+        _processes.cbegin(),
+        _processes.cend(),
         [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
     );
     
@@ -196,11 +216,12 @@ void ProcessHandler::handleReadyReadStandardError() {
         common::TrayProcessLogMessage pm;
         pm.processId = p2T->first;
         pm.outputType = common::TrayProcessLogMessage::OutputType::StdErr;
-        pm.message = QString::fromLatin1(process->readAllStandardError());
+        pm.message = QString::fromLatin1(process->readAllStandardError()).toStdString();
         common::GenericMessage msg;
         msg.type = common::TrayProcessLogMessage::Type;
-        msg.payload = pm.toJson().object();
-        emit sendSocketMessage(msg.toJson());
+        msg.payload = pm;
+        nlohmann::json j = msg;
+        emit sendSocketMessage(j);
     }
 }
 
@@ -208,21 +229,22 @@ void ProcessHandler::handleReadyReadStandardOutput() {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    ProcessMap::iterator p2T = std::find_if(
-        _processes.begin(),
-        _processes.end(),
+    auto p2T = std::find_if(
+        _processes.cbegin(),
+        _processes.cend(),
         [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
     );
     
     if (p2T != _processes.end()) {
         common::TrayProcessLogMessage pm;
         pm.processId = p2T->first;
-        pm.message = QString::fromLatin1(process->readAllStandardOutput());
+        pm.message = QString::fromLatin1(process->readAllStandardOutput()).toStdString();
         pm.outputType = common::TrayProcessLogMessage::OutputType::StdOut;
         common::GenericMessage msg;
         msg.type = common::TrayProcessLogMessage::Type;
-        msg.payload = pm.toJson().object();
-        emit sendSocketMessage(msg.toJson());
+        msg.payload = pm;
+        nlohmann::json j = msg;
+        emit sendSocketMessage(j);
     }
 }
 
@@ -230,34 +252,44 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
                                                    const common::TrayCommand& command)
 {
     if (command.command == "Start") {
-        if (!command.environmentVariables.isEmpty()) {
+        if (!command.environmentVariables.empty()) {
             QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
             // First split per variable, such that each string contains "name,value"
-            QStringList envVariables = command.environmentVariables.split(';');
-            foreach (QString var, envVariables) {
+            std::vector<std::string> envVariables = tokenizeString(
+                command.environmentVariables,
+                ';'
+            );
+            for (const std::string& var : envVariables) {
+                std::vector<std::string> envVariableNameValue = tokenizeString(var, ',');
                 // Split name and value
-                QStringList envVariableNameValue = var.split(',');
                 if (envVariableNameValue.size() == 2) {
-                    env.insert(envVariableNameValue[0], envVariableNameValue[1]);
+                    env.insert(
+                        QString::fromStdString(envVariableNameValue[0]),
+                        QString::fromStdString(envVariableNameValue[1])
+                    );
                 }
             }
             process->setProcessEnvironment(env);
         }
         
-        if (!command.currentWorkingDirectory.isEmpty()) {
-            process->setWorkingDirectory(command.currentWorkingDirectory);
+        if (!command.currentWorkingDirectory.empty()) {
+            process->setWorkingDirectory(
+                QString::fromStdString(command.currentWorkingDirectory)
+            );
         }
-        else if (!command.baseDirectory.isEmpty()) {
-            process->setWorkingDirectory(command.baseDirectory);
+        else if (!command.baseDirectory.empty()) {
+            process->setWorkingDirectory(QString::fromStdString(command.baseDirectory));
         }
         
-        if (command.commandlineParameters.isEmpty()) {
-            process->start("\"" + command.executable + "\"");
+        if (command.commandlineParameters.empty()) {
+            std::string cmd = fmt::format("\"{}\"", command.executable);
+            process->start(QString::fromStdString(cmd));
         }
         else {
-            process->start(
-                "\"" + command.executable + "\" " + command.commandlineParameters
+            std::string cmd = fmt::format(
+                "\"{}\" {}", command.executable, command.commandlineParameters
             );
+            process->start(QString::fromStdString(cmd));
         }
     } else if (command.command == "Kill" || command.command == "Exit") {
         common::TrayProcessStatus ps;
@@ -270,9 +302,9 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
             ps.status = common::TrayProcessStatus::Status::NormalExit;
         }
         // Find specifc value in process map i.e. process
-        ProcessMap::iterator p2T = std::find_if(
-            _processes.begin(),
-            _processes.end(),
+        auto p2T = std::find_if(
+            _processes.cbegin(),
+            _processes.cend(),
             [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
         );
 
@@ -281,48 +313,38 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
             // Send out the TrayProcessStatus with the error/status string
             common::GenericMessage msg;
             msg.type = common::TrayProcessStatus::Type;
-            msg.payload = ps.toJson().object();
-            emit sendSocketMessage(msg.toJson());
+            msg.payload = ps;
+            nlohmann::json j = msg;
+            emit sendSocketMessage(j);
             // Remove this process from the list as we consider it finsihed
             _processes.erase(p2T);
         }
     }
 }
 
-void ProcessHandler::createAndRunProcessFromTrayCommand(
-                                                       const common::TrayCommand& command)
-{
-    QProcess* newProcess = new QProcess(this);
+void ProcessHandler::createAndRunProcessFromTrayCommand(const common::TrayCommand& cmd) {
+    QProcess* proc = new QProcess(this);
     
     // Connect all process signals for logging feedback to core
-    QObject::connect(
-        newProcess, SIGNAL(errorOccurred(QProcess::ProcessError)),
-        this, SLOT(handlerErrorOccurred(QProcess::ProcessError))
-    );
-    QObject::connect(
-        newProcess, SIGNAL(finished(int)),
-        this, SLOT(handleFinished(int))
-    );
-    QObject::connect(
-        newProcess, SIGNAL(finished(int, QProcess::ExitStatus)),
+    connect(proc, &QProcess::errorOccurred, this, &ProcessHandler::handlerErrorOccurred);
+    connect(proc, SIGNAL(finished(int)), this, SLOT(handleFinished(int)));
+    connect(
+        proc, SIGNAL(finished(int, QProcess::ExitStatus)),
         this, SLOT(handleFinished(int, QProcess::ExitStatus))
     );
-    QObject::connect(
-        newProcess, SIGNAL(readyReadStandardError()),
-        this, SLOT(handleReadyReadStandardError())
+    connect(
+        proc, &QProcess::readyReadStandardError,
+        this, &ProcessHandler::handleReadyReadStandardError
     );
-    QObject::connect(
-        newProcess, SIGNAL(readyReadStandardOutput()),
-        this, SLOT(handleReadyReadStandardOutput())
+    connect(
+        proc, &QProcess::readyReadStandardOutput,
+        this, &ProcessHandler::handleReadyReadStandardOutput
     );
-    QObject::connect(
-        newProcess, SIGNAL(started()),
-        this, SLOT(handleStarted())
-    );
+    connect(proc, &QProcess::started, this, &ProcessHandler::handleStarted);
     
     // Insert command identifier and process into out lists
-    _processes.insert(std::make_pair(command.id, newProcess));
+    _processes.insert(std::make_pair(cmd.id, proc));
     
     // Run the process with the command
-    executeProcessWithTrayCommand(newProcess, command);
+    executeProcessWithTrayCommand(proc, cmd);
 }

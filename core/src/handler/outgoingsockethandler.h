@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __OUTGOINGSOCKETHANDLER_H__
-#define __OUTGOINGSOCKETHANDLER_H__
+#ifndef __CORE__OUTGOINGSOCKETHANDLER_H__
+#define __CORE__OUTGOINGSOCKETHANDLER_H__
 
 #include <QObject>
 
@@ -46,23 +46,23 @@
 class OutgoingSocketHandler : public QObject {
 Q_OBJECT
 public:
-    ~OutgoingSocketHandler();
+    OutgoingSocketHandler(std::vector<Cluster>& clusters);
 
-    void initialize(const QList<Cluster*>& clusters);
+    void initialize();
     void deinitialize();
 
-    void sendMessage(const Cluster& cluster, QJsonDocument message) const;
+    void sendMessage(const Cluster& cluster, nlohmann::json message) const;
 
 signals:
     void messageReceived(const Cluster& cluster, const Cluster::Node& node,
-        QJsonDocument message);
+        nlohmann::json message);
     void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);
 
 private:
     void readyRead(const Cluster& cluster, const Cluster::Node& node);
 
-    QList<Cluster*> _clusters;
-    std::map<QString, std::unique_ptr<common::JsonSocket>> _sockets;
+    std::vector<Cluster>& _clusters;
+    std::map<std::string, std::unique_ptr<common::JsonSocket>> _sockets;
 };
 
-#endif // __OUTGOINGSOCKETHANDLER_H__
+#endif // __CORE__OUTGOINGSOCKETHANDLER_H__

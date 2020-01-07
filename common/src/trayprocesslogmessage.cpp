@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2019                                                             *
+ * Copyright (c) 2016 - 2020                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -34,33 +34,27 @@
 
 #include "trayprocesslogmessage.h"
 
-#include "jsonsupport.h"
-#include <QJsonObject>
-
 namespace {
-    const QString KeyIdentifier = "processId";
-    const QString KeyMessage = "message";
-    const QString KeyType = "type";
+    constexpr const char* KeyIdentifier = "processId";
+    constexpr const char* KeyMessage = "message";
+    constexpr const char* KeyType = "type";
 } // namespace
 
 namespace common {
     
-const QString TrayProcessLogMessage::Type = "TrayProcessLogMessage";
-
-TrayProcessLogMessage::TrayProcessLogMessage(const QJsonDocument& document) {
-    QJsonObject obj = document.object();
-    
-    processId = common::testAndReturnInt(obj, KeyIdentifier);
-    message = common::testAndReturnString(obj, KeyMessage);
-    outputType = static_cast<OutputType>(common::testAndReturnInt(obj, KeyType));
+void to_json(nlohmann::json& j, const TrayProcessLogMessage& p) {
+    j = {
+        { KeyIdentifier, p.processId },
+        { KeyMessage, p.message },
+        { KeyType, static_cast<int>(p.outputType) } // @TODO: Replace with string
+    };
 }
 
-QJsonDocument TrayProcessLogMessage::toJson() const {
-    QJsonObject obj;
-    obj[KeyIdentifier] = processId;
-    obj[KeyMessage] = message;
-    obj[KeyType] = static_cast<int>(outputType);
-    return QJsonDocument(obj);
+void from_json(const nlohmann::json& j, TrayProcessLogMessage& p) {
+    j.at(KeyIdentifier).get_to(p.processId);
+    j.at(KeyMessage).get_to(p.message);
+    int type = j.at(KeyType).get<int>();  // @TODO: Replace with string
+    p.outputType = static_cast<TrayProcessLogMessage::OutputType>(type);
 }
     
 } // namespace common

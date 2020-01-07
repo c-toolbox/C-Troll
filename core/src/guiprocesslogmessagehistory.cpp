@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016 - 2020                                                             *
- * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -32,86 +32,57 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "cluster.h"
-
-#include "jsonload.h"
-#include "logging.h"
-#include <assert.h>
-#include <filesystem>
+#include "guiprocesslogmessagehistory.h"
 
 namespace {
-    constexpr const char* KeyName = "name";
-    constexpr const char* KeyId = "id";
-    constexpr const char* KeyEnabled = "enabled";
-    constexpr const char* KeyNodes = "nodes";
+    constexpr const char* KeyProcessId = "processId";
+    constexpr const char* KeyApplicationId = "applicationId";
+    constexpr const char* KeyClusterId = "clusterId";
 
-    constexpr const char* KeyNodeName = "name";
-    constexpr const char* KeyNodeIpAddress = "ip";
-    constexpr const char* KeyNodePort = "port";
+    constexpr const char* KeyConfigurationId = "configurationId";
+    constexpr const char* KeyMessages = "messages";
+
+    constexpr const char* KeyLogMessageId = "id";
+    constexpr const char* KeyLogMessageNodeId = "nodeId";
+    constexpr const char* KeyLogMessageOutputType = "outputType";
+    constexpr const char* KeyLogMessageTime = "time";
+    constexpr const char* KeyLogMessageMessage = "message";
 } // namespace
 
+namespace common {
 
-void to_json(nlohmann::json& j, const Cluster::Node& p) {
+void to_json(nlohmann::json& j, const GuiProcessLogMessageHistory& p) {
     j = {
-        { KeyNodeName, p.name },
-        { KeyNodeIpAddress, p.ipAddress },
-        { KeyNodePort, p.port }
+        { KeyProcessId, p.processId },
+        { KeyApplicationId, p.applicationId },
+        { KeyClusterId, p.clusterId },
+        { KeyMessages, p.logMessages }
     };
 }
 
-void from_json(const nlohmann::json& j, Cluster::Node& p) {
-    j.at(KeyNodeName).get_to(p.name);
-    j.at(KeyNodeIpAddress).get_to(p.ipAddress);
-    j.at(KeyNodePort).get_to(p.port);
-}
-
-void to_json(nlohmann::json& j, const Cluster& p) {
+void to_json(nlohmann::json& j, const GuiProcessLogMessageHistory::LogMessage& p) {
     j = {
-        { KeyName, p.name },
-        { KeyId, p.id },
-        { KeyEnabled, p.isEnabled }
+        { KeyLogMessageId, p.id },
+        { KeyLogMessageNodeId, p.nodeId },
+        { KeyLogMessageMessage, p.message },
+        { KeyLogMessageOutputType, p.outputType },
+        { KeyLogMessageTime, p.time },
     };
-
-    std::map<std::string, Cluster::Node> nodes;
-    for (const Cluster::Node& n : p.nodes) {
-        nodes[n.id] = n;
-    }
-    j[KeyNodes] = nodes;
 }
 
-void from_json(const nlohmann::json& j, Cluster& p) {
-    j.at(KeyName).get_to(p.name);
-    j.at(KeyId).get_to(p.id);
-    p.isEnabled = true;
-    if (j.find(KeyEnabled) != j.end()) {
-        j.at(KeyEnabled).get_to(p.isEnabled);
-    }
-
-    std::map<std::string, Cluster::Node> nodes;
-    j.at(KeyNodes).get_to(nodes);
-    for (const std::pair<const std::string, Cluster::Node>& node : nodes) {
-        Cluster::Node n = node.second;
-        n.id = node.first;
-        p.nodes.push_back(std::move(n));
-    }
+void from_json(const nlohmann::json& j, GuiProcessLogMessageHistory& p) {
+    j.at(KeyProcessId).get_to(p.processId);
+    j.at(KeyApplicationId).get_to(p.applicationId);
+    j.at(KeyClusterId).get_to(p.clusterId);
+    j.at(KeyMessages).get_to(p.logMessages);
 }
 
-std::vector<Cluster> loadClustersFromDirectory(const std::string& directory) {
-    return common::loadJsonFromDirectory<Cluster>(directory, "cluster");
+void from_json(const nlohmann::json& j, GuiProcessLogMessageHistory::LogMessage& p) {
+    j.at(KeyLogMessageId).get_to(p.id);
+    j.at(KeyLogMessageMessage).get_to(p.message);
+    j.at(KeyLogMessageNodeId).get_to(p.nodeId);
+    j.at(KeyLogMessageOutputType).get_to(p.outputType);
+    j.at(KeyLogMessageTime).get_to(p.time);
 }
 
-common::GuiInitialization::Cluster clusterToGuiCluster(const Cluster& c) {
-    common::GuiInitialization::Cluster cluster;
-    cluster.name = c.name;
-    cluster.id = c.id;
-    cluster.isEnabled = c.isEnabled;
-    cluster.connected = std::accumulate(
-        c.nodes.begin(),
-        c.nodes.end(),
-        true,
-        [](bool othersConnected, const Cluster::Node& node) {
-            return othersConnected && node.connected;
-        }
-    );
-    return cluster;
-}
+} // namespace common
