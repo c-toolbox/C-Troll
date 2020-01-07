@@ -55,7 +55,7 @@ struct TrayProcessLogMessage {
     /// The process stdout/stderr line
     std::string message;
     /// The type of output
-    OutputType outputType;
+    OutputType outputType = OutputType::StdOut;
 };
     
 void to_json(nlohmann::json& j, const TrayProcessLogMessage& p);

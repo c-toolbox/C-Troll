@@ -37,21 +37,68 @@
 namespace {
     constexpr const char* KeyProcessId = "processId";
     constexpr const char* KeyStatus = "status";
+
+    std::string fromStatus(common::TrayProcessStatus::Status status) {
+        switch (status) {
+            case common::TrayProcessStatus::Status::Starting: return "Starting";
+            case common::TrayProcessStatus::Status::Running: return "Running";
+            case common::TrayProcessStatus::Status::NormalExit: return "NormalExit";
+            case common::TrayProcessStatus::Status::CrashExit: return "CrashExit";
+            case common::TrayProcessStatus::Status::FailedToStart: return "FailedToStart";
+            case common::TrayProcessStatus::Status::TimedOut: return "TimedOut";
+            case common::TrayProcessStatus::Status::WriteError: return "WriteError";
+            case common::TrayProcessStatus::Status::ReadError: return "ReadError";
+            case common::TrayProcessStatus::Status::UnknownError: return "UnknownError";
+            default: throw std::logic_error("Unhandled case label");
+        }
+    }
+
+    common::TrayProcessStatus::Status toStatus(const std::string& status) {
+        if (status == "Starting") {
+            return common::TrayProcessStatus::Status::Starting;
+        }
+        else if (status == "Running") {
+            return common::TrayProcessStatus::Status::Running;
+        }
+        else if (status == "NormalExit") {
+            return common::TrayProcessStatus::Status::NormalExit;
+        }
+        else if (status == "CrashExit") {
+            return common::TrayProcessStatus::Status::CrashExit;
+        }
+        else if (status == "FailedToStart") {
+            return common::TrayProcessStatus::Status::FailedToStart;
+        }
+        else if (status == "TimedOut") {
+            return common::TrayProcessStatus::Status::TimedOut;
+        }
+        else if (status == "WriteError") {
+            return common::TrayProcessStatus::Status::WriteError;
+        }
+        else if (status == "ReadError") {
+            return common::TrayProcessStatus::Status::ReadError;
+        }
+        else {
+            return common::TrayProcessStatus::Status::UnknownError;
+        }
+    }
+
 } // namespace
 
 namespace common {
     
 void to_json(nlohmann::json& j, const TrayProcessStatus& p) {
+    std::string status = fromStatus(p.status);
     j = {
         { KeyProcessId, p.processId },
-        { KeyStatus, static_cast<int>(p.status) } // @TODO: Replace with string
+        { KeyStatus, status }
     };
 }
 
 void from_json(const nlohmann::json& j, TrayProcessStatus& p) {
     j.at(KeyProcessId).get_to(p.processId);
-    int status = j.at(KeyStatus).get<int>(); // @TODO: Replace with string
-    p.status = static_cast<common::TrayProcessStatus::Status>(status);
+    std::string status = j.at(KeyStatus).get<std::string>();
+    p.status = toStatus(status);
 }
     
 } // namespace common

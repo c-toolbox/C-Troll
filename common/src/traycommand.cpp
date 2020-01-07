@@ -71,7 +71,6 @@ namespace {
             return common::TrayCommand::Command::None;
         }
     }
-
 } // namespace
 
 namespace common {
@@ -94,8 +93,7 @@ void from_json(const nlohmann::json& j, TrayCommand& p) {
     payload.at(KeyId).get_to(p.id);
     payload.at(KeyForwardOutErr).get_to(p.forwardStdOutStdErr);
     
-    std::string commandString;
-    payload.at(KeyCommand).get_to(commandString);
+    std::string commandString = payload.at(KeyCommand).get<std::string>();
     p.command = toCommand(commandString);
 
     payload.at(KeyExecutable).get_to(p.executable);

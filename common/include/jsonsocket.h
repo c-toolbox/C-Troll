@@ -44,6 +44,12 @@
 
 namespace common {
 
+/**
+ * This socket handles connections that transmit entire JSON messages. Individual packages
+ * are cached. When a complete JSON object is received the readyRead signal is emitted,
+ * after which the JSON object is available through the read method. Similarly, the
+ * write method will transmit a JSON object through the socket to the receiver.
+ */
 class JsonSocket : public QObject {
 Q_OBJECT
 public:

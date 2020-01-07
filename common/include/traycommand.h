@@ -42,12 +42,7 @@ namespace common {
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
 struct TrayCommand {
-    enum class Command {
-        Start = 0,
-        Kill,
-        Exit,
-        None
-    };
+    enum class Command { Start, Kill, Exit, None };
 
     /// The string representing this command type, for usage in the common::GenericMessage
     static constexpr const char* Type = "TrayCommand";
