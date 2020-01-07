@@ -79,7 +79,7 @@ std::vector<T> loadJsonFromDirectory(const std::string& directory) {
         }
 
         std::string file = p.path().string();
-        ::Log(fmt::format("Loading {} file {}", type, file));
+        ::Log(fmt::format("Loading file {}", file));
         try {
             T obj = common::loadFromJson<T>(file, directory);
             res.push_back(std::move(obj));
