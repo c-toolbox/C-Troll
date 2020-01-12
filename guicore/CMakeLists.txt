@@ -32,22 +32,52 @@
 #                                                                                        #
 ##########################################################################################
 
-cmake_minimum_required (VERSION 3.10 FATAL_ERROR)
+set(HEADER_FILES
+    src/cluster.h
+    src/clusterconnectionhandler.h
+    src/clusterwidget.h
+    src/configuration.h
+    src/coreprocess.h
+    src/mainwindow.h
+    src/program.h
+    src/programwidget.h
+)
 
-project (C-Troll)
+set(SOURCE_FILES
+    src/cluster.cpp
+    src/clusterconnectionhandler.cpp
+    src/clusterwidget.cpp
+    src/configuration.cpp
+    src/coreprocess.cpp
+    src/main.cpp
+    src/mainwindow.cpp
+    src/program.cpp
+    src/programwidget.cpp
+)
 
-if (APPLE)
-    set(CMAKE_PREFIX_PATH
-        "~/Qt/5.6/clang_64/lib/cmake"
-        "~/Qt/5.7/clang_64/lib/cmake"
-    )
-elseif (WIN32)
-    set(CMAKE_PREFIX_PATH
-        "C:/Qt/5.12.1/msvc2017_64"
-    )
-endif ()
+find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
 
-add_subdirectory(common)
-add_subdirectory(core)
-add_subdirectory(guicore)
-add_subdirectory(tray)
+set(MOC_FILES "")
+qt5_wrap_cpp(
+    MOC_FILES
+    src/clusterconnectionhandler.h
+    src/clusterwidget.h
+    src/mainwindow.h
+    src/programwidget.h
+)
+
+set(RESOURCE_FILES "")
+qt5_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
+
+add_executable(C-Troll WIN32 MACOSX_BUNDLE
+    ${SOURCE_FILES}
+    ${HEADER_FILES}
+    ${MOC_FILES}
+    ${RESOURCE_FILES}
+)
+
+target_include_directories(C-Troll PUBLIC "src")
+target_link_libraries(C-Troll PUBLIC C-Troll-Common Qt5::Widgets Qt5::Network)
+
+set_property(TARGET C-Troll PROPERTY CXX_STANDARD 17)
+set_property(TARGET C-Troll PROPERTY CXX_STANDARD_REQUIRED On)
