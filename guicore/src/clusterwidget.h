@@ -37,29 +37,37 @@
 
 #include <QWidget>
 
+#include <QLabel>
 #include "cluster.h"
 #include <vector>
-
-class ClustersWidget : public QWidget {
-Q_OBJECT
-public:
-    ClustersWidget(const std::vector<Cluster>& clusters);
-
-private:
-    const std::vector<Cluster>& _clusters;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
 
 class ClusterWidget : public QWidget {
 Q_OBJECT
 public:
     ClusterWidget(const Cluster& cluster);
 
+    void updateConnectionStatus(const Cluster::Node& node);
+
 private:
     const Cluster& _cluster;
+    std::vector<QLabel*> _connectionLabels;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+class ClustersWidget : public QWidget {
+    Q_OBJECT
+public:
+    ClustersWidget(const std::vector<Cluster>& clusters);
+
+public slots:
+    void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);
+
+private:
+    const std::vector<Cluster>& _clusters;
+    std::vector<ClusterWidget*> _clusterWidgets;
 };
 
 #endif // __CORE__CLUSTERWIDGET_H__

@@ -92,7 +92,15 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile)
     ClustersWidget* clusters = new ClustersWidget(_clusters);
     tabWidget->addTab(clusters, "Clusters");
 
-    _clusterConnectionHandler = std::make_unique<ClusterConnectionHandler>(_clusters);
+    connect(
+        &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
+        programs, &ProgramsWidget::connectedStatusChanged
+    );
+    connect(
+        &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
+        clusters, &ClustersWidget::connectedStatusChanged
+    );
+    _clusterConnectionHandler.initialize(_clusters);
 }
 
 void MainWindow::log(std::string msg) {
@@ -103,6 +111,9 @@ void MainWindow::startProgram(const Program& program,
                               const Program::Configuration& configuration,
                               const std::string& clusterId)
 {
+    // We don't want to make sure that the program isn't already running as it might be
+    // perfectly valid to start the program multiple times
+
     Log("Application: " + program.name);
     Log("Configuration: " + configuration.name);
     Log("Cluster: " + clusterId);
@@ -135,5 +146,5 @@ void MainWindow::startProgram(const Program& program,
     msg.payload = command;
 
     nlohmann::json j = msg;
-    _clusterConnectionHandler->sendMessage(cluster, j);
+    _clusterConnectionHandler.sendMessage(cluster, j);
 }

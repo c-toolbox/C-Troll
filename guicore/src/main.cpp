@@ -44,7 +44,6 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 
-
     // Load configuration file;  use the passed argument if it exists
     std::string configurationFile = (argc == 2) ? argv[1] : "config.json";
     if (!std::filesystem::exists(configurationFile)) {

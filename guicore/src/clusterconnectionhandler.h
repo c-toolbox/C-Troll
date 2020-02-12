@@ -46,7 +46,7 @@
 class ClusterConnectionHandler : public QObject {
 Q_OBJECT
 public:
-    explicit ClusterConnectionHandler(std::vector<Cluster>& clusters);
+    void initialize(std::vector<Cluster>& clusters);
 
     void sendMessage(const Cluster& cluster, nlohmann::json message) const;
 
@@ -58,7 +58,6 @@ signals:
 private:
     void readyRead(const Cluster& cluster, const Cluster::Node& node);
 
-    std::vector<Cluster>& _clusters;
     std::map<std::string, std::unique_ptr<common::JsonSocket>> _sockets;
 };
 

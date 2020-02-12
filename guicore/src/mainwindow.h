@@ -59,7 +59,7 @@ private:
     std::vector<Cluster> _clusters;
     //std::vector<CoreProcess> _processes;
 
-    std::unique_ptr<ClusterConnectionHandler> _clusterConnectionHandler;
+    ClusterConnectionHandler _clusterConnectionHandler;
 
     QTextEdit* _messageBox = nullptr;
 };

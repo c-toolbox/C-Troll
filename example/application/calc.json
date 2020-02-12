@@ -1,0 +1,17 @@
+{
+    "name": "Calc",
+    "executable": "calc.exe",
+    "configurations": {
+        "default": {
+            "name": "Default",
+            "clusters": {
+                "emil": "",
+                "local": ""
+            }
+        }
+    },
+    "defaults": {
+        "configuration": "default",
+        "cluster": "local"
+    }
+}

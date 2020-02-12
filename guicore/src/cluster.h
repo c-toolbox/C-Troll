@@ -62,9 +62,9 @@ struct Cluster {
         /// hostname
         std::string ipAddress;
         /// The port on which the Tray application on that computer is listening
-        int port;
+        int port = -1;
         /// A flag representing whether the node is connected or not
-        bool isConnected;
+        bool isConnected = false;
     };
 
     /// The human readable name of this Cluster
@@ -72,7 +72,7 @@ struct Cluster {
     /// The unique identifier of this Cluster
     std::string id;
     /// A flag whether this Cluster is enabled or disabled
-    bool isEnabled;
+    bool isEnabled = false;
     /// A list of all nodes belonging to this cluster
     std::vector<Node> nodes;
 };

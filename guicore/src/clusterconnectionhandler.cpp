@@ -46,16 +46,14 @@ namespace {
     }
 } // namespace
 
-ClusterConnectionHandler::ClusterConnectionHandler(std::vector<Cluster>& clusters)
-    : _clusters(clusters)
-{
-    for (Cluster& c : _clusters) {
+void ClusterConnectionHandler::initialize(std::vector<Cluster>& clusters) {
+    for (Cluster& c : clusters) {
         for (Cluster::Node& node : c.nodes) {
             // This handler keeps the sockets to the tray applications open
             std::unique_ptr<QTcpSocket> socket = std::make_unique<QTcpSocket>();
             connect(
                 socket.get(), &QAbstractSocket::stateChanged,
-                [this, c, &node](QAbstractSocket::SocketState state) {
+                [this, &c, &node](QAbstractSocket::SocketState state) {
                     if (state == QAbstractSocket::SocketState::ConnectedState) {
                         Log(fmt::format("Socket state change: {}:{}  {}",
                             node.ipAddress, node.port, state 
@@ -93,8 +91,8 @@ ClusterConnectionHandler::ClusterConnectionHandler(std::vector<Cluster>& cluster
     QTimer* timer = new QTimer(this);
     connect(
         timer, &QTimer::timeout,
-        [this]() {
-            for (Cluster& c : _clusters) {
+        [this, &clusters]() {
+            for (Cluster& c : clusters) {
                 for (Cluster::Node& node : c.nodes) {
                     std::string h = hash(c, node);
                     auto it = _sockets.find(h);
