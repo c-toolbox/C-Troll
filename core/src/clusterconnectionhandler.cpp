@@ -131,18 +131,17 @@ void ClusterConnectionHandler::readyRead(const Cluster& cluster,
 }
 
 void ClusterConnectionHandler::sendMessage(const Cluster& cluster,
+                                           const Cluster::Node& node,
                                            nlohmann::json msg) const
 {
     assert(!msg.is_null());
 
-    for (const Cluster::Node& node : cluster.nodes) {
-        std::string p = std::to_string(node.port);
-        Log("Node: " + node.name + '\t' + node.ipAddress + ':' + p);
-        std::string h = hash(cluster, node);
+    std::string p = std::to_string(node.port);
+    Log("Node: " + node.name + '\t' + node.ipAddress + ':' + p);
+    std::string h = hash(cluster, node);
 
-        const auto it = _sockets.find(h);
-        assert(it != _sockets.end());
+    const auto it = _sockets.find(h);
+    assert(it != _sockets.end());
 
-        it->second->write(msg);
-    }
+    it->second->write(msg);
 }

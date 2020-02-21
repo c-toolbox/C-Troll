@@ -40,7 +40,6 @@
 #include <json/json.hpp>
 
 class JsonObject;
-class Process;
 
 /**
  * This structure represents a cluster setup, that is, a collection of computers that are

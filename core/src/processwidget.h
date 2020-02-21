@@ -37,7 +37,7 @@
 
 #include <QWidget>
 
-#include "coreprocess.h"
+#include "process.h"
 #include "trayprocessstatus.h"
 #include <QLabel>
 #include <vector>
@@ -45,14 +45,14 @@
 class ProcessWidget : public QWidget {
 Q_OBJECT
 public:
-    ProcessWidget(const CoreProcess& process);
+    ProcessWidget(const Process& process);
 
     void updateStatus();
 
     int processId() const;
 
 private:
-    const CoreProcess& _process;
+    const Process& _process;
 
     QLabel* _status;
 };
@@ -66,7 +66,7 @@ Q_OBJECT
 public:
     ProcessesWidget();
 
-    void processAdded(const CoreProcess& process);
+    void processAdded(const Process& process);
     void processUpdated(int processId);
     void processRemoved(int processId);
 

@@ -32,96 +32,32 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__COREPROCESS_H__
-#define __CORE__COREPROCESS_H__
+#ifndef __CORE__PROCESS_H__
+#define __CORE__PROCESS_H__
 
 #include "program.h"
 #include "traycommand.h"
 #include "trayprocessstatus.h"
-#include <chrono>
 
 struct Cluster;
 
-class CoreProcess {
-public:
-    struct NodeStatus {
-        enum class Status {
-            Starting = 0,
-            FailedToStart,
-            Running,
-            NormalExit,
-            CrashExit,
-            Unknown
-        } status;
-        std::chrono::system_clock::time_point time;
-        int id;
-    };
+struct Process {
+    Process() = delete;
 
-    struct NodeError {
-        enum class Error {
-            TimedOut = 0,
-            WriteError,
-            ReadError,
-            UnknownError
-        } error;
-        std::chrono::system_clock::time_point time;
-        int id;
-    };
-
-    struct NodeLogMessage {
-        enum class OutputType {
-            StdOut,
-            StdError
-        };
-        std::string message;
-        std::chrono::system_clock::time_point time;
-        OutputType outputType;
-        int id;
-    };
-
-    struct NodeLog {
-        std::vector<NodeStatus> statuses;
-        std::vector<NodeError> errors;
-        std::vector<NodeLogMessage> messages;
-    };
-
-    struct ClusterStatus {
-        enum class Status {
-            Starting = 0,
-            FailedToStart,
-            Running,
-            Exit,
-            PartialExit,
-            CrashExit,
-            Unknown
-        } status;
-        std::chrono::system_clock::time_point time;
-    };
-
-    CoreProcess(const Program& program, const Program::Configuration& configuration,
+    Process(const Program& application, const Program::Configuration& configuration,
         const Cluster& cluster);
 
-    void pushNodeStatus(std::string nodeId, NodeStatus::Status status);
-    void pushNodeError(std::string nodeId, NodeError::Error error);
-    void pushNodeMessage(const std::string& nodeId, NodeLogMessage::OutputType type,
-        std::string message);
-
-    int id;
+    const int id = -1;
     const Program& application;
     const Program::Configuration& configuration;
     const Cluster& cluster;
-    std::map<std::string, NodeLog> nodeLogs;
-    ClusterStatus clusterStatus = { CoreProcess::ClusterStatus::Status::Starting };
+    common::TrayProcessStatus::Status status;
 
-private:
     static int nextId;
-
-    int nextLogMessageId = 0;
-    int nextNodeErrorId = 0;
-    int nextNodeStatusId = 0;
 };
 
-common::TrayCommand startProcessCommand(const CoreProcess& proc);
-common::TrayCommand exitProcessCommand(const CoreProcess& proc);
+common::TrayCommand startProcessCommand(const Process& process);
+common::TrayCommand exitProcessCommand(const Process& process);
 
-#endif // __CORE__COREPROCESS_H__
+
+#endif // __CORE__PROCESS_H__

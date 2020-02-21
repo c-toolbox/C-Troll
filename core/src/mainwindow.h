@@ -39,7 +39,7 @@
 
 #include "cluster.h"
 #include "clusterconnectionhandler.h"
-#include "coreprocess.h"
+#include "process.h"
 #include "program.h"
 #include <QTextEdit>
 #include <memory>
@@ -65,7 +65,7 @@ private:
 
     std::vector<Program> _programs;
     std::vector<Cluster> _clusters;
-    std::vector<CoreProcess> _processes;
+    std::vector<Process> _processes;
 
     ClusterConnectionHandler _clusterConnectionHandler;
 

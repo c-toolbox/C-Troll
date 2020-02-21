@@ -39,8 +39,6 @@
 #include <string>
 #include <vector>
 
-class Process;
-
 struct Program {
     struct Configuration {
         std::string id;

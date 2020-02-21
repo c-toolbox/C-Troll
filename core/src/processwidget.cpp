@@ -65,7 +65,7 @@ namespace {
     }
 } // namespace
 
-ProcessWidget::ProcessWidget(const CoreProcess& process)
+ProcessWidget::ProcessWidget(const Process& process)
     : _process(process)
 {
     QBoxLayout* layout = new QHBoxLayout;
@@ -87,15 +87,15 @@ ProcessWidget::ProcessWidget(const CoreProcess& process)
     layout->addWidget(cluster);
 
     _status = new QLabel(
-        //QString::fromStdString("Status: " + statusToString(_process.clusterStatus))
+        QString::fromStdString("Status: " + statusToString(_process.status))
     );
     layout->addWidget(_status);
 }
 
 void ProcessWidget::updateStatus() {
-    //_status->setText(
-    //    QString::fromStdString("Status: " + statusToString(_process.processStatus))
-    //);
+    _status->setText(
+        QString::fromStdString("Status: " + statusToString(_process.status))
+    );
 }
 
 int ProcessWidget::processId() const {
@@ -111,7 +111,7 @@ ProcessesWidget::ProcessesWidget() {
     setLayout(layout);
 }
 
-void ProcessesWidget::processAdded(const CoreProcess& process) {
+void ProcessesWidget::processAdded(const Process& process) {
     // The process has been created, but the widget did not exist yet
     ProcessWidget* w = new ProcessWidget(process);
     _widgets.push_back(w);

@@ -42,6 +42,7 @@ namespace common {
 struct GenericMessage {
     /// A string representing the type of payload contained in this GenericMessage
     std::string type;
+
     /// The payload of the message
     nlohmann::json payload;
 };

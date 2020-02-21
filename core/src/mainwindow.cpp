@@ -86,50 +86,51 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
         this, &MainWindow::startProgram
     );
     tabWidget->addTab(_programWidget, "Programs");
+    connect(
+        &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
+        _programWidget, &ProgramsWidget::connectedStatusChanged
+    );
+
 
     // Clusters
     Log(fmt::format("Loading clusters from directory {}", config.clusterPath));
     _clusters = loadClustersFromDirectory(config.clusterPath);
     _clustersWidget = new ClustersWidget(_clusters);
     tabWidget->addTab(_clustersWidget, "Clusters");
-
-    // Processes
-    _processesWidget = new ProcessesWidget;
-    tabWidget->addTab(_processesWidget, "Processes");
-
-    // Log messages
-    tabWidget->addTab(_messageBox, "Log");
-
-    connect(
-        &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
-        _programWidget, &ProgramsWidget::connectedStatusChanged
-    );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
         _clustersWidget, &ClustersWidget::connectedStatusChanged
     );
 
+
+    // Processes
+    _processesWidget = new ProcessesWidget;
+    tabWidget->addTab(_processesWidget, "Processes");
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
         [this](common::TrayProcessStatus status) {
-            const auto it = std::find_if(
-                _processes.begin(), _processes.end(),
-                [status](const CoreProcess& p) { return p.id == status.processId; }
-            );
-            if (it != _processes.end()) {
-                //it->processStatus = status.status;
+        const auto it = std::find_if(
+            _processes.begin(), _processes.end(),
+            [status](const Process& p) { return p.id == status.processId; }
+        );
+        if (it != _processes.end()) {
+            it->status = status.status;
 
-                // The process was already known to us, which should always be the case
-                _processesWidget->processUpdated(it->id);
-            }
+            // The process was already known to us, which should always be the case
+            _processesWidget->processUpdated(it->id);
         }
+    }
     );
+
+
+    // Log messages
+    tabWidget->addTab(_messageBox, "Log");
+
+
 
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::messageReceived,
-        [](const Cluster& cluster, const Cluster::Node& node,
-                    nlohmann::json message)
-        {
+        [](const Cluster& cluster, const Cluster::Node& node, nlohmann::json message) {
             Log(fmt::format("{} {} {}", cluster.name, node.name, std::string(message)));
         }
     );
@@ -162,26 +163,28 @@ void MainWindow::startProgram(const Program& program,
     assert(iCluster != _clusters.end());
     const Cluster& cluster = *iCluster;
 
-    CoreProcess process(program, configuration, cluster);
-    common::TrayCommand command = startProcessCommand(process);
-    
-    // Generate identifier
-    Log("Sending Message:");
-    Log(fmt::format("\tCluster: {} {}", cluster.name, cluster.id));
-    Log(fmt::format("\tCommand: {}", command.command));
-    Log(fmt::format("\tExecutable: {}", command.executable));
-    Log(fmt::format("\tIdentifier: {}", command.id));
-    Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
-    Log(fmt::format("\tCWD: {}", command.currentWorkingDirectory));
+    for (const Cluster::Node& node : cluster.nodes) {
+        Process process(program, configuration, cluster);
+        common::TrayCommand command = startProcessCommand(process);
 
-    // We have to wrap the TrayCommand into a GenericMessage first
-    common::GenericMessage msg;
-    msg.type = common::TrayCommand::Type;
-    msg.payload = command;
+        // Generate identifier
+        Log("Sending Message:");
+        Log(fmt::format("\tCluster: {} {}", cluster.name, cluster.id));
+        Log(fmt::format("\tCommand: {}", command.command));
+        Log(fmt::format("\tExecutable: {}", command.executable));
+        Log(fmt::format("\tIdentifier: {}", command.id));
+        Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
+        Log(fmt::format("\tCWD: {}", command.currentWorkingDirectory));
 
-    nlohmann::json j = msg;
-    _clusterConnectionHandler.sendMessage(cluster, j);
+        // We have to wrap the TrayCommand into a GenericMessage first
+        common::GenericMessage msg;
+        msg.type = common::TrayCommand::Type;
+        msg.payload = command;
 
-    _processes.push_back(std::move(process));
-    _processesWidget->processAdded(_processes.back());
+        nlohmann::json j = msg;
+        _clusterConnectionHandler.sendMessage(cluster, node, j);
+
+        _processes.push_back(std::move(process));
+        _processesWidget->processAdded(_processes.back());
+    }
 }

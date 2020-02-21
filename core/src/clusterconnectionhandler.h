@@ -49,7 +49,8 @@ Q_OBJECT
 public:
     void initialize(std::vector<Cluster>& clusters);
 
-    void sendMessage(const Cluster& cluster, nlohmann::json message) const;
+    void sendMessage(const Cluster& cluster, const Cluster::Node& ,
+        nlohmann::json message) const;
 
 signals:
     void messageReceived(const Cluster& cluster, const Cluster::Node& node,
