@@ -32,7 +32,7 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "traycommand.h"
+#include "commandmessage.h"
 
 #include "logging.h"
 #include <fmt/format.h>
@@ -46,47 +46,37 @@ namespace {
     constexpr const char* KeyWorkingDirectory = "currentWorkingDirectory";
     constexpr const char* KeyCommandlineArguments = "commandlineArguments";
 
-    std::string fromCommand(common::TrayCommand::Command command) {
+    std::string fromCommand(common::CommandMessage::Command command) {
         switch (command) {
-            case common::TrayCommand::Command::Start: return "Start";
-            case common::TrayCommand::Command::Kill: return "Kill";
-            case common::TrayCommand::Command::Exit: return "Exit";
+            case common::CommandMessage::Command::Start: return "Start";
+            case common::CommandMessage::Command::Kill: return "Kill";
+            case common::CommandMessage::Command::Exit: return "Exit";
             default: throw std::logic_error("Unhandled case label");
         }
     }
 
-    common::TrayCommand::Command toCommand(const std::string& command) {
+    common::CommandMessage::Command toCommand(const std::string& command) {
         if (command == "Start") {
-            return common::TrayCommand::Command::Start;
+            return common::CommandMessage::Command::Start;
         }
         else if (command == "Kill") {
-            return common::TrayCommand::Command::Kill;
+            return common::CommandMessage::Command::Kill;
         }
         else if (command == "Exit") {
-            return common::TrayCommand::Command::Exit;
+            return common::CommandMessage::Command::Exit;
         }
         else {
-            return common::TrayCommand::Command::None;
+            return common::CommandMessage::Command::None;
         }
     }
 } // namespace
 
 namespace common {
 
-bool isValidTrayCommand(const nlohmann::json& j) {
-    std::string type;
-    j.at(GenericMessage::KeyType).get_to(type);
-
-    int version;
-    j.at(GenericMessage::KeyVersion).get_to(version);
-
-    return type == TrayCommand::Type && version == GenericMessage::version;
-}
-
-void to_json(nlohmann::json& j, const TrayCommand& p) {
+void to_json(nlohmann::json& j, const CommandMessage& p) {
     j = {
-        { GenericMessage::KeyType, TrayCommand::Type },
-        { GenericMessage::KeyVersion, p.version },
+        { Message::KeyType, CommandMessage::Type },
+        { Message::KeyVersion, p.version },
         { KeyId, p.id },
         { KeyForwardOutErr, p.forwardStdOutStdErr },
         { KeyCommand, fromCommand(p.command) },
@@ -96,8 +86,8 @@ void to_json(nlohmann::json& j, const TrayCommand& p) {
     };
 }
 
-void from_json(const nlohmann::json& j, TrayCommand& p) {
-    validateMessage(j, TrayCommand::Type);
+void from_json(const nlohmann::json& j, CommandMessage& p) {
+    validateMessage(j, CommandMessage::Type);
 
     j.at(KeyId).get_to(p.id);
     j.at(KeyForwardOutErr).get_to(p.forwardStdOutStdErr);
@@ -109,7 +99,7 @@ void from_json(const nlohmann::json& j, TrayCommand& p) {
     j.at(KeyWorkingDirectory).get_to(p.currentWorkingDirectory);
     j.at(KeyCommandlineArguments).get_to(p.commandlineParameters);
 
-    if (p.command == TrayCommand::Command::None) {
+    if (p.command == CommandMessage::Command::None) {
         ::Log(fmt::format("Received unknown command {} with payload {}",
             commandString, j.dump()));
     }

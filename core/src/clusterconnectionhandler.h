@@ -38,7 +38,7 @@
 #include <QObject>
 
 #include "cluster.h"
-#include "trayprocessstatus.h"
+#include "processstatusmessage.h"
 #include <jsonsocket.h>
 #include <QMap>
 #include <map>
@@ -58,7 +58,7 @@ signals:
 
     void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);
 
-    void receivedTrayProcess(common::TrayProcessStatus status);
+    void receivedTrayProcess(common::ProcessStatusMessage status);
 
 private:
     void readyRead(const Cluster& cluster, const Cluster::Node& node);

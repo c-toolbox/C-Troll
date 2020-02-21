@@ -32,38 +32,79 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __COMMON__TRAYPROCESSLOGMESSAGE_H__
-#define __COMMON__TRAYPROCESSLOGMESSAGE_H__
+#include "processstatusmessage.h"
 
-#include "genericmessage.h"
-#include <json/json.hpp>
+#include <fmt/format.h>
+
+namespace {
+    constexpr const char* KeyProcessId = "processId";
+    constexpr const char* KeyStatus = "status";
+
+    std::string fromStatus(common::ProcessStatusMessage::Status status) {
+        switch (status) {
+            case common::ProcessStatusMessage::Status::Starting: return "Starting";
+            case common::ProcessStatusMessage::Status::Running: return "Running";
+            case common::ProcessStatusMessage::Status::NormalExit: return "NormalExit";
+            case common::ProcessStatusMessage::Status::CrashExit: return "CrashExit";
+            case common::ProcessStatusMessage::Status::FailedToStart: return "FailedToStart";
+            case common::ProcessStatusMessage::Status::TimedOut: return "TimedOut";
+            case common::ProcessStatusMessage::Status::WriteError: return "WriteError";
+            case common::ProcessStatusMessage::Status::ReadError: return "ReadError";
+            case common::ProcessStatusMessage::Status::UnknownError: return "UnknownError";
+            default: throw std::logic_error("Unhandled case label");
+        }
+    }
+
+    common::ProcessStatusMessage::Status toStatus(const std::string& status) {
+        if (status == "Starting") {
+            return common::ProcessStatusMessage::Status::Starting;
+        }
+        else if (status == "Running") {
+            return common::ProcessStatusMessage::Status::Running;
+        }
+        else if (status == "NormalExit") {
+            return common::ProcessStatusMessage::Status::NormalExit;
+        }
+        else if (status == "CrashExit") {
+            return common::ProcessStatusMessage::Status::CrashExit;
+        }
+        else if (status == "FailedToStart") {
+            return common::ProcessStatusMessage::Status::FailedToStart;
+        }
+        else if (status == "TimedOut") {
+            return common::ProcessStatusMessage::Status::TimedOut;
+        }
+        else if (status == "WriteError") {
+            return common::ProcessStatusMessage::Status::WriteError;
+        }
+        else if (status == "ReadError") {
+            return common::ProcessStatusMessage::Status::ReadError;
+        }
+        else {
+            return common::ProcessStatusMessage::Status::UnknownError;
+        }
+    }
+
+} // namespace
 
 namespace common {
-    
-/// This struct is the data structure that gets send from the Core to the Tray to signal
-/// that the Tray should perform a task
-struct TrayProcessLogMessage : GenericMessage {
-    /// The string representing this command type, for usage in the common::GenericMessage
-    static constexpr const char* Type = "TrayProcessLogMessage";
 
-    enum class OutputType : int {
-        StdOut = 0,
-        StdErr
+void to_json(nlohmann::json& j, const ProcessStatusMessage& p) {
+    std::string status = fromStatus(p.status);
+    j = {
+        { Message::KeyType, ProcessStatusMessage::Type },
+        { Message::KeyVersion, p.version },
+        { KeyProcessId, p.processId },
+        { KeyStatus, status }
     };
+}
 
-    /// The unique identifier for the process
-    int processId = -1;
-    /// The process stdout/stderr line
-    std::string message;
-    /// The type of output
-    OutputType outputType = OutputType::StdOut;
-};
+void from_json(const nlohmann::json& j, ProcessStatusMessage& p) {
+    validateMessage(j, ProcessStatusMessage::Type);
+
+    j.at(KeyProcessId).get_to(p.processId);
+    std::string status = j.at(KeyStatus).get<std::string>();
+    p.status = toStatus(status);
+}
     
-bool isValidTrayProcessLogMessage(const nlohmann::json& j);
-
-void to_json(nlohmann::json& j, const TrayProcessLogMessage& p);
-void from_json(const nlohmann::json& j, TrayProcessLogMessage& p);
-
 } // namespace common
-
-#endif // __COMMON__TRAYPROCESSLOGMESSAGE_H__

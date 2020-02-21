@@ -36,8 +36,8 @@
 #define __CORE__PROCESS_H__
 
 #include "program.h"
-#include "traycommand.h"
-#include "trayprocessstatus.h"
+#include "commandmessage.h"
+#include "processstatusmessage.h"
 
 struct Cluster;
 
@@ -51,13 +51,13 @@ struct Process {
     const Program& application;
     const Program::Configuration& configuration;
     const Cluster& cluster;
-    common::TrayProcessStatus::Status status;
+    common::ProcessStatusMessage::Status status;
 
     static int nextId;
 };
 
-common::TrayCommand startProcessCommand(const Process& process);
-common::TrayCommand exitProcessCommand(const Process& process);
+common::CommandMessage startProcessCommand(const Process& process);
+common::CommandMessage exitProcessCommand(const Process& process);
 
 
 #endif // __CORE__PROCESS_H__

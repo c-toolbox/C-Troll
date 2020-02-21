@@ -39,12 +39,12 @@
 #include "logging.h"
 #include <assert.h>
 
-common::TrayCommand startProcessCommand(const Process& process) {
-    common::TrayCommand t;
+common::CommandMessage startProcessCommand(const Process& process) {
+    common::CommandMessage t;
     t.id = process.id;
     t.executable = process.application.executable;
     t.currentWorkingDirectory = process.application.currentWorkingDirectory;
-    t.command = common::TrayCommand::Command::Start;
+    t.command = common::CommandMessage::Command::Start;
 
     t.commandlineParameters = process.application.commandlineParameters;
 
@@ -54,10 +54,10 @@ common::TrayCommand startProcessCommand(const Process& process) {
     return t;
 }
 
-common::TrayCommand exitProcessCommand(const Process& process) {
-    common::TrayCommand t;
+common::CommandMessage exitProcessCommand(const Process& process) {
+    common::CommandMessage t;
     t.id = process.id;
-    t.command = common::TrayCommand::Command::Exit;
+    t.command = common::CommandMessage::Command::Exit;
     return t;
 }
 
@@ -69,5 +69,5 @@ Process::Process(const Program& application, const Program::Configuration& confi
     , application(application)
     , configuration(configuration)
     , cluster(cluster)
-    , status(common::TrayProcessStatus::Status::Unknown)
+    , status(common::ProcessStatusMessage::Status::Unknown)
 {}

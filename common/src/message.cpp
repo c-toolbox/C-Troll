@@ -32,29 +32,28 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __COMMON__GENERICMESSAGE_H__
-#define __COMMON__GENERICMESSAGE_H__
+#include "message.h"
 
-#include <json/json.hpp>
-#include <string_view>
+#include <fmt/format.h>
+#include <string>
 
 namespace common {
 
-struct GenericMessage {
-    static constexpr const char* KeyType = "type";
-    static constexpr const char* KeyVersion = "version";
+void validateMessage(const nlohmann::json& message, std::string_view expectedType) {
+    // Sanity checks
+    const std::string type = message.at(Message::KeyType).get<std::string>();
+    if (type != expectedType) {
+        throw std::logic_error(fmt::format(
+            "Validation failed. Expected type {}, got {}", expectedType, type
+        ));
+    }
 
-    /// A string representing the type of payload contained in this GenericMessage
-    std::string type;
+    const int version = message.at(Message::KeyVersion).get<int>();
+    if (version != Message::version) {
+        throw std::runtime_error(fmt::format(
+            "Mismatching version number. Expected {} got {}", Message::version, version
+        ));
+    }
+}
 
-    /// The version of the API that should be increased with breaking changes
-    static constexpr const int version = 1;
-};
-
-// Throws std::logic_error if the internal type is different from the expected type
-// Throws std::runtime_error if the version is different from the current version
-void validateMessage(const nlohmann::json& message, std::string_view expectedType);
-    
 } // namespace common
-    
-#endif // __COMMON__GENERICMESSAGE_H__

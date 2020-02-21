@@ -34,10 +34,10 @@
 
 #include "processhandler.h"
 
-#include "genericmessage.h"
+#include "message.h"
 #include "logging.h"
-#include "trayprocesslogmessage.h"
-#include "trayprocessstatus.h"
+#include "processoutputmessage.h"
+#include "processstatusmessage.h"
 #include <fmt/format.h>
 #include <functional>
 
@@ -60,31 +60,31 @@ namespace {
         }
     }
 
-    common::TrayProcessStatus::Status toTrayStatus(QProcess::ProcessError error) {
+    common::ProcessStatusMessage::Status toTrayStatus(QProcess::ProcessError error) {
         switch (error) {
             case QProcess::FailedToStart:
-                return common::TrayProcessStatus::Status::FailedToStart;
+                return common::ProcessStatusMessage::Status::FailedToStart;
             case QProcess::Crashed:
-                return common::TrayProcessStatus::Status::CrashExit;
+                return common::ProcessStatusMessage::Status::CrashExit;
             case QProcess::Timedout:
-                return common::TrayProcessStatus::Status::TimedOut;
+                return common::ProcessStatusMessage::Status::TimedOut;
             case QProcess::WriteError:
-                return common::TrayProcessStatus::Status::WriteError;
+                return common::ProcessStatusMessage::Status::WriteError;
             case QProcess::ReadError:
-                return common::TrayProcessStatus::Status::ReadError;
+                return common::ProcessStatusMessage::Status::ReadError;
             case QProcess::UnknownError:
-                return common::TrayProcessStatus::Status::UnknownError;
+                return common::ProcessStatusMessage::Status::UnknownError;
             default:
                 throw std::logic_error("Unhandled case exception");
         }
     }
 
-    common::TrayProcessStatus::Status toTrayStatus(QProcess::ExitStatus status) {
+    common::ProcessStatusMessage::Status toTrayStatus(QProcess::ExitStatus status) {
         switch (status) {
             case QProcess::NormalExit:
-                return common::TrayProcessStatus::Status::NormalExit;
+                return common::ProcessStatusMessage::Status::NormalExit;
             case QProcess::CrashExit:
-                return common::TrayProcessStatus::Status::CrashExit;
+                return common::ProcessStatusMessage::Status::CrashExit;
             default:
                 throw std::logic_error("Unhandled case exception");
         }
@@ -92,9 +92,9 @@ namespace {
 } // namespace
 
 void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
-    common::TrayCommand command = message;
+    common::CommandMessage command = message;
     
-    Log("Received TrayCommand");
+    Log("Received CommandMessage");
     Log(fmt::format("\tCommand: {}", command.command));
     Log(fmt::format("\tId: {}", command.id));
     Log(fmt::format("\tExecutable: {}", command.executable));
@@ -105,9 +105,9 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
     // We don't allow the same id for multiple processes
     const auto p = _processes.find(command.id);
     if (p == _processes.end()) {
-        if (command.command == common::TrayCommand::Command::Start) {
+        if (command.command == common::CommandMessage::Command::Start) {
             // Not Found, create and run a process with it
-            createAndRunProcessFromTrayCommand(command);
+            createAndRunProcessFromCommandMessage(command);
         }
         else {
             handlerErrorOccurred(QProcess::ProcessError::FailedToStart);
@@ -115,7 +115,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
     }
     else {
         // Found
-        executeProcessWithTrayCommand(p->second, command);
+        executeProcessWithCommandMessage(p->second, command);
     }
 }
 
@@ -131,7 +131,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     );
     
     if (p != _processes.end() ) {
-        common::TrayProcessStatus msg;
+        common::ProcessStatusMessage msg;
         msg.processId = p->first;
         msg.status = toTrayStatus(error);
         nlohmann::json j = msg;
@@ -151,9 +151,9 @@ void ProcessHandler::handleStarted() {
     
     if (p != _processes.end()) {
         // Send out the TrayProcessStatus with the status string
-        common::TrayProcessStatus msg;
+        common::ProcessStatusMessage msg;
         msg.processId = p->first;
-        msg.status = common::TrayProcessStatus::Status::Running;
+        msg.status = common::ProcessStatusMessage::Status::Running;
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
     }
@@ -175,7 +175,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     );
     
     if (p != _processes.end()) {
-        common::TrayProcessStatus msg;
+        common::ProcessStatusMessage msg;
         msg.processId = p->first;
         msg.status = toTrayStatus(exitStatus);
         nlohmann::json j = msg;
@@ -198,9 +198,9 @@ void ProcessHandler::handleReadyReadStandardError() {
     
     if (p != _processes.end()) {
         // Send out the TrayProcessLogMessage with the stderror key
-        common::TrayProcessLogMessage msg;
+        common::ProcessOutputMessage msg;
         msg.processId = p->first;
-        msg.outputType = common::TrayProcessLogMessage::OutputType::StdErr;
+        msg.outputType = common::ProcessOutputMessage::OutputType::StdErr;
         msg.message = QString::fromLatin1(process->readAllStandardError()).toStdString();
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
@@ -218,19 +218,19 @@ void ProcessHandler::handleReadyReadStandardOutput() {
     );
     
     if (p != _processes.end()) {
-        common::TrayProcessLogMessage msg;
+        common::ProcessOutputMessage msg;
         msg.processId = p->first;
         msg.message = QString::fromLatin1(process->readAllStandardOutput()).toStdString();
-        msg.outputType = common::TrayProcessLogMessage::OutputType::StdOut;
+        msg.outputType = common::ProcessOutputMessage::OutputType::StdOut;
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
     }
 }
 
-void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
-                                                   const common::TrayCommand& command)
+void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
+                                                    const common::CommandMessage& command)
 {
-    if (command.command == common::TrayCommand::Command::Start) {
+    if (command.command == common::CommandMessage::Command::Start) {
         if (!command.currentWorkingDirectory.empty()) {
             process->setWorkingDirectory(
                 QString::fromStdString(command.currentWorkingDirectory)
@@ -248,17 +248,17 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
             process->start(QString::fromStdString(cmd));
         }
     }
-    else if (command.command == common::TrayCommand::Command::Kill ||
-             command.command == common::TrayCommand::Command::Exit)
+    else if (command.command == common::CommandMessage::Command::Kill ||
+             command.command == common::CommandMessage::Command::Exit)
     {
-        common::TrayProcessStatus msg;
-        if (command.command == common::TrayCommand::Command::Kill) {
+        common::ProcessStatusMessage msg;
+        if (command.command == common::CommandMessage::Command::Kill) {
             process->kill();
-            msg.status = common::TrayProcessStatus::Status::CrashExit;
+            msg.status = common::ProcessStatusMessage::Status::CrashExit;
         }
         else {
             process->terminate();
-            msg.status = common::TrayProcessStatus::Status::NormalExit;
+            msg.status = common::ProcessStatusMessage::Status::NormalExit;
         }
         // Find specifc value in process map i.e. process
         const auto p = std::find_if(
@@ -277,7 +277,9 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
     }
 }
 
-void ProcessHandler::createAndRunProcessFromTrayCommand(const common::TrayCommand& cmd) {
+void ProcessHandler::createAndRunProcessFromCommandMessage(
+                                                        const common::CommandMessage& cmd)
+{
     QProcess* proc = new QProcess(this);
     
     // Connect all process signals for logging feedback to core
@@ -305,5 +307,5 @@ void ProcessHandler::createAndRunProcessFromTrayCommand(const common::TrayComman
     _processes.insert(std::make_pair(cmd.id, proc));
     
     // Run the process with the command
-    executeProcessWithTrayCommand(proc, cmd);
+    executeProcessWithCommandMessage(proc, cmd);
 }

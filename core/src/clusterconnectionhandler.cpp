@@ -120,8 +120,8 @@ void ClusterConnectionHandler::readyRead(const Cluster& cluster,
 {
     nlohmann::json message = _sockets[hash(cluster, node)]->read();
 
-    if (common::isValidTrayProcessStatus(message)) {
-        common::TrayProcessStatus status = message;
+    if (common::isValidMessage<common::ProcessStatusMessage>(message)) {
+        common::ProcessStatusMessage status = message;
         emit receivedTrayProcess(status);
     }
     else {

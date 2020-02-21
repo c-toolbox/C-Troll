@@ -35,30 +35,31 @@
 #include "processwidget.h"
 
 #include "cluster.h"
+#include "processstatusmessage.h"
 #include <QVBoxLayout>
 
 namespace {
-    std::string statusToString(common::TrayProcessStatus::Status status) {
+    std::string statusToString(common::ProcessStatusMessage::Status status) {
         switch (status) {
-            case common::TrayProcessStatus::Status::Unknown:
+            case common::ProcessStatusMessage::Status::Unknown:
                 return "Unknown";
-            case common::TrayProcessStatus::Status::Starting:
+            case common::ProcessStatusMessage::Status::Starting:
                 return "Starting";
-            case common::TrayProcessStatus::Status::Running:
+            case common::ProcessStatusMessage::Status::Running:
                 return "Running";
-            case common::TrayProcessStatus::Status::NormalExit:
+            case common::ProcessStatusMessage::Status::NormalExit:
                 return "Normal Exit";
-            case common::TrayProcessStatus::Status::CrashExit:
+            case common::ProcessStatusMessage::Status::CrashExit:
                 return "Crash Exit";
-            case common::TrayProcessStatus::Status::FailedToStart:
+            case common::ProcessStatusMessage::Status::FailedToStart:
                 return "Failed To Start";
-            case common::TrayProcessStatus::Status::TimedOut:
+            case common::ProcessStatusMessage::Status::TimedOut:
                 return "Timed Out";
-            case common::TrayProcessStatus::Status::WriteError:
+            case common::ProcessStatusMessage::Status::WriteError:
                 return "Write Error";
-            case common::TrayProcessStatus::Status::ReadError:
+            case common::ProcessStatusMessage::Status::ReadError:
                 return "Read Error";
-            case common::TrayProcessStatus::Status::UnknownError:
+            case common::ProcessStatusMessage::Status::UnknownError:
             default:
                 return "UnknownError";
         }

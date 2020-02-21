@@ -32,44 +32,35 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __COMMON__TRAYPROCESSSTATUS_H__
-#define __COMMON__TRAYPROCESSSTATUS_H__
+#ifndef __COMMON__PROCESSOUTPUTMESSAGE_H__
+#define __COMMON__PROCESSOUTPUTMESSAGE_H__
 
-#include "genericmessage.h"
+#include "message.h"
 #include <json/json.hpp>
 
 namespace common {
     
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
-struct TrayProcessStatus : public GenericMessage {
-    enum class Status : int {
-        Unknown = -1,
-        Starting = 0,
-        Running,
-        NormalExit,
-        CrashExit,
-        FailedToStart,
-        TimedOut,
-        WriteError,
-        ReadError,
-        UnknownError
+struct ProcessOutputMessage : Message {
+    static constexpr const char* Type = "ProcessOutputMessage";
+
+    enum class OutputType : int {
+        StdOut = 0,
+        StdErr
     };
 
-    /// The string representing this command type, for usage in the common::GenericMessage
-    static constexpr const char* Type = "TrayProcessStatus";
-    
-    /// The unique identifier for the process that will be created
-    int processId;
-    /// The process status
-    Status status;
+    /// The unique identifier for the process
+    int processId = -1;
+    /// The process stdout/stderr line
+    std::string message;
+    /// The type of output
+    OutputType outputType = OutputType::StdOut;
 };
-  
-bool isValidTrayProcessStatus(const nlohmann::json& j);
-
-void to_json(nlohmann::json& j, const TrayProcessStatus& p);
-void from_json(const nlohmann::json& j, TrayProcessStatus& p);
+    
+void to_json(nlohmann::json& j, const ProcessOutputMessage& p);
+void from_json(const nlohmann::json& j, ProcessOutputMessage& p);
 
 } // namespace common
 
-#endif // __COMMON__TRAYPROCESSSTATUS_H__
+#endif // __COMMON__PROCESSOUTPUTMESSAGE_H__

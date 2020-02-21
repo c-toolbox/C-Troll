@@ -32,42 +32,36 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __COMMON__TRAYCOMMAND_H__
-#define __COMMON__TRAYCOMMAND_H__
+#include "processoutputmessage.h"
 
-#include "genericmessage.h"
+#include <fmt/format.h>
 
-#include <json/json.hpp>
+namespace {
+    constexpr const char* KeyIdentifier = "processId";
+    constexpr const char* KeyMessage = "message";
+    constexpr const char* KeyType = "type";
+} // namespace
 
 namespace common {
-
-/// This struct is the data structure that gets send from the Core to the Tray to signal
-/// that the Tray should perform a task
-struct TrayCommand : public GenericMessage {
-    enum class Command { Start, Kill, Exit, None };
-
-    /// The string representing this command type, for usage in the common::GenericMessage
-    static constexpr const char* Type = "TrayCommand";
     
-    /// The unique identifier for the process that will be created
-    int id = -1;
-    /// This value determines whether the process should send back console messages
-    bool forwardStdOutStdErr = false;
-    /// The kind of command that is to be executed
-    Command command;
-    /// The name of the executable
-    std::string executable;
-    /// The location that should be set as the working directory prior to execution
-    std::string currentWorkingDirectory;
-    /// The list of commandline parameters to be passed to executable
-    std::string commandlineParameters;
-};
+void to_json(nlohmann::json& j, const ProcessOutputMessage& p) {
+    j = {
+        { Message::KeyType, ProcessOutputMessage::Type },
+        { Message::KeyVersion, p.version },
+        { KeyIdentifier, p.processId },
+        { KeyMessage, p.message },
+        // @TODO (abock, 2020-02-21) Replace this with a string
+        { KeyType, static_cast<int>(p.outputType) }
+    };
+}
 
-bool isValidTrayCommand(const nlohmann::json& j);
+void from_json(const nlohmann::json& j, ProcessOutputMessage& p) {
+    validateMessage(j, ProcessOutputMessage::Type);
 
-void to_json(nlohmann::json& j, const TrayCommand& p);
-void from_json(const nlohmann::json& j, TrayCommand& p);
-
-} // namespace commmon
-
-#endif // __COMMON__TRAYCOMMAND_H__
+    j.at(KeyIdentifier).get_to(p.processId);
+    j.at(KeyMessage).get_to(p.message);
+    int outputType = j.at(KeyType).get<int>();
+    p.outputType = static_cast<ProcessOutputMessage::OutputType>(outputType);
+}
+    
+} // namespace common

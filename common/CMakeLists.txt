@@ -33,22 +33,22 @@
 ##########################################################################################
 
 set(HEADER_FILES
-    include/genericmessage.h
+    include/commandmessage.h
     include/jsonload.h
     include/jsonsocket.h
     include/logging.h
-    include/traycommand.h
-    include/trayprocesslogmessage.h
-    include/trayprocessstatus.h
+    include/message.h
+    include/processoutputmessage.h
+    include/processstatusmessage.h
 )
 
 set(SOURCE_FILES
+    src/commandmessage.cpp
     src/jsonsocket.cpp
-    src/genericmessage.cpp
     src/logging.cpp
-    src/traycommand.cpp
-    src/trayprocesslogmessage.cpp
-    src/trayprocessstatus.cpp
+    src/message.cpp
+    src/processoutputmessage.cpp
+    src/processstatusmessage.cpp
 )
 
 find_package(Qt5 COMPONENTS Widgets Network REQUIRED)

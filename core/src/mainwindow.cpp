@@ -36,7 +36,7 @@
 
 #include "clusterwidget.h"
 #include "configuration.h"
-#include "genericmessage.h"
+#include "message.h"
 #include "jsonload.h"
 #include "logging.h"
 #include "processwidget.h"
@@ -108,7 +108,7 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     tabWidget->addTab(_processesWidget, "Processes");
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
-        [this](common::TrayProcessStatus status) {
+        [this](common::ProcessStatusMessage status) {
         const auto it = std::find_if(
             _processes.begin(), _processes.end(),
             [status](const Process& p) { return p.id == status.processId; }
@@ -165,7 +165,7 @@ void MainWindow::startProgram(const Program& program,
 
     for (const Cluster::Node& node : cluster.nodes) {
         Process process(program, configuration, cluster);
-        common::TrayCommand command = startProcessCommand(process);
+        common::CommandMessage command = startProcessCommand(process);
 
         // Generate identifier
         Log("Sending Message:");

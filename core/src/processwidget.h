@@ -38,7 +38,6 @@
 #include <QWidget>
 
 #include "process.h"
-#include "trayprocessstatus.h"
 #include <QLabel>
 #include <vector>
 

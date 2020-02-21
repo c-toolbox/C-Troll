@@ -32,30 +32,41 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "genericmessage.h"
+#ifndef __COMMON__PROCESSSTATUSMESSAGE_H__
+#define __COMMON__PROCESSSTATUSMESSAGE_H__
 
-#include <fmt/format.h>
-#include <string>
+#include "message.h"
+#include <json/json.hpp>
 
 namespace common {
+    
+/// This struct is the data structure that gets send from the Core to the Tray to signal
+/// that the Tray should perform a task
+struct ProcessStatusMessage : public Message {
+    static constexpr const char* Type = "ProcessStatusMessage";
 
-void validateMessage(const nlohmann::json& message, std::string_view expectedType) {
-    // Sanity checks
-    const std::string type = message.at(GenericMessage::KeyType).get<std::string>();
-    if (type != expectedType) {
-        throw std::logic_error(fmt::format(
-            "Validation failed. Expected type {}, got {}", expectedType, type
-        ));
-    }
-
-    const int version = message.at(GenericMessage::KeyVersion).get<int>();
-    if (version != GenericMessage::version) {
-        throw std::runtime_error(fmt::format(
-            "Mismatching version number. Expected {} got {}",
-            GenericMessage::version, version
-        ));
-    }
-
-}
+    enum class Status : int {
+        Unknown = -1,
+        Starting = 0,
+        Running,
+        NormalExit,
+        CrashExit,
+        FailedToStart,
+        TimedOut,
+        WriteError,
+        ReadError,
+        UnknownError
+    };
+    
+    /// The unique identifier for the process that will be created
+    int processId;
+    /// The process status
+    Status status;
+};
+  
+void to_json(nlohmann::json& j, const ProcessStatusMessage& p);
+void from_json(const nlohmann::json& j, ProcessStatusMessage& p);
 
 } // namespace common
+
+#endif // __COMMON__PROCESSSTATUSMESSAGE_H__

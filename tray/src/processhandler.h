@@ -37,7 +37,7 @@
 
 #include <QObject>
 
-#include <traycommand.h>
+#include <commandmessage.h>
 #include <QProcess>
 #include <map>
 #include <string>
@@ -60,9 +60,9 @@ signals:
     void sendSocketMessage(const nlohmann::json& message);
 
 private:
-    void executeProcessWithTrayCommand(QProcess* process,
-        const common::TrayCommand& command);
-    void createAndRunProcessFromTrayCommand(const common::TrayCommand& command);
+    void executeProcessWithCommandMessage(QProcess* process,
+        const common::CommandMessage& command);
+    void createAndRunProcessFromCommandMessage(const common::CommandMessage& command);
     
     // The key of this map is a unique id (received from core)
     // The value is the process which is running
