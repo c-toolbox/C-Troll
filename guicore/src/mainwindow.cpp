@@ -36,9 +36,10 @@
 
 #include "clusterwidget.h"
 #include "configuration.h"
-#include "jsonload.h"
 #include "genericmessage.h"
+#include "jsonload.h"
 #include "logging.h"
+#include "processwidget.h"
 #include "programwidget.h"
 #include <QPushButton>
 #include <QHBoxLayout>
@@ -47,9 +48,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
-MainWindow::MainWindow(QString title, const std::string& configurationFile)
-    : QMainWindow()
-{
+MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     setWindowTitle(title);
 
     //
@@ -61,6 +60,7 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile)
             Log(msg.toStdString());
         }
     );
+    _messageBox = new QTextEdit;
 
     //
     // Set up the container widgets
@@ -72,34 +72,68 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile)
     QTabWidget* tabWidget = new QTabWidget;
     layout->addWidget(tabWidget);
 
-    _messageBox = new QTextEdit;
-    layout->addWidget(_messageBox);
-
-
     //
     // Load the configuration
     Log(fmt::format("Loading configuration file {}", configurationFile));
     Configuration config = common::loadFromJson<Configuration>(configurationFile, "");
 
+    // Programs
     Log(fmt::format("Loading programs from directory {}", config.applicationPath));
     _programs = loadProgramsFromDirectory(config.applicationPath);
-    ProgramsWidget* programs = new ProgramsWidget(_programs);
-    connect(programs, &ProgramsWidget::startProgram, this, &MainWindow::startProgram);
-    tabWidget->addTab(programs, "Programs");
+    _programWidget = new ProgramsWidget(_programs);
+    connect(
+        _programWidget, &ProgramsWidget::startProgram,
+        this, &MainWindow::startProgram
+    );
+    tabWidget->addTab(_programWidget, "Programs");
 
+    // Clusters
     Log(fmt::format("Loading clusters from directory {}", config.clusterPath));
     _clusters = loadClustersFromDirectory(config.clusterPath);
-    ClustersWidget* clusters = new ClustersWidget(_clusters);
-    tabWidget->addTab(clusters, "Clusters");
+    _clustersWidget = new ClustersWidget(_clusters);
+    tabWidget->addTab(_clustersWidget, "Clusters");
+
+    // Processes
+    _processesWidget = new ProcessesWidget;
+    tabWidget->addTab(_processesWidget, "Processes");
+
+    // Log messages
+    tabWidget->addTab(_messageBox, "Log");
 
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
-        programs, &ProgramsWidget::connectedStatusChanged
+        _programWidget, &ProgramsWidget::connectedStatusChanged
     );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
-        clusters, &ClustersWidget::connectedStatusChanged
+        _clustersWidget, &ClustersWidget::connectedStatusChanged
     );
+
+    connect(
+        &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
+        [this](common::TrayProcessStatus status) {
+            const auto it = std::find_if(
+                _processes.begin(), _processes.end(),
+                [status](const CoreProcess& p) { return p.id == status.processId; }
+            );
+            if (it != _processes.end()) {
+                it->processStatus = status.status;
+
+                // The process was already known to us, which should always be the case
+                _processesWidget->processUpdated(it->id);
+            }
+        }
+    );
+
+    connect(
+        &_clusterConnectionHandler, &ClusterConnectionHandler::messageReceived,
+        [](const Cluster& cluster, const Cluster::Node& node,
+                    nlohmann::json message)
+        {
+            Log(fmt::format("{} {} {}", cluster.name, node.name, std::string(message)));
+        }
+    );
+
     _clusterConnectionHandler.initialize(_clusters);
 }
 
@@ -147,4 +181,7 @@ void MainWindow::startProgram(const Program& program,
 
     nlohmann::json j = msg;
     _clusterConnectionHandler.sendMessage(cluster, j);
+
+    _processes.push_back(std::move(process));
+    _processesWidget->processAdded(_processes.back());
 }

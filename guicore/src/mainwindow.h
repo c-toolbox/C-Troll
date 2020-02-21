@@ -39,10 +39,14 @@
 
 #include "cluster.h"
 #include "clusterconnectionhandler.h"
-#include "program.h"
 #include "coreprocess.h"
+#include "program.h"
 #include <QTextEdit>
 #include <memory>
+
+class ClustersWidget;
+class ProcessesWidget;
+class ProgramsWidget;
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
@@ -55,9 +59,13 @@ private:
 
     void log(std::string msg);
 
+    ProgramsWidget* _programWidget;
+    ClustersWidget* _clustersWidget;
+    ProcessesWidget* _processesWidget;
+
     std::vector<Program> _programs;
     std::vector<Cluster> _clusters;
-    //std::vector<CoreProcess> _processes;
+    std::vector<CoreProcess> _processes;
 
     ClusterConnectionHandler _clusterConnectionHandler;
 

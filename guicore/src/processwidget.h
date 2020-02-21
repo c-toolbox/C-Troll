@@ -32,41 +32,46 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __COMMON__TRAYPROCESSSTATUS_H__
-#define __COMMON__TRAYPROCESSSTATUS_H__
+#ifndef __CORE__PROCESSWIDGET_H__
+#define __CORE__PROCESSWIDGET_H__
 
-#include <json/json.hpp>
+#include <QWidget>
 
-namespace common {
-    
-/// This struct is the data structure that gets send from the Core to the Tray to signal
-/// that the Tray should perform a task
-struct TrayProcessStatus {
-    enum class Status : int {
-        Unknown = -1,
-        Starting = 0,
-        Running,
-        NormalExit,
-        CrashExit,
-        FailedToStart,
-        TimedOut,
-        WriteError,
-        ReadError,
-        UnknownError
-    };
+#include "coreprocess.h"
+#include "trayprocessstatus.h"
+#include <QLabel>
+#include <vector>
 
-    /// The string representing this command type, for usage in the common::GenericMessage
-    static constexpr const char* Type = "TrayProcessStatus";
-    
-    /// The unique identifier for the process that will be created
-    int processId;
-    /// The process status
-    Status status;
+class ProcessWidget : public QWidget {
+Q_OBJECT
+public:
+    ProcessWidget(const CoreProcess& process);
+
+    void updateStatus();
+
+    int processId() const;
+
+private:
+    const CoreProcess& _process;
+
+    QLabel* _status;
 };
-  
-void to_json(nlohmann::json& j, const TrayProcessStatus& p);
-void from_json(const nlohmann::json& j, TrayProcessStatus& p);
 
-} // namespace common
 
-#endif // __COMMON__TRAYPROCESSSTATUS_H__
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+class ProcessesWidget : public QWidget {
+Q_OBJECT
+public:
+    ProcessesWidget();
+
+    void processAdded(const CoreProcess& process);
+    void processUpdated(int processId);
+    void processRemoved(int processId);
+
+private:
+    std::vector<ProcessWidget*> _widgets;
+};
+
+#endif // __CORE__PROCESSWIDGET_H__

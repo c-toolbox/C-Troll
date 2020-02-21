@@ -115,19 +115,32 @@ void ClusterConnectionHandler::initialize(std::vector<Cluster>& clusters) {
     timer->start(2500);
 }
 
-void ClusterConnectionHandler::readyRead(const Cluster& cluster, const Cluster::Node& node) {
+void ClusterConnectionHandler::readyRead(const Cluster& cluster,
+                                         const Cluster::Node& node)
+{
     nlohmann::json message = _sockets[hash(cluster, node)]->read();
-    emit messageReceived(cluster, node, message);
+
+    std::string type = message["type"];
+    if (type == common::TrayProcessStatus::Type) {
+        common::TrayProcessStatus status = message["payload"];
+        emit receivedTrayProcess(status);
+    }
+    else {
+        emit messageReceived(cluster, node, message);
+    }
 }
 
-void ClusterConnectionHandler::sendMessage(const Cluster& cluster, nlohmann::json msg) const {
+void ClusterConnectionHandler::sendMessage(const Cluster& cluster,
+                                           nlohmann::json msg) const
+{
     assert(!msg.is_null());
 
     for (const Cluster::Node& node : cluster.nodes) {
-        Log("Node: " + node.name + '\t' + node.ipAddress + ':' + std::to_string(node.port));
+        std::string p = std::to_string(node.port);
+        Log("Node: " + node.name + '\t' + node.ipAddress + ':' + p);
         std::string h = hash(cluster, node);
 
-        auto it = _sockets.find(h);
+        const auto it = _sockets.find(h);
         assert(it != _sockets.end());
 
         it->second->write(msg);

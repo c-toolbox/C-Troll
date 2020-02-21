@@ -1,7 +1,7 @@
 {
     "name": "VLC",
-    "executable": "C:/Program Files/VideoLAN/VLC/vlc.exe",
-	"currentWorkingDirectory": "C:/Program Files/VideoLAN/VLC",
+    "executable": "C:/Program Files (x86)/VideoLAN/VLC/vlc.exe",
+	"currentWorkingDirectory": "C:/Program Files (x86)/VideoLAN/VLC",
     "configurations": {
         "default": {
             "name": "Default",

@@ -32,110 +32,108 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "programwidget.h"
+#include "processwidget.h"
 
-#include "logging.h"
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QPushButton>
+#include "cluster.h"
 #include <QVBoxLayout>
 
-ConfigurationWidget::ConfigurationWidget(const Program::Configuration& configuration)
-    : _configuration(configuration)
-{
-    QBoxLayout* layout = new QHBoxLayout;
-    setLayout(layout);
-
-    QLabel* label = new QLabel(QString::fromStdString(configuration.name));
-    layout->addWidget(label);
-
-    for (const std::pair<const std::string, std::string>& p :
-         configuration.clusterCommandlineParameters)
-    {
-        _startButton = new QPushButton(
-            QString::fromStdString(p.first + '/' + configuration.name)
-        );
-        _startButton->setEnabled(false);
-        connect(
-            _startButton, &QPushButton::clicked,
-            [this, configuration, p]() { emit startProgram(p.first); }
-        );
-        layout->addWidget(_startButton);
-    }
-}
-
-void ConfigurationWidget::updateStatus(const Cluster& cluster) {
-    for (const std::pair<const std::string, std::string>& p : 
-         _configuration.clusterCommandlineParameters)
-    {
-        if (p.first == cluster.id) {
-            bool allConnected = std::all_of(
-                cluster.nodes.begin(),
-                cluster.nodes.end(),
-                std::mem_fn(&Cluster::Node::isConnected)
-            );
-            _startButton->setEnabled(allConnected);
+namespace {
+    std::string statusToString(CoreProcess::ProcessStatus status) {
+        switch (status) {
+            case CoreProcess::ProcessStatus::Unknown:
+                return "Unknown";
+            case CoreProcess::ProcessStatus::Starting:
+                return "Starting";
+            case CoreProcess::ProcessStatus::Running:
+                return "Running";
+            case CoreProcess::ProcessStatus::NormalExit:
+                return "Normal Exit";
+            case CoreProcess::ProcessStatus::CrashExit:
+                return "Crash Exit";
+            case CoreProcess::ProcessStatus::FailedToStart:
+                return "Failed To Start";
+            case CoreProcess::ProcessStatus::TimedOut:
+                return "Timed Out";
+            case CoreProcess::ProcessStatus::WriteError:
+                return "Write Error";
+            case CoreProcess::ProcessStatus::ReadError:
+                return "Read Error";
+            case CoreProcess::ProcessStatus::UnknownError:
+            default:
+                return "UnknownError";
         }
     }
-}
+} // namespace
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-ProgramWidget::ProgramWidget(const Program& program)
-    : _program(program)
+ProcessWidget::ProcessWidget(const CoreProcess& process)
+    : _process(process)
 {
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 
-    QLabel* name = new QLabel(QString::fromStdString(program.name));
-    layout->addWidget(name);
+    QLabel* program = new QLabel(
+        QString::fromStdString("Program: " + _process.application.name)
+    );
+    layout->addWidget(program);
 
-    for (const Program::Configuration& c : program.configurations) {
-        ConfigurationWidget* w = new ConfigurationWidget(c);
-        _widgets.push_back(w);
-        connect(
-            w, &ConfigurationWidget::startProgram,
-            [this, c](const std::string& clusterId) { emit startProgram(c, clusterId); }
-        );
-        layout->addWidget(w);
-    }
+    QLabel* configuration = new QLabel(
+        QString::fromStdString("Configuration: " + _process.configuration.name)
+    );
+    layout->addWidget(configuration);
+
+    QLabel* cluster = new QLabel(
+        QString::fromStdString("Cluster: " + _process.cluster.name)
+    );
+    layout->addWidget(cluster);
+
+    _status = new QLabel(
+        QString::fromStdString("Status: " + statusToString(_process.processStatus))
+    );
+    layout->addWidget(_status);
 }
 
-void ProgramWidget::updateStatus(const Cluster& cluster) {
-    for (ConfigurationWidget* w : _widgets) {
-        w->updateStatus(cluster);
-    }
+void ProcessWidget::updateStatus() {
+    _status->setText(
+        QString::fromStdString("Status: " + statusToString(_process.processStatus))
+    );
+}
+
+int ProcessWidget::processId() const {
+    return _process.id;
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ProgramsWidget::ProgramsWidget(const std::vector<Program>& programs)
-    : _programs(programs)
-{
-    QBoxLayout* layout = new QVBoxLayout;
+ProcessesWidget::ProcessesWidget() {
+    QLayout* layout = new QVBoxLayout;
     setLayout(layout);
-
-    for (const Program& p : programs) {
-        ProgramWidget* w = new ProgramWidget(p);
-        _widgets.push_back(w);
-
-        connect(
-            w, &ProgramWidget::startProgram,
-            [this, p](const Program::Configuration& conf, const std::string& clusterId) {
-                emit startProgram(p, conf, clusterId);
-            }
-        );
-
-        layout->addWidget(w);
-    }
 }
 
-void ProgramsWidget::connectedStatusChanged(const Cluster& cluster) {
-    for (ProgramWidget* w : _widgets) {
-        w->updateStatus(cluster);
-    }
+void ProcessesWidget::processAdded(const CoreProcess& process) {
+    // The process has been created, but the widget did not exist yet
+    ProcessWidget* w = new ProcessWidget(process);
+    _widgets.push_back(w);
+    layout()->addWidget(w);
+}
+
+void ProcessesWidget::processUpdated(int processId) {
+    const auto wIt = std::find_if(
+        _widgets.begin(), _widgets.end(),
+        [processId](ProcessWidget* w) { return w->processId() == processId; }
+    );
+    assert(wIt != _widgets.end());
+    (*wIt)->updateStatus();
+}
+
+void ProcessesWidget::processRemoved(int processId) {
+    const auto wIt = std::find_if(
+        _widgets.begin(), _widgets.end(),
+        [processId](ProcessWidget* w) { return w->processId() == processId; }
+    );
+    assert(wIt != _widgets.end());
+
+    layout()->removeWidget(*wIt);
+    _widgets.erase(wIt);
 }

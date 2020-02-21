@@ -39,6 +39,7 @@ set(HEADER_FILES
     src/configuration.h
     src/coreprocess.h
     src/mainwindow.h
+    src/processwidget.h
     src/program.h
     src/programwidget.h
 )
@@ -51,6 +52,7 @@ set(SOURCE_FILES
     src/coreprocess.cpp
     src/main.cpp
     src/mainwindow.cpp
+    src/processwidget.cpp
     src/program.cpp
     src/programwidget.cpp
 )
@@ -63,6 +65,7 @@ qt5_wrap_cpp(
     src/clusterconnectionhandler.h
     src/clusterwidget.h
     src/mainwindow.h
+    src/processwidget.h
     src/programwidget.h
 )
 

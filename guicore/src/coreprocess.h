@@ -37,6 +37,7 @@
 
 #include "program.h"
 #include "traycommand.h"
+#include "trayprocessstatus.h"
 #include <chrono>
 
 struct Cluster;

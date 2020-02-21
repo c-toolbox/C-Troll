@@ -109,7 +109,6 @@ double timeToGuiTime(std::chrono::system_clock::time_point time) {
     return duration_cast<milliseconds>(time.time_since_epoch()).count();
 }
 
-
 } // namespace
 
 common::TrayCommand startProcessCommand(const CoreProcess& proc) {
@@ -144,7 +143,6 @@ CoreProcess::CoreProcess(const Program& application,
     , configuration(configuration)
     , cluster(cluster)
 {}
-
 
 void CoreProcess::pushNodeStatus(std::string nodeId, NodeStatus::Status nodeStatus) {
     ClusterStatus::Status status = clusterStatus.status;
