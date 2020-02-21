@@ -34,6 +34,8 @@
 
 #include "trayprocesslogmessage.h"
 
+#include <fmt/format.h>
+
 namespace {
     constexpr const char* KeyIdentifier = "processId";
     constexpr const char* KeyMessage = "message";
@@ -42,19 +44,34 @@ namespace {
 
 namespace common {
     
+bool isValidTrayProcessLogMessage(const nlohmann::json& j) {
+    std::string type;
+    j.at(GenericMessage::KeyType).get_to(type);
+
+    int version;
+    j.at(GenericMessage::KeyVersion).get_to(version);
+
+    return type == TrayProcessLogMessage::Type && version == GenericMessage::version;
+}
+
 void to_json(nlohmann::json& j, const TrayProcessLogMessage& p) {
     j = {
+        { GenericMessage::KeyType, TrayProcessLogMessage::Type },
+        { GenericMessage::KeyVersion, p.version },
         { KeyIdentifier, p.processId },
         { KeyMessage, p.message },
-        { KeyType, static_cast<int>(p.outputType) } // @TODO: Replace with string
+        // @TODO (abock, 2020-02-21) Replace this with a string
+        { KeyType, static_cast<int>(p.outputType) }
     };
 }
 
 void from_json(const nlohmann::json& j, TrayProcessLogMessage& p) {
+    validateMessage(j, TrayProcessLogMessage::Type);
+
     j.at(KeyIdentifier).get_to(p.processId);
     j.at(KeyMessage).get_to(p.message);
-    int type = j.at(KeyType).get<int>();  // @TODO: Replace with string
-    p.outputType = static_cast<TrayProcessLogMessage::OutputType>(type);
+    int outputType = j.at(KeyType).get<int>();
+    p.outputType = static_cast<TrayProcessLogMessage::OutputType>(outputType);
 }
     
 } // namespace common

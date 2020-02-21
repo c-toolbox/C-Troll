@@ -120,9 +120,8 @@ void ClusterConnectionHandler::readyRead(const Cluster& cluster,
 {
     nlohmann::json message = _sockets[hash(cluster, node)]->read();
 
-    std::string type = message["type"];
-    if (type == common::TrayProcessStatus::Type) {
-        common::TrayProcessStatus status = message["payload"];
+    if (common::isValidTrayProcessStatus(message)) {
+        common::TrayProcessStatus status = message;
         emit receivedTrayProcess(status);
     }
     else {

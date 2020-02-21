@@ -35,13 +35,14 @@
 #ifndef __COMMON__TRAYPROCESSLOGMESSAGE_H__
 #define __COMMON__TRAYPROCESSLOGMESSAGE_H__
 
+#include "genericmessage.h"
 #include <json/json.hpp>
 
 namespace common {
     
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
-struct TrayProcessLogMessage {
+struct TrayProcessLogMessage : GenericMessage {
     /// The string representing this command type, for usage in the common::GenericMessage
     static constexpr const char* Type = "TrayProcessLogMessage";
 
@@ -58,6 +59,8 @@ struct TrayProcessLogMessage {
     OutputType outputType = OutputType::StdOut;
 };
     
+bool isValidTrayProcessLogMessage(const nlohmann::json& j);
+
 void to_json(nlohmann::json& j, const TrayProcessLogMessage& p);
 void from_json(const nlohmann::json& j, TrayProcessLogMessage& p);
 

@@ -35,13 +35,15 @@
 #ifndef __COMMON__TRAYCOMMAND_H__
 #define __COMMON__TRAYCOMMAND_H__
 
+#include "genericmessage.h"
+
 #include <json/json.hpp>
 
 namespace common {
 
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
-struct TrayCommand {
+struct TrayCommand : public GenericMessage {
     enum class Command { Start, Kill, Exit, None };
 
     /// The string representing this command type, for usage in the common::GenericMessage
@@ -60,6 +62,8 @@ struct TrayCommand {
     /// The list of commandline parameters to be passed to executable
     std::string commandlineParameters;
 };
+
+bool isValidTrayCommand(const nlohmann::json& j);
 
 void to_json(nlohmann::json& j, const TrayCommand& p);
 void from_json(const nlohmann::json& j, TrayCommand& p);

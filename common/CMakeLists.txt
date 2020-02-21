@@ -43,8 +43,8 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
-    src/genericmessage.cpp
     src/jsonsocket.cpp
+    src/genericmessage.cpp
     src/logging.cpp
     src/traycommand.cpp
     src/trayprocesslogmessage.cpp

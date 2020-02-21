@@ -35,13 +35,14 @@
 #ifndef __COMMON__TRAYPROCESSSTATUS_H__
 #define __COMMON__TRAYPROCESSSTATUS_H__
 
+#include "genericmessage.h"
 #include <json/json.hpp>
 
 namespace common {
     
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
-struct TrayProcessStatus {
+struct TrayProcessStatus : public GenericMessage {
     enum class Status : int {
         Unknown = -1,
         Starting = 0,
@@ -64,6 +65,8 @@ struct TrayProcessStatus {
     Status status;
 };
   
+bool isValidTrayProcessStatus(const nlohmann::json& j);
+
 void to_json(nlohmann::json& j, const TrayProcessStatus& p);
 void from_json(const nlohmann::json& j, TrayProcessStatus& p);
 

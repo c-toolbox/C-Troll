@@ -34,23 +34,28 @@
 
 #include "genericmessage.h"
 
-namespace {
-    constexpr const char* KeyType = "type";
-    constexpr const char* KeyPayload = "payload";
-} // namespace
+#include <fmt/format.h>
+#include <string>
 
 namespace common {
 
-void to_json(nlohmann::json& j, const GenericMessage& p) {
-    j = {
-        { KeyType, p.type },
-        { KeyPayload, p.payload }
-    };
-}
+void validateMessage(const nlohmann::json& message, std::string_view expectedType) {
+    // Sanity checks
+    const std::string type = message.at(GenericMessage::KeyType).get<std::string>();
+    if (type != expectedType) {
+        throw std::logic_error(fmt::format(
+            "Validation failed. Expected type {}, got {}", expectedType, type
+        ));
+    }
 
-void from_json(const nlohmann::json& j, GenericMessage& p) {
-    j.at(KeyType).get_to(p.type);
-    p.payload = j.at(KeyPayload);
+    const int version = message.at(GenericMessage::KeyVersion).get<int>();
+    if (version != GenericMessage::version) {
+        throw std::runtime_error(fmt::format(
+            "Mismatching version number. Expected {} got {}",
+            GenericMessage::version, version
+        ));
+    }
+
 }
 
 } // namespace common

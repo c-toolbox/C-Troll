@@ -34,6 +34,8 @@
 
 #include "trayprocessstatus.h"
 
+#include <fmt/format.h>
+
 namespace {
     constexpr const char* KeyProcessId = "processId";
     constexpr const char* KeyStatus = "status";
@@ -86,16 +88,30 @@ namespace {
 } // namespace
 
 namespace common {
-    
+
+bool isValidTrayProcessStatus(const nlohmann::json& j) {
+    std::string type;
+    j.at(GenericMessage::KeyType).get_to(type);
+
+    int version;
+    j.at(GenericMessage::KeyVersion).get_to(version);
+
+    return type == TrayProcessStatus::Type && version == GenericMessage::version;
+}
+
 void to_json(nlohmann::json& j, const TrayProcessStatus& p) {
     std::string status = fromStatus(p.status);
     j = {
+        { GenericMessage::KeyType, TrayProcessStatus::Type },
+        { GenericMessage::KeyVersion, p.version },
         { KeyProcessId, p.processId },
         { KeyStatus, status }
     };
 }
 
 void from_json(const nlohmann::json& j, TrayProcessStatus& p) {
+    validateMessage(j, TrayProcessStatus::Type);
+
     j.at(KeyProcessId).get_to(p.processId);
     std::string status = j.at(KeyStatus).get<std::string>();
     p.status = toStatus(status);

@@ -131,14 +131,9 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     );
     
     if (p != _processes.end() ) {
-        common::TrayProcessStatus ps;
-        ps.processId = p->first;
-        ps.status = toTrayStatus(error);
-
-        // Send out the TrayProcessStatus with the error/status string
-        common::GenericMessage msg;
-        msg.type = common::TrayProcessStatus::Type;
-        msg.payload = ps;
+        common::TrayProcessStatus msg;
+        msg.processId = p->first;
+        msg.status = toTrayStatus(error);
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
     }
@@ -156,12 +151,9 @@ void ProcessHandler::handleStarted() {
     
     if (p != _processes.end()) {
         // Send out the TrayProcessStatus with the status string
-        common::TrayProcessStatus ps;
-        ps.processId = p->first;
-        ps.status = common::TrayProcessStatus::Status::Running;
-        common::GenericMessage msg;
-        msg.type = common::TrayProcessStatus::Type;
-        msg.payload = ps;
+        common::TrayProcessStatus msg;
+        msg.processId = p->first;
+        msg.status = common::TrayProcessStatus::Status::Running;
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
     }
@@ -183,14 +175,9 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     );
     
     if (p != _processes.end()) {
-        common::TrayProcessStatus ps;
-        ps.processId = p->first;
-        ps.status = toTrayStatus(exitStatus);
-
-        // Send out the TrayProcessStatus with the error/status string
-        common::GenericMessage msg;
-        msg.type = common::TrayProcessStatus::Type;
-        msg.payload = ps;
+        common::TrayProcessStatus msg;
+        msg.processId = p->first;
+        msg.status = toTrayStatus(exitStatus);
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
         
@@ -211,14 +198,10 @@ void ProcessHandler::handleReadyReadStandardError() {
     
     if (p != _processes.end()) {
         // Send out the TrayProcessLogMessage with the stderror key
-        common::TrayProcessLogMessage pm;
-        pm.processId = p->first;
-        pm.outputType = common::TrayProcessLogMessage::OutputType::StdErr;
-        pm.message = QString::fromLatin1(process->readAllStandardError()).toStdString();
-
-        common::GenericMessage msg;
-        msg.type = common::TrayProcessLogMessage::Type;
-        msg.payload = pm;
+        common::TrayProcessLogMessage msg;
+        msg.processId = p->first;
+        msg.outputType = common::TrayProcessLogMessage::OutputType::StdErr;
+        msg.message = QString::fromLatin1(process->readAllStandardError()).toStdString();
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
     }
@@ -235,14 +218,10 @@ void ProcessHandler::handleReadyReadStandardOutput() {
     );
     
     if (p != _processes.end()) {
-        common::TrayProcessLogMessage pm;
-        pm.processId = p->first;
-        pm.message = QString::fromLatin1(process->readAllStandardOutput()).toStdString();
-        pm.outputType = common::TrayProcessLogMessage::OutputType::StdOut;
-
-        common::GenericMessage msg;
-        msg.type = common::TrayProcessLogMessage::Type;
-        msg.payload = pm;
+        common::TrayProcessLogMessage msg;
+        msg.processId = p->first;
+        msg.message = QString::fromLatin1(process->readAllStandardOutput()).toStdString();
+        msg.outputType = common::TrayProcessLogMessage::OutputType::StdOut;
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
     }
@@ -272,14 +251,14 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
     else if (command.command == common::TrayCommand::Command::Kill ||
              command.command == common::TrayCommand::Command::Exit)
     {
-        common::TrayProcessStatus ps;
+        common::TrayProcessStatus msg;
         if (command.command == common::TrayCommand::Command::Kill) {
             process->kill();
-            ps.status = common::TrayProcessStatus::Status::CrashExit;
+            msg.status = common::TrayProcessStatus::Status::CrashExit;
         }
         else {
             process->terminate();
-            ps.status = common::TrayProcessStatus::Status::NormalExit;
+            msg.status = common::TrayProcessStatus::Status::NormalExit;
         }
         // Find specifc value in process map i.e. process
         const auto p = std::find_if(
@@ -289,11 +268,7 @@ void ProcessHandler::executeProcessWithTrayCommand(QProcess* process,
         );
 
         if (p != _processes.end()) {
-            ps.processId = p->first;
-            // Send out the TrayProcessStatus with the error/status string
-            common::GenericMessage msg;
-            msg.type = common::TrayProcessStatus::Type;
-            msg.payload = ps;
+            msg.processId = p->first;
             nlohmann::json j = msg;
             emit sendSocketMessage(j);
             // Remove this process from the list as we consider it finished

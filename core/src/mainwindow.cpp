@@ -176,12 +176,7 @@ void MainWindow::startProgram(const Program& program,
         Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
         Log(fmt::format("\tCWD: {}", command.currentWorkingDirectory));
 
-        // We have to wrap the TrayCommand into a GenericMessage first
-        common::GenericMessage msg;
-        msg.type = common::TrayCommand::Type;
-        msg.payload = command;
-
-        nlohmann::json j = msg;
+        nlohmann::json j = command;
         _clusterConnectionHandler.sendMessage(cluster, node, j);
 
         _processes.push_back(std::move(process));

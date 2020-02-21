@@ -36,19 +36,24 @@
 #define __COMMON__GENERICMESSAGE_H__
 
 #include <json/json.hpp>
+#include <string_view>
 
 namespace common {
 
 struct GenericMessage {
+    static constexpr const char* KeyType = "type";
+    static constexpr const char* KeyVersion = "version";
+
     /// A string representing the type of payload contained in this GenericMessage
     std::string type;
 
-    /// The payload of the message
-    nlohmann::json payload;
+    /// The version of the API that should be increased with breaking changes
+    static constexpr const int version = 1;
 };
 
-void to_json(nlohmann::json& j, const GenericMessage& p);
-void from_json(const nlohmann::json& j, GenericMessage& p);
+// Throws std::logic_error if the internal type is different from the expected type
+// Throws std::runtime_error if the version is different from the current version
+void validateMessage(const nlohmann::json& message, std::string_view expectedType);
     
 } // namespace common
     

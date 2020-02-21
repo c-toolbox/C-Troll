@@ -39,8 +39,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyPayload = "payload";
-
     constexpr const char* KeyId = "id";
     constexpr const char* KeyForwardOutErr = "forwardOutErr";
     constexpr const char* KeyCommand = "command";
@@ -75,8 +73,20 @@ namespace {
 
 namespace common {
 
+bool isValidTrayCommand(const nlohmann::json& j) {
+    std::string type;
+    j.at(GenericMessage::KeyType).get_to(type);
+
+    int version;
+    j.at(GenericMessage::KeyVersion).get_to(version);
+
+    return type == TrayCommand::Type && version == GenericMessage::version;
+}
+
 void to_json(nlohmann::json& j, const TrayCommand& p) {
     j = {
+        { GenericMessage::KeyType, TrayCommand::Type },
+        { GenericMessage::KeyVersion, p.version },
         { KeyId, p.id },
         { KeyForwardOutErr, p.forwardStdOutStdErr },
         { KeyCommand, fromCommand(p.command) },
@@ -87,18 +97,17 @@ void to_json(nlohmann::json& j, const TrayCommand& p) {
 }
 
 void from_json(const nlohmann::json& j, TrayCommand& p) {
-    nlohmann::json payload = j.at(KeyPayload);
+    validateMessage(j, TrayCommand::Type);
 
-
-    payload.at(KeyId).get_to(p.id);
-    payload.at(KeyForwardOutErr).get_to(p.forwardStdOutStdErr);
+    j.at(KeyId).get_to(p.id);
+    j.at(KeyForwardOutErr).get_to(p.forwardStdOutStdErr);
     
-    std::string commandString = payload.at(KeyCommand).get<std::string>();
+    const std::string commandString = j.at(KeyCommand).get<std::string>();
     p.command = toCommand(commandString);
 
-    payload.at(KeyExecutable).get_to(p.executable);
-    payload.at(KeyWorkingDirectory).get_to(p.currentWorkingDirectory);
-    payload.at(KeyCommandlineArguments).get_to(p.commandlineParameters);
+    j.at(KeyExecutable).get_to(p.executable);
+    j.at(KeyWorkingDirectory).get_to(p.currentWorkingDirectory);
+    j.at(KeyCommandlineArguments).get_to(p.commandlineParameters);
 
     if (p.command == TrayCommand::Command::None) {
         ::Log(fmt::format("Received unknown command {} with payload {}",
