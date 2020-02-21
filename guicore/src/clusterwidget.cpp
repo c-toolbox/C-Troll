@@ -46,6 +46,9 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
     QLabel* clusterName = new QLabel(QString::fromStdString(cluster.name));
     layout->addWidget(clusterName);
 
+    _connectionLabel = new QLabel("disconnected");
+    layout->addWidget(_connectionLabel);
+
     for (const Cluster::Node& n : cluster.nodes) {
         QWidget* node = new QWidget;
         layout->addWidget(node);
@@ -60,7 +63,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
 
         QString text = n.isConnected ? "connected" : "disconnected";
         QLabel* connected = new QLabel(text);
-        _connectionLabels.push_back(connected);
+        _nodeConnectionLabels.push_back(connected);
         nodeLayout->addWidget(connected);
     }
 }
@@ -69,9 +72,17 @@ void ClusterWidget::updateConnectionStatus(const Cluster::Node& node) {
     for (size_t i = 0; i < _cluster.nodes.size(); ++i) {
         const Cluster::Node& it = _cluster.nodes[i];
         if (it.id == node.id) {
-            _connectionLabels[i]->setText(it.isConnected ? "connected" : "disconnected");
+            _nodeConnectionLabels[i]->setText(
+                it.isConnected ? "connected" : "disconnected"
+            );
         }
     }
+
+    const bool allConnected = std::all_of(
+        _cluster.nodes.begin(), _cluster.nodes.end(),
+        std::mem_fn(&Cluster::Node::isConnected)
+    );
+    _connectionLabel->setText(allConnected ? "connected" : "disconnected");
 }
 
 

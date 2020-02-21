@@ -133,7 +133,7 @@ void MainWindow::startProgram(const Program& program,
     
     // Generate identifier
     Log("Sending Message:");
-    Log(fmt::format("Cluster: {} {}", cluster.name, cluster.id));
+    Log(fmt::format("\tCluster: {} {}", cluster.name, cluster.id));
     Log(fmt::format("\tCommand: {}", command.command));
     Log(fmt::format("\tExecutable: {}", command.executable));
     Log(fmt::format("\tIdentifier: {}", command.id));

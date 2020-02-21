@@ -50,7 +50,8 @@ public:
 
 private:
     const Cluster& _cluster;
-    std::vector<QLabel*> _connectionLabels;
+    QLabel* _connectionLabel;
+    std::vector<QLabel*> _nodeConnectionLabels;
 };
 
 
