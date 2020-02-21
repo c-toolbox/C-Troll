@@ -34,33 +34,42 @@
 
 #ifndef __CORE__MAINWINDOW_H__
 #define __CORE__MAINWINDOW_H__
- 
+
 #include <QMainWindow>
-#include <QCloseEvent>
-#include <QSystemTrayIcon>
-#include <QAction>
+
+#include "cluster.h"
+#include "clusterconnectionhandler.h"
+#include "coreprocess.h"
+#include "program.h"
 #include <QTextEdit>
- 
-namespace Ui { class MainWindow; }
- 
+#include <memory>
+
+class ClustersWidget;
+class ProcessesWidget;
+class ProgramsWidget;
+
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
-    explicit MainWindow(const QString& title);
+    explicit MainWindow(QString title, const std::string& configurationFile);
+
+private:
+    void startProgram(const Program& program,
+        const Program::Configuration& configurationId, const std::string& clusterId);
 
     void log(std::string msg);
 
-protected:
-    void closeEvent(QCloseEvent* event);
-    void changeEvent(QEvent* event);
- 
-private slots:
-    void iconActivated(QSystemTrayIcon::ActivationReason reason);
- 
-private:
-    // Declare the object of future applications for the tray icon
-    QTextEdit* _messageBox;
-    QSystemTrayIcon* _trayIcon;
+    ProgramsWidget* _programWidget;
+    ClustersWidget* _clustersWidget;
+    ProcessesWidget* _processesWidget;
+
+    std::vector<Program> _programs;
+    std::vector<Cluster> _clusters;
+    std::vector<CoreProcess> _processes;
+
+    ClusterConnectionHandler _clusterConnectionHandler;
+
+    QTextEdit* _messageBox = nullptr;
 };
- 
+
 #endif // __CORE__MAINWINDOW_H__

@@ -35,7 +35,6 @@
 #ifndef __CORE__CLUSTER_H__
 #define __CORE__CLUSTER_H__
 
-#include "guiinitialization.h"
 #include <QByteArray>
 #include <memory>
 #include <json/json.hpp>
@@ -63,9 +62,9 @@ struct Cluster {
         /// hostname
         std::string ipAddress;
         /// The port on which the Tray application on that computer is listening
-        int port;
+        int port = -1;
         /// A flag representing whether the node is connected or not
-        bool isConnected;
+        bool isConnected = false;
     };
 
     /// The human readable name of this Cluster
@@ -73,11 +72,9 @@ struct Cluster {
     /// The unique identifier of this Cluster
     std::string id;
     /// A flag whether this Cluster is enabled or disabled
-    bool isEnabled;
+    bool isEnabled = false;
     /// A list of all nodes belonging to this cluster
     std::vector<Node> nodes;
-    /// A vector of processes that are active on this cluster
-    std::vector<Process*> processes;
 };
 
 void to_json(nlohmann::json& j, const Cluster& p);
@@ -92,15 +89,5 @@ void from_json(const nlohmann::json& j, Cluster& p);
  * \return A list of all Cluster%s that were found by walking the \p directory
  */
 std::vector<Cluster> loadClustersFromDirectory(const std::string& directory);
-
-/**
- * This method converts a Cluster information into the
- * common::GuiInitialization::Cluster format so that it can be send to connected GUIs.
- * \param cluster The Cluster information that is to be converte
- * \return A common::GuiInitialization::Cluster structure that contains all relevant
- * information for the GUI initialization step
- */
-common::GuiInitialization::Cluster clusterToGuiCluster(const Cluster& cluster);
-
 
 #endif // __CORE__CLUSTER_H__

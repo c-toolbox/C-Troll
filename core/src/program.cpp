@@ -138,32 +138,3 @@ void from_json(const nlohmann::json& j, Program& p) {
 std::vector<Program> loadProgramsFromDirectory(const std::string& directory) {
     return common::loadJsonFromDirectory<Program>(directory);
 }
-
-common::GuiInitialization::Application programToGuiApplication(const Program& prog) {
-    common::GuiInitialization::Application app;
-    app.name = prog.name;
-    app.id = prog.id;
-    app.tags = prog.tags;
-
-    for (const Program::Configuration& conf : prog.configurations) {
-        common::GuiInitialization::Application::Configuration c;
-        c.name = conf.name;
-        c.id = conf.id;
-        for (const std::pair<std::string, std::string>& p :
-             conf.clusterCommandlineParameters)
-        {
-            c.clusters.push_back(p.first);
-        }
-
-        app.configurations.push_back(c);
-    }
-
-    app.defaultCluster = prog.defaultCluster;
-    app.defaultConfiguration = prog.defaultConfiguration;
-    
-    return app;
-}
-
-Program::~Program() {
-    assert(processes.empty());
-}

@@ -98,16 +98,3 @@ void from_json(const nlohmann::json& j, Cluster& p) {
 std::vector<Cluster> loadClustersFromDirectory(const std::string& directory) {
     return common::loadJsonFromDirectory<Cluster>(directory);
 }
-
-common::GuiInitialization::Cluster clusterToGuiCluster(const Cluster& c) {
-    common::GuiInitialization::Cluster cluster;
-    cluster.name = c.name;
-    cluster.id = c.id;
-    cluster.isEnabled = c.isEnabled;
-    cluster.isConnected = std::all_of(
-        c.nodes.begin(),
-        c.nodes.end(),
-        std::mem_fn(&Cluster::Node::isConnected)
-    );
-    return cluster;
-}

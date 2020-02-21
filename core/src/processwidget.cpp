@@ -38,27 +38,27 @@
 #include <QVBoxLayout>
 
 namespace {
-    std::string statusToString(CoreProcess::ProcessStatus status) {
+    std::string statusToString(common::TrayProcessStatus::Status status) {
         switch (status) {
-            case CoreProcess::ProcessStatus::Unknown:
+            case common::TrayProcessStatus::Status::Unknown:
                 return "Unknown";
-            case CoreProcess::ProcessStatus::Starting:
+            case common::TrayProcessStatus::Status::Starting:
                 return "Starting";
-            case CoreProcess::ProcessStatus::Running:
+            case common::TrayProcessStatus::Status::Running:
                 return "Running";
-            case CoreProcess::ProcessStatus::NormalExit:
+            case common::TrayProcessStatus::Status::NormalExit:
                 return "Normal Exit";
-            case CoreProcess::ProcessStatus::CrashExit:
+            case common::TrayProcessStatus::Status::CrashExit:
                 return "Crash Exit";
-            case CoreProcess::ProcessStatus::FailedToStart:
+            case common::TrayProcessStatus::Status::FailedToStart:
                 return "Failed To Start";
-            case CoreProcess::ProcessStatus::TimedOut:
+            case common::TrayProcessStatus::Status::TimedOut:
                 return "Timed Out";
-            case CoreProcess::ProcessStatus::WriteError:
+            case common::TrayProcessStatus::Status::WriteError:
                 return "Write Error";
-            case CoreProcess::ProcessStatus::ReadError:
+            case common::TrayProcessStatus::Status::ReadError:
                 return "Read Error";
-            case CoreProcess::ProcessStatus::UnknownError:
+            case common::TrayProcessStatus::Status::UnknownError:
             default:
                 return "UnknownError";
         }
@@ -87,15 +87,15 @@ ProcessWidget::ProcessWidget(const CoreProcess& process)
     layout->addWidget(cluster);
 
     _status = new QLabel(
-        QString::fromStdString("Status: " + statusToString(_process.processStatus))
+        //QString::fromStdString("Status: " + statusToString(_process.clusterStatus))
     );
     layout->addWidget(_status);
 }
 
 void ProcessWidget::updateStatus() {
-    _status->setText(
-        QString::fromStdString("Status: " + statusToString(_process.processStatus))
-    );
+    //_status->setText(
+    //    QString::fromStdString("Status: " + statusToString(_process.processStatus))
+    //);
 }
 
 int ProcessWidget::processId() const {

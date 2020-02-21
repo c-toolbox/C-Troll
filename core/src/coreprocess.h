@@ -35,15 +35,12 @@
 #ifndef __CORE__COREPROCESS_H__
 #define __CORE__COREPROCESS_H__
 
-#include "guiinitialization.h"
-#include "guiprocesslogmessage.h"
-#include "guiprocesslogmessagehistory.h"
-#include "guiprocessstatus.h"
+#include "program.h"
 #include "traycommand.h"
+#include "trayprocessstatus.h"
 #include <chrono>
 
 struct Cluster;
-struct Program;
 
 class CoreProcess {
 public:
@@ -101,7 +98,8 @@ public:
         std::chrono::system_clock::time_point time;
     };
 
-    CoreProcess(Program& program, std::string configurationId, Cluster& cluster);
+    CoreProcess(const Program& program, const Program::Configuration& configuration,
+        const Cluster& cluster);
 
     void pushNodeStatus(std::string nodeId, NodeStatus::Status status);
     void pushNodeError(std::string nodeId, NodeError::Error error);
@@ -109,9 +107,9 @@ public:
         std::string message);
 
     int id;
-    Program& application;
-    std::string configurationId;
-    Cluster& cluster;
+    const Program& application;
+    const Program::Configuration& configuration;
+    const Cluster& cluster;
     std::map<std::string, NodeLog> nodeLogs;
     ClusterStatus clusterStatus = { CoreProcess::ClusterStatus::Status::Starting };
 
@@ -122,13 +120,6 @@ private:
     int nextNodeErrorId = 0;
     int nextNodeStatusId = 0;
 };
-
-common::GuiInitialization::Process coreProcessToGuiProcess(const CoreProcess& process);
-common::GuiProcessStatus coreProcessToProcessStatus(const CoreProcess& process,
-    const std::string& nodeId);
-common::GuiProcessLogMessage latestGuiProcessLogMessage(const CoreProcess& process,
-    const std::string& nodeId);
-common::GuiProcessLogMessageHistory logMessageHistory(const CoreProcess& proc);
 
 common::TrayCommand startProcessCommand(const CoreProcess& proc);
 common::TrayCommand exitProcessCommand(const CoreProcess& proc);

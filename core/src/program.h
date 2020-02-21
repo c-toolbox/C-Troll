@@ -35,7 +35,6 @@
 #ifndef __CORE__PROGRAM_H__
 #define __CORE__PROGRAM_H__
 
-#include "guiinitialization.h"
 #include <json/json.hpp>
 #include <string>
 #include <vector>
@@ -46,12 +45,10 @@ struct Program {
     struct Configuration {
         std::string id;
         std::string name;
+        // First argument:  Cluster Id   Second argument:  Commandline parameter
         std::map<std::string, std::string> clusterCommandlineParameters;
     };
 
-    Program() = default;
-    ~Program();
-    
     /// A unique identifier
     std::string id;
     /// A human readable name for this Program
@@ -72,13 +69,9 @@ struct Program {
     std::string defaultConfiguration;
     // Default cluster id
     std::string defaultCluster;
-    /// A vector of processes that derive from this program.
-    std::vector<Process*> processes;
 };
 
 std::vector<Program> loadProgramsFromDirectory(const std::string& directory);
-
-common::GuiInitialization::Application programToGuiApplication(const Program& p);
 
 void to_json(nlohmann::json& j, const Program& p);
 void from_json(const nlohmann::json& j, Program& p);
