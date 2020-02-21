@@ -63,11 +63,12 @@ common::CommandMessage exitProcessCommand(const Process& process) {
 
 int Process::nextId = 0;
 
-Process::Process(const Program& application, const Program::Configuration& configuration,
-                 const Cluster& cluster)
+Process::Process(const Program& program, const Program::Configuration& configuration,
+                 const Cluster& cluster, const Cluster::Node& node)
     : id(nextId++)
-    , application(application)
+    , application(program)
     , configuration(configuration)
     , cluster(cluster)
+    , node(node)
     , status(common::ProcessStatusMessage::Status::Unknown)
 {}

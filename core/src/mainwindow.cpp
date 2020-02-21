@@ -111,13 +111,15 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
         [this](common::ProcessStatusMessage status) {
         const auto it = std::find_if(
             _processes.begin(), _processes.end(),
-            [status](const Process& p) { return p.id == status.processId; }
+            [status](const std::unique_ptr<Process>& p) {
+                return p->id == status.processId;
+            }
         );
         if (it != _processes.end()) {
-            it->status = status.status;
+            (*it)->status = status.status;
 
             // The process was already known to us, which should always be the case
-            _processesWidget->processUpdated(it->id);
+            _processesWidget->processUpdated((*it)->id);
         }
     }
     );
@@ -164,8 +166,13 @@ void MainWindow::startProgram(const Program& program,
     const Cluster& cluster = *iCluster;
 
     for (const Cluster::Node& node : cluster.nodes) {
-        Process process(program, configuration, cluster);
-        common::CommandMessage command = startProcessCommand(process);
+        std::unique_ptr<Process> process = std::make_unique<Process>(
+            program,
+            configuration,
+            cluster,
+            node
+        );
+        common::CommandMessage command = startProcessCommand(*process);
 
         // Generate identifier
         Log("Sending Message:");
@@ -179,7 +186,7 @@ void MainWindow::startProgram(const Program& program,
         nlohmann::json j = command;
         _clusterConnectionHandler.sendMessage(cluster, node, j);
 
+        _processesWidget->processAdded(*process);
         _processes.push_back(std::move(process));
-        _processesWidget->processAdded(_processes.back());
     }
 }

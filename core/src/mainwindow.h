@@ -65,7 +65,7 @@ private:
 
     std::vector<Program> _programs;
     std::vector<Cluster> _clusters;
-    std::vector<Process> _processes;
+    std::vector<std::unique_ptr<Process>> _processes;
 
     ClusterConnectionHandler _clusterConnectionHandler;
 

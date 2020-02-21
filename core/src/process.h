@@ -35,22 +35,22 @@
 #ifndef __CORE__PROCESS_H__
 #define __CORE__PROCESS_H__
 
-#include "program.h"
+#include "cluster.h"
 #include "commandmessage.h"
 #include "processstatusmessage.h"
-
-struct Cluster;
+#include "program.h"
 
 struct Process {
     Process() = delete;
 
-    Process(const Program& application, const Program::Configuration& configuration,
-        const Cluster& cluster);
+    Process(const Program& program, const Program::Configuration& configuration,
+        const Cluster& cluster, const Cluster::Node& node);
 
     const int id = -1;
     const Program& application;
     const Program::Configuration& configuration;
     const Cluster& cluster;
+    const Cluster::Node& node;
     common::ProcessStatusMessage::Status status;
 
     static int nextId;

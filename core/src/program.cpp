@@ -44,7 +44,7 @@ namespace {
     constexpr const char* KeyExecutable = "executable";
     constexpr const char* KeyBaseDirectory = "baseDirectory";
     constexpr const char* KeyCommandlineParameters = "commandlineParameters";
-    constexpr const char* KeyCurrentWorkingDirectory = "currentWorkingDirectory";
+    constexpr const char* KeyWorkingDirectory = "workingDirectory";
     constexpr const char* KeyClusterCommandlineParameters = "clusters";
     constexpr const char* KeyDefaults = "defaults";
     constexpr const char* KeyDefaultCluster = "cluster";
@@ -82,7 +82,7 @@ void to_json(nlohmann::json& j, const Program& p) {
         j[KeyCommandlineParameters] = p.commandlineParameters;
     }
     if (!p.currentWorkingDirectory.empty()) {
-        j[KeyCurrentWorkingDirectory] = p.currentWorkingDirectory;
+        j[KeyWorkingDirectory] = p.currentWorkingDirectory;
     }
     if (!p.tags.empty()) {
         j[KeyTags] = p.tags;
@@ -113,8 +113,8 @@ void from_json(const nlohmann::json& j, Program& p) {
         j.at(KeyCommandlineParameters).get_to(p.commandlineParameters);
     }
     p.currentWorkingDirectory = p.baseDirectory;
-    if (j.find(KeyCurrentWorkingDirectory) != j.end()) {
-        j.at(KeyCurrentWorkingDirectory).get_to(p.currentWorkingDirectory);
+    if (j.find(KeyWorkingDirectory) != j.end()) {
+        j.at(KeyWorkingDirectory).get_to(p.currentWorkingDirectory);
     }
     if (j.find(KeyTags) != j.end()) {
         j.at(KeyTags).get_to(p.tags);
