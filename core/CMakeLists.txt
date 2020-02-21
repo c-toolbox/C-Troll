@@ -37,8 +37,8 @@ set(HEADER_FILES
     src/clusterconnectionhandler.h
     src/clusterwidget.h
     src/configuration.h
-    src/coreprocess.h
     src/mainwindow.h
+    src/process.h
     src/processwidget.h
     src/program.h
     src/programwidget.h
@@ -49,9 +49,9 @@ set(SOURCE_FILES
     src/clusterconnectionhandler.cpp
     src/clusterwidget.cpp
     src/configuration.cpp
-    src/coreprocess.cpp
     src/main.cpp
     src/mainwindow.cpp
+    src/process.cpp
     src/processwidget.cpp
     src/program.cpp
     src/programwidget.cpp
