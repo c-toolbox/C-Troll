@@ -106,9 +106,10 @@ ProgramWidget::ProgramWidget(const Program& program)
 
 void ProgramWidget::updateStatus(const Cluster& cluster) {
     const auto it = _widgets.find(cluster.id);
-    assert(it != _widgets.end());
-
-    it->second->updateStatus(cluster);
+    // We have to check as a cluster that is active might not have any associated programs
+    if (it != _widgets.end()) {
+        it->second->updateStatus(cluster);
+    }
 }
 
 
