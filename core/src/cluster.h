@@ -73,7 +73,7 @@ struct Cluster {
     /// A flag whether this Cluster is enabled or disabled
     bool isEnabled = false;
     /// A list of all nodes belonging to this cluster
-    std::vector<Node> nodes;
+    std::vector<std::unique_ptr<Node>> nodes;
 };
 
 void to_json(nlohmann::json& j, const Cluster& p);

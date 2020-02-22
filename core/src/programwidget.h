@@ -80,7 +80,7 @@ private:
 class ProgramWidget : public QWidget {
 Q_OBJECT
 public:
-    ProgramWidget(const Program& program);
+    ProgramWidget(Program* program);
 
     void updateStatus(const Cluster& cluster);
 
@@ -99,8 +99,8 @@ private:
 class ProgramsWidget : public QWidget {
     Q_OBJECT
 public:
-    ProgramsWidget(const std::vector<Program>& programs,
-        const std::vector<Cluster>& clusters);
+    ProgramsWidget(const std::vector<Program*>& programs,
+        const std::vector<Cluster*>& clusters);
 
 public slots:
     void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);
@@ -110,7 +110,6 @@ signals:
         const Program::Configuration& configuration);
 
 private:
-    const std::vector<Program>& _programs;
     std::vector<ProgramWidget*> _widgets;
 };
 

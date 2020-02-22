@@ -47,7 +47,7 @@
 class ClusterConnectionHandler : public QObject {
 Q_OBJECT
 public:
-    void initialize(std::vector<Cluster>& clusters);
+    void initialize(const std::vector<Cluster*>& clusters);
 
     void sendMessage(const Cluster& cluster, const Cluster::Node& ,
         nlohmann::json message) const;
@@ -66,8 +66,8 @@ private slots:
 
 private:
     struct NodeInfo {
-        std::reference_wrapper<Cluster> cluster;
-        std::reference_wrapper<Cluster::Node> node;
+        Cluster* cluster;
+        Cluster::Node* node;
     };
 
     struct SocketData {

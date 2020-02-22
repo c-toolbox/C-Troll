@@ -77,10 +77,25 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     Log(fmt::format("Loading configuration file {}", configurationFile));
     Configuration config = common::loadFromJson<Configuration>(configurationFile, "");
 
-    // Programs
+    //
+    // Load the data
     Log(fmt::format("Loading programs from directory {}", config.applicationPath));
-    _programs = loadProgramsFromDirectory(config.applicationPath);
-    _programWidget = new programs::ProgramsWidget(_programs, _clusters);
+    std::vector<Program*> programs;
+    for (Program& program : loadProgramsFromDirectory(config.applicationPath)) {
+        std::unique_ptr<Program> p = std::make_unique<Program>(std::move(program));
+        programs.push_back(p.get());
+        _programs.push_back(std::move(p));
+    }
+    Log(fmt::format("Loading clusters from directory {}", config.clusterPath));
+    std::vector<Cluster*> clusters;
+    for (Cluster& cluster : loadClustersFromDirectory(config.clusterPath)) {
+        std::unique_ptr<Cluster> c = std::make_unique<Cluster>(std::move(cluster));
+        clusters.push_back(c.get());
+        _clusters.push_back(std::move(c));
+    }
+
+    // Programs
+    _programWidget = new programs::ProgramsWidget(programs, clusters);
     connect(
         _programWidget, &programs::ProgramsWidget::startProgram,
         this, &MainWindow::startProgram
@@ -92,9 +107,7 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
 
 
     // Clusters
-    Log(fmt::format("Loading clusters from directory {}", config.clusterPath));
-    _clusters = loadClustersFromDirectory(config.clusterPath);
-    _clustersWidget = new ClustersWidget(_clusters);
+    _clustersWidget = new ClustersWidget(clusters);
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
         _clustersWidget, &ClustersWidget::connectedStatusChanged
@@ -135,7 +148,7 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     tabWidget->addTab(_processesWidget, "Processes");
     tabWidget->addTab(_messageBox, "Log");
 
-    _clusterConnectionHandler.initialize(_clusters);
+    _clusterConnectionHandler.initialize(clusters);
 }
 
 void MainWindow::log(std::string msg) {
@@ -158,23 +171,23 @@ void MainWindow::startProgram(const std::string& clusterId,
     const auto iCluster = std::find_if(
         _clusters.cbegin(),
         _clusters.cend(),
-        [clusterId](const Cluster& c) { return c.id == clusterId; }
+        [clusterId](const std::unique_ptr<Cluster>& c) { return c->id == clusterId; }
     );
     assert(iCluster != _clusters.end());
-    const Cluster& cluster = *iCluster;
+    const Cluster* cluster = iCluster->get();
 
-    for (const Cluster::Node& node : cluster.nodes) {
+    for (const std::unique_ptr<Cluster::Node>& node : cluster->nodes) {
         std::unique_ptr<Process> process = std::make_unique<Process>(
             program,
             configuration,
-            cluster,
-            node
+            *cluster,
+            *node
         );
         common::CommandMessage command = startProcessCommand(*process);
 
         // Generate identifier
         Log("Sending Message:");
-        Log(fmt::format("\tCluster: {} {}", cluster.name, cluster.id));
+        Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id));
         Log(fmt::format("\tCommand: {}", command.command));
         Log(fmt::format("\tExecutable: {}", command.executable));
         Log(fmt::format("\tIdentifier: {}", command.id));
@@ -182,7 +195,7 @@ void MainWindow::startProgram(const std::string& clusterId,
         Log(fmt::format("\tCWD: {}", command.workingDirectory));
 
         nlohmann::json j = command;
-        _clusterConnectionHandler.sendMessage(cluster, node, j);
+        _clusterConnectionHandler.sendMessage(*cluster, *node, j);
 
         _processesWidget->processAdded(*process);
         _processes.push_back(std::move(process));

@@ -37,31 +37,31 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-ClusterWidget::ClusterWidget(const Cluster& cluster)
+ClusterWidget::ClusterWidget(const Cluster* cluster)
     : _cluster(cluster)
 {
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 
-    QLabel* clusterName = new QLabel(QString::fromStdString(cluster.name));
+    QLabel* clusterName = new QLabel(QString::fromStdString(cluster->name));
     layout->addWidget(clusterName);
 
     _connectionLabel = new QLabel("disconnected");
     layout->addWidget(_connectionLabel);
 
-    for (const Cluster::Node& n : cluster.nodes) {
+    for (const std::unique_ptr<Cluster::Node>& n : cluster->nodes) {
         QWidget* node = new QWidget;
         layout->addWidget(node);
         QBoxLayout* nodeLayout = new QVBoxLayout;
         node->setLayout(nodeLayout);
 
-        QLabel* name = new QLabel(QString::fromStdString(n.name));
+        QLabel* name = new QLabel(QString::fromStdString(n->name));
         nodeLayout->addWidget(name);
 
-        QLabel* ip = new QLabel(QString::fromStdString(n.ipAddress));
+        QLabel* ip = new QLabel(QString::fromStdString(n->ipAddress));
         nodeLayout->addWidget(ip);
 
-        QString text = n.isConnected ? "connected" : "disconnected";
+        QString text = n->isConnected ? "connected" : "disconnected";
         QLabel* connected = new QLabel(text);
         _nodeConnectionLabels.push_back(connected);
         nodeLayout->addWidget(connected);
@@ -69,8 +69,8 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
 }
 
 void ClusterWidget::updateConnectionStatus(const Cluster::Node& node) {
-    for (size_t i = 0; i < _cluster.nodes.size(); ++i) {
-        const Cluster::Node& it = _cluster.nodes[i];
+    for (size_t i = 0; i < _cluster->nodes.size(); ++i) {
+        const Cluster::Node& it = *_cluster->nodes[i];
         if (it.id == node.id) {
             _nodeConnectionLabels[i]->setText(
                 it.isConnected ? "connected" : "disconnected"
@@ -79,7 +79,7 @@ void ClusterWidget::updateConnectionStatus(const Cluster::Node& node) {
     }
 
     const bool allConnected = std::all_of(
-        _cluster.nodes.begin(), _cluster.nodes.end(),
+        _cluster->nodes.begin(), _cluster->nodes.end(),
         std::mem_fn(&Cluster::Node::isConnected)
     );
     _connectionLabel->setText(allConnected ? "connected" : "disconnected");
@@ -89,13 +89,13 @@ void ClusterWidget::updateConnectionStatus(const Cluster::Node& node) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ClustersWidget::ClustersWidget(const std::vector<Cluster>& clusters)
+ClustersWidget::ClustersWidget(std::vector<Cluster*> clusters)
     : _clusters(clusters)
 {
     QBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
 
-    for (const Cluster& c : clusters) {
+    for (Cluster* c : clusters) {
         ClusterWidget* widget = new ClusterWidget(c);
         _clusterWidgets.push_back(widget);
         layout->addWidget(widget);
@@ -108,8 +108,8 @@ void ClustersWidget::connectedStatusChanged(const Cluster& cluster,
     assert(_clusters.size() == _clusterWidgets.size());
 
     for (size_t i = 0; i < _clusters.size(); ++i) {
-        const Cluster& it = _clusters[i];
-        if (it.id == cluster.id) {
+        Cluster* it = _clusters[i];
+        if (it->id == cluster.id) {
             _clusterWidgets[i]->updateConnectionStatus(node);
             return;
         }

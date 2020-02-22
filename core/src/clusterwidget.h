@@ -44,12 +44,12 @@
 class ClusterWidget : public QWidget {
 Q_OBJECT
 public:
-    ClusterWidget(const Cluster& cluster);
+    ClusterWidget(const Cluster* cluster);
 
     void updateConnectionStatus(const Cluster::Node& node);
 
 private:
-    const Cluster& _cluster;
+    const Cluster* const _cluster;
     QLabel* _connectionLabel;
     std::vector<QLabel*> _nodeConnectionLabels;
 };
@@ -61,13 +61,13 @@ private:
 class ClustersWidget : public QWidget {
     Q_OBJECT
 public:
-    ClustersWidget(const std::vector<Cluster>& clusters);
+    ClustersWidget(std::vector<Cluster*> clusters);
 
 public slots:
     void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);
 
 private:
-    const std::vector<Cluster>& _clusters;
+    std::vector<Cluster*> _clusters;
     std::vector<ClusterWidget*> _clusterWidgets;
 };
 

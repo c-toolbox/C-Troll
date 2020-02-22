@@ -63,8 +63,8 @@ private:
     ClustersWidget* _clustersWidget;
     ProcessesWidget* _processesWidget;
 
-    std::vector<Program> _programs;
-    std::vector<Cluster> _clusters;
+    std::vector<std::unique_ptr<Program>> _programs;
+    std::vector<std::unique_ptr<Cluster>> _clusters;
     std::vector<std::unique_ptr<Process>> _processes;
 
     ClusterConnectionHandler _clusterConnectionHandler;

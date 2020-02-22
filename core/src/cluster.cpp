@@ -50,32 +50,10 @@ namespace {
     constexpr const char* KeyNodePort = "port";
 } // namespace
 
-void to_json(nlohmann::json& j, const Cluster::Node& p) {
-    j = {
-        { KeyNodeName, p.name },
-        { KeyNodeIpAddress, p.ipAddress },
-        { KeyNodePort, p.port }
-    };
-}
-
 void from_json(const nlohmann::json& j, Cluster::Node& p) {
     j.at(KeyNodeName).get_to(p.name);
     j.at(KeyNodeIpAddress).get_to(p.ipAddress);
     j.at(KeyNodePort).get_to(p.port);
-}
-
-void to_json(nlohmann::json& j, const Cluster& p) {
-    j = {
-        { KeyName, p.name },
-        { KeyId, p.id },
-        { KeyEnabled, p.isEnabled }
-    };
-
-    std::map<std::string, Cluster::Node> nodes;
-    for (const Cluster::Node& n : p.nodes) {
-        nodes[n.id] = n;
-    }
-    j[KeyNodes] = nodes;
 }
 
 void from_json(const nlohmann::json& j, Cluster& p) {
@@ -89,8 +67,8 @@ void from_json(const nlohmann::json& j, Cluster& p) {
     std::map<std::string, Cluster::Node> nodes;
     j.at(KeyNodes).get_to(nodes);
     for (const std::pair<const std::string, Cluster::Node>& node : nodes) {
-        Cluster::Node n = node.second;
-        n.id = node.first;
+        std::unique_ptr<Cluster::Node> n = std::make_unique<Cluster::Node>(node.second);
+        n->id = node.first;
         p.nodes.push_back(std::move(n));
     }
 }

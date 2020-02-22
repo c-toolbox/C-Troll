@@ -93,15 +93,15 @@ void ClusterWidget::updateStatus(const Cluster& cluster) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ProgramWidget::ProgramWidget(const Program& program) {
+ProgramWidget::ProgramWidget(Program* program) {
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 
-    QLabel* name = new QLabel(QString::fromStdString(program.name));
+    QLabel* name = new QLabel(QString::fromStdString(program->name));
     layout->addWidget(name);
 
-    for (const std::string& cluster : program.clusters) {
-        ClusterWidget* w = new ClusterWidget(cluster, program.configurations);
+    for (const std::string& cluster : program->clusters) {
+        ClusterWidget* w = new ClusterWidget(cluster, program->configurations);
 
         connect(
             w, &ClusterWidget::startProgram,
@@ -127,20 +127,19 @@ void ProgramWidget::updateStatus(const Cluster& cluster) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ProgramsWidget::ProgramsWidget(const std::vector<Program>& programs,
-                               const std::vector<Cluster>& clusters)
-    : _programs(programs)
+ProgramsWidget::ProgramsWidget(const std::vector<Program*>& programs,
+                               const std::vector<Cluster*>& clusters)
 {
     QBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
 
-    for (const Program& p : programs) {
+    for (Program* p : programs) {
         ProgramWidget* w = new ProgramWidget(p);
 
         connect(
             w, &ProgramWidget::startProgram,
             [this, p](const std::string& cluster, const Program::Configuration& conf) {
-                emit startProgram(cluster, p, conf);
+                emit startProgram(cluster, *p, conf);
             }
         );
 

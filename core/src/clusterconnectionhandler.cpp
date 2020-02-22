@@ -46,15 +46,15 @@ namespace {
     }
 } // namespace
 
-void ClusterConnectionHandler::initialize(std::vector<Cluster>& clusters) {
-    for (Cluster& c : clusters) {
-        for (Cluster::Node& node : c.nodes) {
-            std::string h = hash(node);
+void ClusterConnectionHandler::initialize(const std::vector<Cluster*>& clusters) {
+    for (Cluster* c : clusters) {
+        for (const std::unique_ptr<Cluster::Node>& node : c->nodes) {
+            std::string h = hash(*node);
             const auto it = _nodes.find(h);
             if (it != _nodes.end()) {
                 // A socket to this node has already been created, so we just need to
                 // register our interest in this
-                it->second.nodes.push_back({ c, node });
+                it->second.nodes.push_back({ c, node.get() });
                 continue;
             }
 
@@ -70,7 +70,7 @@ void ClusterConnectionHandler::initialize(std::vector<Cluster>& clusters) {
 
             SocketData data;
             data.socket = std::make_unique<common::JsonSocket>(std::move(socket));
-            data.nodes.push_back({ c, node });
+            data.nodes.push_back({ c, node.get() });
 
             connect(
                 data.socket.get(), &common::JsonSocket::readyRead,
@@ -82,7 +82,7 @@ void ClusterConnectionHandler::initialize(std::vector<Cluster>& clusters) {
             common::JsonSocket* s = data.socket.get();
             _nodes[h] = std::move(data);
 
-            s->connectToHost(node.ipAddress, node.port);
+            s->connectToHost(node->ipAddress, node->port);
 
         }
     }
@@ -97,11 +97,11 @@ void ClusterConnectionHandler::initialize(std::vector<Cluster>& clusters) {
                     for (NodeInfo& ni : value.nodes) {
                         Log(fmt::format(
                             "Unconnected: {}:{}",
-                            ni.node.get().ipAddress, ni.node.get().port
+                            ni.node->ipAddress, ni.node->port
                         ));
-                        if (ni.node.get().isConnected) {
-                            ni.node.get().isConnected = false;
-                            emit connectedStatusChanged(ni.cluster, ni.node);
+                        if (ni.node->isConnected) {
+                            ni.node->isConnected = false;
+                            emit connectedStatusChanged(*ni.cluster, *ni.node);
                         }
                     }
                 }
@@ -121,12 +121,12 @@ void ClusterConnectionHandler::handleSocketStateChange(const std::string& hash,
 
     for (NodeInfo& ni : it->second.nodes) {
         Log(fmt::format("Socket state change: {}:{}  {}",
-            ni.node.get().ipAddress, ni.node.get().port, state
+            ni.node->ipAddress, ni.node->port, state
         ));
 
-        if (ni.node.get().isConnected != isConnected) {
-            ni.node.get().isConnected = isConnected;
-            emit connectedStatusChanged(ni.cluster, ni.node);
+        if (ni.node->isConnected != isConnected) {
+            ni.node->isConnected = isConnected;
+            emit connectedStatusChanged(*ni.cluster, *ni.node);
         }
     }
 }
@@ -143,7 +143,7 @@ void ClusterConnectionHandler::readyRead(const std::string& hash) {
     }
     else {
         for (const NodeInfo& ni : it->second.nodes) {
-            emit messageReceived(ni.cluster, ni.node, message);
+            emit messageReceived(*ni.cluster, *ni.node, message);
         }
     }
 }
