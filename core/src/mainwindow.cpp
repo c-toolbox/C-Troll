@@ -80,12 +80,11 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     // Programs
     Log(fmt::format("Loading programs from directory {}", config.applicationPath));
     _programs = loadProgramsFromDirectory(config.applicationPath);
-    _programWidget = new programs::ProgramsWidget(_programs);
+    _programWidget = new programs::ProgramsWidget(_programs, _clusters);
     connect(
         _programWidget, &programs::ProgramsWidget::startProgram,
         this, &MainWindow::startProgram
     );
-    tabWidget->addTab(_programWidget, "Programs");
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
         _programWidget, &programs::ProgramsWidget::connectedStatusChanged
@@ -96,7 +95,6 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     Log(fmt::format("Loading clusters from directory {}", config.clusterPath));
     _clusters = loadClustersFromDirectory(config.clusterPath);
     _clustersWidget = new ClustersWidget(_clusters);
-    tabWidget->addTab(_clustersWidget, "Clusters");
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
         _clustersWidget, &ClustersWidget::connectedStatusChanged
@@ -105,7 +103,6 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
 
     // Processes
     _processesWidget = new ProcessesWidget;
-    tabWidget->addTab(_processesWidget, "Processes");
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
         [this](common::ProcessStatusMessage status) {
@@ -123,19 +120,20 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
         }
     }
     );
-
-
-    // Log messages
-    tabWidget->addTab(_messageBox, "Log");
-
-
-
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::messageReceived,
         [](const Cluster& cluster, const Cluster::Node& node, nlohmann::json message) {
             Log(fmt::format("{} {} {}", cluster.name, node.name, std::string(message)));
         }
     );
+
+
+
+    // Set up the tab widget
+    tabWidget->addTab(_programWidget, "Programs");
+    tabWidget->addTab(_clustersWidget, "Clusters");
+    tabWidget->addTab(_processesWidget, "Processes");
+    tabWidget->addTab(_messageBox, "Log");
 
     _clusterConnectionHandler.initialize(_clusters);
 }

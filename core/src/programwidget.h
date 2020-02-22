@@ -44,6 +44,20 @@
 
 namespace programs {
 
+class ProgramButton : public QPushButton {
+Q_OBJECT
+public:
+    ProgramButton(std::string name);
+
+signals:
+    void startProgram(const Program::Configuration& configuration);
+    void stopProgram(const Program::Configuration& configuration);
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
 class ClusterWidget : public QWidget {
 Q_OBJECT
 public:
@@ -56,7 +70,7 @@ signals:
     void startProgram(const Program::Configuration& configuration);
 
 private:
-    std::map<std::string, QPushButton*> _startButtons;
+    std::map<std::string, ProgramButton*> _startButtons;
 };
 
 
@@ -75,7 +89,6 @@ signals:
         const Program::Configuration& configuration);
 
 private:
-    const Program& _program;
     std::map<std::string, ClusterWidget*> _widgets;
 };
 
@@ -86,7 +99,8 @@ private:
 class ProgramsWidget : public QWidget {
     Q_OBJECT
 public:
-    ProgramsWidget(const std::vector<Program>& programs);
+    ProgramsWidget(const std::vector<Program>& programs,
+        const std::vector<Cluster>& clusters);
 
 public slots:
     void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);

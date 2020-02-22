@@ -37,10 +37,23 @@
 #include "logging.h"
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMenu>
 #include <QPushButton>
 #include <QVBoxLayout>
 
 namespace programs {
+
+ProgramButton::ProgramButton(std::string name) 
+    : QPushButton(QString::fromStdString(name))
+{
+    //QMenu* menu = new QMenu(this);
+    //menu->addAction("Act");
+    //setMenu(menu);
+}
+
+    
+//////////////////////////////////////////////////////////////////////////////////////////
+
 
 ClusterWidget::ClusterWidget(const std::string& cluster,
                              const std::vector<Program::Configuration>& configurations)
@@ -52,7 +65,7 @@ ClusterWidget::ClusterWidget(const std::string& cluster,
     layout->addWidget(name);
 
     for (const Program::Configuration& configuration : configurations) {
-        QPushButton* button = new QPushButton(QString::fromStdString(configuration.name));
+        ProgramButton* button = new ProgramButton(configuration.name);
         button->setEnabled(false);
 
         connect(
@@ -80,9 +93,7 @@ void ClusterWidget::updateStatus(const Cluster& cluster) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ProgramWidget::ProgramWidget(const Program& program)
-    : _program(program)
-{
+ProgramWidget::ProgramWidget(const Program& program) {
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 
@@ -116,7 +127,8 @@ void ProgramWidget::updateStatus(const Cluster& cluster) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ProgramsWidget::ProgramsWidget(const std::vector<Program>& programs)
+ProgramsWidget::ProgramsWidget(const std::vector<Program>& programs,
+                               const std::vector<Cluster>& clusters)
     : _programs(programs)
 {
     QBoxLayout* layout = new QVBoxLayout;
