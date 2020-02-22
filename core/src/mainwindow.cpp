@@ -80,15 +80,15 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     // Programs
     Log(fmt::format("Loading programs from directory {}", config.applicationPath));
     _programs = loadProgramsFromDirectory(config.applicationPath);
-    _programWidget = new ProgramsWidget(_programs);
+    _programWidget = new programs::ProgramsWidget(_programs);
     connect(
-        _programWidget, &ProgramsWidget::startProgram,
+        _programWidget, &programs::ProgramsWidget::startProgram,
         this, &MainWindow::startProgram
     );
     tabWidget->addTab(_programWidget, "Programs");
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
-        _programWidget, &ProgramsWidget::connectedStatusChanged
+        _programWidget, &programs::ProgramsWidget::connectedStatusChanged
     );
 
 
@@ -144,9 +144,9 @@ void MainWindow::log(std::string msg) {
     _messageBox->append(QString::fromStdString(msg));
 }
 
-void MainWindow::startProgram(const Program& program,
-                              const Program::Configuration& configuration,
-                              const std::string& clusterId)
+void MainWindow::startProgram(const std::string& clusterId, 
+                              const Program& program,
+                              const Program::Configuration& configuration)
 {
     // We don't want to make sure that the program isn't already running as it might be
     // perfectly valid to start the program multiple times
@@ -181,7 +181,7 @@ void MainWindow::startProgram(const Program& program,
         Log(fmt::format("\tExecutable: {}", command.executable));
         Log(fmt::format("\tIdentifier: {}", command.id));
         Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
-        Log(fmt::format("\tCWD: {}", command.currentWorkingDirectory));
+        Log(fmt::format("\tCWD: {}", command.workingDirectory));
 
         nlohmann::json j = command;
         _clusterConnectionHandler.sendMessage(cluster, node, j);

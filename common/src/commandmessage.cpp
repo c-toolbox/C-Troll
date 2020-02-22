@@ -43,7 +43,7 @@ namespace {
     constexpr const char* KeyForwardOutErr = "forwardOutErr";
     constexpr const char* KeyCommand = "command";
     constexpr const char* KeyExecutable = "executable";
-    constexpr const char* KeyWorkingDirectory = "currentWorkingDirectory";
+    constexpr const char* KeyWorkingDirectory = "workingDirectory";
     constexpr const char* KeyCommandlineArguments = "commandlineArguments";
 
     std::string fromCommand(common::CommandMessage::Command command) {
@@ -81,7 +81,7 @@ void to_json(nlohmann::json& j, const CommandMessage& p) {
         { KeyForwardOutErr, p.forwardStdOutStdErr },
         { KeyCommand, fromCommand(p.command) },
         { KeyExecutable, p.executable },
-        { KeyWorkingDirectory, p.currentWorkingDirectory },
+        { KeyWorkingDirectory, p.workingDirectory },
         { KeyCommandlineArguments, p.commandlineParameters }
     };
 }
@@ -96,7 +96,7 @@ void from_json(const nlohmann::json& j, CommandMessage& p) {
     p.command = toCommand(commandString);
 
     j.at(KeyExecutable).get_to(p.executable);
-    j.at(KeyWorkingDirectory).get_to(p.currentWorkingDirectory);
+    j.at(KeyWorkingDirectory).get_to(p.workingDirectory);
     j.at(KeyCommandlineArguments).get_to(p.commandlineParameters);
 
     if (p.command == CommandMessage::Command::None) {

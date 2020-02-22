@@ -1,17 +1,23 @@
 {
-    "name": "VLC",
-    "executable": "C:/Program Files (x86)/VideoLAN/VLC/vlc.exe",
-	"currentWorkingDirectory": "C:/Program Files (x86)/VideoLAN/VLC",
-    "configurations": {
-        "default": {
-            "name": "Default",
-            "clusters": {
-                "local": ""
-            }
-        }
+  "name": "VLC",
+  "executable": "C:/Program Files (x86)/VideoLAN/VLC/vlc.exe",
+  "workingDirectory": "C:/Program Files (x86)/VideoLAN/VLC",
+  "configurations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "parameters": ""
     },
-    "defaults": {
-        "configuration": "default",
-        "cluster": "local"
+    {
+      "id": "fancy",
+      "name": "Fancy",
+      "parameters": "-foo bar"
     }
+  ],
+  "clusters": [
+    "local",
+    "local-office"
+  ],
+  "default-cluster": "local",
+  "default-configuration": "default"
 }

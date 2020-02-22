@@ -43,13 +43,13 @@ common::CommandMessage startProcessCommand(const Process& process) {
     common::CommandMessage t;
     t.id = process.id;
     t.executable = process.application.executable;
-    t.currentWorkingDirectory = process.application.currentWorkingDirectory;
+    t.workingDirectory = process.application.workingDirectory;
     t.command = common::CommandMessage::Command::Start;
 
     t.commandlineParameters = process.application.commandlineParameters;
 
     t.commandlineParameters = t.commandlineParameters + ' ' +
-        process.configuration.clusterCommandlineParameters.at(process.cluster.id);
+        process.configuration.parameters;
 
     return t;
 }

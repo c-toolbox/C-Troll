@@ -42,20 +42,21 @@
 #include "program.h"
 #include <vector>
 
-class ConfigurationWidget : public QWidget {
+namespace programs {
+
+class ClusterWidget : public QWidget {
 Q_OBJECT
 public:
-    ConfigurationWidget(const Program::Configuration& configuration);
+    ClusterWidget(const std::string& cluster,
+        const std::vector<Program::Configuration>& configurations);
 
     void updateStatus(const Cluster& cluster);
 
 signals:
-    void startProgram(const std::string& clusterId);
+    void startProgram(const Program::Configuration& configuration);
 
 private:
-    const Program::Configuration& _configuration;
-
-    QPushButton* _startButton = nullptr;
+    std::map<std::string, QPushButton*> _startButtons;
 };
 
 
@@ -70,11 +71,12 @@ public:
     void updateStatus(const Cluster& cluster);
 
 signals:
-    void startProgram(const Program::Configuration& configuration, const std::string& clusterId);
+    void startProgram(const std::string& cluster,
+        const Program::Configuration& configuration);
 
 private:
     const Program& _program;
-    std::vector<ConfigurationWidget*> _widgets;
+    std::map<std::string, ClusterWidget*> _widgets;
 };
 
 
@@ -87,15 +89,17 @@ public:
     ProgramsWidget(const std::vector<Program>& programs);
 
 public slots:
-    void connectedStatusChanged(const Cluster& cluster);
+    void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);
 
 signals:
-    void startProgram(const Program& program, const Program::Configuration& configuration,
-        const std::string& clusterId);
+    void startProgram(const std::string& clusterId, const Program& program,
+        const Program::Configuration& configuration);
 
 private:
     const std::vector<Program>& _programs;
     std::vector<ProgramWidget*> _widgets;
 };
+
+} // namespace programs
 
 #endif // __CORE__PROGRAMWIDGET_H__

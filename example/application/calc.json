@@ -1,17 +1,6 @@
 {
-    "name": "Calc",
-    "executable": "calc.exe",
-    "configurations": {
-        "default": {
-            "name": "Default",
-            "clusters": {
-                "emil": "",
-                "local": ""
-            }
-        }
-    },
-    "defaults": {
-        "configuration": "default",
-        "cluster": "local"
-    }
+  "name": "Calc",
+  "executable": "calc.exe",
+  "clusters": [ "emil", "local", "local-office" ],
+  "default-cluster": "local"
 }

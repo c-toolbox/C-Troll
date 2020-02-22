@@ -60,10 +60,21 @@ signals:
 
     void receivedTrayProcess(common::ProcessStatusMessage status);
 
-private:
-    void readyRead(const Cluster& cluster, const Cluster::Node& node);
+private slots:
+    void handleSocketStateChange(const std::string& hash, QAbstractSocket::SocketState state);
+    void readyRead(const std::string& hash);
 
-    std::map<std::string, std::unique_ptr<common::JsonSocket>> _sockets;
+private:
+    struct NodeInfo {
+        std::reference_wrapper<Cluster> cluster;
+        std::reference_wrapper<Cluster::Node> node;
+    };
+
+    struct SocketData {
+        std::unique_ptr<common::JsonSocket> socket;
+        std::vector<NodeInfo> nodes;
+    };
+    std::map<std::string, SocketData> _nodes;
 };
 
 #endif // __CORE__CLUSTERCONNECTIONHANDLER_H__

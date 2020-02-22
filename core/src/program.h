@@ -41,10 +41,14 @@
 
 struct Program {
     struct Configuration {
+        /// Unique identifier of the configuration
         std::string id;
+
+        /// User-facing name of the configuration
         std::string name;
-        // First argument:  Cluster Id   Second argument:  Commandline parameter
-        std::map<std::string, std::string> clusterCommandlineParameters;
+
+        /// Commandline parameters that are associated with the configuration
+        std::string parameters;
     };
 
     /// A unique identifier
@@ -53,16 +57,16 @@ struct Program {
     std::string name;
     /// The full path to the executable
     std::string executable;
-    /// The base directory of the application
-    std::string baseDirectory;
     /// A fixed set of commandline parameters
     std::string commandlineParameters;
     /// The current working directory from which the Program is started
-    std::string currentWorkingDirectory;
+    std::string workingDirectory;
     /// A list of tags that are associated with this Program
     std::vector<std::string> tags;
-    // List of all configurations
+    /// List of all configurations
     std::vector<Configuration> configurations;
+    /// List of all clusters
+    std::vector<std::string> clusters;
     // Default configuration id
     std::string defaultConfiguration;
     // Default cluster id
@@ -71,7 +75,6 @@ struct Program {
 
 std::vector<Program> loadProgramsFromDirectory(const std::string& directory);
 
-void to_json(nlohmann::json& j, const Program& p);
 void from_json(const nlohmann::json& j, Program& p);
 
 #endif // __CORE__PROGRAM_H__

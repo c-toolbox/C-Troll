@@ -57,7 +57,7 @@ struct CommandMessage : public Message {
     /// The name of the executable
     std::string executable;
     /// The location that should be set as the working directory prior to execution
-    std::string currentWorkingDirectory;
+    std::string workingDirectory;
     /// The list of commandline parameters to be passed to executable
     std::string commandlineParameters;
 };

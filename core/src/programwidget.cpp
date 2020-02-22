@@ -40,45 +40,42 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-ConfigurationWidget::ConfigurationWidget(const Program::Configuration& configuration)
-    : _configuration(configuration)
+namespace programs {
+
+ClusterWidget::ClusterWidget(const std::string& cluster,
+                             const std::vector<Program::Configuration>& configurations)
 {
-    QBoxLayout* layout = new QHBoxLayout;
+    QBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
 
-    QLabel* label = new QLabel(QString::fromStdString(configuration.name));
-    layout->addWidget(label);
+    QLabel* name = new QLabel(QString::fromStdString(cluster));
+    layout->addWidget(name);
 
-    for (const std::pair<const std::string, std::string>& p :
-         configuration.clusterCommandlineParameters)
-    {
-        _startButton = new QPushButton(
-            QString::fromStdString(p.first + '/' + configuration.name)
-        );
-        _startButton->setEnabled(false);
+    for (const Program::Configuration& configuration : configurations) {
+        QPushButton* button = new QPushButton(QString::fromStdString(configuration.name));
+        button->setEnabled(false);
+
         connect(
-            _startButton, &QPushButton::clicked,
-            [this, configuration, p]() { emit startProgram(p.first); }
+            button, &QPushButton::clicked,
+            [this, configuration]() { emit startProgram(configuration); }
         );
-        layout->addWidget(_startButton);
+
+        _startButtons[configuration.name] = button;
+        layout->addWidget(button);
     }
 }
 
-void ConfigurationWidget::updateStatus(const Cluster& cluster) {
-    for (const std::pair<const std::string, std::string>& p : 
-         _configuration.clusterCommandlineParameters)
-    {
-        if (p.first == cluster.id) {
-            bool allConnected = std::all_of(
-                cluster.nodes.begin(),
-                cluster.nodes.end(),
-                std::mem_fn(&Cluster::Node::isConnected)
-            );
-            _startButton->setEnabled(allConnected);
-        }
+void ClusterWidget::updateStatus(const Cluster& cluster) {
+    const bool allConnected = std::all_of(
+        cluster.nodes.begin(),
+        cluster.nodes.end(),
+        std::mem_fn(&Cluster::Node::isConnected)
+    );
+
+    for (auto& [key, value] : _startButtons) {
+        value->setEnabled(allConnected);
     }
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -92,21 +89,26 @@ ProgramWidget::ProgramWidget(const Program& program)
     QLabel* name = new QLabel(QString::fromStdString(program.name));
     layout->addWidget(name);
 
-    for (const Program::Configuration& c : program.configurations) {
-        ConfigurationWidget* w = new ConfigurationWidget(c);
-        _widgets.push_back(w);
+    for (const std::string& cluster : program.clusters) {
+        ClusterWidget* w = new ClusterWidget(cluster, program.configurations);
+
         connect(
-            w, &ConfigurationWidget::startProgram,
-            [this, c](const std::string& clusterId) { emit startProgram(c, clusterId); }
+            w, &ClusterWidget::startProgram,
+            [this, cluster](const Program::Configuration conf) {
+                emit startProgram(cluster, conf);
+            }
         );
+
+        _widgets[cluster] = w;
         layout->addWidget(w);
     }
 }
 
 void ProgramWidget::updateStatus(const Cluster& cluster) {
-    for (ConfigurationWidget* w : _widgets) {
-        w->updateStatus(cluster);
-    }
+    const auto it = _widgets.find(cluster.id);
+    assert(it != _widgets.end());
+
+    it->second->updateStatus(cluster);
 }
 
 
@@ -121,21 +123,24 @@ ProgramsWidget::ProgramsWidget(const std::vector<Program>& programs)
 
     for (const Program& p : programs) {
         ProgramWidget* w = new ProgramWidget(p);
-        _widgets.push_back(w);
 
         connect(
             w, &ProgramWidget::startProgram,
-            [this, p](const Program::Configuration& conf, const std::string& clusterId) {
-                emit startProgram(p, conf, clusterId);
+            [this, p](const std::string& cluster, const Program::Configuration& conf) {
+                emit startProgram(cluster, p, conf);
             }
         );
 
+        _widgets.push_back(w);
         layout->addWidget(w);
     }
 }
 
-void ProgramsWidget::connectedStatusChanged(const Cluster& cluster) {
+void ProgramsWidget::connectedStatusChanged(const Cluster& cluster, const Cluster::Node&)
+{
     for (ProgramWidget* w : _widgets) {
         w->updateStatus(cluster);
     }
 }
+
+} // namespace programs

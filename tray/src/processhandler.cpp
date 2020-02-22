@@ -99,7 +99,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
     Log(fmt::format("\tId: {}", command.id));
     Log(fmt::format("\tExecutable: {}", command.executable));
     Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
-    Log(fmt::format("\tCurrent Working Directory: {}", command.currentWorkingDirectory));
+    Log(fmt::format("\tCurrent Working Directory: {}", command.workingDirectory));
 
     // Check if the identifier of traycommand already is tied to a process
     // We don't allow the same id for multiple processes
@@ -231,9 +231,9 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
                                                     const common::CommandMessage& command)
 {
     if (command.command == common::CommandMessage::Command::Start) {
-        if (!command.currentWorkingDirectory.empty()) {
+        if (!command.workingDirectory.empty()) {
             process->setWorkingDirectory(
-                QString::fromStdString(command.currentWorkingDirectory)
+                QString::fromStdString(command.workingDirectory)
             );
         }
         

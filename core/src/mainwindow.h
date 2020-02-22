@@ -46,7 +46,7 @@
 
 class ClustersWidget;
 class ProcessesWidget;
-class ProgramsWidget;
+namespace programs { class ProgramsWidget; }
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
@@ -54,12 +54,12 @@ public:
     explicit MainWindow(QString title, const std::string& configurationFile);
 
 private:
-    void startProgram(const Program& program,
-        const Program::Configuration& configurationId, const std::string& clusterId);
+    void startProgram(const std::string& clusterId, const Program& program,
+        const Program::Configuration& configurationId);
 
     void log(std::string msg);
 
-    ProgramsWidget* _programWidget;
+    programs::ProgramsWidget* _programWidget;
     ClustersWidget* _clustersWidget;
     ProcessesWidget* _processesWidget;
 
