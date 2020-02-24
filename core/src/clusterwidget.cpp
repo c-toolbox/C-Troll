@@ -102,15 +102,13 @@ ClustersWidget::ClustersWidget(std::vector<Cluster*> clusters)
     }
 }
 
-void ClustersWidget::connectedStatusChanged(const Cluster& cluster,
-                                            const Cluster::Node& node)
-{
+void ClustersWidget::connectedStatusChanged(Cluster* cluster, Cluster::Node* node) {
     assert(_clusters.size() == _clusterWidgets.size());
 
     for (size_t i = 0; i < _clusters.size(); ++i) {
         Cluster* it = _clusters[i];
-        if (it->id == cluster.id) {
-            _clusterWidgets[i]->updateConnectionStatus(node);
+        if (it->id == cluster->id) {
+            _clusterWidgets[i]->updateConnectionStatus(*node);
             return;
         }
     }

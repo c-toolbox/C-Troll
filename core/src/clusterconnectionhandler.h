@@ -49,14 +49,14 @@ Q_OBJECT
 public:
     void initialize(const std::vector<Cluster*>& clusters);
 
-    void sendMessage(const Cluster& cluster, const Cluster::Node& ,
+    void sendMessage(const Cluster& cluster, const Cluster::Node& node,
         nlohmann::json message) const;
 
 signals:
-    void messageReceived(const Cluster& cluster, const Cluster::Node& node,
+    void messageReceived(Cluster* cluster, Cluster::Node* node,
         nlohmann::json message);
 
-    void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);
+    void connectedStatusChanged(Cluster* cluster, Cluster::Node* node);
 
     void receivedTrayProcess(common::ProcessStatusMessage status);
 

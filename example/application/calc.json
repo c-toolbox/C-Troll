@@ -1,6 +1,6 @@
 {
   "name": "Calc",
   "executable": "calc.exe",
-  "clusters": [ "emil", "local", "local-office" ],
+  "clusters": [ "local", "local-office" ],
   "default-cluster": "local"
 }

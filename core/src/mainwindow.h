@@ -54,8 +54,8 @@ public:
     explicit MainWindow(QString title, const std::string& configurationFile);
 
 private:
-    void startProgram(const std::string& clusterId, const Program& program,
-        const Program::Configuration& configurationId);
+    void startProgram(Cluster* cluster, const Program& program,
+        const Program::Configuration& configuration);
 
     void log(std::string msg);
 

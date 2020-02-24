@@ -51,17 +51,31 @@ ProgramButton::ProgramButton(std::string name)
     //setMenu(menu);
 }
 
+void ProgramButton::updateStatus() {
+
+}
+
+void ProgramButton::addMenu() {
+
+}
+
+void ProgramButton::removeMenu() {
+
+}
+
     
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ClusterWidget::ClusterWidget(const std::string& cluster,
+ClusterWidget::ClusterWidget(Cluster* cluster,
                              const std::vector<Program::Configuration>& configurations)
 {
+    assert(cluster);
+
     QBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
 
-    QLabel* name = new QLabel(QString::fromStdString(cluster));
+    QLabel* name = new QLabel(QString::fromStdString(cluster->name));
     layout->addWidget(name);
 
     for (const Program::Configuration& configuration : configurations) {
@@ -93,14 +107,17 @@ void ClusterWidget::updateStatus(const Cluster& cluster) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ProgramWidget::ProgramWidget(Program* program) {
+ProgramWidget::ProgramWidget(Program* program, std::vector<Cluster*> clusters) {
+    assert(program);
+    assert(std::all_of(clusters.begin(), clusters.end(), [](Cluster* c) { return c; }));
+
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 
     QLabel* name = new QLabel(QString::fromStdString(program->name));
     layout->addWidget(name);
 
-    for (const std::string& cluster : program->clusters) {
+    for (Cluster* cluster : clusters) {
         ClusterWidget* w = new ClusterWidget(cluster, program->configurations);
 
         connect(
@@ -115,11 +132,13 @@ ProgramWidget::ProgramWidget(Program* program) {
     }
 }
 
-void ProgramWidget::updateStatus(const Cluster& cluster) {
-    const auto it = _widgets.find(cluster.id);
+void ProgramWidget::updateStatus(Cluster* cluster) {
+    assert(cluster);
+
+    const auto it = _widgets.find(cluster);
     // We have to check as a cluster that is active might not have any associated programs
     if (it != _widgets.end()) {
-        it->second->updateStatus(cluster);
+        it->second->updateStatus(*cluster);
     }
 }
 
@@ -130,15 +149,32 @@ void ProgramWidget::updateStatus(const Cluster& cluster) {
 ProgramsWidget::ProgramsWidget(const std::vector<Program*>& programs,
                                const std::vector<Cluster*>& clusters)
 {
+    assert(std::all_of(programs.begin(), programs.end(), [](Program* p) { return p; }));
+    assert(std::all_of(clusters.begin(), clusters.end(), [](Cluster* c) { return c; }));
+
+
     QBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
 
     for (Program* p : programs) {
-        ProgramWidget* w = new ProgramWidget(p);
+        // Filter the full cluster list to only contain clusters that the program is
+        // interested in
+
+        std::vector<Cluster*> cs;
+        for (const std::string& cluster : p->clusters) {
+            const auto it = std::find_if(
+                clusters.begin(), clusters.end(),
+                [cluster](Cluster* c) { return c->id == cluster; }
+            );
+            assert(it != clusters.end());
+            cs.push_back(*it);
+        }
+
+        ProgramWidget* w = new ProgramWidget(p, cs);
 
         connect(
             w, &ProgramWidget::startProgram,
-            [this, p](const std::string& cluster, const Program::Configuration& conf) {
+            [this, p](Cluster* cluster, const Program::Configuration& conf) {
                 emit startProgram(cluster, *p, conf);
             }
         );
@@ -148,8 +184,8 @@ ProgramsWidget::ProgramsWidget(const std::vector<Program*>& programs,
     }
 }
 
-void ProgramsWidget::connectedStatusChanged(const Cluster& cluster, const Cluster::Node&)
-{
+void ProgramsWidget::connectedStatusChanged(Cluster* cluster, Cluster::Node*) {
+    assert(cluster);
     for (ProgramWidget* w : _widgets) {
         w->updateStatus(cluster);
     }

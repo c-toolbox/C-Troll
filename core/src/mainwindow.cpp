@@ -135,8 +135,8 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::messageReceived,
-        [](const Cluster& cluster, const Cluster::Node& node, nlohmann::json message) {
-            Log(fmt::format("{} {} {}", cluster.name, node.name, std::string(message)));
+        [](Cluster* cluster, Cluster::Node* node, nlohmann::json message) {
+            Log(fmt::format("{} {} {}", cluster->name, node->name, std::string(message)));
         }
     );
 
@@ -155,8 +155,7 @@ void MainWindow::log(std::string msg) {
     _messageBox->append(QString::fromStdString(msg));
 }
 
-void MainWindow::startProgram(const std::string& clusterId, 
-                              const Program& program,
+void MainWindow::startProgram(Cluster* cluster, const Program& program,
                               const Program::Configuration& configuration)
 {
     // We don't want to make sure that the program isn't already running as it might be
@@ -164,17 +163,7 @@ void MainWindow::startProgram(const std::string& clusterId,
 
     Log("Application: " + program.name);
     Log("Configuration: " + configuration.name);
-    Log("Cluster: " + clusterId);
-
-    // @TODO (abock, 2020-01-12) Replace the clusterId with a reference to the actual
-    // cluster so that we don't need to look up the cluster itself
-    const auto iCluster = std::find_if(
-        _clusters.cbegin(),
-        _clusters.cend(),
-        [clusterId](const std::unique_ptr<Cluster>& c) { return c->id == clusterId; }
-    );
-    assert(iCluster != _clusters.end());
-    const Cluster* cluster = iCluster->get();
+    Log("Cluster: " + cluster->name);
 
     for (const std::unique_ptr<Cluster::Node>& node : cluster->nodes) {
         std::unique_ptr<Process> process = std::make_unique<Process>(

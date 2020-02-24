@@ -49,9 +49,15 @@ Q_OBJECT
 public:
     ProgramButton(std::string name);
 
+    void updateStatus();
+
 signals:
     void startProgram(const Program::Configuration& configuration);
     void stopProgram(const Program::Configuration& configuration);
+
+private:
+    void addMenu();
+    void removeMenu();
 };
 
 
@@ -61,7 +67,7 @@ signals:
 class ClusterWidget : public QWidget {
 Q_OBJECT
 public:
-    ClusterWidget(const std::string& cluster,
+    ClusterWidget(Cluster* cluster,
         const std::vector<Program::Configuration>& configurations);
 
     void updateStatus(const Cluster& cluster);
@@ -80,16 +86,16 @@ private:
 class ProgramWidget : public QWidget {
 Q_OBJECT
 public:
-    ProgramWidget(Program* program);
+    ProgramWidget(Program* program, std::vector<Cluster*> clusters);
 
-    void updateStatus(const Cluster& cluster);
+    void updateStatus(Cluster* cluster);
 
 signals:
-    void startProgram(const std::string& cluster,
+    void startProgram(Cluster* cluster,
         const Program::Configuration& configuration);
 
 private:
-    std::map<std::string, ClusterWidget*> _widgets;
+    std::map<Cluster*, ClusterWidget*> _widgets;
 };
 
 
@@ -103,10 +109,10 @@ public:
         const std::vector<Cluster*>& clusters);
 
 public slots:
-    void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);
+    void connectedStatusChanged(Cluster* cluster, Cluster::Node* node);
 
 signals:
-    void startProgram(const std::string& clusterId, const Program& program,
+    void startProgram(Cluster* cluster, const Program& program,
         const Program::Configuration& configuration);
 
 private:

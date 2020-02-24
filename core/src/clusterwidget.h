@@ -64,7 +64,7 @@ public:
     ClustersWidget(std::vector<Cluster*> clusters);
 
 public slots:
-    void connectedStatusChanged(const Cluster& cluster, const Cluster::Node& node);
+    void connectedStatusChanged(Cluster* cluster, Cluster::Node* node);
 
 private:
     std::vector<Cluster*> _clusters;
