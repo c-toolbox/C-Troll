@@ -119,19 +119,20 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
         [this](common::ProcessStatusMessage status) {
-        const auto it = std::find_if(
-            _processes.begin(), _processes.end(),
-            [status](const std::unique_ptr<Process>& p) {
-                return p->id == status.processId;
-            }
-        );
-        if (it != _processes.end()) {
-            (*it)->status = status.status;
+            const auto it = std::find_if(
+                _processes.begin(), _processes.end(),
+                [status](const std::unique_ptr<Process>& p) {
+                    return p->id == status.processId;
+                }
+            );
+            if (it != _processes.end()) {
+                (*it)->status = status.status;
 
-            // The process was already known to us, which should always be the case
-            _processesWidget->processUpdated((*it)->id);
+                // The process was already known to us, which should always be the case
+                _processesWidget->processUpdated((*it)->id);
+                _programWidget->processUpdated(it->get());
+            }
         }
-    }
     );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::messageReceived,
@@ -155,22 +156,22 @@ void MainWindow::log(std::string msg) {
     _messageBox->append(QString::fromStdString(msg));
 }
 
-void MainWindow::startProgram(Cluster* cluster, const Program& program,
-                              const Program::Configuration& configuration)
+void MainWindow::startProgram(Cluster* cluster, const Program* program,
+                              const Program::Configuration* configuration)
 {
     // We don't want to make sure that the program isn't already running as it might be
     // perfectly valid to start the program multiple times
 
-    Log("Application: " + program.name);
-    Log("Configuration: " + configuration.name);
+    Log("Application: " + program->name);
+    Log("Configuration: " + configuration->name);
     Log("Cluster: " + cluster->name);
 
     for (const std::unique_ptr<Cluster::Node>& node : cluster->nodes) {
         std::unique_ptr<Process> process = std::make_unique<Process>(
             program,
             configuration,
-            *cluster,
-            *node
+            cluster,
+            node.get()
         );
         common::CommandMessage command = startProcessCommand(*process);
 

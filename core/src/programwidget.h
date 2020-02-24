@@ -39,6 +39,7 @@
 
 #include <QPushButton>
 #include "cluster.h"
+#include "process.h"
 #include "program.h"
 #include <vector>
 
@@ -47,7 +48,7 @@ namespace programs {
 class ProgramButton : public QPushButton {
 Q_OBJECT
 public:
-    ProgramButton(std::string name);
+    ProgramButton(Cluster* cluster, const Program::Configuration* configuration);
 
     void updateStatus();
 
@@ -58,6 +59,9 @@ signals:
 private:
     void addMenu();
     void removeMenu();
+
+    Cluster* _cluster;
+    const Program::Configuration* _configuration;
 };
 
 
@@ -70,13 +74,13 @@ public:
     ClusterWidget(Cluster* cluster,
         const std::vector<Program::Configuration>& configurations);
 
-    void updateStatus(const Cluster& cluster);
+    void updateStatus();
 
 signals:
-    void startProgram(const Program::Configuration& configuration);
+    void startProgram(const Program::Configuration* configuration);
 
 private:
-    std::map<std::string, ProgramButton*> _startButtons;
+    std::vector<ProgramButton*> _startButtons;
 };
 
 
@@ -89,10 +93,10 @@ public:
     ProgramWidget(Program* program, std::vector<Cluster*> clusters);
 
     void updateStatus(Cluster* cluster);
+    void processUpdated(Process* process);
 
 signals:
-    void startProgram(Cluster* cluster,
-        const Program::Configuration& configuration);
+    void startProgram(Cluster* cluster, const Program::Configuration* configuration);
 
 private:
     std::map<Cluster*, ClusterWidget*> _widgets;
@@ -108,12 +112,14 @@ public:
     ProgramsWidget(const std::vector<Program*>& programs,
         const std::vector<Cluster*>& clusters);
 
+    void processUpdated(Process* process);
+
 public slots:
     void connectedStatusChanged(Cluster* cluster, Cluster::Node* node);
 
 signals:
-    void startProgram(Cluster* cluster, const Program& program,
-        const Program::Configuration& configuration);
+    void startProgram(Cluster* cluster, const Program* program,
+        const Program::Configuration* configuration);
 
 private:
     std::vector<ProgramWidget*> _widgets;

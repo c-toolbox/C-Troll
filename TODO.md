@@ -3,3 +3,4 @@ CORE
  - Need to update process status in CoreProcess based on feedback from tray
  - Need to check at startup of all clusters for all applications exist.  Problem if an application references a cluster that does not exist
  - Change the ClusterConnectionHandler to only create a single connection per node and group nodes together into clusters
+ - Need to check at startup for uniqueness of names or the clusterconnectionhandler hash function is no longer unique

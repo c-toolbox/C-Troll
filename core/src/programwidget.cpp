@@ -43,16 +43,26 @@
 
 namespace programs {
 
-ProgramButton::ProgramButton(std::string name) 
-    : QPushButton(QString::fromStdString(name))
+ProgramButton::ProgramButton(Cluster* cluster,
+                             const Program::Configuration* configuration)
+    : QPushButton(QString::fromStdString(cluster->name))
+    , _cluster(cluster)
+    , _configuration(configuration)
 {
     //QMenu* menu = new QMenu(this);
     //menu->addAction("Act");
     //setMenu(menu);
+
+    setEnabled(false);
 }
 
 void ProgramButton::updateStatus() {
-
+    const bool allConnected = std::all_of(
+        _cluster->nodes.begin(),
+        _cluster->nodes.end(),
+        std::mem_fn(&Cluster::Node::isConnected)
+    );
+    setEnabled(allConnected);
 }
 
 void ProgramButton::addMenu() {
@@ -79,29 +89,23 @@ ClusterWidget::ClusterWidget(Cluster* cluster,
     layout->addWidget(name);
 
     for (const Program::Configuration& configuration : configurations) {
-        ProgramButton* button = new ProgramButton(configuration.name);
-        button->setEnabled(false);
+        ProgramButton* button = new ProgramButton(cluster, &configuration);
 
         connect(
             button, &QPushButton::clicked,
-            [this, configuration]() { emit startProgram(configuration); }
+            [this, configuration]() { emit startProgram(&configuration); }
         );
 
-        _startButtons[configuration.name] = button;
+        _startButtons.push_back(button);
         layout->addWidget(button);
     }
 }
 
-void ClusterWidget::updateStatus(const Cluster& cluster) {
-    const bool allConnected = std::all_of(
-        cluster.nodes.begin(),
-        cluster.nodes.end(),
-        std::mem_fn(&Cluster::Node::isConnected)
+void ClusterWidget::updateStatus() {
+    std::for_each(
+        _startButtons.begin(), _startButtons.end(),
+        std::mem_fn(&ProgramButton::updateStatus)
     );
-
-    for (auto& [key, value] : _startButtons) {
-        value->setEnabled(allConnected);
-    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -122,7 +126,7 @@ ProgramWidget::ProgramWidget(Program* program, std::vector<Cluster*> clusters) {
 
         connect(
             w, &ClusterWidget::startProgram,
-            [this, cluster](const Program::Configuration conf) {
+            [this, cluster](const Program::Configuration* conf) {
                 emit startProgram(cluster, conf);
             }
         );
@@ -138,8 +142,14 @@ void ProgramWidget::updateStatus(Cluster* cluster) {
     const auto it = _widgets.find(cluster);
     // We have to check as a cluster that is active might not have any associated programs
     if (it != _widgets.end()) {
-        it->second->updateStatus(*cluster);
+        it->second->updateStatus();
     }
+}
+
+void ProgramWidget::processUpdated(Process* process) {
+    assert(process);
+
+    //const auto it = _widgets.find(process.cluster);
 }
 
 
@@ -174,8 +184,8 @@ ProgramsWidget::ProgramsWidget(const std::vector<Program*>& programs,
 
         connect(
             w, &ProgramWidget::startProgram,
-            [this, p](Cluster* cluster, const Program::Configuration& conf) {
-                emit startProgram(cluster, *p, conf);
+            [this, p](Cluster* cluster, const Program::Configuration* conf) {
+                emit startProgram(cluster, p, conf);
             }
         );
 
@@ -183,6 +193,15 @@ ProgramsWidget::ProgramsWidget(const std::vector<Program*>& programs,
         layout->addWidget(w);
     }
 }
+
+void ProgramsWidget::processUpdated(Process* process) {
+    assert(process);
+
+    for (ProgramWidget* w : _widgets) {
+        w->processUpdated(process);
+    }
+}
+
 
 void ProgramsWidget::connectedStatusChanged(Cluster* cluster, Cluster::Node*) {
     assert(cluster);

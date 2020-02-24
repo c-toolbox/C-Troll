@@ -47,6 +47,8 @@
 class ClusterConnectionHandler : public QObject {
 Q_OBJECT
 public:
+    ~ClusterConnectionHandler();
+
     void initialize(const std::vector<Cluster*>& clusters);
 
     void sendMessage(const Cluster& cluster, const Cluster::Node& node,
@@ -61,7 +63,8 @@ signals:
     void receivedTrayProcess(common::ProcessStatusMessage status);
 
 private slots:
-    void handleSocketStateChange(const std::string& hash, QAbstractSocket::SocketState state);
+    void handleSocketStateChange(const std::string& h,
+        QAbstractSocket::SocketState state);
     void readyRead(const std::string& hash);
 
 private:

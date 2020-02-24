@@ -42,9 +42,23 @@
 
 namespace {
     std::string hash(const Cluster::Node& node) {
-        return node.name + ':' + std::to_string(node.port);
+        // @TODO (abock, 2020-02-24) Remove the IP address from this part once the
+        // uniqueness of cluster names is enforced
+        return node.name + ':' + std::to_string(node.port) + ';' + node.ipAddress;
     }
 } // namespace
+
+ClusterConnectionHandler::~ClusterConnectionHandler() {
+    // We need to do the deletion this way since there will be messages pending for the
+    // JsonSocket on the event queue (particuarly the signalling that the connection is
+    // closed.  So we keep the actual values around while the destructor is running and
+    // only delete the sockets in the next tick (see `deleteLater`)
+    for (auto& [key, value] : _nodes) {
+        QObject::disconnect(value.socket.get());
+        value.socket.release()->deleteLater();
+    }
+    _nodes.clear();
+}
 
 void ClusterConnectionHandler::initialize(const std::vector<Cluster*>& clusters) {
     for (Cluster* c : clusters) {
@@ -111,15 +125,22 @@ void ClusterConnectionHandler::initialize(const std::vector<Cluster*>& clusters)
     timer->start(2500);
 }
 
-void ClusterConnectionHandler::handleSocketStateChange(const std::string& hash,
+void ClusterConnectionHandler::handleSocketStateChange(const std::string& h,
                                                        QAbstractSocket::SocketState state)
 {
-    const auto it = _nodes.find(hash);
+    const auto it = _nodes.find(h);
     assert(it != _nodes.end());
 
     const bool isConnected = state == QAbstractSocket::SocketState::ConnectedState;
 
     for (NodeInfo& ni : it->second.nodes) {
+        const std::string thisHash = hash(*ni.node);
+        if (thisHash != h) {
+            // We are only interested in modifying the node info structs that correspond
+            // to the node that has just changed the stocket state
+            continue;
+        }
+
         Log(fmt::format("Socket state change: {}:{}  {}",
             ni.node->ipAddress, ni.node->port, state
         ));

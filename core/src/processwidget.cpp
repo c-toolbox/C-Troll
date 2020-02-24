@@ -73,17 +73,17 @@ ProcessWidget::ProcessWidget(const Process& process)
     setLayout(layout);
 
     QLabel* program = new QLabel(
-        QString::fromStdString("Program: " + _process.application.name)
+        QString::fromStdString("Program: " + _process.application->name)
     );
     layout->addWidget(program);
 
     QLabel* configuration = new QLabel(
-        QString::fromStdString("Configuration: " + _process.configuration.name)
+        QString::fromStdString("Configuration: " + _process.configuration->name)
     );
     layout->addWidget(configuration);
 
     QLabel* cluster = new QLabel(
-        QString::fromStdString("Cluster: " + _process.cluster.name)
+        QString::fromStdString("Cluster: " + _process.cluster->name)
     );
     layout->addWidget(cluster);
 

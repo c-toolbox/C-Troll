@@ -43,14 +43,14 @@
 struct Process {
     Process() = delete;
 
-    Process(const Program& program, const Program::Configuration& configuration,
-        const Cluster& cluster, const Cluster::Node& node);
+    Process(const Program* program, const Program::Configuration* configuration,
+        const Cluster* cluster, const Cluster::Node* node);
 
     const int id = -1;
-    const Program& application;
-    const Program::Configuration& configuration;
-    const Cluster& cluster;
-    const Cluster::Node& node;
+    const Program* application;
+    const Program::Configuration* configuration;
+    const Cluster* cluster;
+    const Cluster::Node* node;
     common::ProcessStatusMessage::Status status;
 
     static int nextId;

@@ -42,14 +42,14 @@
 common::CommandMessage startProcessCommand(const Process& process) {
     common::CommandMessage t;
     t.id = process.id;
-    t.executable = process.application.executable;
-    t.workingDirectory = process.application.workingDirectory;
+    t.executable = process.application->executable;
+    t.workingDirectory = process.application->workingDirectory;
     t.command = common::CommandMessage::Command::Start;
 
-    t.commandlineParameters = process.application.commandlineParameters;
+    t.commandlineParameters = process.application->commandlineParameters;
 
     t.commandlineParameters = t.commandlineParameters + ' ' +
-        process.configuration.parameters;
+        process.configuration->parameters;
 
     return t;
 }
@@ -63,8 +63,8 @@ common::CommandMessage exitProcessCommand(const Process& process) {
 
 int Process::nextId = 0;
 
-Process::Process(const Program& program, const Program::Configuration& configuration,
-                 const Cluster& cluster, const Cluster::Node& node)
+Process::Process(const Program* program, const Program::Configuration* configuration,
+                 const Cluster* cluster, const Cluster::Node* node)
     : id(nextId++)
     , application(program)
     , configuration(configuration)
