@@ -43,17 +43,17 @@
 
 namespace programs {
 
-ProgramButton::ProgramButton(Cluster* cluster,
+ProgramButton::ProgramButton(const Cluster* cluster,
                              const Program::Configuration* configuration)
     : QPushButton(QString::fromStdString(cluster->name))
     , _cluster(cluster)
     , _configuration(configuration)
 {
-    //QMenu* menu = new QMenu(this);
-    //menu->addAction("Act");
-    //setMenu(menu);
+    _actionMenu = new QMenu(this);
 
     setEnabled(false);
+
+    connect(this, &QPushButton::clicked, this, &ProgramButton::handlePress);
 }
 
 void ProgramButton::updateStatus() {
@@ -65,12 +65,72 @@ void ProgramButton::updateStatus() {
     setEnabled(allConnected);
 }
 
-void ProgramButton::addMenu() {
+void ProgramButton::processUpdated(Process* process) {
+    auto it = std::find_if(
+        _processes.begin(), _processes.end(),
+        [id = process->id](const std::pair<const Cluster::Node*, ProcessInfo>& p) {
+            return p.second.process->id == id;
+        }
+    );
+    if (it != _processes.end()) {
+        // This is a process that already exists and we should update it depending on the
+        // status of the incoming process
+        assert(it->second.process == process);
+    }
+    else {
+        // This is a brand new process, so it better be in a Starting status
+        assert(process->status == common::ProcessStatusMessage::Status::Starting);
 
+        ProcessInfo info;
+        info.process = process;
+        info.menuAction = new QAction(QString::fromStdString(process->node->name));
+        _processes[process->node] = info;
+    }
+
+    // If all processes don't exist or are in NormalExit/CrashExit/FailedToStart, we show
+    // the regular start button without any menus attached
+    if (hasNoProcessRunning()) {
+        setMenu(nullptr);
+        setObjectName("start"); // used in the QSS sheet to style this button
+        // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
+        setText(QString::fromStdString(_cluster->name));
+    }
+    else if (hasAllProcessesRunning()) {
+        setMenu(nullptr);
+        setObjectName("stop"); // used in the QSS sheet to style this button
+        // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
+        setText("Stop:" + QString::fromStdString(_cluster->name));
+    }
+    else {
+        setMenu(_actionMenu);
+        setObjectName("mixed"); // used in the QSS sheet to style this button
+        // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
+        setText("Mixed:" + QString::fromStdString(_cluster->name));
+    }
 }
 
-void ProgramButton::removeMenu() {
+void ProgramButton::handlePress() {
+    emit startProgram(_configuration);
+}
 
+bool ProgramButton::hasNoProcessRunning() const {
+    auto processRunning = [this](const std::unique_ptr<Cluster::Node>& n) {
+        using Status = common::ProcessStatusMessage::Status;
+        const auto it = _processes.find(n.get());
+        return (it != _processes.end()) && it->second.process->status == Status::Running;
+    };
+
+    return std::none_of(_cluster->nodes.begin(), _cluster->nodes.end(), processRunning);
+}
+
+bool ProgramButton::hasAllProcessesRunning() const {
+    auto processRunning = [this](const std::unique_ptr<Cluster::Node>& n) {
+        using Status = common::ProcessStatusMessage::Status;
+        const auto it = _processes.find(n.get());
+        return (it != _processes.end()) && it->second.process->status == Status::Running;
+    };
+
+    return std::all_of(_cluster->nodes.begin(), _cluster->nodes.end(), processRunning);
 }
 
     
@@ -92,11 +152,15 @@ ClusterWidget::ClusterWidget(Cluster* cluster,
         ProgramButton* button = new ProgramButton(cluster, &configuration);
 
         connect(
-            button, &QPushButton::clicked,
-            [this, configuration]() { emit startProgram(&configuration); }
+            button, &ProgramButton::startProgram,
+            [this](const Program::Configuration* conf) { emit startProgram(conf); }
+        );
+        connect(
+            button, &ProgramButton::stopProgram,
+            [this](const Program::Configuration* conf) { emit stopProgram(conf); }
         );
 
-        _startButtons.push_back(button);
+        _startButtons[configuration.id] = button;
         layout->addWidget(button);
     }
 }
@@ -104,9 +168,19 @@ ClusterWidget::ClusterWidget(Cluster* cluster,
 void ClusterWidget::updateStatus() {
     std::for_each(
         _startButtons.begin(), _startButtons.end(),
-        std::mem_fn(&ProgramButton::updateStatus)
+        [](const std::pair<const std::string, ProgramButton*>& p) {
+            p.second->updateStatus();
+        }
     );
 }
+
+void ClusterWidget::processUpdated(Process* process) {
+    const auto it = _startButtons.find(process->configuration->id);
+    if (it != _startButtons.end()) {
+        it->second->processUpdated(process);
+    }
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -131,6 +205,13 @@ ProgramWidget::ProgramWidget(Program* program, std::vector<Cluster*> clusters) {
             }
         );
 
+        connect(
+            w, &ClusterWidget::stopProgram,
+            [this, cluster](const Program::Configuration* conf) {
+                emit stopProgram(cluster, conf);
+            }
+        );
+
         _widgets[cluster] = w;
         layout->addWidget(w);
     }
@@ -149,7 +230,10 @@ void ProgramWidget::updateStatus(Cluster* cluster) {
 void ProgramWidget::processUpdated(Process* process) {
     assert(process);
 
-    //const auto it = _widgets.find(process.cluster);
+    const auto it = _widgets.find(process->cluster);
+    assert(it != _widgets.end());
+    it->second->processUpdated(process);
+
 }
 
 
@@ -189,7 +273,14 @@ ProgramsWidget::ProgramsWidget(const std::vector<Program*>& programs,
             }
         );
 
-        _widgets.push_back(w);
+        connect(
+            w, &ProgramWidget::stopProgram,
+            [this, p](Cluster* cluster, const Program::Configuration* conf) {
+                emit stopProgram(cluster, p, conf);
+            }
+        );
+
+        _widgets[p] = w;
         layout->addWidget(w);
     }
 }
@@ -197,16 +288,16 @@ ProgramsWidget::ProgramsWidget(const std::vector<Program*>& programs,
 void ProgramsWidget::processUpdated(Process* process) {
     assert(process);
 
-    for (ProgramWidget* w : _widgets) {
-        w->processUpdated(process);
+    const auto it = _widgets.find(process->application);
+    if (it != _widgets.end()) {
+        it->second->processUpdated(process);
     }
 }
 
-
 void ProgramsWidget::connectedStatusChanged(Cluster* cluster, Cluster::Node*) {
     assert(cluster);
-    for (ProgramWidget* w : _widgets) {
-        w->updateStatus(cluster);
+    for (auto& [key, value] : _widgets) {
+        value->updateStatus(cluster);
     }
 }
 

@@ -35,9 +35,10 @@
 #ifndef __CORE__PROGRAMWIDGET_H__
 #define __CORE__PROGRAMWIDGET_H__
 
+#include <QPushButton>
 #include <QWidget>
 
-#include <QPushButton>
+#include <QMenu>
 #include "cluster.h"
 #include "process.h"
 #include "program.h"
@@ -48,20 +49,32 @@ namespace programs {
 class ProgramButton : public QPushButton {
 Q_OBJECT
 public:
-    ProgramButton(Cluster* cluster, const Program::Configuration* configuration);
+    ProgramButton(const Cluster* cluster, const Program::Configuration* configuration);
 
     void updateStatus();
+    void processUpdated(Process* process);
 
 signals:
-    void startProgram(const Program::Configuration& configuration);
-    void stopProgram(const Program::Configuration& configuration);
+    void startProgram(const Program::Configuration* configuration);
+    void stopProgram(const Program::Configuration* configuration);
+
+private slots:
+    void handlePress();
 
 private:
-    void addMenu();
-    void removeMenu();
+    bool hasNoProcessRunning() const;
+    bool hasAllProcessesRunning() const;
 
-    Cluster* _cluster;
+    const Cluster* _cluster;
     const Program::Configuration* _configuration;
+
+    struct ProcessInfo {
+        Process* process;
+        QAction* menuAction;
+    };
+
+    QMenu* _actionMenu;
+    std::map<const Cluster::Node*, ProcessInfo> _processes;
 };
 
 
@@ -75,12 +88,14 @@ public:
         const std::vector<Program::Configuration>& configurations);
 
     void updateStatus();
+    void processUpdated(Process* process);
 
 signals:
     void startProgram(const Program::Configuration* configuration);
+    void stopProgram(const Program::Configuration* configuration);
 
 private:
-    std::vector<ProgramButton*> _startButtons;
+    std::map<std::string, ProgramButton*> _startButtons;
 };
 
 
@@ -97,9 +112,10 @@ public:
 
 signals:
     void startProgram(Cluster* cluster, const Program::Configuration* configuration);
+    void stopProgram(Cluster* cluster, const Program::Configuration* configuration);
 
 private:
-    std::map<Cluster*, ClusterWidget*> _widgets;
+    std::map<const Cluster*, ClusterWidget*> _widgets;
 };
 
 
@@ -120,9 +136,11 @@ public slots:
 signals:
     void startProgram(Cluster* cluster, const Program* program,
         const Program::Configuration* configuration);
+    void stopProgram(Cluster* cluster, const Program* program,
+        const Program::Configuration* configuration);
 
 private:
-    std::vector<ProgramWidget*> _widgets;
+    std::map<const Program*, ProgramWidget*> _widgets;
 };
 
 } // namespace programs

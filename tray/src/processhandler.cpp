@@ -231,6 +231,13 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
                                                     const common::CommandMessage& command)
 {
     if (command.command == common::CommandMessage::Command::Start) {
+        // Send out the TrayProcessStatus with the status "Started"
+        common::ProcessStatusMessage msg;
+        msg.processId = command.id;
+        msg.status = common::ProcessStatusMessage::Status::Starting;
+        nlohmann::json j = msg;
+        emit sendSocketMessage(j);
+
         if (!command.workingDirectory.empty()) {
             process->setWorkingDirectory(
                 QString::fromStdString(command.workingDirectory)
