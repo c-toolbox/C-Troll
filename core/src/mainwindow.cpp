@@ -101,6 +101,19 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
         this, &MainWindow::startProgram
     );
     connect(
+        _programWidget, &programs::ProgramsWidget::stopProgram,
+        this, &MainWindow::stopProgram
+    );
+    connect(
+        _programWidget, &programs::ProgramsWidget::restartProcess,
+        this, &MainWindow::startProcess
+    );
+    connect(
+        _programWidget, &programs::ProgramsWidget::stopProcess,
+        this, &MainWindow::stopProcess
+    );
+
+    connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
         _programWidget, &programs::ProgramsWidget::connectedStatusChanged
     );
@@ -175,19 +188,64 @@ void MainWindow::startProgram(Cluster* cluster, const Program* program,
         );
         common::CommandMessage command = startProcessCommand(*process);
 
-        // Generate identifier
-        Log("Sending Message:");
-        Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id));
-        Log(fmt::format("\tCommand: {}", command.command));
-        Log(fmt::format("\tExecutable: {}", command.executable));
-        Log(fmt::format("\tIdentifier: {}", command.id));
-        Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
-        Log(fmt::format("\tCWD: {}", command.workingDirectory));
-
-        nlohmann::json j = command;
-        _clusterConnectionHandler.sendMessage(*cluster, *node, j);
+        startProcess(process.get());
 
         _processesWidget->processAdded(*process);
         _processes.push_back(std::move(process));
     }
+}
+
+void MainWindow::stopProgram(Cluster* cluster, const Program* program,
+                             const Program::Configuration* configuration)
+{
+    std::vector<Process*> processes;
+    for (const std::unique_ptr<Process>& process : _processes) {
+        const bool clusterMatch = process->cluster == cluster;
+        const bool programMatch = process->application == program;
+        const bool configurationMatch = process->configuration == configuration;
+
+        if (clusterMatch && programMatch && configurationMatch) {
+            processes.push_back(process.get());
+        }
+    }
+
+    // Something strange must have happened if we get to the stop command without actually
+    // having a single process that corresponds to the command.  The question is, how did
+    // we manage to set off the stopProgram function in the first place?
+    assert(!processes.empty());
+
+    for (Process* process : processes) {
+        stopProcess(process);
+    }
+}
+
+void MainWindow::startProcess(const Process* process) {
+    common::CommandMessage command = startProcessCommand(*process);
+
+    // Generate identifier
+    Log("Sending Message to start application:");
+    Log(fmt::format("\tCluster: {} {}", process->cluster->name, process->cluster->id));
+    Log(fmt::format("\tCommand: {}", command.command));
+    Log(fmt::format("\tExecutable: {}", command.executable));
+    Log(fmt::format("\tIdentifier: {}", command.id));
+    Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
+    Log(fmt::format("\tCWD: {}", command.workingDirectory));
+    
+    nlohmann::json j = command;
+    _clusterConnectionHandler.sendMessage(*process->cluster, *process->node, j);
+}
+
+void MainWindow::stopProcess(const Process* process) {
+    common::CommandMessage command = exitProcessCommand(*process);
+
+    Log("Sending Message to stop application:");
+    Log(fmt::format("\tCluster: {} {}", process->cluster->name, process->cluster->id));
+    Log(fmt::format("\tCommand: {}", command.command));
+    Log(fmt::format("\tExecutable: {}", command.executable));
+    Log(fmt::format("\tIdentifier: {}", command.id));
+    Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
+    Log(fmt::format("\tCWD: {}", command.workingDirectory));
+
+    nlohmann::json j = command;
+    _clusterConnectionHandler.sendMessage(*process->cluster, *process->node, j);
 }

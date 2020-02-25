@@ -53,7 +53,12 @@ ProgramButton::ProgramButton(const Cluster* cluster,
 
     setEnabled(false);
 
-    connect(this, &QPushButton::clicked, this, &ProgramButton::handlePress);
+    connect(
+        this, &QPushButton::clicked,
+        [this]() {
+            emit startProgram(_configuration);
+        }
+    );
 }
 
 void ProgramButton::updateStatus() {
@@ -72,20 +77,32 @@ void ProgramButton::processUpdated(Process* process) {
             return p.second.process->id == id;
         }
     );
-    if (it != _processes.end()) {
-        // This is a process that already exists and we should update it depending on the
-        // status of the incoming process
-        assert(it->second.process == process);
-    }
-    else {
+    if (it == _processes.end()) {
         // This is a brand new process, so it better be in a Starting status
         assert(process->status == common::ProcessStatusMessage::Status::Starting);
 
         ProcessInfo info;
         info.process = process;
         info.menuAction = new QAction(QString::fromStdString(process->node->name));
+        // We store the name of the node as the user data in order to sort them later
+        info.menuAction->setData(QString::fromStdString(process->node->name));
         _processes[process->node] = info;
     }
+    else {
+        // This is a process that already exists and we should update it depending on the
+        // status of the incoming process
+        assert(it->second.process == process);
+    }
+
+    updateButton();
+}
+
+void ProgramButton::updateButton() {
+    // @TODO (abock, 2020-02-25) This solution is a bit ugly.  Would be better to have a
+    // fixed signal-slot mechanism and whenever an action gets triggered, we disambiguate
+    // (or store) in which state we are and then emit the proper signal
+
+    QObject::disconnect(this, "QPushButton::clicked");
 
     // If all processes don't exist or are in NormalExit/CrashExit/FailedToStart, we show
     // the regular start button without any menus attached
@@ -94,23 +111,107 @@ void ProgramButton::processUpdated(Process* process) {
         setObjectName("start"); // used in the QSS sheet to style this button
         // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
         setText(QString::fromStdString(_cluster->name));
+
+        connect(
+            this, &QPushButton::clicked,
+            [this]() {
+                emit startProgram(_configuration);
+            }
+        );
     }
     else if (hasAllProcessesRunning()) {
         setMenu(nullptr);
         setObjectName("stop"); // used in the QSS sheet to style this button
         // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
         setText("Stop:" + QString::fromStdString(_cluster->name));
+
+        connect(
+            this, &QPushButton::clicked,
+            [this]() {
+                emit stopProgram(_configuration);
+            }
+        );
     }
     else {
         setMenu(_actionMenu);
         setObjectName("mixed"); // used in the QSS sheet to style this button
         // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
         setText("Mixed:" + QString::fromStdString(_cluster->name));
+
+        updateMenu();
     }
 }
 
-void ProgramButton::handlePress() {
-    emit startProgram(_configuration);
+void ProgramButton::updateMenu() {
+    // First a bit of cleanup so that we don't have old signal connections laying around
+    for (const std::pair<const Cluster::Node*, ProcessInfo>& p : _processes) {
+        QObject::disconnect(p.second.menuAction);
+    }
+    _actionMenu->clear();
+
+    std::vector<QAction*> actions;
+    std::transform(
+        _processes.begin(), _processes.end(),
+        std::back_inserter(actions),
+        [](const std::pair<const Cluster::Node*, ProcessInfo>& p) {
+            return p.second.menuAction;
+        }
+    );
+    std::sort(
+        actions.begin(), actions.end(),
+        [](QAction* lhs, QAction* rhs) {
+            return lhs->data().toString() < rhs->data().toString();
+        }
+    );
+
+    for (QAction* action : actions) {
+        const std::string nodeName = action->data().toString().toStdString();
+        const auto it = std::find_if(
+            _processes.begin(), _processes.end(),
+            [nodeName](const std::pair<const Cluster::Node*, ProcessInfo>& p) {
+                return p.first->name == nodeName;
+            }
+        );
+        // If we are getting this far, the node for this action has to exist in the map
+        assert(it != _processes.end());
+        const Cluster::Node* node = it->first;
+
+        // We only going to update the actions if some of the nodes are not running but
+        // some others are. So we basically have to provide the ability to start the nodes
+        // that are currently not running and close the ones that currently are
+        if (isProcessRunning(node)) {
+            setObjectName("stop"); // used in the QSS sheet to style this button
+            connect(
+                action, &QAction::triggered,
+                [this, process = it->second.process]() { emit stopProcess(process); }
+            );
+
+            // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
+            action->setText("Stop: " + action->data().toString());
+        }
+        else {
+            setObjectName("restart"); // used in the QSS sheet to style this button
+            connect(
+                action, &QAction::triggered,
+                [this, process = it->second.process]() { emit restartProcess(process); }
+            );
+
+            // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
+            action->setText("Restart: " + action->data().toString());
+        }
+
+        _actionMenu->addAction(action);
+    }
+}
+
+bool ProgramButton::isProcessRunning(const Cluster::Node* node) const {
+    using Status = common::ProcessStatusMessage::Status;
+    const auto it = _processes.find(node);
+    return (it != _processes.end()) && it->second.process->status == Status::Running;
+}
+
+bool ProgramButton::isProcessRunning(const std::unique_ptr<Cluster::Node>& node) const {
+    return isProcessRunning(node.get());
 }
 
 bool ProgramButton::hasNoProcessRunning() const {
@@ -120,7 +221,10 @@ bool ProgramButton::hasNoProcessRunning() const {
         return (it != _processes.end()) && it->second.process->status == Status::Running;
     };
 
-    return std::none_of(_cluster->nodes.begin(), _cluster->nodes.end(), processRunning);
+    return std::none_of(
+        _cluster->nodes.begin(), _cluster->nodes.end(),
+        [this](const std::unique_ptr<Cluster::Node>& n) { return isProcessRunning(n); }
+    );
 }
 
 bool ProgramButton::hasAllProcessesRunning() const {
@@ -157,7 +261,18 @@ ClusterWidget::ClusterWidget(Cluster* cluster,
         );
         connect(
             button, &ProgramButton::stopProgram,
-            [this](const Program::Configuration* conf) { emit stopProgram(conf); }
+            [this](const Program::Configuration* conf) {
+                emit stopProgram(conf);
+            }
+        );
+
+        connect(
+            button, &ProgramButton::restartProcess,
+            this, &ClusterWidget::restartProcess
+        );
+        connect(
+            button, &ProgramButton::stopProcess,
+            this, &ClusterWidget::stopProcess
         );
 
         _startButtons[configuration.id] = button;
@@ -211,6 +326,9 @@ ProgramWidget::ProgramWidget(Program* program, std::vector<Cluster*> clusters) {
                 emit stopProgram(cluster, conf);
             }
         );
+
+        connect(w, &ClusterWidget::restartProcess, this, &ProgramWidget::restartProcess);
+        connect(w, &ClusterWidget::stopProcess, this, &ProgramWidget::stopProcess);
 
         _widgets[cluster] = w;
         layout->addWidget(w);
@@ -272,13 +390,15 @@ ProgramsWidget::ProgramsWidget(const std::vector<Program*>& programs,
                 emit startProgram(cluster, p, conf);
             }
         );
-
         connect(
             w, &ProgramWidget::stopProgram,
             [this, p](Cluster* cluster, const Program::Configuration* conf) {
                 emit stopProgram(cluster, p, conf);
             }
         );
+
+        connect(w, &ProgramWidget::restartProcess, this, &ProgramsWidget::restartProcess);
+        connect(w, &ProgramWidget::stopProcess, this, &ProgramsWidget::stopProcess);
 
         _widgets[p] = w;
         layout->addWidget(w);

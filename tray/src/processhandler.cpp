@@ -131,6 +131,10 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     );
     
     if (p != _processes.end() ) {
+        // @TODO (abock, 2020-02-26) Me thinks this codepath should also send a
+        // "failedtostart" message. When trying to open the same process multiple times,
+        // the core got stuck in a "Starting" state
+
         common::ProcessStatusMessage msg;
         msg.processId = p->first;
         msg.status = toTrayStatus(error);

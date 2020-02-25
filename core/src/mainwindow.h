@@ -54,8 +54,14 @@ public:
     explicit MainWindow(QString title, const std::string& configurationFile);
 
 private:
+    // private slots
     void startProgram(Cluster* cluster, const Program* program,
         const Program::Configuration* configuration);
+    void stopProgram(Cluster* cluster, const Program* program,
+        const Program::Configuration* configuration);
+    void startProcess(const Process* process);
+    void stopProcess(const Process* process);
+
 
     void log(std::string msg);
 

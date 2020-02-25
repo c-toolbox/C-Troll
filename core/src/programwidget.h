@@ -58,10 +58,15 @@ signals:
     void startProgram(const Program::Configuration* configuration);
     void stopProgram(const Program::Configuration* configuration);
 
-private slots:
-    void handlePress();
+    void restartProcess(const Process* process);
+    void stopProcess(const Process* process);
 
 private:
+    void updateButton();
+    void updateMenu();
+
+    bool isProcessRunning(const Cluster::Node* node) const;
+    bool isProcessRunning(const std::unique_ptr<Cluster::Node>& node) const;
     bool hasNoProcessRunning() const;
     bool hasAllProcessesRunning() const;
 
@@ -94,6 +99,9 @@ signals:
     void startProgram(const Program::Configuration* configuration);
     void stopProgram(const Program::Configuration* configuration);
 
+    void restartProcess(const Process* process);
+    void stopProcess(const Process* process);
+
 private:
     std::map<std::string, ProgramButton*> _startButtons;
 };
@@ -113,6 +121,9 @@ public:
 signals:
     void startProgram(Cluster* cluster, const Program::Configuration* configuration);
     void stopProgram(Cluster* cluster, const Program::Configuration* configuration);
+
+    void restartProcess(const Process* process);
+    void stopProcess(const Process* process);
 
 private:
     std::map<const Cluster*, ClusterWidget*> _widgets;
@@ -138,6 +149,9 @@ signals:
         const Program::Configuration* configuration);
     void stopProgram(Cluster* cluster, const Program* program,
         const Program::Configuration* configuration);
+
+    void restartProcess(const Process* process);
+    void stopProcess(const Process* process);
 
 private:
     std::map<const Program*, ProgramWidget*> _widgets;
