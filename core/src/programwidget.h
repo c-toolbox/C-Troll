@@ -62,6 +62,8 @@ signals:
     void stopProcess(const Process* process);
 
 private:
+    void handleButtonPress();
+
     void updateButton();
     void updateMenu();
 

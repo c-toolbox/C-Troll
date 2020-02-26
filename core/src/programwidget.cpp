@@ -53,12 +53,7 @@ ProgramButton::ProgramButton(const Cluster* cluster,
 
     setEnabled(false);
 
-    connect(
-        this, &QPushButton::clicked,
-        [this]() {
-            emit startProgram(_configuration);
-        }
-    );
+    connect(this, &QPushButton::clicked, this, &ProgramButton::handleButtonPress);
 }
 
 void ProgramButton::updateStatus() {
@@ -97,13 +92,25 @@ void ProgramButton::processUpdated(Process* process) {
     updateButton();
 }
 
+void ProgramButton::handleButtonPress() {
+    // This slot should only be invoked if either all processes are running, or no process
+    // are running
+    assert(hasNoProcessRunning() || hasAllProcessesRunning());
+
+    if (hasNoProcessRunning()) {
+        emit startProgram(_configuration);
+    }
+    else if (hasAllProcessesRunning()) {
+        emit stopProgram(_configuration);
+    }
+    else {
+        // This slot should only be invoked if either all processes are running, or no
+        // process are running
+        assert(false);
+    }
+}
+
 void ProgramButton::updateButton() {
-    // @TODO (abock, 2020-02-25) This solution is a bit ugly.  Would be better to have a
-    // fixed signal-slot mechanism and whenever an action gets triggered, we disambiguate
-    // (or store) in which state we are and then emit the proper signal
-
-    QObject::disconnect(this, "QPushButton::clicked");
-
     // If all processes don't exist or are in NormalExit/CrashExit/FailedToStart, we show
     // the regular start button without any menus attached
     if (hasNoProcessRunning()) {
@@ -111,26 +118,12 @@ void ProgramButton::updateButton() {
         setObjectName("start"); // used in the QSS sheet to style this button
         // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
         setText(QString::fromStdString(_cluster->name));
-
-        connect(
-            this, &QPushButton::clicked,
-            [this]() {
-                emit startProgram(_configuration);
-            }
-        );
     }
     else if (hasAllProcessesRunning()) {
         setMenu(nullptr);
         setObjectName("stop"); // used in the QSS sheet to style this button
         // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
         setText("Stop:" + QString::fromStdString(_cluster->name));
-
-        connect(
-            this, &QPushButton::clicked,
-            [this]() {
-                emit stopProgram(_configuration);
-            }
-        );
     }
     else {
         setMenu(_actionMenu);
