@@ -34,35 +34,32 @@
 
 #include "program.h"
 
+#include "cluster.h"
+#include "database.h"
 #include "jsonload.h"
 #include "logging.h"
+#include <fmt/format.h>
 #include <assert.h>
 
 namespace {
-    constexpr const char* KeyId = "id"; // @TODO Is this needed?
     constexpr const char* KeyName = "name";
     constexpr const char* KeyExecutable = "executable";
     constexpr const char* KeyCommandlineParameters = "commandlineParameters";
     constexpr const char* KeyWorkingDirectory = "workingDirectory";
     constexpr const char* KeyClusters = "clusters";
-    constexpr const char* KeyDefaultCluster = "default-cluster";
-    constexpr const char* KeyDefaultConfiguration = "default-configuration";
     constexpr const char* KeyTags = "tags";
     constexpr const char* KeyConfigurations = "configurations";
 
-    constexpr const char* KeyConfigurationId = "id";
     constexpr const char* KeyConfigurationName = "name";
     constexpr const char* KeyConfigurationParameters = "parameters";
 } // namespace
 
 void from_json(const nlohmann::json& j, Program::Configuration& p) {
-    j.at(KeyConfigurationId).get_to(p.id);
     j.at(KeyConfigurationName).get_to(p.name);
     j.at(KeyConfigurationParameters).get_to(p.parameters);
 }
 
 void from_json(const nlohmann::json& j, Program& p) {
-    j.at(KeyId).get_to(p.id);
     j.at(KeyName).get_to(p.name);
     j.at(KeyExecutable).get_to(p.executable);
     if (j.find(KeyCommandlineParameters) != j.end()) {
@@ -79,18 +76,52 @@ void from_json(const nlohmann::json& j, Program& p) {
     }
     else {
         // There always has to be at least a default configuration
-        p.configurations.push_back({ "default", "Default", "" });
+        p.configurations.push_back({ 0, "Default", "" });
     }
 
-    j.at(KeyClusters).get_to(p.clusters);
-    if (j.find(KeyDefaultConfiguration) != j.end()) {
-        j.at(KeyDefaultConfiguration).get_to(p.defaultConfiguration);
-    }
-    if (j.find(KeyDefaultCluster) != j.end()) {
-        j.at(KeyDefaultCluster).get_to(p.defaultCluster);
+    std::vector<std::string> clusters = j.at(KeyClusters).get<std::vector<std::string>>();
+    for (const std::string& cluster : clusters) {
+        Cluster* c = data::findCluster(cluster);
+        if (!c) {
+            std::string message = fmt::format("Could not find cluster {}", cluster);
+            ::Log(message);
+            throw std::runtime_error(message);
+        }
+        p.clusters.push_back(c->id);
     }
 }
 
 std::vector<Program> loadProgramsFromDirectory(const std::string& directory) {
-    return common::loadJsonFromDirectory<Program>(directory);
+    std::vector<Program> programs = common::loadJsonFromDirectory<Program>(directory);
+
+    for (const Program& program : programs) {
+        if (program.name.empty()) {
+            throw std::runtime_error("No name specified for program");
+        }
+        if (program.executable.empty()) {
+            throw std::runtime_error(fmt::format(
+                "No executable specified for program {}", program.name
+            ));
+        }
+        if (program.clusters.empty()) {
+            throw std::runtime_error(fmt::format(
+                "No clusters specified for program {}", program.name
+            ));
+        }
+    }
+
+    // Inject the unique identifiers into the nodes
+    int programId = 0;
+    for (Program& program : programs) {
+        program.id = programId;
+        programId++;
+
+        int configurationId = 0;
+        for (Program::Configuration& conf : program.configurations) {
+            conf.id = configurationId;
+            configurationId++;
+        }
+    }
+
+    return programs;
 }

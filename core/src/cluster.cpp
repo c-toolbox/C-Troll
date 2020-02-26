@@ -34,45 +34,61 @@
 
 #include "cluster.h"
 
+#include "database.h"
 #include "jsonload.h"
 #include "logging.h"
+#include "node.h"
+#include <fmt/format.h>
 #include <assert.h>
 #include <filesystem>
 
 namespace {
     constexpr const char* KeyName = "name";
-    constexpr const char* KeyId = "id";
     constexpr const char* KeyEnabled = "enabled";
     constexpr const char* KeyNodes = "nodes";
-
-    constexpr const char* KeyNodeName = "name";
-    constexpr const char* KeyNodeIpAddress = "ip";
-    constexpr const char* KeyNodePort = "port";
 } // namespace
-
-void from_json(const nlohmann::json& j, Cluster::Node& p) {
-    j.at(KeyNodeName).get_to(p.name);
-    j.at(KeyNodeIpAddress).get_to(p.ipAddress);
-    j.at(KeyNodePort).get_to(p.port);
-}
 
 void from_json(const nlohmann::json& j, Cluster& p) {
     j.at(KeyName).get_to(p.name);
-    j.at(KeyId).get_to(p.id);
     p.isEnabled = true;
     if (j.find(KeyEnabled) != j.end()) {
         j.at(KeyEnabled).get_to(p.isEnabled);
     }
+    
+    std::vector<std::string> nodes = j.at(KeyNodes).get<std::vector<std::string>>();
+    for (const std::string& node : nodes) {
+        Node* n = data::findNode(node);
+        if (!n) {
+            std::string message = fmt::format("Could not find node with name {}", node);
+            Log(message);
+            throw std::runtime_error(message);
+        }
 
-    std::map<std::string, Cluster::Node> nodes;
-    j.at(KeyNodes).get_to(nodes);
-    for (const std::pair<const std::string, Cluster::Node>& node : nodes) {
-        std::unique_ptr<Cluster::Node> n = std::make_unique<Cluster::Node>(node.second);
-        n->id = node.first;
-        p.nodes.push_back(std::move(n));
+        p.nodes.push_back(n->id);
     }
 }
 
 std::vector<Cluster> loadClustersFromDirectory(const std::string& directory) {
-    return common::loadJsonFromDirectory<Cluster>(directory);
+    std::vector<Cluster> clusters = common::loadJsonFromDirectory<Cluster>(directory);
+
+    for (const Cluster& cluster : clusters) {
+        if (cluster.name.empty()) {
+            throw std::runtime_error("Missing name for cluster");
+        }
+
+        if (cluster.nodes.empty()) {
+            throw std::runtime_error(fmt::format(
+                "No clusters specified for cluster {}", cluster.name
+            ));
+        }
+    }
+
+    // Inject the unique identifiers into the nodes
+    int id = 0;
+    for (Cluster& cluster : clusters) {
+        cluster.id = id;
+        id++;
+    }
+
+    return clusters;
 }

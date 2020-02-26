@@ -39,6 +39,7 @@ set(HEADER_FILES
     src/configuration.h
     src/database.h
     src/mainwindow.h
+    src/node.h
     src/process.h
     src/processwidget.h
     src/program.h
@@ -53,6 +54,7 @@ set(SOURCE_FILES
     src/database.cpp
     src/main.cpp
     src/mainwindow.cpp
+    src/node.cpp
     src/process.cpp
     src/processwidget.cpp
     src/program.cpp

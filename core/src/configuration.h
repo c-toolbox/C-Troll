@@ -43,7 +43,8 @@ struct Configuration {
     std::string applicationPath;
     /// The path that contains the JSON objects describing the available clusters
     std::string clusterPath;
-    int listeningPort;
+    /// The path that contains the JSON objects describing the available nodes
+    std::string nodePath;
 };
 
 void from_json(const nlohmann::json& j, Configuration& c);

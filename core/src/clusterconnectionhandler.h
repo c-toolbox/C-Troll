@@ -38,6 +38,7 @@
 #include <QObject>
 
 #include "cluster.h"
+#include "node.h"
 #include "processstatusmessage.h"
 #include <jsonsocket.h>
 #include <QMap>
@@ -49,35 +50,35 @@ Q_OBJECT
 public:
     ~ClusterConnectionHandler();
 
-    void initialize(const std::vector<Cluster*>& clusters);
+    void initialize();
 
-    void sendMessage(const Cluster& cluster, const Cluster::Node& node,
+    void sendMessage(const Cluster& cluster, const Node& node,
         nlohmann::json message) const;
 
 signals:
-    void messageReceived(Cluster* cluster, Cluster::Node* node,
-        nlohmann::json message);
+    void messageReceived(int clusterId, int nodeId, nlohmann::json message);
 
-    void connectedStatusChanged(const std::string& cluster, const std::string& node);
+    void connectedStatusChanged(int clusterId, int nodeId);
 
     void receivedTrayProcess(common::ProcessStatusMessage status);
 
 private slots:
-    void handleSocketStateChange(const std::string& h,
-        QAbstractSocket::SocketState state);
-    void readyRead(const std::string& hash);
+    void handleSocketStateChange(int nodeId, QAbstractSocket::SocketState state);
+    void readyRead(int nodeId);
 
 private:
-    struct NodeInfo {
-        Cluster* cluster;
-        Cluster::Node* node;
-    };
+    std::map<int, std::unique_ptr<common::JsonSocket>> _sockets;
 
-    struct SocketData {
-        std::unique_ptr<common::JsonSocket> socket;
-        std::vector<NodeInfo> nodes;
-    };
-    std::map<std::string, SocketData> _nodes;
+    //struct NodeInfo {
+    //    Cluster* cluster;
+    //    Node* node;
+    //};
+
+    //struct SocketData {
+    //    std::unique_ptr<common::JsonSocket> socket;
+    //    std::vector<NodeInfo> nodes;
+    //};
+    //std::map<std::string, SocketData> _nodes;
 };
 
 #endif // __CORE__CLUSTERCONNECTIONHANDLER_H__

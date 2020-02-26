@@ -81,13 +81,12 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     //
     // Load the data
     Log(fmt::format("Loading programs from directory {}", config.applicationPath));
-    data::loadPrograms(config.applicationPath);
-
+    Log(fmt::format("Loading nodes from directory {}", config.nodePath));
     Log(fmt::format("Loading clusters from directory {}", config.clusterPath));
-    data::loadClusters(config.clusterPath);
+    data::loadData(config.applicationPath, config.clusterPath, config.nodePath);
 
     // Programs
-    _programWidget = new programs::ProgramsWidget(data::programs(), data::clusters());
+    _programWidget = new programs::ProgramsWidget;
     connect(
         _programWidget, &programs::ProgramsWidget::startProgram,
         this, &MainWindow::startProgram
@@ -135,12 +134,12 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::messageReceived,
-        [](Cluster* cluster, Cluster::Node* node, nlohmann::json message) {
+        [](int clusterId, int nodeId, nlohmann::json message) {
+            Cluster* cluster = data::findCluster(clusterId);
+            Node* node = data::findNode(nodeId);
             Log(fmt::format("{} {} {}", cluster->name, node->name, std::string(message)));
         }
     );
-
-
 
     // Set up the tab widget
     tabWidget->addTab(_programWidget, "Programs");
@@ -148,7 +147,7 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     tabWidget->addTab(_processesWidget, "Processes");
     tabWidget->addTab(_messageBox, "Log");
 
-    _clusterConnectionHandler.initialize(data::clusters());
+    _clusterConnectionHandler.initialize();
 }
 
 void MainWindow::log(std::string msg) {
@@ -165,12 +164,12 @@ void MainWindow::startProgram(Cluster* cluster, const Program* program,
     Log("Configuration: " + configuration->name);
     Log("Cluster: " + cluster->name);
 
-    for (const std::unique_ptr<Cluster::Node>& node : cluster->nodes) {
+    for (int node : cluster->nodes) {
         std::unique_ptr<Process> process = std::make_unique<Process>(
             program,
             configuration,
             cluster,
-            node.get()
+            data::findNode(node)
         );
         common::CommandMessage command = startProcessCommand(*process);
 

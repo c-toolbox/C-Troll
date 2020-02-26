@@ -46,7 +46,7 @@ namespace programs {
 
 ProgramButton::ProgramButton(const Cluster* cluster,
                              const Program::Configuration* configuration)
-    : QPushButton(QString::fromStdString(cluster->name))
+    : QPushButton(QString::fromStdString(configuration->name) )
     , _cluster(cluster)
     , _configuration(configuration)
 {
@@ -58,10 +58,11 @@ ProgramButton::ProgramButton(const Cluster* cluster,
 }
 
 void ProgramButton::updateStatus() {
+    std::vector<Node*> nodes = data::findNodesForCluster(*_cluster);
+
     const bool allConnected = std::all_of(
-        _cluster->nodes.begin(),
-        _cluster->nodes.end(),
-        std::mem_fn(&Cluster::Node::isConnected)
+        nodes.begin(), nodes.end(),
+        std::mem_fn(&Node::isConnected)
     );
     setEnabled(allConnected);
 }
@@ -69,7 +70,7 @@ void ProgramButton::updateStatus() {
 void ProgramButton::processUpdated(Process* process) {
     auto it = std::find_if(
         _processes.begin(), _processes.end(),
-        [id = process->id](const std::pair<const Cluster::Node*, ProcessInfo>& p) {
+        [id = process->id](const std::pair<const Node*, ProcessInfo>& p) {
             return p.second.process->id == id;
         }
     );
@@ -146,7 +147,7 @@ void ProgramButton::updateButton() {
 
 void ProgramButton::updateMenu() {
     // First a bit of cleanup so that we don't have old signal connections laying around
-    for (const std::pair<const Cluster::Node*, ProcessInfo>& p : _processes) {
+    for (const std::pair<const Node*, ProcessInfo>& p : _processes) {
         QObject::disconnect(p.second.menuAction);
     }
     _actionMenu->clear();
@@ -155,7 +156,7 @@ void ProgramButton::updateMenu() {
     std::transform(
         _processes.begin(), _processes.end(),
         std::back_inserter(actions),
-        [](const std::pair<const Cluster::Node*, ProcessInfo>& p) {
+        [](const std::pair<const Node*, ProcessInfo>& p) {
             return p.second.menuAction;
         }
     );
@@ -170,13 +171,13 @@ void ProgramButton::updateMenu() {
         const std::string nodeName = action->data().toString().toStdString();
         const auto it = std::find_if(
             _processes.begin(), _processes.end(),
-            [nodeName](const std::pair<const Cluster::Node*, ProcessInfo>& p) {
+            [nodeName](const std::pair<const Node*, ProcessInfo>& p) {
                 return p.first->name == nodeName;
             }
         );
         // If we are getting this far, the node for this action has to exist in the map
         assert(it != _processes.end());
-        const Cluster::Node* node = it->first;
+        const Node* node = it->first;
 
         // We only going to update the actions if some of the nodes are not running but
         // some others are. So we basically have to provide the ability to start the nodes
@@ -206,37 +207,24 @@ void ProgramButton::updateMenu() {
     }
 }
 
-bool ProgramButton::isProcessRunning(const Cluster::Node* node) const {
+bool ProgramButton::isProcessRunning(const Node* node) const {
     using Status = common::ProcessStatusMessage::Status;
     const auto it = _processes.find(node);
     return (it != _processes.end()) && it->second.process->status == Status::Running;
 }
 
-bool ProgramButton::isProcessRunning(const std::unique_ptr<Cluster::Node>& node) const {
-    return isProcessRunning(node.get());
-}
-
 bool ProgramButton::hasNoProcessRunning() const {
-    auto processRunning = [this](const std::unique_ptr<Cluster::Node>& n) {
-        using Status = common::ProcessStatusMessage::Status;
-        const auto it = _processes.find(n.get());
-        return (it != _processes.end()) && it->second.process->status == Status::Running;
-    };
-
     return std::none_of(
         _cluster->nodes.begin(), _cluster->nodes.end(),
-        [this](const std::unique_ptr<Cluster::Node>& n) { return isProcessRunning(n); }
+        [this](int n) { return isProcessRunning(data::findNode(n)); }
     );
 }
 
 bool ProgramButton::hasAllProcessesRunning() const {
-    auto processRunning = [this](const std::unique_ptr<Cluster::Node>& n) {
-        using Status = common::ProcessStatusMessage::Status;
-        const auto it = _processes.find(n.get());
-        return (it != _processes.end()) && it->second.process->status == Status::Running;
-    };
-
-    return std::all_of(_cluster->nodes.begin(), _cluster->nodes.end(), processRunning);
+    return std::all_of(
+        _cluster->nodes.begin(), _cluster->nodes.end(),
+        [this](int n) { return isProcessRunning(data::findNode(n)); }
+    );
 }
 
     
@@ -285,7 +273,7 @@ ClusterWidget::ClusterWidget(Cluster* cluster,
 void ClusterWidget::updateStatus() {
     std::for_each(
         _startButtons.begin(), _startButtons.end(),
-        [](const std::pair<const std::string, ProgramButton*>& p) {
+        [](const std::pair<const int, ProgramButton*>& p) {
             p.second->updateStatus();
         }
     );
@@ -302,18 +290,17 @@ void ClusterWidget::processUpdated(Process* process) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ProgramWidget::ProgramWidget(Program* program, std::vector<Cluster*> clusters) {
-    assert(program);
-    assert(std::all_of(clusters.begin(), clusters.end(), [](Cluster* c) { return c; }));
-
+ProgramWidget::ProgramWidget(const Program& program) {
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 
-    QLabel* name = new QLabel(QString::fromStdString(program->name));
+    QLabel* name = new QLabel(QString::fromStdString(program.name));
     layout->addWidget(name);
 
+    std::vector<Cluster*> clusters = data::findClustersForProgram(program);
     for (Cluster* cluster : clusters) {
-        ClusterWidget* w = new ClusterWidget(cluster, program->configurations);
+        assert(cluster);
+        ClusterWidget* w = new ClusterWidget(cluster, program.configurations);
 
         connect(
             w, &ClusterWidget::startProgram,
@@ -332,15 +319,13 @@ ProgramWidget::ProgramWidget(Program* program, std::vector<Cluster*> clusters) {
         connect(w, &ClusterWidget::restartProcess, this, &ProgramWidget::restartProcess);
         connect(w, &ClusterWidget::stopProcess, this, &ProgramWidget::stopProcess);
 
-        _widgets[cluster] = w;
+        _widgets[cluster->id] = w;
         layout->addWidget(w);
     }
 }
 
-void ProgramWidget::updateStatus(Cluster* cluster) {
-    assert(cluster);
-
-    const auto it = _widgets.find(cluster);
+void ProgramWidget::updateStatus(int clusterId) {
+    const auto it = _widgets.find(clusterId);
     // We have to check as a cluster that is active might not have any associated programs
     if (it != _widgets.end()) {
         it->second->updateStatus();
@@ -350,41 +335,21 @@ void ProgramWidget::updateStatus(Cluster* cluster) {
 void ProgramWidget::processUpdated(Process* process) {
     assert(process);
 
-    const auto it = _widgets.find(process->cluster);
+    const auto it = _widgets.find(process->cluster->id);
     assert(it != _widgets.end());
     it->second->processUpdated(process);
-
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ProgramsWidget::ProgramsWidget(const std::vector<Program*>& programs,
-                               const std::vector<Cluster*>& clusters)
-{
-    assert(std::all_of(programs.begin(), programs.end(), [](Program* p) { return p; }));
-    assert(std::all_of(clusters.begin(), clusters.end(), [](Cluster* c) { return c; }));
-
-
+ProgramsWidget::ProgramsWidget() {
     QBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
 
-    for (Program* p : programs) {
-        // Filter the full cluster list to only contain clusters that the program is
-        // interested in
-
-        std::vector<Cluster*> cs;
-        for (const std::string& cluster : p->clusters) {
-            const auto it = std::find_if(
-                clusters.begin(), clusters.end(),
-                [cluster](Cluster* c) { return c->id == cluster; }
-            );
-            assert(it != clusters.end());
-            cs.push_back(*it);
-        }
-
-        ProgramWidget* w = new ProgramWidget(p, cs);
+    for (Program* p : data::programs()) {
+        ProgramWidget* w = new ProgramWidget(*p);
 
         connect(
             w, &ProgramWidget::startProgram,
@@ -402,7 +367,7 @@ ProgramsWidget::ProgramsWidget(const std::vector<Program*>& programs,
         connect(w, &ProgramWidget::restartProcess, this, &ProgramsWidget::restartProcess);
         connect(w, &ProgramWidget::stopProcess, this, &ProgramsWidget::stopProcess);
 
-        _widgets[p] = w;
+        _widgets[p->id] = w;
         layout->addWidget(w);
     }
 }
@@ -410,19 +375,15 @@ ProgramsWidget::ProgramsWidget(const std::vector<Program*>& programs,
 void ProgramsWidget::processUpdated(Process* process) {
     assert(process);
 
-    const auto it = _widgets.find(process->application);
+    const auto it = _widgets.find(process->application->id);
     if (it != _widgets.end()) {
         it->second->processUpdated(process);
     }
 }
 
-void ProgramsWidget::connectedStatusChanged(const std::string& cluster,
-                                            const std::string&)
-{
-    Cluster* c = data::findCluster(cluster);
-    assert(c);
-    for (auto& [key, value] : _widgets) {
-        value->updateStatus(c);
+void ProgramsWidget::connectedStatusChanged(int cluster, int) {
+    for (const std::pair<const int, ProgramWidget*>& p : _widgets) {
+        p.second->updateStatus(cluster);
     }
 }
 

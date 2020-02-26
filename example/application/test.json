@@ -21,9 +21,7 @@
     }
   ],
   "clusters": [
-    "local",
-    "mega-cluster"
-  ],
-  "default-cluster": "local",
-  "default-configuration":  "second unique id"
+    "Local",
+    "Mega Cluster"
+  ]
 }

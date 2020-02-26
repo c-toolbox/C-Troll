@@ -35,12 +35,15 @@
 #include "database.h"
 
 #include "cluster.h"
+#include "node.h"
 #include "program.h"
 #include "process.h"
 
 namespace {
 
+// @TODO (abock, 2020-02-26) Replace these with in-place storage
 std::vector<std::unique_ptr<Cluster>> gClusters;
+std::vector<std::unique_ptr<Node>> gNodes;
 std::vector<std::unique_ptr<Program>> gPrograms;
 std::vector<std::unique_ptr<Process>> gProcesses;
 
@@ -54,6 +57,14 @@ std::vector<Cluster*> clusters() {
         clusters.push_back(c.get());
     }
     return clusters;
+}
+
+std::vector<Node*> nodes() {
+    std::vector<Node*> nodes;
+    for (const std::unique_ptr<Node>& n : gNodes) {
+        nodes.push_back(n.get());
+    }
+    return nodes;
 }
 
 std::vector<Program*> programs() {
@@ -76,11 +87,7 @@ std::vector<Process*> processes() {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-void addProcess(std::unique_ptr<Process> process) {
-    gProcesses.push_back(std::move(process));
-}
-
-Cluster* findCluster(const std::string& id) {
+Cluster* findCluster(int id) {
     const auto it = std::find_if(
         gClusters.begin(), gClusters.end(),
         [id](const std::unique_ptr<Cluster>& c) {
@@ -88,6 +95,67 @@ Cluster* findCluster(const std::string& id) {
         }
     );
     return it != gClusters.end() ? it->get() : nullptr;
+}
+
+Cluster* findCluster(const std::string& name) {
+    const auto it = std::find_if(
+        gClusters.begin(), gClusters.end(),
+        [name](const std::unique_ptr<Cluster>& c) {
+            return c->name == name;
+        }
+    );
+    return it != gClusters.end() ? it->get() : nullptr;
+}
+
+std::vector<Cluster*> findClustersForProgram(const Program& program) {
+    std::vector<Cluster*> clusters;
+    for (int clusterId : program.clusters) {
+        Cluster* cluster = findCluster(clusterId);
+        assert(cluster);
+        clusters.push_back(cluster);
+    }
+    return clusters;
+}
+
+std::vector<Cluster*> findClusterForNode(const Node& node) {
+    std::vector<Cluster*> clusters;
+    for (const std::unique_ptr<Cluster>& cluster : gClusters) {
+        const auto it = std::find(cluster->nodes.begin(), cluster->nodes.end(), node.id);
+        if (it != cluster->nodes.end()) {
+            clusters.push_back(cluster.get());
+        }
+    }
+    return clusters;
+}
+
+Node* findNode(int id) {
+    const auto it = std::find_if(
+        gNodes.begin(), gNodes.end(),
+        [id](const std::unique_ptr<Node>& n) {
+            return n->id == id;
+        }
+    );
+    return it != gNodes.end() ? it->get() : nullptr;
+}
+
+Node* findNode(const std::string& name) {
+    const auto it = std::find_if(
+        gNodes.begin(), gNodes.end(),
+        [name](const std::unique_ptr<Node>& n) {
+            return n->name == name;
+        }
+    );
+    return it != gNodes.end() ? it->get() : nullptr;
+}
+
+std::vector<Node*> findNodesForCluster(const Cluster& cluster) {
+    std::vector<Node*> nodes;
+    for (int nodeId : cluster.nodes) {
+        Node* node = findNode(nodeId);
+        assert(node);
+        nodes.push_back(node);
+    }
+    return nodes;
 }
 
 Process* findProcess(int id) {
@@ -100,29 +168,37 @@ Process* findProcess(int id) {
     return it != gProcesses.end() ? it->get() : nullptr;
 }
 
+void addProcess(std::unique_ptr<Process> process) {
+    gProcesses.push_back(std::move(process));
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-void loadPrograms(const std::string& path) {
-    gPrograms.clear();
+void loadData(const std::string& programPath, const std::string& clusterPath,
+              const std::string& nodePath)
+{
+    gNodes.clear();
+    std::vector<Node> nodes = loadNodesFromDirectory(nodePath);
+    for (Node& node : nodes) {
+        std::unique_ptr<Node> n = std::make_unique<Node>(std::move(node));
+        gNodes.push_back(std::move(n));
+    }
 
-    std::vector<Program> programs = loadProgramsFromDirectory(path);
+    gClusters.clear();
+    std::vector<Cluster> clusters = loadClustersFromDirectory(clusterPath);
+    for (Cluster& cluster : clusters) {
+        std::unique_ptr<Cluster> c = std::make_unique<Cluster>(std::move(cluster));
+        gClusters.push_back(std::move(c));
+    }
+
+    gPrograms.clear();
+    std::vector<Program> programs = loadProgramsFromDirectory(programPath);
     for (Program& program : programs) {
         std::unique_ptr<Program> p = std::make_unique<Program>(std::move(program));
         gPrograms.push_back(std::move(p));
     }
 }
-
-void loadClusters(const std::string& path) {
-    gClusters.clear();
-
-    std::vector<Cluster> clusters = loadClustersFromDirectory(path);
-    for (Cluster& cluster : clusters) {
-        std::unique_ptr<Cluster> c = std::make_unique<Cluster>(std::move(cluster));
-        gClusters.push_back(std::move(c));
-    }
-}
-
 
 } // namespace data

@@ -44,12 +44,12 @@
 class ClusterWidget : public QWidget {
 Q_OBJECT
 public:
-    ClusterWidget(std::string clusterId);
+    ClusterWidget(int clusterId);
 
-    void updateConnectionStatus(const std::string& node);
+    void updateConnectionStatus(int nodeId);
 
 private:
-    const std::string _clusterId;
+    const int _clusterId;
 
     QLabel* _connectionLabel;
     std::vector<QLabel*> _nodeConnectionLabels;
@@ -65,10 +65,10 @@ public:
     ClustersWidget();
 
 public slots:
-    void connectedStatusChanged(const std::string& cluster, const std::string& node);
+    void connectedStatusChanged(int clusterId, int nodeId);
 
 private:
-    std::map<std::string, ClusterWidget*> _clusterWidgets;
+    std::map<int, ClusterWidget*> _clusterWidgets;
 };
 
 #endif // __CORE__CLUSTERWIDGET_H__

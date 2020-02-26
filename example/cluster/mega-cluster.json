@@ -1,8 +1,5 @@
 {
     "name": "Mega Cluster",
     "enabled": true,
-    "nodes": {
-        "local": { "name": "Local", "ip": "localhost", "port": 5000 },
-        "office": { "name": "Office", "ip": "130.236.243.10", "port": 5000 }
-    }
+    "nodes": [ "Local", "Office", "Laptop" ]
 }

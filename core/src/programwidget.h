@@ -40,6 +40,7 @@
 
 #include <QMenu>
 #include "cluster.h"
+#include "node.h"
 #include "process.h"
 #include "program.h"
 #include <vector>
@@ -67,8 +68,7 @@ private:
     void updateButton();
     void updateMenu();
 
-    bool isProcessRunning(const Cluster::Node* node) const;
-    bool isProcessRunning(const std::unique_ptr<Cluster::Node>& node) const;
+    bool isProcessRunning(const Node* node) const;
     bool hasNoProcessRunning() const;
     bool hasAllProcessesRunning() const;
 
@@ -81,7 +81,7 @@ private:
     };
 
     QMenu* _actionMenu;
-    std::map<const Cluster::Node*, ProcessInfo> _processes;
+    std::map<const Node*, ProcessInfo> _processes;
 };
 
 
@@ -105,7 +105,7 @@ signals:
     void stopProcess(const Process* process);
 
 private:
-    std::map<std::string, ProgramButton*> _startButtons;
+    std::map<int, ProgramButton*> _startButtons;
 };
 
 
@@ -115,9 +115,9 @@ private:
 class ProgramWidget : public QWidget {
 Q_OBJECT
 public:
-    ProgramWidget(Program* program, std::vector<Cluster*> clusters);
+    ProgramWidget(const Program& program);
 
-    void updateStatus(Cluster* cluster);
+    void updateStatus(int clusterId);
     void processUpdated(Process* process);
 
 signals:
@@ -128,7 +128,7 @@ signals:
     void stopProcess(const Process* process);
 
 private:
-    std::map<const Cluster*, ClusterWidget*> _widgets;
+    std::map<int, ClusterWidget*> _widgets;
 };
 
 
@@ -136,15 +136,14 @@ private:
 
 
 class ProgramsWidget : public QWidget {
-    Q_OBJECT
+Q_OBJECT
 public:
-    ProgramsWidget(const std::vector<Program*>& programs,
-        const std::vector<Cluster*>& clusters);
+    ProgramsWidget();
 
     void processUpdated(Process* process);
 
 public slots:
-    void connectedStatusChanged(const std::string& cluster, const std::string& node);
+    void connectedStatusChanged(int cluster, int node);
 
 signals:
     void startProgram(Cluster* cluster, const Program* program,
@@ -156,7 +155,7 @@ signals:
     void stopProcess(const Process* process);
 
 private:
-    std::map<const Program*, ProgramWidget*> _widgets;
+    std::map<int, ProgramWidget*> _widgets;
 };
 
 } // namespace programs

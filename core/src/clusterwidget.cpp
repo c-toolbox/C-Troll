@@ -35,10 +35,11 @@
 #include "clusterwidget.h"
 
 #include "database.h"
+#include "node.h"
 #include <QLabel>
 #include <QVBoxLayout>
 
-ClusterWidget::ClusterWidget(std::string clusterId)
+ClusterWidget::ClusterWidget(int clusterId)
     : _clusterId(clusterId)
 {
     Cluster* cluster = data::findCluster(clusterId);
@@ -53,7 +54,9 @@ ClusterWidget::ClusterWidget(std::string clusterId)
     _connectionLabel = new QLabel("disconnected");
     layout->addWidget(_connectionLabel);
 
-    for (const std::unique_ptr<Cluster::Node>& n : cluster->nodes) {
+    for (int nodeId : cluster->nodes) {
+        Node* n = data::findNode(nodeId);
+
         QWidget* node = new QWidget;
         layout->addWidget(node);
         QBoxLayout* nodeLayout = new QVBoxLayout;
@@ -72,22 +75,26 @@ ClusterWidget::ClusterWidget(std::string clusterId)
     }
 }
 
-void ClusterWidget::updateConnectionStatus(const std::string& node) {
+void ClusterWidget::updateConnectionStatus(int nodeId) {
     Cluster* cluster = data::findCluster(_clusterId);
     assert(cluster);
 
     for (size_t i = 0; i < cluster->nodes.size(); ++i) {
-        const Cluster::Node& it = *cluster->nodes[i];
-        if (it.id == node) {
+        Node* n = data::findNode(cluster->nodes[i]);
+        if (n->id == nodeId) {
             _nodeConnectionLabels[i]->setText(
-                it.isConnected ? "connected" : "disconnected"
+                n->isConnected ? "connected" : "disconnected"
             );
         }
     }
 
     const bool allConnected = std::all_of(
         cluster->nodes.begin(), cluster->nodes.end(),
-        std::mem_fn(&Cluster::Node::isConnected)
+        [](int id) {
+            Node* n = data::findNode(id);
+            assert(n);
+            return n->isConnected;
+        }
     );
     _connectionLabel->setText(allConnected ? "connected" : "disconnected");
 }
@@ -107,10 +114,8 @@ ClustersWidget::ClustersWidget() {
     }
 }
 
-void ClustersWidget::connectedStatusChanged(const std::string& cluster,
-                                            const std::string& node)
-{
-    const auto it = _clusterWidgets.find(cluster);
+void ClustersWidget::connectedStatusChanged(int clusterId, int nodeId) {
+    const auto it = _clusterWidgets.find(clusterId);
     assert(it != _clusterWidgets.end());
-    it->second->updateConnectionStatus(node);
+    it->second->updateConnectionStatus(nodeId);
 }

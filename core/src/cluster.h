@@ -35,8 +35,6 @@
 #ifndef __CORE__CLUSTER_H__
 #define __CORE__CLUSTER_H__
 
-#include <QByteArray>
-#include <memory>
 #include <json/json.hpp>
 
 class JsonObject;
@@ -47,36 +45,18 @@ class JsonObject;
  * \m id, a setting whether or not it is \m enabled and a list of computer \m nodes.
  */
 struct Cluster {
-    /**
-     * This struct contains information about individual computer nodes of the cluster.
-     * Each node has a human-readable \m name, an \m ipAddress, and a \m port on which the
-     * Tray application is listening.
-     */
-    struct Node {
-        /// Unique identifier for the cluster node
-        std::string id;
-        /// The human readable name of the computer node
-        std::string name;
-        /// The IP address at which the computer is reachable; this can also be a
-        /// hostname
-        std::string ipAddress;
-        /// The port on which the Tray application on that computer is listening
-        int port = -1;
-        /// A flag representing whether the node is connected or not
-        bool isConnected = false;
-    };
+    int id = -1;
 
     /// The human readable name of this Cluster
     std::string name;
-    /// The unique identifier of this Cluster
-    std::string id;
+
     /// A flag whether this Cluster is enabled or disabled
     bool isEnabled = false;
+
     /// A list of all nodes belonging to this cluster
-    std::vector<std::unique_ptr<Node>> nodes;
+    std::vector<int> nodes;
 };
 
-void to_json(nlohmann::json& j, const Cluster& p);
 void from_json(const nlohmann::json& j, Cluster& p);
 
 /**

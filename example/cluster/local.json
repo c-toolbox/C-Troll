@@ -1,7 +1,5 @@
 {
     "name": "Local",
     "enabled": true,
-    "nodes": {
-        "local": { "name": "Local", "ip": "localhost", "port": 5000 }
-    }
+    "nodes": [ "Local" ]
 }

@@ -32,43 +32,42 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "process.h"
+#ifndef __CORE__NODE_H__
+#define __CORE__NODE_H__
 
-#include "cluster.h"
-#include "program.h"
-#include "logging.h"
-#include <assert.h>
+#include <json/json.hpp>
 
-common::CommandMessage startProcessCommand(const Process& process) {
-    common::CommandMessage t;
-    t.id = process.id;
-    t.executable = process.application->executable;
-    t.workingDirectory = process.application->workingDirectory;
-    t.command = common::CommandMessage::Command::Start;
+/**
+ * This struct contains information about individual computer nodes of the cluster.
+ * Each node has a human-readable \m name, an \m ipAddress, and a \m port on which the
+ * Tray application is listening.
+ */
+struct Node {
+    /// Unique identifier for the cluster node
+    int id = -1;
 
-    t.commandlineParameters = process.application->commandlineParameters;
+    /// The human readable name of the computer node
+    std::string name;
+    /// The IP address at which the computer is reachable; this can also be a
+    /// hostname
+    std::string ipAddress;
+    /// The port on which the Tray application on that computer is listening
+    int port = -1;
+    /// A flag representing whether the node is connected or not
+    bool isConnected = false;
+};
 
-    t.commandlineParameters = t.commandlineParameters + ' ' +
-        process.configuration->parameters;
 
-    return t;
-}
+void from_json(const nlohmann::json& j, Node& p);
 
-common::CommandMessage exitProcessCommand(const Process& process) {
-    common::CommandMessage t;
-    t.id = process.id;
-    t.command = common::CommandMessage::Command::Exit;
-    return t;
-}
+/**
+ * This method walks the passed \p directory and looks for all <code>*.json</code>
+ * files in it. Any \c JSON file in it will be interpreted as a node configuration and
+ * returned.
+ * \param directory The directory that is walked in search for <code>*.json</code>
+ *        files
+ * \return A list of all Nodes%s that were found by walking the \p directory
+ */
+std::vector<Node> loadNodesFromDirectory(const std::string& directory);
 
-int Process::nextId = 0;
-
-Process::Process(const Program* program, const Program::Configuration* configuration,
-                 const Cluster* cluster, const Node* node)
-    : id(nextId++)
-    , application(program)
-    , configuration(configuration)
-    , cluster(cluster)
-    , node(node)
-    , status(common::ProcessStatusMessage::Status::Unknown)
-{}
+#endif // __CORE__CLUSTER_H__

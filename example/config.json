@@ -1,5 +1,6 @@
 {
-    "applicationPath": "application",
-    "clusterPath": "cluster",
-    "listeningPort": 19850
+  "applicationPath": "application",
+  "clusterPath": "cluster",
+  "nodePath":  "nodes",
+  "listeningPort": 19850
 }

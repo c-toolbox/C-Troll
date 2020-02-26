@@ -37,6 +37,7 @@
 
 #include "cluster.h"
 #include "commandmessage.h"
+#include "node.h"
 #include "processstatusmessage.h"
 #include "program.h"
 
@@ -44,13 +45,13 @@ struct Process {
     Process() = delete;
 
     Process(const Program* program, const Program::Configuration* configuration,
-        const Cluster* cluster, const Cluster::Node* node);
+        const Cluster* cluster, const Node* node);
 
     const int id = -1;
     const Program* application;
     const Program::Configuration* configuration;
     const Cluster* cluster;
-    const Cluster::Node* node;
+    const Node* node;
     common::ProcessStatusMessage::Status status;
 
     static int nextId;

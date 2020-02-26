@@ -4,20 +4,16 @@
   "workingDirectory": "C:/Program Files (x86)/VideoLAN/VLC",
   "configurations": [
     {
-      "id": "default",
       "name": "Default",
       "parameters": ""
     },
     {
-      "id": "fancy",
       "name": "Fancy",
       "parameters": "-foo bar"
     }
   ],
   "clusters": [
-    "local",
-    "local-office"
-  ],
-  "default-cluster": "local",
-  "default-configuration": "default"
+    "Local",
+    "Local+Office"
+  ]
 }

@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016 - 2020                                                             *
- * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
+ * Alexander Bock, Erik SundÃ©n, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -32,43 +32,80 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "process.h"
+#include "node.h"
 
-#include "cluster.h"
-#include "program.h"
+#include "jsonload.h"
 #include "logging.h"
+#include <fmt/format.h>
 #include <assert.h>
+#include <filesystem>
+#include <set>
 
-common::CommandMessage startProcessCommand(const Process& process) {
-    common::CommandMessage t;
-    t.id = process.id;
-    t.executable = process.application->executable;
-    t.workingDirectory = process.application->workingDirectory;
-    t.command = common::CommandMessage::Command::Start;
+namespace {
+    constexpr const char* KeyName = "name";
+    constexpr const char* KeyIpAddress = "ip";
+    constexpr const char* KeyPort = "port";
+} // namespace
 
-    t.commandlineParameters = process.application->commandlineParameters;
+template <>
+struct fmt::formatter<Node> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) {
+        return ctx.begin();
+    }
 
-    t.commandlineParameters = t.commandlineParameters + ' ' +
-        process.configuration->parameters;
+    template <typename FormatContext>
+    auto format(const Node& n, FormatContext& ctx) {
+        return format_to(
+            ctx.out(),
+            "( id: {}, name: \"{}\", ipAddress: \"{}\", port: {}, isConnected: {} )",
+            n.id, n.name, n.ipAddress, n.port, n.isConnected
+        );
+    }
+};
 
-    return t;
+void from_json(const nlohmann::json& j, Node& p) {
+    j.at(KeyName).get_to(p.name);
+    j.at(KeyIpAddress).get_to(p.ipAddress);
+    j.at(KeyPort).get_to(p.port);
 }
 
-common::CommandMessage exitProcessCommand(const Process& process) {
-    common::CommandMessage t;
-    t.id = process.id;
-    t.command = common::CommandMessage::Command::Exit;
-    return t;
+std::vector<Node> loadNodesFromDirectory(const std::string& directory) {
+    std::vector<Node> nodes = common::loadJsonFromDirectory<Node>(directory);
+
+    // First check that no names for nodes are duplicated
+    std::set<std::string> nodeNames;
+    for (const Node& n : nodes) {
+        if (nodeNames.find(n.name) != nodeNames.end()) {
+            throw std::runtime_error(fmt::format("Found duplicate node name: {}", n));
+        }
+        nodeNames.insert(n.name);
+    }
+
+    for (const Node& node : nodes) {
+        if (node.name.empty()) {
+            throw std::runtime_error(fmt::format("Found node without a name: {}", node));
+        }
+        if (node.ipAddress.empty()) {
+            throw std::runtime_error(
+                fmt::format("Found node without an IP address: {}", node)
+            );
+        }
+        // @TODO (abock, 2020-02-26) Add a clever check that makes sure the passed value
+        // is a valid DNS name or IP address
+
+        if (node.port <= 0 || node.port >= 65536) {
+            throw std::runtime_error(fmt::format(
+                "Found node with invalid port: {}", node
+            ));
+        }
+    }
+
+    // Inject the unique identifiers into the nodes
+    int id = 0;
+    for (Node& node : nodes) {
+        node.id = id;
+        id++;
+    }
+    return nodes;
 }
-
-int Process::nextId = 0;
-
-Process::Process(const Program* program, const Program::Configuration* configuration,
-                 const Cluster* cluster, const Node* node)
-    : id(nextId++)
-    , application(program)
-    , configuration(configuration)
-    , cluster(cluster)
-    , node(node)
-    , status(common::ProcessStatusMessage::Status::Unknown)
-{}

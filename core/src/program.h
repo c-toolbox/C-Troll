@@ -42,7 +42,7 @@
 struct Program {
     struct Configuration {
         /// Unique identifier of the configuration
-        std::string id;
+        int id;
 
         /// User-facing name of the configuration
         std::string name;
@@ -52,7 +52,7 @@ struct Program {
     };
 
     /// A unique identifier
-    std::string id;
+    int id;
     /// A human readable name for this Program
     std::string name;
     /// The full path to the executable
@@ -66,11 +66,7 @@ struct Program {
     /// List of all configurations
     std::vector<Configuration> configurations;
     /// List of all clusters
-    std::vector<std::string> clusters;
-    // Default configuration id
-    std::string defaultConfiguration;
-    // Default cluster id
-    std::string defaultCluster;
+    std::vector<int> clusters;
 };
 
 std::vector<Program> loadProgramsFromDirectory(const std::string& directory);

@@ -1,8 +1,5 @@
 {
     "name": "Local+Office",
     "enabled": true,
-    "nodes": {
-        "local": { "name": "Local", "ip": "localhost", "port": 5000 },
-        "office": { "name": "Office", "ip": "130.236.243.64", "port": 5000 }
-    }
+    "nodes": [ "Local", "Office" ]
 }

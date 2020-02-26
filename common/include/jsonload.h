@@ -72,8 +72,6 @@ T loadFromJson(const std::string& jsonFile, const std::string& baseDirectory) {
     std::ifstream f(jsonFile);
     nlohmann::json obj;
     f >> obj;
-    obj["id"] = id;
-
     return T(obj);
 }
 

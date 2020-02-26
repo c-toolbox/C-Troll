@@ -40,21 +40,31 @@
 #include <vector>
 
 struct Cluster;
+struct Node;
 struct Program;
 struct Process;
 
 namespace data {
     
 std::vector<Cluster*> clusters();
+std::vector<Node*> nodes();
 std::vector<Program*> programs();
 std::vector<Process*> processes();
 
+Cluster* findCluster(int);
+Cluster* findCluster(const std::string& name);
+std::vector<Cluster*> findClustersForProgram(const Program& program);
+std::vector<Cluster*> findClusterForNode(const Node& node);
+
+Node* findNode(int id);
+Node* findNode(const std::string& name);
+std::vector<Node*> findNodesForCluster(const Cluster& cluster);
+
 void addProcess(std::unique_ptr<Process> process);
-Cluster* findCluster(const std::string& id);
 Process* findProcess(int id);
 
-void loadPrograms(const std::string& path);
-void loadClusters(const std::string& path);
+void loadData(const std::string& programPath, const std::string& clusterPath,
+    const std::string& nodePath);
 
 } // namespace data
 

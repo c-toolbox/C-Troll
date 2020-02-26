@@ -37,11 +37,11 @@
 namespace {
     constexpr const char* KeyApplicationPath = "applicationPath";
     constexpr const char* KeyClusterPath = "clusterPath";
-    constexpr const char* KeyListeningPort = "listeningPort";
+    constexpr const char* KeyNodePath = "nodePath";
 } // namespace
 
 void from_json(const nlohmann::json& j, Configuration& p) {
     j.at(KeyApplicationPath).get_to(p.applicationPath);
     j.at(KeyClusterPath).get_to(p.clusterPath);
-    j.at(KeyListeningPort).get_to(p.listeningPort);
+    j.at(KeyNodePath).get_to(p.nodePath);
 }
