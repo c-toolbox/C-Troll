@@ -36,6 +36,7 @@
 
 #include "clusterwidget.h"
 #include "configuration.h"
+#include "database.h"
 #include "message.h"
 #include "jsonload.h"
 #include "logging.h"
@@ -80,22 +81,13 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     //
     // Load the data
     Log(fmt::format("Loading programs from directory {}", config.applicationPath));
-    std::vector<Program*> programs;
-    for (Program& program : loadProgramsFromDirectory(config.applicationPath)) {
-        std::unique_ptr<Program> p = std::make_unique<Program>(std::move(program));
-        programs.push_back(p.get());
-        _programs.push_back(std::move(p));
-    }
+    data::loadPrograms(config.applicationPath);
+
     Log(fmt::format("Loading clusters from directory {}", config.clusterPath));
-    std::vector<Cluster*> clusters;
-    for (Cluster& cluster : loadClustersFromDirectory(config.clusterPath)) {
-        std::unique_ptr<Cluster> c = std::make_unique<Cluster>(std::move(cluster));
-        clusters.push_back(c.get());
-        _clusters.push_back(std::move(c));
-    }
+    data::loadClusters(config.clusterPath);
 
     // Programs
-    _programWidget = new programs::ProgramsWidget(programs, clusters);
+    _programWidget = new programs::ProgramsWidget(data::programs(), data::clusters());
     connect(
         _programWidget, &programs::ProgramsWidget::startProgram,
         this, &MainWindow::startProgram
@@ -120,7 +112,7 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
 
 
     // Clusters
-    _clustersWidget = new ClustersWidget(clusters);
+    _clustersWidget = new ClustersWidget(data::clusters());
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
         _clustersWidget, &ClustersWidget::connectedStatusChanged
@@ -132,19 +124,13 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
         [this](common::ProcessStatusMessage status) {
-            const auto it = std::find_if(
-                _processes.begin(), _processes.end(),
-                [status](const std::unique_ptr<Process>& p) {
-                    return p->id == status.processId;
-                }
-            );
-            if (it != _processes.end()) {
-                (*it)->status = status.status;
+            Process* process = data::findProcess(status.processId);
+            assert(process);
+            process->status = status.status;
 
-                // The process was already known to us, which should always be the case
-                _processesWidget->processUpdated((*it)->id);
-                _programWidget->processUpdated(it->get());
-            }
+            // The process was already known to us, which should always be the case
+            _processesWidget->processUpdated(process->id);
+            _programWidget->processUpdated(process);
         }
     );
     connect(
@@ -162,7 +148,7 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     tabWidget->addTab(_processesWidget, "Processes");
     tabWidget->addTab(_messageBox, "Log");
 
-    _clusterConnectionHandler.initialize(clusters);
+    _clusterConnectionHandler.initialize(data::clusters());
 }
 
 void MainWindow::log(std::string msg) {
@@ -191,7 +177,7 @@ void MainWindow::startProgram(Cluster* cluster, const Program* program,
         startProcess(process.get());
 
         _processesWidget->processAdded(*process);
-        _processes.push_back(std::move(process));
+        data::addProcess(std::move(process));
     }
 }
 
@@ -199,13 +185,13 @@ void MainWindow::stopProgram(Cluster* cluster, const Program* program,
                              const Program::Configuration* configuration)
 {
     std::vector<Process*> processes;
-    for (const std::unique_ptr<Process>& process : _processes) {
+    for (Process* process : data::processes()) {
         const bool clusterMatch = process->cluster == cluster;
         const bool programMatch = process->application == program;
         const bool configurationMatch = process->configuration == configuration;
 
         if (clusterMatch && programMatch && configurationMatch) {
-            processes.push_back(process.get());
+            processes.push_back(process);
         }
     }
 

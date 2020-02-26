@@ -32,46 +32,29 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__MAINWINDOW_H__
-#define __CORE__MAINWINDOW_H__
+#ifndef __CORE__DATABASE_H__
+#define __CORE__DATABASE_H__
 
-#include <QMainWindow>
-
-#include "cluster.h"
-#include "clusterconnectionhandler.h"
-#include "process.h"
-#include "program.h"
-#include <QTextEdit>
 #include <memory>
+#include <string>
+#include <vector>
 
-class ClustersWidget;
-class ProcessesWidget;
-namespace programs { class ProgramsWidget; }
+struct Cluster;
+struct Program;
+struct Process;
 
-class MainWindow : public QMainWindow {
-Q_OBJECT
-public:
-    explicit MainWindow(QString title, const std::string& configurationFile);
+namespace data {
+    
+std::vector<Cluster*> clusters();
+std::vector<Program*> programs();
+std::vector<Process*> processes();
 
-private:
-    // private slots
-    void startProgram(Cluster* cluster, const Program* program,
-        const Program::Configuration* configuration);
-    void stopProgram(Cluster* cluster, const Program* program,
-        const Program::Configuration* configuration);
-    void startProcess(const Process* process);
-    void stopProcess(const Process* process);
+void addProcess(std::unique_ptr<Process> process);
+Process* findProcess(int id);
 
+void loadPrograms(const std::string& path);
+void loadClusters(const std::string& path);
 
-    void log(std::string msg);
+} // namespace data
 
-    programs::ProgramsWidget* _programWidget;
-    ClustersWidget* _clustersWidget;
-    ProcessesWidget* _processesWidget;
-
-    ClusterConnectionHandler _clusterConnectionHandler;
-
-    QTextEdit* _messageBox = nullptr;
-};
-
-#endif // __CORE__MAINWINDOW_H__
+#endif // __CORE__DATABASE_H__

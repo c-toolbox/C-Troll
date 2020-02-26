@@ -99,9 +99,15 @@ void ProgramButton::handleButtonPress() {
 
     if (hasNoProcessRunning()) {
         emit startProgram(_configuration);
+        
+        // We disable the button until we get another message back from the tray
+        setEnabled(false);
     }
     else if (hasAllProcessesRunning()) {
         emit stopProgram(_configuration);
+
+        // We disable the button until we get another message back from the tray
+        setEnabled(false);
     }
     else {
         // This slot should only be invoked if either all processes are running, or no
@@ -111,6 +117,8 @@ void ProgramButton::handleButtonPress() {
 }
 
 void ProgramButton::updateButton() {
+    setEnabled(true);
+
     // If all processes don't exist or are in NormalExit/CrashExit/FailedToStart, we show
     // the regular start button without any menus attached
     if (hasNoProcessRunning()) {

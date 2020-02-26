@@ -32,46 +32,87 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__MAINWINDOW_H__
-#define __CORE__MAINWINDOW_H__
-
-#include <QMainWindow>
+#include "database.h"
 
 #include "cluster.h"
-#include "clusterconnectionhandler.h"
-#include "process.h"
 #include "program.h"
-#include <QTextEdit>
-#include <memory>
+#include "process.h"
 
-class ClustersWidget;
-class ProcessesWidget;
-namespace programs { class ProgramsWidget; }
+namespace {
 
-class MainWindow : public QMainWindow {
-Q_OBJECT
-public:
-    explicit MainWindow(QString title, const std::string& configurationFile);
+std::vector<std::unique_ptr<Cluster>> gClusters;
+std::vector<std::unique_ptr<Program>> gPrograms;
+std::vector<std::unique_ptr<Process>> gProcesses;
 
-private:
-    // private slots
-    void startProgram(Cluster* cluster, const Program* program,
-        const Program::Configuration* configuration);
-    void stopProgram(Cluster* cluster, const Program* program,
-        const Program::Configuration* configuration);
-    void startProcess(const Process* process);
-    void stopProcess(const Process* process);
+} // namespace
+
+namespace data {
+
+std::vector<Cluster*> clusters() {
+    std::vector<Cluster*> clusters;
+    for (const std::unique_ptr<Cluster>& c : gClusters) {
+        clusters.push_back(c.get());
+    }
+    return clusters;
+}
+
+std::vector<Program*> programs() {
+    std::vector<Program*> programs;
+    for (const std::unique_ptr<Program>& c : gPrograms) {
+        programs.push_back(c.get());
+    }
+    return programs;
+}
+
+std::vector<Process*> processes() {
+    std::vector<Process*> processes;
+    for (const std::unique_ptr<Process>& c : gProcesses) {
+        processes.push_back(c.get());
+    }
+    return processes;
+}
 
 
-    void log(std::string msg);
+//////////////////////////////////////////////////////////////////////////////////////////
 
-    programs::ProgramsWidget* _programWidget;
-    ClustersWidget* _clustersWidget;
-    ProcessesWidget* _processesWidget;
 
-    ClusterConnectionHandler _clusterConnectionHandler;
+void addProcess(std::unique_ptr<Process> process) {
+    gProcesses.push_back(std::move(process));
+}
 
-    QTextEdit* _messageBox = nullptr;
-};
+Process* findProcess(int id) {
+    const auto it = std::find_if(
+        gProcesses.begin(), gProcesses.end(),
+        [id](const std::unique_ptr<Process>& p) {
+            return p->id == id;
+        }
+    );
+    return it != gProcesses.end() ? it->get() : nullptr;
+}
 
-#endif // __CORE__MAINWINDOW_H__
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+void loadPrograms(const std::string& path) {
+    gPrograms.clear();
+
+    std::vector<Program> programs = loadProgramsFromDirectory(path);
+    for (Program& program : programs) {
+        std::unique_ptr<Program> p = std::make_unique<Program>(std::move(program));
+        gPrograms.push_back(std::move(p));
+    }
+}
+
+void loadClusters(const std::string& path) {
+    gClusters.clear();
+
+    std::vector<Cluster> clusters = loadClustersFromDirectory(path);
+    for (Cluster& cluster : clusters) {
+        std::unique_ptr<Cluster> c = std::make_unique<Cluster>(std::move(cluster));
+        gClusters.push_back(std::move(c));
+    }
+}
+
+
+} // namespace data
