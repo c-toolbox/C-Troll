@@ -158,6 +158,25 @@ std::vector<Node*> findNodesForCluster(const Cluster& cluster) {
     return nodes;
 }
 
+Program* findProgram(int id) {
+    const auto it = std::find_if(
+        gPrograms.begin(), gPrograms.end(),
+        [id](const std::unique_ptr<Program>& p) {
+            return p->id == id;
+        }
+    );
+    return it != gPrograms.end() ? it->get() : nullptr;
+}
+
+const Program::Configuration& findConfigurationForProgram(const Program& program, int id)
+{
+    const auto it = std::find_if(
+        program.configurations.begin(), program.configurations.end(),
+        [id](const Program::Configuration& c) { return c.id == id; }
+    );
+    return *it;
+}
+
 Process* findProcess(int id) {
     const auto it = std::find_if(
         gProcesses.begin(), gProcesses.end(),

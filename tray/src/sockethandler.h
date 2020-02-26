@@ -44,10 +44,11 @@ namespace common { class JsonSocket; }
 class SocketHandler : public QObject {
 Q_OBJECT
 public:
+    void initialize(int port = 5000);
+
     void newConnection();
     void disconnected(common::JsonSocket*);
     void readyRead(common::JsonSocket*);
-    void initialize();
 
 public slots:    
     void sendMessage(const nlohmann::json& message);

@@ -41,9 +41,7 @@
 #include <iostream>
 #include <memory>
 
-void SocketHandler::initialize() {
-    const int port = 5000;
-    
+void SocketHandler::initialize(int port) {
     Log(fmt::format("Listening on port: {}", port));
     
     const bool success = _server.listen(QHostAddress::Any, port);

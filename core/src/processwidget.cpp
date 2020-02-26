@@ -70,24 +70,33 @@ ProcessWidget::ProcessWidget(int processId)
     : _processId(processId)
 {
     Process* process = data::findProcess(_processId);
+    assert(process);
+    Program* program = data::findProgram(process->programId);
+    assert(program);
+    const Program::Configuration& configuration = data::findConfigurationForProgram(
+        *program, process->configurationId
+    );
+    Cluster* cluster = data::findCluster(process->clusterId);
+    assert(cluster);
+
 
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 
-    QLabel* program = new QLabel(
-        QString::fromStdString("Program: " + process->application->name)
+    QLabel* programLabel = new QLabel(
+        QString::fromStdString("Program: " + program->name)
     );
-    layout->addWidget(program);
+    layout->addWidget(programLabel);
 
-    QLabel* configuration = new QLabel(
-        QString::fromStdString("Configuration: " + process->configuration->name)
+    QLabel* configurationLabel = new QLabel(
+        QString::fromStdString("Configuration: " + configuration.name)
     );
-    layout->addWidget(configuration);
+    layout->addWidget(configurationLabel);
 
-    QLabel* cluster = new QLabel(
-        QString::fromStdString("Cluster: " + process->cluster->name)
+    QLabel* clusterLabel = new QLabel(
+        QString::fromStdString("Cluster: " + cluster->name)
     );
-    layout->addWidget(cluster);
+    layout->addWidget(clusterLabel);
 
     QLabel* id = new QLabel(QString::number(process->id));
     layout->addWidget(id);

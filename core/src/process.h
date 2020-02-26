@@ -42,18 +42,16 @@
 #include "program.h"
 
 struct Process {
-    Process() = delete;
-
-    Process(const Program* program, const Program::Configuration* configuration,
-        const Cluster* cluster, const Node* node);
+    Process(int programId, int configurationId, int clusterId, int NodeId);
 
     const int id = -1;
-    const Program* application;
-    const Program::Configuration* configuration;
-    const Cluster* cluster;
-    const Node* node;
+    const int programId;
+    const int configurationId;
+    const int clusterId;
+    const int nodeId;
     common::ProcessStatusMessage::Status status;
 
+private:
     static int nextId;
 };
 

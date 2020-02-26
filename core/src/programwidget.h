@@ -56,8 +56,8 @@ public:
     void processUpdated(Process* process);
 
 signals:
-    void startProgram(const Program::Configuration* configuration);
-    void stopProgram(const Program::Configuration* configuration);
+    void startProgram(int configurationId);
+    void stopProgram(int configurationId);
 
     void restartProcess(const Process* process);
     void stopProcess(const Process* process);
@@ -81,7 +81,7 @@ private:
     };
 
     QMenu* _actionMenu;
-    std::map<const Node*, ProcessInfo> _processes;
+    std::map<int, ProcessInfo> _processes;
 };
 
 
@@ -98,8 +98,8 @@ public:
     void processUpdated(Process* process);
 
 signals:
-    void startProgram(const Program::Configuration* configuration);
-    void stopProgram(const Program::Configuration* configuration);
+    void startProgram(int configurationId);
+    void stopProgram(int configurationId);
 
     void restartProcess(const Process* process);
     void stopProcess(const Process* process);
@@ -109,7 +109,7 @@ private:
 };
 
 
- //////////////////////////////////////////////////////////////////////////////////////////
+ /////////////////////////////////////////////////////////////////////////////////////////
 
 
 class ProgramWidget : public QWidget {
@@ -121,8 +121,8 @@ public:
     void processUpdated(Process* process);
 
 signals:
-    void startProgram(Cluster* cluster, const Program::Configuration* configuration);
-    void stopProgram(Cluster* cluster, const Program::Configuration* configuration);
+    void startProgram(int clusterId, int configurationId);
+    void stopProgram(int clusterId, int configurationId);
 
     void restartProcess(const Process* process);
     void stopProcess(const Process* process);
@@ -146,10 +146,8 @@ public slots:
     void connectedStatusChanged(int cluster, int node);
 
 signals:
-    void startProgram(Cluster* cluster, const Program* program,
-        const Program::Configuration* configuration);
-    void stopProgram(Cluster* cluster, const Program* program,
-        const Program::Configuration* configuration);
+    void startProgram(int clusterId, int programId, int configurationId);
+    void stopProgram(int clusterId, int programId, int configurationId);
 
     void restartProcess(const Process* process);
     void stopProcess(const Process* process);

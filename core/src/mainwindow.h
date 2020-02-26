@@ -55,10 +55,8 @@ public:
 
 private:
     // private slots
-    void startProgram(Cluster* cluster, const Program* program,
-        const Program::Configuration* configuration);
-    void stopProgram(Cluster* cluster, const Program* program,
-        const Program::Configuration* configuration);
+    void startProgram(int clusterId, int programId, int configurationId);
+    void stopProgram(int clusterId, int programId, int configurationId);
     void startProcess(const Process* process);
     void stopProcess(const Process* process);
 

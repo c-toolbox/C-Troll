@@ -70,7 +70,7 @@ void ProgramButton::updateStatus() {
 void ProgramButton::processUpdated(Process* process) {
     auto it = std::find_if(
         _processes.begin(), _processes.end(),
-        [id = process->id](const std::pair<const Node*, ProcessInfo>& p) {
+        [id = process->id](const std::pair<int, ProcessInfo>& p) {
             return p.second.process->id == id;
         }
     );
@@ -80,10 +80,11 @@ void ProgramButton::processUpdated(Process* process) {
 
         ProcessInfo info;
         info.process = process;
-        info.menuAction = new QAction(QString::fromStdString(process->node->name));
+        Node* node = data::findNode(process->nodeId);
+        info.menuAction = new QAction(QString::fromStdString(node->name));
         // We store the name of the node as the user data in order to sort them later
-        info.menuAction->setData(QString::fromStdString(process->node->name));
-        _processes[process->node] = info;
+        info.menuAction->setData(QString::fromStdString(node->name));
+        _processes[process->nodeId] = info;
     }
     else {
         // This is a process that already exists and we should update it depending on the
@@ -100,13 +101,13 @@ void ProgramButton::handleButtonPress() {
     assert(hasNoProcessRunning() || hasAllProcessesRunning());
 
     if (hasNoProcessRunning()) {
-        emit startProgram(_configuration);
+        emit startProgram(_configuration->id);
         
         // We disable the button until we get another message back from the tray
         setEnabled(false);
     }
     else if (hasAllProcessesRunning()) {
-        emit stopProgram(_configuration);
+        emit stopProgram(_configuration->id);
 
         // We disable the button until we get another message back from the tray
         setEnabled(false);
@@ -147,7 +148,7 @@ void ProgramButton::updateButton() {
 
 void ProgramButton::updateMenu() {
     // First a bit of cleanup so that we don't have old signal connections laying around
-    for (const std::pair<const Node*, ProcessInfo>& p : _processes) {
+    for (const std::pair<int, ProcessInfo>& p : _processes) {
         QObject::disconnect(p.second.menuAction);
     }
     _actionMenu->clear();
@@ -156,7 +157,7 @@ void ProgramButton::updateMenu() {
     std::transform(
         _processes.begin(), _processes.end(),
         std::back_inserter(actions),
-        [](const std::pair<const Node*, ProcessInfo>& p) {
+        [](const std::pair<int, ProcessInfo>& p) {
             return p.second.menuAction;
         }
     );
@@ -171,13 +172,14 @@ void ProgramButton::updateMenu() {
         const std::string nodeName = action->data().toString().toStdString();
         const auto it = std::find_if(
             _processes.begin(), _processes.end(),
-            [nodeName](const std::pair<const Node*, ProcessInfo>& p) {
-                return p.first->name == nodeName;
+            [nodeName](const std::pair<int, ProcessInfo>& p) {
+                Node* node = data::findNode(p.first);
+                return node->name == nodeName;
             }
         );
         // If we are getting this far, the node for this action has to exist in the map
         assert(it != _processes.end());
-        const Node* node = it->first;
+        const Node* node = data::findNode(it->first);
 
         // We only going to update the actions if some of the nodes are not running but
         // some others are. So we basically have to provide the ability to start the nodes
@@ -209,7 +211,7 @@ void ProgramButton::updateMenu() {
 
 bool ProgramButton::isProcessRunning(const Node* node) const {
     using Status = common::ProcessStatusMessage::Status;
-    const auto it = _processes.find(node);
+    const auto it = _processes.find(node->id);
     return (it != _processes.end()) && it->second.process->status == Status::Running;
 }
 
@@ -247,13 +249,11 @@ ClusterWidget::ClusterWidget(Cluster* cluster,
 
         connect(
             button, &ProgramButton::startProgram,
-            [this](const Program::Configuration* conf) { emit startProgram(conf); }
+            this, &ClusterWidget::startProgram
         );
         connect(
             button, &ProgramButton::stopProgram,
-            [this](const Program::Configuration* conf) {
-                emit stopProgram(conf);
-            }
+            this, &ClusterWidget::stopProgram
         );
 
         connect(
@@ -280,7 +280,7 @@ void ClusterWidget::updateStatus() {
 }
 
 void ClusterWidget::processUpdated(Process* process) {
-    const auto it = _startButtons.find(process->configuration->id);
+    const auto it = _startButtons.find(process->configurationId);
     if (it != _startButtons.end()) {
         it->second->processUpdated(process);
     }
@@ -304,15 +304,15 @@ ProgramWidget::ProgramWidget(const Program& program) {
 
         connect(
             w, &ClusterWidget::startProgram,
-            [this, cluster](const Program::Configuration* conf) {
-                emit startProgram(cluster, conf);
+            [this, clusterId = cluster->id](int configurationId) {
+                emit startProgram(clusterId, configurationId);
             }
         );
 
         connect(
             w, &ClusterWidget::stopProgram,
-            [this, cluster](const Program::Configuration* conf) {
-                emit stopProgram(cluster, conf);
+            [this, clusterId = cluster->id](int configurationId) {
+                emit stopProgram(clusterId, configurationId);
             }
         );
 
@@ -335,7 +335,7 @@ void ProgramWidget::updateStatus(int clusterId) {
 void ProgramWidget::processUpdated(Process* process) {
     assert(process);
 
-    const auto it = _widgets.find(process->cluster->id);
+    const auto it = _widgets.find(process->clusterId);
     assert(it != _widgets.end());
     it->second->processUpdated(process);
 }
@@ -353,14 +353,14 @@ ProgramsWidget::ProgramsWidget() {
 
         connect(
             w, &ProgramWidget::startProgram,
-            [this, p](Cluster* cluster, const Program::Configuration* conf) {
-                emit startProgram(cluster, p, conf);
+            [this, programId = p->id](int clusterId, int configurationId) {
+                emit startProgram(clusterId, programId, configurationId);
             }
         );
         connect(
             w, &ProgramWidget::stopProgram,
-            [this, p](Cluster* cluster, const Program::Configuration* conf) {
-                emit stopProgram(cluster, p, conf);
+            [this, programId = p->id](int clusterId, int configurationId) {
+                emit stopProgram(clusterId, programId, configurationId);
             }
         );
 
@@ -375,7 +375,7 @@ ProgramsWidget::ProgramsWidget() {
 void ProgramsWidget::processUpdated(Process* process) {
     assert(process);
 
-    const auto it = _widgets.find(process->application->id);
+    const auto it = _widgets.find(process->programId);
     if (it != _widgets.end()) {
         it->second->processUpdated(process);
     }

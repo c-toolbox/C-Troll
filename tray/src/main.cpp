@@ -89,8 +89,17 @@ int main(int argc, char** argv) {
     mw.hide();
 #endif // QT_DEBUG
 
+
     SocketHandler socketHandler;
-    socketHandler.initialize();
+    if (argc == 3 && std::string_view(argv[1]) == "-port") {
+        int port = std::atoi(argv[2]);
+        Log("Starting at port " + std::to_string(port));
+        socketHandler.initialize(port);
+    }
+    else {
+        socketHandler.initialize();
+    }
+
     
     ProcessHandler processHandler;
     

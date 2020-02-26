@@ -35,21 +35,25 @@
 #include "process.h"
 
 #include "cluster.h"
+#include "database.h"
 #include "program.h"
 #include "logging.h"
 #include <assert.h>
 
 common::CommandMessage startProcessCommand(const Process& process) {
+    Program* program = data::findProgram(process.programId);
+    const Program::Configuration& configuration = data::findConfigurationForProgram(
+        *program, process.configurationId
+    );
+
     common::CommandMessage t;
     t.id = process.id;
-    t.executable = process.application->executable;
-    t.workingDirectory = process.application->workingDirectory;
+    t.executable = program->executable;
+    t.workingDirectory = program->workingDirectory;
     t.command = common::CommandMessage::Command::Start;
 
-    t.commandlineParameters = process.application->commandlineParameters;
-
-    t.commandlineParameters = t.commandlineParameters + ' ' +
-        process.configuration->parameters;
+    t.commandlineParameters =
+        program->commandlineParameters + ' ' + configuration.parameters;
 
     return t;
 }
@@ -63,12 +67,11 @@ common::CommandMessage exitProcessCommand(const Process& process) {
 
 int Process::nextId = 0;
 
-Process::Process(const Program* program, const Program::Configuration* configuration,
-                 const Cluster* cluster, const Node* node)
+Process::Process(int programId, int configurationId, int clusterId, int nodeId)
     : id(nextId++)
-    , application(program)
-    , configuration(configuration)
-    , cluster(cluster)
-    , node(node)
+    , programId(programId)
+    , configurationId(configurationId)
+    , clusterId(clusterId)
+    , nodeId(nodeId)
     , status(common::ProcessStatusMessage::Status::Unknown)
 {}
