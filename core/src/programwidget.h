@@ -53,14 +53,14 @@ public:
     ProgramButton(const Cluster* cluster, const Program::Configuration* configuration);
 
     void updateStatus();
-    void processUpdated(Process* process);
+    void processUpdated(Process::ID processId);
 
 signals:
     void startProgram(int configurationId);
     void stopProgram(int configurationId);
 
-    void restartProcess(const Process* process);
-    void stopProcess(const Process* process);
+    void restartProcess(Process::ID processId);
+    void stopProcess(Process::ID processId);
 
 private:
     void handleButtonPress();
@@ -68,7 +68,7 @@ private:
     void updateButton();
     void updateMenu();
 
-    bool isProcessRunning(const Node* node) const;
+    bool isProcessRunning(int nodeId) const;
     bool hasNoProcessRunning() const;
     bool hasAllProcessesRunning() const;
 
@@ -76,7 +76,7 @@ private:
     const Program::Configuration* _configuration;
 
     struct ProcessInfo {
-        Process* process;
+        Process::ID processId;
         QAction* menuAction;
     };
 
@@ -95,14 +95,14 @@ public:
         const std::vector<Program::Configuration>& configurations);
 
     void updateStatus();
-    void processUpdated(Process* process);
+    void processUpdated(Process::ID processId);
 
 signals:
     void startProgram(int configurationId);
     void stopProgram(int configurationId);
 
-    void restartProcess(const Process* process);
-    void stopProcess(const Process* process);
+    void restartProcess(Process::ID processId);
+    void stopProcess(Process::ID processId);
 
 private:
     std::map<int, ProgramButton*> _startButtons;
@@ -118,14 +118,14 @@ public:
     ProgramWidget(const Program& program);
 
     void updateStatus(int clusterId);
-    void processUpdated(Process* process);
+    void processUpdated(Process::ID processId);
 
 signals:
     void startProgram(int clusterId, int configurationId);
     void stopProgram(int clusterId, int configurationId);
 
-    void restartProcess(const Process* process);
-    void stopProcess(const Process* process);
+    void restartProcess(Process::ID processId);
+    void stopProcess(Process::ID processId);
 
 private:
     std::map<int, ClusterWidget*> _widgets;
@@ -140,7 +140,7 @@ Q_OBJECT
 public:
     ProgramsWidget();
 
-    void processUpdated(Process* process);
+    void processUpdated(Process::ID processId);
 
 public slots:
     void connectedStatusChanged(int cluster, int node);
@@ -149,8 +149,8 @@ signals:
     void startProgram(int clusterId, int programId, int configurationId);
     void stopProgram(int clusterId, int programId, int configurationId);
 
-    void restartProcess(const Process* process);
-    void stopProcess(const Process* process);
+    void restartProcess(Process::ID processId);
+    void stopProcess(Process::ID processId);
 
 private:
     std::map<int, ProgramWidget*> _widgets;

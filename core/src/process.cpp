@@ -47,7 +47,7 @@ common::CommandMessage startProcessCommand(const Process& process) {
     );
 
     common::CommandMessage t;
-    t.id = process.id;
+    t.id = process.id.v;
     t.executable = program->executable;
     t.workingDirectory = program->workingDirectory;
     t.command = common::CommandMessage::Command::Start;
@@ -60,7 +60,7 @@ common::CommandMessage startProcessCommand(const Process& process) {
 
 common::CommandMessage exitProcessCommand(const Process& process) {
     common::CommandMessage t;
-    t.id = process.id;
+    t.id = process.id.v;
     t.command = common::CommandMessage::Command::Exit;
     return t;
 }
@@ -68,7 +68,7 @@ common::CommandMessage exitProcessCommand(const Process& process) {
 int Process::nextId = 0;
 
 Process::Process(int programId, int configurationId, int clusterId, int nodeId)
-    : id(nextId++)
+    : id{ nextId++ }
     , programId(programId)
     , configurationId(configurationId)
     , clusterId(clusterId)

@@ -66,7 +66,7 @@ namespace {
     }
 } // namespace
 
-ProcessWidget::ProcessWidget(int processId) 
+ProcessWidget::ProcessWidget(Process::ID processId)
     : _processId(processId)
 {
     Process* process = data::findProcess(_processId);
@@ -98,7 +98,7 @@ ProcessWidget::ProcessWidget(int processId)
     );
     layout->addWidget(clusterLabel);
 
-    QLabel* id = new QLabel(QString::number(process->id));
+    QLabel* id = new QLabel(QString::number(process->id.v));
     layout->addWidget(id);
 
     _status = new QLabel(
@@ -123,20 +123,20 @@ ProcessesWidget::ProcessesWidget() {
     setLayout(layout);
 }
 
-void ProcessesWidget::processAdded(int processId) {
+void ProcessesWidget::processAdded(Process::ID processId) {
     // The process has been created, but the widget did not exist yet
     ProcessWidget* w = new ProcessWidget(processId);
     _widgets[processId] = w;
     layout()->addWidget(w);
 }
 
-void ProcessesWidget::processUpdated(int processId) {
+void ProcessesWidget::processUpdated(Process::ID processId) {
     const auto it = _widgets.find(processId);
     assert(it != _widgets.end());
     it->second->updateStatus();
 }
 
-void ProcessesWidget::processRemoved(int processId) {
+void ProcessesWidget::processRemoved(Process::ID processId) {
     const auto it = _widgets.find(processId);
     assert(it != _widgets.end());
 

@@ -54,9 +54,8 @@ ClusterWidget::ClusterWidget(int clusterId)
     _connectionLabel = new QLabel("disconnected");
     layout->addWidget(_connectionLabel);
 
-    for (int nodeId : cluster->nodes) {
-        Node* n = data::findNode(nodeId);
-
+    std::vector<Node*> nodes = data::findNodesForCluster(*cluster);
+    for (Node* n : nodes) {
         QWidget* node = new QWidget;
         layout->addWidget(node);
         QBoxLayout* nodeLayout = new QVBoxLayout;
@@ -70,31 +69,33 @@ ClusterWidget::ClusterWidget(int clusterId)
 
         QString text = n->isConnected ? "connected" : "disconnected";
         QLabel* connected = new QLabel(text);
-        _nodeConnectionLabels.push_back(connected);
+        _nodeConnectionLabels[n->id] = connected;
         nodeLayout->addWidget(connected);
     }
 }
 
 void ClusterWidget::updateConnectionStatus(int nodeId) {
+    Node* n = data::findNode(nodeId);
+    assert(n);
+    _nodeConnectionLabels[nodeId]->setText(n->isConnected ? "connected" : "disconnected");
+
+
+    //for (int )
+    //for (size_t i = 0; i < cluster->nodes.size(); ++i) {
+    //    Node* n = data::findNode(cluster->nodes[i]);
+    //    if (n->id == nodeId) {
+    //        _nodeConnectionLabels[i]->setText(
+    //            n->isConnected ? "connected" : "disconnected"
+    //        );
+    //    }
+    //}
+
     Cluster* cluster = data::findCluster(_clusterId);
     assert(cluster);
-
-    for (size_t i = 0; i < cluster->nodes.size(); ++i) {
-        Node* n = data::findNode(cluster->nodes[i]);
-        if (n->id == nodeId) {
-            _nodeConnectionLabels[i]->setText(
-                n->isConnected ? "connected" : "disconnected"
-            );
-        }
-    }
+    std::vector<Node*> nodes = data::findNodesForCluster(*cluster);
 
     const bool allConnected = std::all_of(
-        cluster->nodes.begin(), cluster->nodes.end(),
-        [](int id) {
-            Node* n = data::findNode(id);
-            assert(n);
-            return n->isConnected;
-        }
+        nodes.begin(), nodes.end(), std::mem_fn(&Node::isConnected)
     );
     _connectionLabel->setText(allConnected ? "connected" : "disconnected");
 }

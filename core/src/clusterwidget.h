@@ -39,7 +39,7 @@
 
 #include <QLabel>
 #include "cluster.h"
-#include <vector>
+#include <map>
 
 class ClusterWidget : public QWidget {
 Q_OBJECT
@@ -52,7 +52,7 @@ private:
     const int _clusterId;
 
     QLabel* _connectionLabel;
-    std::vector<QLabel*> _nodeConnectionLabels;
+    std::map<int, QLabel*> _nodeConnectionLabels;
 };
 
 

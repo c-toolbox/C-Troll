@@ -32,42 +32,20 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__PROCESSWIDGET_H__
-#define __CORE__PROCESSWIDGET_H__
+#ifndef __CORE__TYPED_ID_H__
+#define __CORE__TYPED_ID_H__
 
-#include <QWidget>
+template <typename T, typename Tag>
+struct TypedId {
+    constexpr TypedId() = default;
+    constexpr explicit TypedId(T value) : v(value) {}
 
-#include "process.h"
-#include <QLabel>
-#include <vector>
+    constexpr bool operator==(const TypedId& rhs) const { return v == rhs.v; }
+    constexpr TypedId& operator=(int value) const { v = value; return *this; }
 
-class ProcessWidget : public QWidget {
-Q_OBJECT
-public:
-    ProcessWidget(Process::ID processId);
+    constexpr bool operator<(const TypedId& rhs) const { return v < rhs.v; }
 
-    void updateStatus();
-
-private:
-    const Process::ID _processId;
-    QLabel* _status;
+    T v = T(0);
 };
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-class ProcessesWidget : public QWidget {
-Q_OBJECT
-public:
-    ProcessesWidget();
-
-    void processAdded(Process::ID processId);
-    void processUpdated(Process::ID processId);
-    void processRemoved(Process::ID processId);
-
-private:
-    std::map<Process::ID, ProcessWidget*> _widgets;
-};
-
-#endif // __CORE__PROCESSWIDGET_H__
+#endif // __CORE__TYPED_ID_H__

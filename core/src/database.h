@@ -35,14 +35,14 @@
 #ifndef __CORE__DATABASE_H__
 #define __CORE__DATABASE_H__
 
+#include "cluster.h"
+#include "node.h"
+#include "process.h"
 #include "program.h"
 #include <memory>
 #include <string>
 #include <vector>
 
-struct Cluster;
-struct Node;
-struct Process;
 
 namespace data {
     
@@ -63,8 +63,8 @@ std::vector<Node*> findNodesForCluster(const Cluster& cluster);
 Program* findProgram(int id);
 const Program::Configuration& findConfigurationForProgram(const Program& program, int id);
 
+Process* findProcess(Process::ID id);
 void addProcess(std::unique_ptr<Process> process);
-Process* findProcess(int id);
 
 void loadData(const std::string& programPath, const std::string& clusterPath,
     const std::string& nodePath);

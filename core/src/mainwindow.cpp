@@ -125,13 +125,13 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
         [this](common::ProcessStatusMessage status) {
-            Process* process = data::findProcess(status.processId);
+            Process* process = data::findProcess(Process::ID{ status.processId });
             assert(process);
             process->status = status.status;
 
             // The process was already known to us, which should always be the case
             _processesWidget->processUpdated(process->id);
-            _programWidget->processUpdated(process);
+            _programWidget->processUpdated(process->id);
         }
     );
     connect(
@@ -182,17 +182,16 @@ void MainWindow::startProgram(int clusterId, int programId, int configurationId)
             clusterId,
             node
         );
-        common::CommandMessage command = startProcessCommand(*process);
-
-        startProcess(process.get());
-
-        int id = process->id;
+        Process::ID id = process->id;
         data::addProcess(std::move(process));
+
+        startProcess(id);
         _processesWidget->processAdded(id);
     }
 }
 
 void MainWindow::stopProgram(int clusterId, int programId, int configurationId) {
+    // First, collect all the processes that belong to this program combination
     std::vector<Process*> processes;
     for (Process* process : data::processes()) {
         const bool clusterMatch = process->clusterId == clusterId;
@@ -210,11 +209,12 @@ void MainWindow::stopProgram(int clusterId, int programId, int configurationId) 
     assert(!processes.empty());
 
     for (Process* process : processes) {
-        stopProcess(process);
+        stopProcess(process->id);
     }
 }
 
-void MainWindow::startProcess(const Process* process) {
+void MainWindow::startProcess(Process::ID processId) {
+    Process* process = data::findProcess(processId);
     Cluster* cluster = data::findCluster(process->clusterId);
     Node* node = data::findNode(process->nodeId);
 
@@ -233,7 +233,8 @@ void MainWindow::startProcess(const Process* process) {
     _clusterConnectionHandler.sendMessage(*cluster, *node, j);
 }
 
-void MainWindow::stopProcess(const Process* process) {
+void MainWindow::stopProcess(Process::ID processId) {
+    Process* process = data::findProcess(processId);
     Cluster* cluster = data::findCluster(process->clusterId);
     Node* node = data::findNode(process->nodeId);
 

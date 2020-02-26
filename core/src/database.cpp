@@ -177,11 +177,11 @@ const Program::Configuration& findConfigurationForProgram(const Program& program
     return *it;
 }
 
-Process* findProcess(int id) {
+Process* findProcess(Process::ID id) {
     const auto it = std::find_if(
         gProcesses.begin(), gProcesses.end(),
         [id](const std::unique_ptr<Process>& p) {
-            return p->id == id;
+            return p->id.v == id.v;
         }
     );
     return it != gProcesses.end() ? it->get() : nullptr;

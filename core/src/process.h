@@ -40,15 +40,18 @@
 #include "node.h"
 #include "processstatusmessage.h"
 #include "program.h"
+#include "typedid.h"
 
 struct Process {
+    using ID = TypedId<int, struct ProcessIdTag>;
+
     Process(int programId, int configurationId, int clusterId, int NodeId);
 
-    const int id = -1;
-    const int programId;
-    const int configurationId;
-    const int clusterId;
-    const int nodeId;
+    const ID id{ -1 };
+    const int programId = -1;
+    const int configurationId = -1;
+    const int clusterId = -1;
+    const int nodeId = -1;
     common::ProcessStatusMessage::Status status;
 
 private:

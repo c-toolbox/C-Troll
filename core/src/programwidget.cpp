@@ -67,11 +67,13 @@ void ProgramButton::updateStatus() {
     setEnabled(allConnected);
 }
 
-void ProgramButton::processUpdated(Process* process) {
+void ProgramButton::processUpdated(Process::ID processId) {
+    Process* process = data::findProcess(processId);
+
     auto it = std::find_if(
         _processes.begin(), _processes.end(),
-        [id = process->id](const std::pair<int, ProcessInfo>& p) {
-            return p.second.process->id == id;
+        [processId](const std::pair<int, ProcessInfo>& p) {
+            return p.second.processId.v == processId.v;
         }
     );
     if (it == _processes.end()) {
@@ -79,7 +81,7 @@ void ProgramButton::processUpdated(Process* process) {
         assert(process->status == common::ProcessStatusMessage::Status::Starting);
 
         ProcessInfo info;
-        info.process = process;
+        info.processId = processId;
         Node* node = data::findNode(process->nodeId);
         info.menuAction = new QAction(QString::fromStdString(node->name));
         // We store the name of the node as the user data in order to sort them later
@@ -89,7 +91,7 @@ void ProgramButton::processUpdated(Process* process) {
     else {
         // This is a process that already exists and we should update it depending on the
         // status of the incoming process
-        assert(it->second.process == process);
+        assert(it->second.processId.v == processId.v);
     }
 
     updateButton();
@@ -179,16 +181,15 @@ void ProgramButton::updateMenu() {
         );
         // If we are getting this far, the node for this action has to exist in the map
         assert(it != _processes.end());
-        const Node* node = data::findNode(it->first);
 
         // We only going to update the actions if some of the nodes are not running but
         // some others are. So we basically have to provide the ability to start the nodes
         // that are currently not running and close the ones that currently are
-        if (isProcessRunning(node)) {
+        if (isProcessRunning(it->first)) {
             setObjectName("stop"); // used in the QSS sheet to style this button
             connect(
                 action, &QAction::triggered,
-                [this, process = it->second.process]() { emit stopProcess(process); }
+                [this, id = it->second.processId]() { emit stopProcess(id); }
             );
 
             // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
@@ -198,7 +199,7 @@ void ProgramButton::updateMenu() {
             setObjectName("restart"); // used in the QSS sheet to style this button
             connect(
                 action, &QAction::triggered,
-                [this, process = it->second.process]() { emit restartProcess(process); }
+                [this, id = it->second.processId]() { emit restartProcess(id); }
             );
 
             // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
@@ -209,23 +210,24 @@ void ProgramButton::updateMenu() {
     }
 }
 
-bool ProgramButton::isProcessRunning(const Node* node) const {
+bool ProgramButton::isProcessRunning(int nodeId) const {
     using Status = common::ProcessStatusMessage::Status;
-    const auto it = _processes.find(node->id);
-    return (it != _processes.end()) && it->second.process->status == Status::Running;
+    const auto it = _processes.find(nodeId);
+    return (it != _processes.end()) &&
+        data::findProcess(it->second.processId)->status == Status::Running;
 }
 
 bool ProgramButton::hasNoProcessRunning() const {
     return std::none_of(
         _cluster->nodes.begin(), _cluster->nodes.end(),
-        [this](int n) { return isProcessRunning(data::findNode(n)); }
+        [this](int n) { return isProcessRunning(n); }
     );
 }
 
 bool ProgramButton::hasAllProcessesRunning() const {
     return std::all_of(
         _cluster->nodes.begin(), _cluster->nodes.end(),
-        [this](int n) { return isProcessRunning(data::findNode(n)); }
+        [this](int n) { return isProcessRunning(n); }
     );
 }
 
@@ -279,10 +281,11 @@ void ClusterWidget::updateStatus() {
     );
 }
 
-void ClusterWidget::processUpdated(Process* process) {
+void ClusterWidget::processUpdated(Process::ID processId) {
+    Process* process = data::findProcess(processId);
     const auto it = _startButtons.find(process->configurationId);
     if (it != _startButtons.end()) {
-        it->second->processUpdated(process);
+        it->second->processUpdated(processId);
     }
 }
 
@@ -332,12 +335,11 @@ void ProgramWidget::updateStatus(int clusterId) {
     }
 }
 
-void ProgramWidget::processUpdated(Process* process) {
-    assert(process);
-
+void ProgramWidget::processUpdated(Process::ID processId) {
+    Process* process = data::findProcess(processId);
     const auto it = _widgets.find(process->clusterId);
     assert(it != _widgets.end());
-    it->second->processUpdated(process);
+    it->second->processUpdated(processId);
 }
 
 
@@ -372,12 +374,12 @@ ProgramsWidget::ProgramsWidget() {
     }
 }
 
-void ProgramsWidget::processUpdated(Process* process) {
-    assert(process);
+void ProgramsWidget::processUpdated(Process::ID processId) {
+    Process* process = data::findProcess(processId);
 
     const auto it = _widgets.find(process->programId);
     if (it != _widgets.end()) {
-        it->second->processUpdated(process);
+        it->second->processUpdated(processId);
     }
 }
 

@@ -74,71 +74,23 @@ void ClusterConnectionHandler::initialize() {
         _sockets[node->id] = std::move(jsonSocket);
         s->connectToHost(node->ipAddress, node->port);
     }
-
-
-    //for (Cluster* c : data::clusters()) {
-    //    std::vector<Node*> nodes = data::findNodesForCluster(*c);
-    //    for (Node* node : nodes) {
-    //        std::string h = hash(*node);
-    //        const auto it = _nodes.find(h);
-    //        if (it != _nodes.end()) {
-    //            // A socket to this node has already been created, so we just need to
-    //            // register our interest in this
-    //            it->second.nodes.push_back({ c, node });
-    //            continue;
-    //        }
-
-    //        // This handler keeps the sockets to the tray applications open
-    //        std::unique_ptr<QTcpSocket> socket = std::make_unique<QTcpSocket>();
-
-    //        connect(
-    //            socket.get(), &QAbstractSocket::stateChanged,
-    //            [this, h](QAbstractSocket::SocketState state) {
-    //                handleSocketStateChange(h, state);
-    //            }
-    //        );
-
-    //        SocketData data;
-    //        data.socket = std::make_unique<common::JsonSocket>(std::move(socket));
-    //        data.nodes.push_back({ c, node });
-
-    //        connect(
-    //            data.socket.get(), &common::JsonSocket::readyRead,
-    //            [this, h]() { readyRead(h); }
-    //        );
-
-    //        // We need to save the pointer as the connectToHost function will trigger the
-    //        // Qt signal/slot which in turn requires the socket to be on the _nodes list
-    //        common::JsonSocket* s = data.socket.get();
-    //        _nodes[h] = std::move(data);
-
-    //        s->connectToHost(node->ipAddress, node->port);
-
-    //    }
-    //}
-    
-    //QTimer* timer = new QTimer(this);
-    //connect(
-    //    timer, &QTimer::timeout,
-    //    [this]() {
-    //        for (auto& [key, value] : _nodes) {
-    //            QAbstractSocket::SocketState state = value.socket->state();
-    //            if (state == QAbstractSocket::SocketState::UnconnectedState) {
-    //                for (NodeInfo& ni : value.nodes) {
-    //                    Log(fmt::format(
-    //                        "Unconnected: {}:{}",
-    //                        ni.node->ipAddress, ni.node->port
-    //                    ));
-    //                    if (ni.node->isConnected) {
-    //                        ni.node->isConnected = false;
-    //                        emit connectedStatusChanged(ni.cluster->id, ni.node->id);
-    //                    }
-    //                }
-    //            }
-    //        }
-    //    }
-    //);
-    //timer->start(2500);
+    QTimer* timer = new QTimer(this);
+    connect(
+        timer, &QTimer::timeout,
+        [this]() {
+            using K = int;
+            using V = std::unique_ptr<common::JsonSocket>;
+            for (const std::pair<const K, V>& p : _sockets) {
+                // Try to reconnect all sockets that are currently unconnected
+                QAbstractSocket::SocketState state = p.second->state();
+                if (state == QAbstractSocket::SocketState::UnconnectedState) {
+                    Node* node = data::findNode(p.first);
+                    p.second->connectToHost(node->ipAddress, node->port);
+                }
+            }
+        }
+    );
+    timer->start(2500);
 }
 
 void ClusterConnectionHandler::handleSocketStateChange(int nodeId,
@@ -185,8 +137,7 @@ void ClusterConnectionHandler::sendMessage(const Cluster& cluster, const Node& n
 {
     assert(!msg.is_null());
 
-    std::string p = std::to_string(node.port);
-    Log("Node: " + node.name + '\t' + node.ipAddress + ':' + p);
+    Log("Node: " + node.name + '\t' + node.ipAddress + ':' + std::to_string(node.port));
 
     const auto it = _sockets.find(node.id);
     assert(it != _sockets.end());

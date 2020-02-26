@@ -68,17 +68,6 @@ private slots:
 
 private:
     std::map<int, std::unique_ptr<common::JsonSocket>> _sockets;
-
-    //struct NodeInfo {
-    //    Cluster* cluster;
-    //    Node* node;
-    //};
-
-    //struct SocketData {
-    //    std::unique_ptr<common::JsonSocket> socket;
-    //    std::vector<NodeInfo> nodes;
-    //};
-    //std::map<std::string, SocketData> _nodes;
 };
 
 #endif // __CORE__CLUSTERCONNECTIONHANDLER_H__

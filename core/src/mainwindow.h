@@ -57,8 +57,8 @@ private:
     // private slots
     void startProgram(int clusterId, int programId, int configurationId);
     void stopProgram(int clusterId, int programId, int configurationId);
-    void startProcess(const Process* process);
-    void stopProcess(const Process* process);
+    void startProcess(Process::ID processId);
+    void stopProcess(Process::ID processId);
 
 
     void log(std::string msg);
