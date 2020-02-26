@@ -80,6 +80,16 @@ void addProcess(std::unique_ptr<Process> process) {
     gProcesses.push_back(std::move(process));
 }
 
+Cluster* findCluster(const std::string& id) {
+    const auto it = std::find_if(
+        gClusters.begin(), gClusters.end(),
+        [id](const std::unique_ptr<Cluster>& c) {
+            return c->id == id;
+        }
+    );
+    return it != gClusters.end() ? it->get() : nullptr;
+}
+
 Process* findProcess(int id) {
     const auto it = std::find_if(
         gProcesses.begin(), gProcesses.end(),

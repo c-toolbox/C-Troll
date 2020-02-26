@@ -112,7 +112,7 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
 
 
     // Clusters
-    _clustersWidget = new ClustersWidget(data::clusters());
+    _clustersWidget = new ClustersWidget;
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
         _clustersWidget, &ClustersWidget::connectedStatusChanged
@@ -176,8 +176,9 @@ void MainWindow::startProgram(Cluster* cluster, const Program* program,
 
         startProcess(process.get());
 
-        _processesWidget->processAdded(*process);
+        int id = process->id;
         data::addProcess(std::move(process));
+        _processesWidget->processAdded(id);
     }
 }
 

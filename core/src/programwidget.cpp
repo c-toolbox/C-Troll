@@ -34,6 +34,7 @@
 
 #include "programwidget.h"
 
+#include "database.h"
 #include "logging.h"
 #include <QHBoxLayout>
 #include <QLabel>
@@ -415,10 +416,13 @@ void ProgramsWidget::processUpdated(Process* process) {
     }
 }
 
-void ProgramsWidget::connectedStatusChanged(Cluster* cluster, Cluster::Node*) {
-    assert(cluster);
+void ProgramsWidget::connectedStatusChanged(const std::string& cluster,
+                                            const std::string&)
+{
+    Cluster* c = data::findCluster(cluster);
+    assert(c);
     for (auto& [key, value] : _widgets) {
-        value->updateStatus(cluster);
+        value->updateStatus(c);
     }
 }
 

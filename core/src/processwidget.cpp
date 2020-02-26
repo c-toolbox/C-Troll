@@ -34,7 +34,7 @@
 
 #include "processwidget.h"
 
-#include "cluster.h"
+#include "database.h"
 #include "processstatusmessage.h"
 #include <QVBoxLayout>
 
@@ -66,41 +66,43 @@ namespace {
     }
 } // namespace
 
-ProcessWidget::ProcessWidget(const Process& process)
-    : _process(process)
+ProcessWidget::ProcessWidget(int processId) 
+    : _processId(processId)
 {
+    Process* process = data::findProcess(_processId);
+
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 
     QLabel* program = new QLabel(
-        QString::fromStdString("Program: " + _process.application->name)
+        QString::fromStdString("Program: " + process->application->name)
     );
     layout->addWidget(program);
 
     QLabel* configuration = new QLabel(
-        QString::fromStdString("Configuration: " + _process.configuration->name)
+        QString::fromStdString("Configuration: " + process->configuration->name)
     );
     layout->addWidget(configuration);
 
     QLabel* cluster = new QLabel(
-        QString::fromStdString("Cluster: " + _process.cluster->name)
+        QString::fromStdString("Cluster: " + process->cluster->name)
     );
     layout->addWidget(cluster);
 
+    QLabel* id = new QLabel(QString::number(process->id));
+    layout->addWidget(id);
+
     _status = new QLabel(
-        QString::fromStdString("Status: " + statusToString(_process.status))
+        QString::fromStdString("Status: " + statusToString(process->status))
     );
     layout->addWidget(_status);
 }
 
 void ProcessWidget::updateStatus() {
+    Process* process = data::findProcess(_processId);
     _status->setText(
-        QString::fromStdString("Status: " + statusToString(_process.status))
+        QString::fromStdString("Status: " + statusToString(process->status))
     );
-}
-
-int ProcessWidget::processId() const {
-    return _process.id;
 }
 
 
@@ -112,29 +114,23 @@ ProcessesWidget::ProcessesWidget() {
     setLayout(layout);
 }
 
-void ProcessesWidget::processAdded(const Process& process) {
+void ProcessesWidget::processAdded(int processId) {
     // The process has been created, but the widget did not exist yet
-    ProcessWidget* w = new ProcessWidget(process);
-    _widgets.push_back(w);
+    ProcessWidget* w = new ProcessWidget(processId);
+    _widgets[processId] = w;
     layout()->addWidget(w);
 }
 
 void ProcessesWidget::processUpdated(int processId) {
-    const auto wIt = std::find_if(
-        _widgets.begin(), _widgets.end(),
-        [processId](ProcessWidget* w) { return w->processId() == processId; }
-    );
-    assert(wIt != _widgets.end());
-    (*wIt)->updateStatus();
+    const auto it = _widgets.find(processId);
+    assert(it != _widgets.end());
+    it->second->updateStatus();
 }
 
 void ProcessesWidget::processRemoved(int processId) {
-    const auto wIt = std::find_if(
-        _widgets.begin(), _widgets.end(),
-        [processId](ProcessWidget* w) { return w->processId() == processId; }
-    );
-    assert(wIt != _widgets.end());
+    const auto it = _widgets.find(processId);
+    assert(it != _widgets.end());
 
-    layout()->removeWidget(*wIt);
-    _widgets.erase(wIt);
+    layout()->removeWidget(it->second);
+    _widgets.erase(processId);
 }

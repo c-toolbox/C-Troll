@@ -58,7 +58,7 @@ signals:
     void messageReceived(Cluster* cluster, Cluster::Node* node,
         nlohmann::json message);
 
-    void connectedStatusChanged(Cluster* cluster, Cluster::Node* node);
+    void connectedStatusChanged(const std::string& cluster, const std::string& node);
 
     void receivedTrayProcess(common::ProcessStatusMessage status);
 

@@ -50,6 +50,7 @@ std::vector<Program*> programs();
 std::vector<Process*> processes();
 
 void addProcess(std::unique_ptr<Process> process);
+Cluster* findCluster(const std::string& id);
 Process* findProcess(int id);
 
 void loadPrograms(const std::string& path);

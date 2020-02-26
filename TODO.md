@@ -6,3 +6,4 @@ CORE
  - Need to check at startup for uniqueness of names or the clusterconnectionhandler hash function is no longer unique
  - Pass over the codebase to unify application <-> program usage
  - Global database struct that stores clusters, applications, and processes and we place all pointer handling with id strings
+ - When starting C-Troll with a running Tray, closing the tray, and reopening it, C-Troll does not try to reconnect to the tray application anymore

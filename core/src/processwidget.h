@@ -44,15 +44,12 @@
 class ProcessWidget : public QWidget {
 Q_OBJECT
 public:
-    ProcessWidget(const Process& process);
+    ProcessWidget(int processId);
 
     void updateStatus();
 
-    int processId() const;
-
 private:
-    const Process& _process;
-
+    const int _processId;
     QLabel* _status;
 };
 
@@ -65,12 +62,12 @@ Q_OBJECT
 public:
     ProcessesWidget();
 
-    void processAdded(const Process& process);
+    void processAdded(int processId);
     void processUpdated(int processId);
     void processRemoved(int processId);
 
 private:
-    std::vector<ProcessWidget*> _widgets;
+    std::map<int, ProcessWidget*> _widgets;
 };
 
 #endif // __CORE__PROCESSWIDGET_H__

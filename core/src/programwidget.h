@@ -144,7 +144,7 @@ public:
     void processUpdated(Process* process);
 
 public slots:
-    void connectedStatusChanged(Cluster* cluster, Cluster::Node* node);
+    void connectedStatusChanged(const std::string& cluster, const std::string& node);
 
 signals:
     void startProgram(Cluster* cluster, const Program* program,

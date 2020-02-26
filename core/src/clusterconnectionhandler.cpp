@@ -115,7 +115,7 @@ void ClusterConnectionHandler::initialize(const std::vector<Cluster*>& clusters)
                         ));
                         if (ni.node->isConnected) {
                             ni.node->isConnected = false;
-                            emit connectedStatusChanged(ni.cluster, ni.node);
+                            emit connectedStatusChanged(ni.cluster->id, ni.node->id);
                         }
                     }
                 }
@@ -147,7 +147,7 @@ void ClusterConnectionHandler::handleSocketStateChange(const std::string& h,
 
         if (ni.node->isConnected != isConnected) {
             ni.node->isConnected = isConnected;
-            emit connectedStatusChanged(ni.cluster, ni.node);
+            emit connectedStatusChanged(ni.cluster->id, ni.node->id);
         }
     }
 }

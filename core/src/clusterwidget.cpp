@@ -34,12 +34,16 @@
 
 #include "clusterwidget.h"
 
+#include "database.h"
 #include <QLabel>
 #include <QVBoxLayout>
 
-ClusterWidget::ClusterWidget(const Cluster* cluster)
-    : _cluster(cluster)
+ClusterWidget::ClusterWidget(std::string clusterId)
+    : _clusterId(clusterId)
 {
+    Cluster* cluster = data::findCluster(clusterId);
+    assert(cluster);
+
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 
@@ -68,10 +72,13 @@ ClusterWidget::ClusterWidget(const Cluster* cluster)
     }
 }
 
-void ClusterWidget::updateConnectionStatus(const Cluster::Node& node) {
-    for (size_t i = 0; i < _cluster->nodes.size(); ++i) {
-        const Cluster::Node& it = *_cluster->nodes[i];
-        if (it.id == node.id) {
+void ClusterWidget::updateConnectionStatus(const std::string& node) {
+    Cluster* cluster = data::findCluster(_clusterId);
+    assert(cluster);
+
+    for (size_t i = 0; i < cluster->nodes.size(); ++i) {
+        const Cluster::Node& it = *cluster->nodes[i];
+        if (it.id == node) {
             _nodeConnectionLabels[i]->setText(
                 it.isConnected ? "connected" : "disconnected"
             );
@@ -79,7 +86,7 @@ void ClusterWidget::updateConnectionStatus(const Cluster::Node& node) {
     }
 
     const bool allConnected = std::all_of(
-        _cluster->nodes.begin(), _cluster->nodes.end(),
+        cluster->nodes.begin(), cluster->nodes.end(),
         std::mem_fn(&Cluster::Node::isConnected)
     );
     _connectionLabel->setText(allConnected ? "connected" : "disconnected");
@@ -89,29 +96,21 @@ void ClusterWidget::updateConnectionStatus(const Cluster::Node& node) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ClustersWidget::ClustersWidget(std::vector<Cluster*> clusters)
-    : _clusters(clusters)
-{
+ClustersWidget::ClustersWidget() {
     QBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
 
-    for (Cluster* c : clusters) {
-        ClusterWidget* widget = new ClusterWidget(c);
-        _clusterWidgets.push_back(widget);
+    for (Cluster* c : data::clusters()) {
+        ClusterWidget* widget = new ClusterWidget(c->id);
+        _clusterWidgets[c->id] = widget;
         layout->addWidget(widget);
     }
 }
 
-void ClustersWidget::connectedStatusChanged(Cluster* cluster, Cluster::Node* node) {
-    assert(_clusters.size() == _clusterWidgets.size());
-
-    for (size_t i = 0; i < _clusters.size(); ++i) {
-        Cluster* it = _clusters[i];
-        if (it->id == cluster->id) {
-            _clusterWidgets[i]->updateConnectionStatus(*node);
-            return;
-        }
-    }
-
-    assert(false);
+void ClustersWidget::connectedStatusChanged(const std::string& cluster,
+                                            const std::string& node)
+{
+    const auto it = _clusterWidgets.find(cluster);
+    assert(it != _clusterWidgets.end());
+    it->second->updateConnectionStatus(node);
 }
