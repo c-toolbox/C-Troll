@@ -47,7 +47,7 @@ ClusterConnectionHandler::~ClusterConnectionHandler() {
     // JsonSocket on the event queue (particuarly the signalling that the connection is
     // closed.  So we keep the actual values around while the destructor is running and
     // only delete the sockets in the next tick (see `deleteLater`)
-    for (std::pair<const int, std::unique_ptr<common::JsonSocket>>& p : _sockets) {
+    for (std::pair<const Node::ID, std::unique_ptr<common::JsonSocket>>& p : _sockets) {
         QObject::disconnect(p.second.get());
         p.second.release()->deleteLater();
     }
@@ -79,7 +79,7 @@ void ClusterConnectionHandler::initialize() {
     connect(
         timer, &QTimer::timeout,
         [this]() {
-            using K = int;
+            using K = Node::ID;
             using V = std::unique_ptr<common::JsonSocket>;
             for (const std::pair<const K, V>& p : _sockets) {
                 // Try to reconnect all sockets that are currently unconnected
@@ -94,7 +94,7 @@ void ClusterConnectionHandler::initialize() {
     timer->start(2500);
 }
 
-void ClusterConnectionHandler::handleSocketStateChange(int nodeId,
+void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
                                                        QAbstractSocket::SocketState state)
 {
     Node* node = data::findNode(nodeId);
@@ -115,7 +115,7 @@ void ClusterConnectionHandler::handleSocketStateChange(int nodeId,
     }
 }
 
-void ClusterConnectionHandler::readyRead(int nodeId) {
+void ClusterConnectionHandler::readyRead(Node::ID nodeId) {
     const auto it = _sockets.find(nodeId);
     assert(it != _sockets.end());
 
@@ -135,7 +135,7 @@ void ClusterConnectionHandler::readyRead(int nodeId) {
     }
 }
 
-void ClusterConnectionHandler::sendMessage(const Cluster& cluster, const Node& node,
+void ClusterConnectionHandler::sendMessage(const Cluster&, const Node& node,
                                            nlohmann::json msg) const
 {
     assert(!msg.is_null());

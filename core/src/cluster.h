@@ -35,6 +35,8 @@
 #ifndef __CORE__CLUSTER_H__
 #define __CORE__CLUSTER_H__
 
+#include "node.h"
+#include "typedid.h"
 #include <json/json.hpp>
 
 /**
@@ -43,7 +45,9 @@
  * \m id, a setting whether or not it is \m enabled and a list of computer \m nodes.
  */
 struct Cluster {
-    int id = -1;
+    using ID = TypedId<int, struct ClusterTag>;
+
+    ID id{ -1 };
 
     /// The human readable name of this Cluster
     std::string name;
@@ -52,7 +56,7 @@ struct Cluster {
     bool isEnabled = false;
 
     /// A list of all nodes belonging to this cluster
-    std::vector<int> nodes;
+    std::vector<Node::ID> nodes;
 };
 
 void from_json(const nlohmann::json& j, Cluster& p);

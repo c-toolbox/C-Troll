@@ -41,7 +41,7 @@ struct TypedId {
     constexpr explicit TypedId(T value) : v(value) {}
 
     constexpr bool operator==(const TypedId& rhs) const { return v == rhs.v; }
-    constexpr TypedId& operator=(int value) const { v = value; return *this; }
+    constexpr TypedId& operator=(int value) { v = value; return *this; }
 
     constexpr bool operator<(const TypedId& rhs) const { return v < rhs.v; }
 

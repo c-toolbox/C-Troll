@@ -82,7 +82,7 @@ std::vector<Process*> processes() {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-Cluster* findCluster(int id) {
+Cluster* findCluster(Cluster::ID id) {
     const auto it = std::find_if(
         gClusters.begin(), gClusters.end(),
         [id](const std::unique_ptr<Cluster>& c) {
@@ -104,7 +104,7 @@ Cluster* findCluster(const std::string& name) {
 
 std::vector<Cluster*> findClustersForProgram(const Program& program) {
     std::vector<Cluster*> clusters;
-    for (int clusterId : program.clusters) {
+    for (Cluster::ID clusterId : program.clusters) {
         Cluster* cluster = findCluster(clusterId);
         assert(cluster);
         clusters.push_back(cluster);
@@ -123,7 +123,7 @@ std::vector<Cluster*> findClusterForNode(const Node& node) {
     return clusters;
 }
 
-Node* findNode(int id) {
+Node* findNode(Node::ID id) {
     const auto it = std::find_if(
         gNodes.begin(), gNodes.end(),
         [id](const std::unique_ptr<Node>& n) {
@@ -145,7 +145,7 @@ Node* findNode(const std::string& name) {
 
 std::vector<Node*> findNodesForCluster(const Cluster& cluster) {
     std::vector<Node*> nodes;
-    for (int nodeId : cluster.nodes) {
+    for (Node::ID nodeId : cluster.nodes) {
         Node* node = findNode(nodeId);
         assert(node);
         nodes.push_back(node);
@@ -153,7 +153,7 @@ std::vector<Node*> findNodesForCluster(const Cluster& cluster) {
     return nodes;
 }
 
-Program* findProgram(int id) {
+Program* findProgram(Program::ID id) {
     const auto it = std::find_if(
         gPrograms.begin(), gPrograms.end(),
         [id](const std::unique_ptr<Program>& p) {
@@ -163,7 +163,8 @@ Program* findProgram(int id) {
     return it != gPrograms.end() ? it->get() : nullptr;
 }
 
-const Program::Configuration& findConfigurationForProgram(const Program& program, int id)
+const Program::Configuration& findConfigurationForProgram(const Program& program,
+                                                          Program::Configuration::ID id)
 {
     const auto it = std::find_if(
         program.configurations.begin(), program.configurations.end(),

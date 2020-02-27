@@ -51,17 +51,18 @@ std::vector<Node*> nodes();
 std::vector<Program*> programs();
 std::vector<Process*> processes();
 
-Cluster* findCluster(int);
+Cluster* findCluster(Cluster::ID id);
 Cluster* findCluster(const std::string& name);
 std::vector<Cluster*> findClustersForProgram(const Program& program);
 std::vector<Cluster*> findClusterForNode(const Node& node);
 
-Node* findNode(int id);
+Node* findNode(Node::ID id);
 Node* findNode(const std::string& name);
 std::vector<Node*> findNodesForCluster(const Cluster& cluster);
 
-Program* findProgram(int id);
-const Program::Configuration& findConfigurationForProgram(const Program& program, int id);
+Program* findProgram(Program::ID id);
+const Program::Configuration& findConfigurationForProgram(const Program& program, 
+    Program::Configuration::ID id);
 
 Process* findProcess(Process::ID id);
 void addProcess(std::unique_ptr<Process> process);

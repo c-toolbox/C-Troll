@@ -59,7 +59,7 @@ struct fmt::formatter<Node> {
         return format_to(
             ctx.out(),
             "( id: {}, name: \"{}\", ipAddress: \"{}\", port: {}, isConnected: {} )",
-            n.id, n.name, n.ipAddress, n.port, n.isConnected
+            n.id.v, n.name, n.ipAddress, n.port, n.isConnected
         );
     }
 };

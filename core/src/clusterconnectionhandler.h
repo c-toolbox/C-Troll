@@ -37,6 +37,7 @@
 
 #include <QObject>
 
+#include "cluster.h"
 #include "jsonsocket.h"
 #include "processstatusmessage.h"
 #include <QAbstractSocket>
@@ -57,18 +58,18 @@ public:
         nlohmann::json message) const;
 
 signals:
-    void messageReceived(int clusterId, int nodeId, nlohmann::json message);
+    void messageReceived(Cluster::ID clusterId, Node::ID nodeId, nlohmann::json message);
 
-    void connectedStatusChanged(int clusterId, int nodeId);
+    void connectedStatusChanged(Cluster::ID clusterId, Node::ID nodeId);
 
     void receivedTrayProcess(common::ProcessStatusMessage status);
 
 private slots:
-    void handleSocketStateChange(int nodeId, QAbstractSocket::SocketState state);
-    void readyRead(int nodeId);
+    void handleSocketStateChange(Node::ID nodeId, QAbstractSocket::SocketState state);
+    void readyRead(Node::ID nodeId);
 
 private:
-    std::map<int, std::unique_ptr<common::JsonSocket>> _sockets;
+    std::map<Node::ID, std::unique_ptr<common::JsonSocket>> _sockets;
 };
 
 #endif // __CORE__CLUSTERCONNECTIONHANDLER_H__

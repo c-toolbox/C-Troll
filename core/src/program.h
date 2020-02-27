@@ -35,14 +35,18 @@
 #ifndef __CORE__PROGRAM_H__
 #define __CORE__PROGRAM_H__
 
+#include "cluster.h"
+#include "typedid.h"
 #include <json/json.hpp>
 #include <string>
 #include <vector>
 
 struct Program {
     struct Configuration {
+        using ID = TypedId<int, struct ConfigurationTag>;
+
         /// Unique identifier of the configuration
-        int id;
+        ID id{ -1 };
 
         /// User-facing name of the configuration
         std::string name;
@@ -51,8 +55,10 @@ struct Program {
         std::string parameters;
     };
 
+    using ID = TypedId<int, struct ProgramTag>;
+
     /// A unique identifier
-    int id;
+    ID id{ -1 };
     /// A human readable name for this Program
     std::string name;
     /// The full path to the executable
@@ -66,7 +72,7 @@ struct Program {
     /// List of all configurations
     std::vector<Configuration> configurations;
     /// List of all clusters
-    std::vector<int> clusters;
+    std::vector<Cluster::ID> clusters;
 };
 
 std::vector<Program> loadProgramsFromDirectory(const std::string& directory);

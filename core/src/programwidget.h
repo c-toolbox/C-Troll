@@ -56,8 +56,8 @@ public:
     void processUpdated(Process::ID processId);
 
 signals:
-    void startProgram(int configurationId);
-    void stopProgram(int configurationId);
+    void startProgram(Program::Configuration::ID configurationId);
+    void stopProgram(Program::Configuration::ID configurationId);
 
     void restartProcess(Process::ID processId);
     void stopProcess(Process::ID processId);
@@ -68,7 +68,7 @@ private:
     void updateButton();
     void updateMenu();
 
-    bool isProcessRunning(int nodeId) const;
+    bool isProcessRunning(Node::ID nodeId) const;
     bool hasNoProcessRunning() const;
     bool hasAllProcessesRunning() const;
 
@@ -81,7 +81,7 @@ private:
     };
 
     QMenu* _actionMenu;
-    std::map<int, ProcessInfo> _processes;
+    std::map<Node::ID, ProcessInfo> _processes;
 };
 
 
@@ -98,14 +98,14 @@ public:
     void processUpdated(Process::ID processId);
 
 signals:
-    void startProgram(int configurationId);
-    void stopProgram(int configurationId);
+    void startProgram(Program::Configuration::ID configurationId);
+    void stopProgram(Program::Configuration::ID configurationId);
 
     void restartProcess(Process::ID processId);
     void stopProcess(Process::ID processId);
 
 private:
-    std::map<int, ProgramButton*> _startButtons;
+    std::map<Program::Configuration::ID, ProgramButton*> _startButtons;
 };
 
 
@@ -117,18 +117,18 @@ Q_OBJECT
 public:
     ProgramWidget(const Program& program);
 
-    void updateStatus(int clusterId);
+    void updateStatus(Cluster::ID clusterId);
     void processUpdated(Process::ID processId);
 
 signals:
-    void startProgram(int clusterId, int configurationId);
-    void stopProgram(int clusterId, int configurationId);
+    void startProgram(Cluster::ID clusterId, Program::Configuration::ID configurationId);
+    void stopProgram(Cluster::ID clusterId, Program::Configuration::ID configurationId);
 
     void restartProcess(Process::ID processId);
     void stopProcess(Process::ID processId);
 
 private:
-    std::map<int, ClusterWidget*> _widgets;
+    std::map<Cluster::ID, ClusterWidget*> _widgets;
 };
 
 
@@ -143,17 +143,19 @@ public:
     void processUpdated(Process::ID processId);
 
 public slots:
-    void connectedStatusChanged(int cluster, int node);
+    void connectedStatusChanged(Cluster::ID cluster, Node::ID node);
 
 signals:
-    void startProgram(int clusterId, int programId, int configurationId);
-    void stopProgram(int clusterId, int programId, int configurationId);
+    void startProgram(Cluster::ID clusterId, Program::ID programId,
+        Program::Configuration::ID configurationId);
+    void stopProgram(Cluster::ID clusterId, Program::ID programId,
+        Program::Configuration::ID configurationId);
 
     void restartProcess(Process::ID processId);
     void stopProcess(Process::ID processId);
 
 private:
-    std::map<int, ProgramWidget*> _widgets;
+    std::map<Program::ID, ProgramWidget*> _widgets;
 };
 
 } // namespace programs

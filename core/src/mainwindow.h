@@ -53,8 +53,10 @@ public:
 
 private:
     // private slots
-    void startProgram(int clusterId, int programId, int configurationId);
-    void stopProgram(int clusterId, int programId, int configurationId);
+    void startProgram(Cluster::ID clusterId, Program::ID programId,
+        Program::Configuration::ID configurationId);
+    void stopProgram(Cluster::ID clusterId, Program::ID programId,
+        Program::Configuration::ID configurationId);
     void startProcess(Process::ID processId);
     void stopProcess(Process::ID processId);
 

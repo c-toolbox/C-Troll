@@ -37,6 +37,7 @@
 
 #include <QWidget>
 
+#include "cluster.h"
 #include <map>
 
 class QLabel;
@@ -44,15 +45,15 @@ class QLabel;
 class ClusterWidget : public QWidget {
 Q_OBJECT
 public:
-    ClusterWidget(int clusterId);
+    ClusterWidget(Cluster::ID clusterId);
 
-    void updateConnectionStatus(int nodeId);
+    void updateConnectionStatus(Node::ID nodeId);
 
 private:
-    const int _clusterId;
+    const Cluster::ID _clusterId;
 
     QLabel* _connectionLabel;
-    std::map<int, QLabel*> _nodeConnectionLabels;
+    std::map<Node::ID, QLabel*> _nodeConnectionLabels;
 };
 
 
@@ -65,10 +66,10 @@ public:
     ClustersWidget();
 
 public slots:
-    void connectedStatusChanged(int clusterId, int nodeId);
+    void connectedStatusChanged(Cluster::ID clusterId, Node::ID nodeId);
 
 private:
-    std::map<int, ClusterWidget*> _clusterWidgets;
+    std::map<Cluster::ID, ClusterWidget*> _clusterWidgets;
 };
 
 #endif // __CORE__CLUSTERWIDGET_H__

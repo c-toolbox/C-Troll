@@ -35,6 +35,7 @@
 #ifndef __CORE__NODE_H__
 #define __CORE__NODE_H__
 
+#include "typedid.h"
 #include <json/json.hpp>
 
 /**
@@ -43,8 +44,10 @@
  * Tray application is listening.
  */
 struct Node {
+    using ID = TypedId<int, struct NodeTag>;
+
     /// Unique identifier for the cluster node
-    int id = -1;
+    ID id{ -1 };
 
     /// The human readable name of the computer node
     std::string name;

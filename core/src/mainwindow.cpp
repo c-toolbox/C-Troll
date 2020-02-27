@@ -130,7 +130,7 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::messageReceived,
-        [](int clusterId, int nodeId, nlohmann::json message) {
+        [](Cluster::ID clusterId, Node::ID nodeId, nlohmann::json message) {
             Cluster* cluster = data::findCluster(clusterId);
             Node* node = data::findNode(nodeId);
             Log(fmt::format("{} {} {}", cluster->name, node->name, std::string(message)));
@@ -150,26 +150,16 @@ void MainWindow::log(std::string msg) {
     _messageBox->append(QString::fromStdString(msg));
 }
 
-void MainWindow::startProgram(int clusterId, int programId, int configurationId) {
+void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
+                              Program::Configuration::ID configurationId)
+{
     // We don't want to make sure that the program isn't already running as it might be
     // perfectly valid to start the program multiple times
 
     Cluster* cluster = data::findCluster(clusterId);
     assert(cluster);
-    //Program* program = data::findProgram(programId);
-    //assert(program);
-    //const Program::Configuration& configuration = data::findConfigurationForProgram(
-    //    *program,
-    //    configurationId
-    //);
 
-
-
-    //Log("Application: " + program->name);
-    //Log("Configuration: " + configuration.name);
-    //Log("Cluster: " + cluster->name);
-
-    for (int node : cluster->nodes) {
+    for (Node::ID node : cluster->nodes) {
         std::unique_ptr<Process> process = std::make_unique<Process>(
             programId,
             configurationId,
@@ -184,7 +174,9 @@ void MainWindow::startProgram(int clusterId, int programId, int configurationId)
     }
 }
 
-void MainWindow::stopProgram(int clusterId, int programId, int configurationId) {
+void MainWindow::stopProgram(Cluster::ID clusterId, Program::ID programId,
+                             Program::Configuration::ID configurationId)
+{
     // First, collect all the processes that belong to this program combination
     std::vector<Process*> processes;
     for (Process* process : data::processes()) {
@@ -216,7 +208,7 @@ void MainWindow::startProcess(Process::ID processId) {
 
     // Generate identifier
     Log("Sending Message to start application:");
-    Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id));
+    Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id.v));
     Log(fmt::format("\tCommand: {}", command.command));
     Log(fmt::format("\tExecutable: {}", command.executable));
     Log(fmt::format("\tIdentifier: {}", command.id));
@@ -235,7 +227,7 @@ void MainWindow::stopProcess(Process::ID processId) {
     common::CommandMessage command = exitProcessCommand(*process);
 
     Log("Sending Message to stop application:");
-    Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id));
+    Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id.v));
     Log(fmt::format("\tCommand: {}", command.command));
     Log(fmt::format("\tExecutable: {}", command.executable));
     Log(fmt::format("\tIdentifier: {}", command.id));

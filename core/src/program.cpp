@@ -76,7 +76,7 @@ void from_json(const nlohmann::json& j, Program& p) {
     }
     else {
         // There always has to be at least a default configuration
-        p.configurations.push_back({ 0, "Default", "" });
+        p.configurations.push_back({ Program::Configuration::ID{ 0 }, "Default", "" });
     }
 
     std::vector<std::string> clusters = j.at(KeyClusters).get<std::vector<std::string>>();

@@ -66,7 +66,8 @@ common::CommandMessage exitProcessCommand(const Process& process) {
 
 int Process::nextId = 0;
 
-Process::Process(int programId, int configurationId, int clusterId, int nodeId)
+Process::Process(Program::ID programId, Program::Configuration::ID configurationId,
+                 Cluster::ID clusterId, Node::ID nodeId)
     : id{ nextId++ }
     , programId(programId)
     , configurationId(configurationId)

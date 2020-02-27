@@ -36,19 +36,22 @@
 #define __CORE__PROCESS_H__
 
 #include "commandmessage.h"
+#include "node.h"
 #include "processstatusmessage.h"
+#include "program.h"
 #include "typedid.h"
 
 struct Process {
     using ID = TypedId<int, struct ProcessIdTag>;
 
-    Process(int programId, int configurationId, int clusterId, int NodeId);
+    Process(Program::ID programId, Program::Configuration::ID configurationId,
+        Cluster::ID clusterId, Node::ID NodeId);
 
-    const ID id{ -1 };
-    const int programId = -1;
-    const int configurationId = -1;
-    const int clusterId = -1;
-    const int nodeId = -1;
+    const ID id;
+    const Program::ID programId;
+    const Program::Configuration::ID configurationId;
+    const Cluster::ID clusterId;
+    const Node::ID nodeId;
     common::ProcessStatusMessage::Status status;
 
 private:

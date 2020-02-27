@@ -40,7 +40,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-ClusterWidget::ClusterWidget(int clusterId)
+ClusterWidget::ClusterWidget(Cluster::ID clusterId)
     : _clusterId(clusterId)
 {
     Cluster* cluster = data::findCluster(clusterId);
@@ -75,7 +75,7 @@ ClusterWidget::ClusterWidget(int clusterId)
     }
 }
 
-void ClusterWidget::updateConnectionStatus(int nodeId) {
+void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
     Node* n = data::findNode(nodeId);
     assert(n);
     _nodeConnectionLabels[nodeId]->setText(n->isConnected ? "connected" : "disconnected");
@@ -105,7 +105,7 @@ ClustersWidget::ClustersWidget() {
     }
 }
 
-void ClustersWidget::connectedStatusChanged(int clusterId, int nodeId) {
+void ClustersWidget::connectedStatusChanged(Cluster::ID clusterId, Node::ID nodeId) {
     const auto it = _clusterWidgets.find(clusterId);
     assert(it != _clusterWidgets.end());
     it->second->updateConnectionStatus(nodeId);
