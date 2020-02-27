@@ -155,11 +155,6 @@ void ProcessHandler::handleStarted() {
     }
 }
 
-void ProcessHandler::handleFinished(int exitCode) {
-    QProcess* process = qobject_cast<QProcess*>(QObject::sender());
-    handleFinished(exitCode, process->exitStatus());
-}
-
 void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
@@ -273,10 +268,9 @@ void ProcessHandler::createAndRunProcessFromCommandMessage(
     
     // Connect all process signals for logging feedback to core
     connect(proc, &QProcess::errorOccurred, this, &ProcessHandler::handlerErrorOccurred);
-    connect(proc, SIGNAL(finished(int)), this, SLOT(handleFinished(int)));
     connect(
-        proc, SIGNAL(finished(int, QProcess::ExitStatus)),
-        this, SLOT(handleFinished(int, QProcess::ExitStatus))
+        proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+        this, &ProcessHandler::handleFinished
     );
 
     if (cmd.forwardStdOutStdErr) {

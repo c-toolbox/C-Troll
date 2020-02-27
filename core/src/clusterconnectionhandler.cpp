@@ -101,8 +101,10 @@ void ClusterConnectionHandler::handleSocketStateChange(int nodeId,
 
     const bool isConnected = state == QAbstractSocket::SocketState::ConnectedState;
 
-    Log(fmt::format("Socket state change: {}:{} {}", node->ipAddress, node->port, state));
     if (node->isConnected != isConnected) {
+        Log(fmt::format(
+            "Socket state change: {}:{} {}", node->ipAddress, node->port, state
+        ));
         node->isConnected = isConnected;
     }
 

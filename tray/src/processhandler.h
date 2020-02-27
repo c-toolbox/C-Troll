@@ -50,7 +50,6 @@ public slots:
     void handleSocketMessage(const nlohmann::json& message);
 
     void handlerErrorOccurred(QProcess::ProcessError error);
-    void handleFinished(int exitCode);
     void handleFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void handleReadyReadStandardError();
     void handleReadyReadStandardOutput();
