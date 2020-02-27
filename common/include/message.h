@@ -48,7 +48,7 @@ struct Message {
     std::string type;
 
     /// The version of the API that should be increased with breaking changes
-    static constexpr const int version = 1;
+    static constexpr const int CurrentVersion = 1;
 };
 
 template <typename T>
@@ -56,13 +56,16 @@ bool isValidMessage(const nlohmann::json& message) {
     const std::string type = message.at(Message::KeyType).get<std::string>();
     const int version = message.at(Message::KeyVersion).get<int>();
 
-    return type == T::Type && version == Message::version;
+    return type == T::Type && version == Message::CurrentVersion;
 }
 
 // Throws std::logic_error if the internal type is different from the expected type
 // Throws std::runtime_error if the version is different from the current version
 void validateMessage(const nlohmann::json& message, std::string_view expectedType);
     
+void from_json(const nlohmann::json& j, Message& p);
+
+
 } // namespace common
     
 #endif // __COMMON__MESSAGE_H__

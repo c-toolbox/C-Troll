@@ -76,7 +76,7 @@ namespace common {
 void to_json(nlohmann::json& j, const CommandMessage& p) {
     j = {
         { Message::KeyType, CommandMessage::Type },
-        { Message::KeyVersion, p.version },
+        { Message::KeyVersion, p.CurrentVersion },
         { KeyId, p.id },
         { KeyForwardOutErr, p.forwardStdOutStdErr },
         { KeyCommand, fromCommand(p.command) },

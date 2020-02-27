@@ -40,6 +40,7 @@
 #include "cluster.h"
 #include "jsonsocket.h"
 #include "processstatusmessage.h"
+#include "traystatusmessage.h"
 #include <QAbstractSocket>
 #include <map>
 #include <memory>
@@ -62,6 +63,7 @@ signals:
     void connectedStatusChanged(Cluster::ID clusterId, Node::ID nodeId);
 
     void receivedTrayProcess(common::ProcessStatusMessage status);
+    void receivedTrayStatus(Node::ID id, common::TrayStatusMessage status);
 
 private slots:
     void handleSocketStateChange(Node::ID nodeId, QAbstractSocket::SocketState state);

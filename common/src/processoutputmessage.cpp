@@ -47,7 +47,7 @@ namespace common {
 void to_json(nlohmann::json& j, const ProcessOutputMessage& p) {
     j = {
         { Message::KeyType, ProcessOutputMessage::Type },
-        { Message::KeyVersion, p.version },
+        { Message::KeyVersion, p.CurrentVersion },
         { KeyIdentifier, p.processId },
         { KeyMessage, p.message },
         // @TODO (abock, 2020-02-21) Replace this with a string

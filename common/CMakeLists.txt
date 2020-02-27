@@ -41,6 +41,7 @@ set(HEADER_FILES
     include/message.h
     include/processoutputmessage.h
     include/processstatusmessage.h
+    include/traystatusmessage.h
 )
 
 set(SOURCE_FILES
@@ -51,6 +52,7 @@ set(SOURCE_FILES
     src/message.cpp
     src/processoutputmessage.cpp
     src/processstatusmessage.cpp
+    src/traystatusmessage.cpp
 )
 
 find_package(Qt5 COMPONENTS Widgets Network REQUIRED)

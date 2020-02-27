@@ -142,6 +142,10 @@ void ClusterConnectionHandler::readyRead(Node::ID nodeId) {
         common::ProcessStatusMessage status = message;
         emit receivedTrayProcess(status);
     }
+    else if (common::isValidMessage<common::TrayStatusMessage>(message)) {
+        common::TrayStatusMessage status = message;
+        emit receivedTrayStatus(nodeId, status);
+    }
     else {
         Node* node = data::findNode(nodeId);
         std::vector<Cluster*> clusters = data::findClusterForNode(*node);
@@ -150,6 +154,7 @@ void ClusterConnectionHandler::readyRead(Node::ID nodeId) {
             emit messageReceived(cluster->id, node->id, message);
         }
     }
+    
 }
 
 void ClusterConnectionHandler::sendMessage(const Node& node, nlohmann::json msg) const {

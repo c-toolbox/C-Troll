@@ -93,7 +93,7 @@ void to_json(nlohmann::json& j, const ProcessStatusMessage& p) {
     std::string status = fromStatus(p.status);
     j = {
         { Message::KeyType, ProcessStatusMessage::Type },
-        { Message::KeyVersion, p.version },
+        { Message::KeyVersion, p.CurrentVersion },
         { KeyProcessId, p.processId },
         { KeyStatus, status }
     };

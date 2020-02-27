@@ -43,7 +43,7 @@ namespace common {
 void to_json(nlohmann::json& j, const KillAllMessage& p) {
     j = {
         { Message::KeyType, KillAllMessage::Type },
-        { Message::KeyVersion, p.version }
+        { Message::KeyVersion, p.CurrentVersion }
     };
 }
 

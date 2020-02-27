@@ -49,11 +49,18 @@ void validateMessage(const nlohmann::json& message, std::string_view expectedTyp
     }
 
     const int version = message.at(Message::KeyVersion).get<int>();
-    if (version != Message::version) {
+    if (version != Message::CurrentVersion) {
         throw std::runtime_error(fmt::format(
-            "Mismatching version number. Expected {} got {}", Message::version, version
+            "Mismatching version number. Expected {} got {}",
+            Message::CurrentVersion,
+            version
         ));
     }
 }
+
+void from_json(const nlohmann::json& j, Message& p) {
+
+}
+
 
 } // namespace common
