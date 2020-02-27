@@ -34,7 +34,6 @@
 
 #include "process.h"
 
-#include "cluster.h"
 #include "database.h"
 #include "program.h"
 #include "logging.h"

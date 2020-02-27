@@ -37,8 +37,6 @@
 
 #include <json/json.hpp>
 
-class JsonObject;
-
 /**
  * This structure represents a cluster setup, that is, a collection of computers that are
  * addressed as a unit. Each cluster has a human readable \m name, a unique

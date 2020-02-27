@@ -37,13 +37,14 @@
 
 #include <QObject>
 
-#include "cluster.h"
-#include "node.h"
+#include "jsonsocket.h"
 #include "processstatusmessage.h"
-#include <jsonsocket.h>
-#include <QMap>
+#include <QAbstractSocket>
 #include <map>
 #include <memory>
+
+struct Cluster;
+struct Node;
 
 class ClusterConnectionHandler : public QObject {
 Q_OBJECT

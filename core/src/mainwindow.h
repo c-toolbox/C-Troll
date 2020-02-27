@@ -37,15 +37,13 @@
 
 #include <QMainWindow>
 
-#include "cluster.h"
 #include "clusterconnectionhandler.h"
 #include "process.h"
-#include "program.h"
-#include <QTextEdit>
-#include <memory>
 
 class ClustersWidget;
 class ProcessesWidget;
+class QTextEdit;
+
 namespace programs { class ProgramsWidget; }
 
 class MainWindow : public QMainWindow {

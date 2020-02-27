@@ -34,12 +34,13 @@
 
 #include "clusterconnectionhandler.h"
 
+#include "cluster.h"
 #include "database.h"
-#include "jsonsocket.h"
 #include "logging.h"
+#include "node.h"
 #include <QTimer>
-#include <assert.h>
 #include <fmt/format.h>
+#include <assert.h>
 
 ClusterConnectionHandler::~ClusterConnectionHandler() {
     // We need to do the deletion this way since there will be messages pending for the

@@ -34,6 +34,7 @@
 
 #include "clusterwidget.h"
 
+#include "cluster.h"
 #include "database.h"
 #include "node.h"
 #include <QLabel>
@@ -78,17 +79,6 @@ void ClusterWidget::updateConnectionStatus(int nodeId) {
     Node* n = data::findNode(nodeId);
     assert(n);
     _nodeConnectionLabels[nodeId]->setText(n->isConnected ? "connected" : "disconnected");
-
-
-    //for (int )
-    //for (size_t i = 0; i < cluster->nodes.size(); ++i) {
-    //    Node* n = data::findNode(cluster->nodes[i]);
-    //    if (n->id == nodeId) {
-    //        _nodeConnectionLabels[i]->setText(
-    //            n->isConnected ? "connected" : "disconnected"
-    //        );
-    //    }
-    //}
 
     Cluster* cluster = data::findCluster(_clusterId);
     assert(cluster);

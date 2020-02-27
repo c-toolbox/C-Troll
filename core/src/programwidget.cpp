@@ -34,12 +34,12 @@
 
 #include "programwidget.h"
 
+#include "cluster.h"
 #include "database.h"
 #include "logging.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>
-#include <QPushButton>
 #include <QVBoxLayout>
 
 namespace programs {

@@ -35,11 +35,8 @@
 #ifndef __CORE__PROCESS_H__
 #define __CORE__PROCESS_H__
 
-#include "cluster.h"
 #include "commandmessage.h"
-#include "node.h"
 #include "processstatusmessage.h"
-#include "program.h"
 #include "typedid.h"
 
 struct Process {

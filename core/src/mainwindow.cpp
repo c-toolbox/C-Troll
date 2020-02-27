@@ -37,15 +37,9 @@
 #include "clusterwidget.h"
 #include "configuration.h"
 #include "database.h"
-#include "message.h"
 #include "jsonload.h"
-#include "logging.h"
 #include "processwidget.h"
 #include "programwidget.h"
-#include <QPushButton>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QTabWidget>
 #include <QTextEdit>
 #include <QVBoxLayout>
 

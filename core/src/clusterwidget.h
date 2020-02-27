@@ -37,9 +37,9 @@
 
 #include <QWidget>
 
-#include <QLabel>
-#include "cluster.h"
 #include <map>
+
+class QLabel;
 
 class ClusterWidget : public QWidget {
 Q_OBJECT

@@ -36,14 +36,14 @@
 #define __CORE__PROGRAMWIDGET_H__
 
 #include <QPushButton>
-#include <QWidget>
 
-#include <QMenu>
-#include "cluster.h"
-#include "node.h"
 #include "process.h"
 #include "program.h"
-#include <vector>
+#include <QWidget>
+#include <map>
+
+struct Cluster;
+class QMenu;
 
 namespace programs {
 

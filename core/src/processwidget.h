@@ -38,8 +38,9 @@
 #include <QWidget>
 
 #include "process.h"
-#include <QLabel>
-#include <vector>
+#include <map>
+
+class QLabel;
 
 class ProcessWidget : public QWidget {
 Q_OBJECT

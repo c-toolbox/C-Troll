@@ -36,6 +36,7 @@
 
 #include "database.h"
 #include "processstatusmessage.h"
+#include <QLabel>
 #include <QVBoxLayout>
 
 namespace {
