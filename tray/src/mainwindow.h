@@ -60,7 +60,6 @@ private slots:
 private:
     // Declare the object of future applications for the tray icon
     QTextEdit* _messageBox;
-    QSystemTrayIcon* _trayIcon;
 };
  
 #endif // __TRAY__MAINWINDOW_H__

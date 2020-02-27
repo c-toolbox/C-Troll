@@ -34,13 +34,10 @@
 
 #include "mainwindow.h"
 
+#include <QApplication>
 #include <QHBoxLayout>
 #include <QMenu>
 #include <iostream>
-
-void MainWindow::log(std::string msg) {
-    _messageBox->append(QString::fromStdString(std::move(msg)));
-}
 
 MainWindow::MainWindow(const QString& title)
     : QMainWindow()
@@ -53,8 +50,10 @@ MainWindow::MainWindow(const QString& title)
  
     // Initialize the tray icon, set the icon of a set of system icons,
     // as well as set a tooltip
-    _trayIcon = new QSystemTrayIcon(QIcon(":/images/C_transparent.png"), this);
-    _trayIcon->setToolTip(title + QString("\nCluster Launcher Application"));
+    QSystemTrayIcon* trayIcon = new QSystemTrayIcon(
+        QIcon(":/images/C_transparent.png"), this
+    );
+    trayIcon->setToolTip(title + QString("\nCluster Launcher Application"));
 
     // After that create a context menu of two items
     QMenu* menu = new QMenu(this);
@@ -65,17 +64,24 @@ MainWindow::MainWindow(const QString& title)
 
     // The second menu item terminates the application
     QAction* quitAction = new QAction(trUtf8("Quit"), this);
-    connect(quitAction, &QAction::triggered, this, &MainWindow::close);
+    connect(
+        quitAction, &QAction::triggered,
+        QApplication::instance(), &QApplication::quit
+    );
     menu->addAction(quitAction);
  
     // Set the context menu on the icon and show the application icon in the system tray
-    _trayIcon->setContextMenu(menu);
-    _trayIcon->show();
+    trayIcon->setContextMenu(menu);
+    trayIcon->show();
  
     // Also connect clicking on the icon to the signal processor of this press 
-    connect(_trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
+    connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
 }
  
+void MainWindow::log(std::string msg) {
+    _messageBox->append(QString::fromStdString(std::move(msg)));
+}
+
 // The method that handles the closing event of the application window
 void MainWindow::closeEvent(QCloseEvent* event) {
     // If the window is visible, and the checkbox is checked, then the completion of the
@@ -84,13 +90,6 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     if (isVisible()) {
         event->ignore();
         hide();
- 
-        _trayIcon->showMessage(
-            windowTitle(),
-            trUtf8("The application is still running in the background"),
-            QSystemTrayIcon::Information,
-            2000
-        );
     }
 }
 

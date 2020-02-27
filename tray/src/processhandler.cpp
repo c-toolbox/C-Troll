@@ -124,11 +124,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    const auto p = std::find_if(
-        _processes.cbegin(),
-        _processes.cend(),
-        [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
-    );
+    const auto p = processIt(process);
     
     if (p != _processes.end() ) {
         // @TODO (abock, 2020-02-26) Me thinks this codepath should also send a
@@ -147,11 +143,7 @@ void ProcessHandler::handleStarted() {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    auto p = std::find_if(
-        _processes.cbegin(),
-        _processes.cend(),
-        [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
-    );
+    auto p = processIt(process);
     
     if (p != _processes.end()) {
         // Send out the TrayProcessStatus with the status string
@@ -172,11 +164,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    const auto p = std::find_if(
-        _processes.cbegin(),
-        _processes.cend(),
-        [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
-    );
+    auto p = processIt(process);
     
     if (p != _processes.end()) {
         common::ProcessStatusMessage msg;
@@ -194,12 +182,7 @@ void ProcessHandler::handleReadyReadStandardError() {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    const auto p = std::find_if(
-        _processes.cbegin(),
-        _processes.cend(),
-        [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
-    );
-    
+    auto p = processIt(process);   
     if (p != _processes.end()) {
         // Send out the TrayProcessLogMessage with the stderror key
         common::ProcessOutputMessage msg;
@@ -215,12 +198,7 @@ void ProcessHandler::handleReadyReadStandardOutput() {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    auto p = std::find_if(
-        _processes.cbegin(),
-        _processes.cend(),
-        [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
-    );
-    
+    auto p = processIt(process);
     if (p != _processes.end()) {
         common::ProcessOutputMessage msg;
         msg.processId = p->first;
@@ -319,4 +297,13 @@ void ProcessHandler::createAndRunProcessFromCommandMessage(
     
     // Run the process with the command
     executeProcessWithCommandMessage(proc, cmd);
+}
+
+std::map<int, QProcess*>::const_iterator ProcessHandler::processIt(QProcess* process) {
+    const auto p = std::find_if(
+        _processes.cbegin(),
+        _processes.cend(),
+        [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
+    );
+    return p;
 }

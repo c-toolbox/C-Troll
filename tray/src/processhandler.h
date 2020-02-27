@@ -37,11 +37,11 @@
 
 #include <QObject>
 
-#include <commandmessage.h>
+#include "commandmessage.h"
 #include <QProcess>
+#include <json/json.hpp>
 #include <map>
 #include <string>
-#include <json/json.hpp>
 
 class ProcessHandler : public QObject {
 Q_OBJECT
@@ -64,6 +64,8 @@ private:
         const common::CommandMessage& command);
     void createAndRunProcessFromCommandMessage(const common::CommandMessage& command);
     
+    std::map<int, QProcess*>::const_iterator processIt(QProcess* process);
+
     // The key of this map is a unique id (received from core)
     // The value is the process which is running
     std::map<int, QProcess*> _processes;
