@@ -32,49 +32,23 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__PROCESSWIDGET_H__
-#define __CORE__PROCESSWIDGET_H__
+#include "killallmessage.h"
 
-#include <QWidget>
+#include "logging.h"
+#include <fmt/format.h>
+#include <optional>
 
-#include "process.h"
-#include <map>
+namespace common {
 
-class QBoxLayout;
-class QLabel;
+void to_json(nlohmann::json& j, const KillAllMessage& p) {
+    j = {
+        { Message::KeyType, KillAllMessage::Type },
+        { Message::KeyVersion, p.version }
+    };
+}
 
-class ProcessWidget : public QWidget {
-Q_OBJECT
-public:
-    ProcessWidget(Process::ID processId);
+void from_json(const nlohmann::json& j, KillAllMessage&) {
+    validateMessage(j, KillAllMessage::Type);
+}
 
-    void updateStatus();
-
-private:
-    const Process::ID _processId;
-    QLabel* _status;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-class ProcessesWidget : public QWidget {
-Q_OBJECT
-public:
-    ProcessesWidget();
-
-    void processAdded(Process::ID processId);
-    void processUpdated(Process::ID processId);
-    void processRemoved(Process::ID processId);
-
-signals:
-    void killAllProcesses();
-
-private:
-    QBoxLayout* _layout;
-
-    std::map<Process::ID, ProcessWidget*> _widgets;
-};
-
-#endif // __CORE__PROCESSWIDGET_H__
+} // namespace common

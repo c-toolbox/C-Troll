@@ -36,6 +36,7 @@ set(HEADER_FILES
     include/commandmessage.h
     include/jsonload.h
     include/jsonsocket.h
+    include/killallmessage.h
     include/logging.h
     include/message.h
     include/processoutputmessage.h
@@ -45,6 +46,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
     src/commandmessage.cpp
     src/jsonsocket.cpp
+    src/killallmessage.cpp
     src/logging.cpp
     src/message.cpp
     src/processoutputmessage.cpp

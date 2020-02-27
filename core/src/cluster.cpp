@@ -83,6 +83,8 @@ std::vector<Cluster> loadClustersFromDirectory(const std::string& directory) {
         }
     }
 
+    // @TODO (abock, 2020-02-27) Check whether there are any duplicate clusters specified
+
     // Inject the unique identifiers into the nodes
     int id = 0;
     for (Cluster& cluster : clusters) {

@@ -7,3 +7,4 @@ CORE
  - Pass over the codebase to unify application <-> program usage
  - Global database struct that stores clusters, applications, and processes and we place all pointer handling with id strings
  - When starting C-Troll with a running Tray, closing the tray, and reopening it, C-Troll does not try to reconnect to the tray application anymore
+ - 1. start a program on a cluster, 2. close the tray on that node, 3. start the tray again -> C-Troll still says "Stop: XX"

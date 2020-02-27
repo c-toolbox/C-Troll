@@ -38,10 +38,12 @@
 #include "configuration.h"
 #include "database.h"
 #include "jsonload.h"
+#include "killallmessage.h"
 #include "processwidget.h"
 #include "programwidget.h"
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <set>
 
 MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     setWindowTitle(title);
@@ -120,7 +122,13 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
         [this](common::ProcessStatusMessage status) {
             Process* process = data::findProcess(Process::ID{ status.processId });
-            assert(process);
+            if (!process) {
+                // This state might happen if C-Troll was restarted while programs were
+                // still running on the trays, if we than issue a killall command, we are
+                // handed back a process id that we don't know
+                return;
+            }
+
             process->status = status.status;
 
             // The process was already known to us, which should always be the case
@@ -135,6 +143,10 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
             Node* node = data::findNode(nodeId);
             Log(fmt::format("{} {} {}", cluster->name, node->name, std::string(message)));
         }
+    );
+    connect(
+        _processesWidget, &ProcessesWidget::killAllProcesses,
+        [this]() { killAllProcesses(Cluster::ID{ -1 }); }
     );
 
     // Set up the tab widget
@@ -207,7 +219,7 @@ void MainWindow::startProcess(Process::ID processId) {
     common::CommandMessage command = startProcessCommand(*process);
 
     // Generate identifier
-    Log("Sending Message to start application:");
+    Log("Sending message to start program:");
     Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id.v));
     Log(fmt::format("\tCommand: {}", command.command));
     Log(fmt::format("\tExecutable: {}", command.executable));
@@ -216,7 +228,7 @@ void MainWindow::startProcess(Process::ID processId) {
     Log(fmt::format("\tCWD: {}", command.workingDirectory));
     
     nlohmann::json j = command;
-    _clusterConnectionHandler.sendMessage(*cluster, *node, j);
+    _clusterConnectionHandler.sendMessage(*node, j);
 }
 
 void MainWindow::stopProcess(Process::ID processId) {
@@ -226,7 +238,7 @@ void MainWindow::stopProcess(Process::ID processId) {
 
     common::CommandMessage command = exitProcessCommand(*process);
 
-    Log("Sending Message to stop application:");
+    Log("Sending message to stop program:");
     Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id.v));
     Log(fmt::format("\tCommand: {}", command.command));
     Log(fmt::format("\tExecutable: {}", command.executable));
@@ -235,5 +247,35 @@ void MainWindow::stopProcess(Process::ID processId) {
     Log(fmt::format("\tCWD: {}", command.workingDirectory));
 
     nlohmann::json j = command;
-    _clusterConnectionHandler.sendMessage(*cluster, *node, j);
+    _clusterConnectionHandler.sendMessage(*node, j);
+}
+
+void MainWindow::killAllProcesses(Cluster::ID id) {
+    Log("Send message to stop all programs");
+
+    std::vector< Node*> nodes;
+    if (id.v == -1 ) {
+        // Send kill command to all clusters
+        for (Cluster* cluster : data::clusters()) {
+            std::vector<Node*> ns = data::findNodesForCluster(*cluster);
+            std::copy(ns.begin(), ns.end(), std::back_inserter(nodes));
+        }
+
+        // We have probably picked up a number of duplicates in this process as nodes can
+        // be specified in multiple clusters
+        std::sort(nodes.begin(), nodes.end());
+        nodes.erase(std::unique(nodes.begin(), nodes.end()), nodes.end());
+    }
+    else {
+        // We want to send the kill command only to the nodes of a specific cluster
+        Cluster* cluster = data::findCluster(id);
+        nodes = data::findNodesForCluster(*cluster);
+    }
+
+    common::KillAllMessage command;
+    nlohmann::json j = command;
+    for (Node* node : nodes) {
+        Log("\t" + node->name);
+        _clusterConnectionHandler.sendMessage(*node, j);
+    }
 }

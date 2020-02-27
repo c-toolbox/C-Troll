@@ -37,6 +37,7 @@
 #include "database.h"
 #include "processstatusmessage.h"
 #include <QLabel>
+#include <QPushButton>
 #include <QVBoxLayout>
 
 namespace {
@@ -120,15 +121,20 @@ void ProcessWidget::updateStatus() {
 
 
 ProcessesWidget::ProcessesWidget() {
-    QLayout* layout = new QVBoxLayout;
-    setLayout(layout);
+    _layout = new QVBoxLayout;
+    setLayout(_layout);
+
+    QPushButton* killAll = new QPushButton("Kill all processses");
+    _layout->addWidget(killAll);
+
+    connect(killAll, &QPushButton::clicked, this, &ProcessesWidget::killAllProcesses);
 }
 
 void ProcessesWidget::processAdded(Process::ID processId) {
     // The process has been created, but the widget did not exist yet
     ProcessWidget* w = new ProcessWidget(processId);
     _widgets[processId] = w;
-    layout()->addWidget(w);
+    _layout->insertWidget(static_cast<int>(_widgets.size() - 1), w);
 }
 
 void ProcessesWidget::processUpdated(Process::ID processId) {
@@ -141,6 +147,6 @@ void ProcessesWidget::processRemoved(Process::ID processId) {
     const auto it = _widgets.find(processId);
     assert(it != _widgets.end());
 
-    layout()->removeWidget(it->second);
+    _layout->removeWidget(it->second);
     _widgets.erase(processId);
 }

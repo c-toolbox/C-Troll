@@ -34,8 +34,9 @@
 
 #include "processhandler.h"
 
-#include "message.h"
+#include "killallmessage.h"
 #include "logging.h"
+#include "message.h"
 #include "processoutputmessage.h"
 #include "processstatusmessage.h"
 #include <fmt/format.h>
@@ -92,31 +93,46 @@ namespace {
 } // namespace
 
 void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
-    common::CommandMessage command = message;
-    
-    Log("Received CommandMessage");
-    Log(fmt::format("\tCommand: {}", command.command));
-    Log(fmt::format("\tId: {}", command.id));
-    Log(fmt::format("\tExecutable: {}", command.executable));
-    Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
-    Log(fmt::format("\tCurrent Working Directory: {}", command.workingDirectory));
+    if (common::isValidMessage<common::CommandMessage>(message)) {
+        common::CommandMessage command = message;
 
-    // Check if the identifier of traycommand already is tied to a process
-    // We don't allow the same id for multiple processes
-    const auto p = _processes.find(command.id);
-    if (p == _processes.end()) {
-        if (command.command == common::CommandMessage::Command::Start) {
-            // Not Found, create and run a process with it
-            createAndRunProcessFromCommandMessage(command);
+        Log("Received CommandMessage");
+        Log(fmt::format("\tCommand: {}", command.command));
+        Log(fmt::format("\tId: {}", command.id));
+        Log(fmt::format("\tExecutable: {}", command.executable));
+        Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
+        Log(fmt::format("\tCurrent Working Directory: {}", command.workingDirectory));
+
+        // Check if the identifier of traycommand already is tied to a process
+        // We don't allow the same id for multiple processes
+        const auto p = _processes.find(command.id);
+        if (p == _processes.end()) {
+            if (command.command == common::CommandMessage::Command::Start) {
+                // Not Found, create and run a process with it
+                createAndRunProcessFromCommandMessage(command);
+            }
+            else {
+                handlerErrorOccurred(QProcess::ProcessError::FailedToStart);
+            }
         }
         else {
-            handlerErrorOccurred(QProcess::ProcessError::FailedToStart);
+            // Found
+            executeProcessWithCommandMessage(p->second, command);
         }
     }
-    else {
-        // Found
-        executeProcessWithCommandMessage(p->second, command);
+    else if (common::isValidMessage<common::KillAllMessage>(message)) {
+        Log("Received KillAllMessage");
+
+        for (const std::pair<const int, QProcess*>& p : _processes) {
+            Log("Killing process " + std::to_string(p.first));
+
+            p.second->close();
+            p.second->deleteLater();
+        }
+        _processes.clear();
     }
+
+
 }
 
 void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {

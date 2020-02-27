@@ -54,8 +54,7 @@ public:
 
     void initialize();
 
-    void sendMessage(const Cluster& cluster, const Node& node,
-        nlohmann::json message) const;
+    void sendMessage(const Node& node, nlohmann::json message) const;
 
 signals:
     void messageReceived(Cluster::ID clusterId, Node::ID nodeId, nlohmann::json message);

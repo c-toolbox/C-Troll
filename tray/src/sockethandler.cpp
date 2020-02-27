@@ -60,7 +60,7 @@ void SocketHandler::readyRead(common::JsonSocket* socket) {
 }
 
 void SocketHandler::sendMessage(const nlohmann::json& message) {
-    Log(fmt::format("Sending message:\n{}", message.dump()));
+    Log(fmt::format("Sending message: {}", message.dump()));
     for (common::JsonSocket* jsonSocket : _sockets) {
         std::string local = jsonSocket->localAddress();
         std::string peer = jsonSocket->peerAddress();
@@ -74,7 +74,7 @@ void SocketHandler::disconnected(common::JsonSocket* socket) {
     if (ptr != _sockets.end()) {
         (*ptr)->deleteLater();
         _sockets.erase(ptr);
-        Log("Socket disconnected");
+        Log(fmt::format("Socket from {} disconnected", socket->peerAddress()));
     }
 }
 
@@ -95,6 +95,6 @@ void SocketHandler::newConnection() {
         );
 
         _sockets.push_back(jsonSocket);
-        Log("Socket connected");
+        Log(fmt::format("Socket connected from {}", jsonSocket->peerAddress()));
     }
 }

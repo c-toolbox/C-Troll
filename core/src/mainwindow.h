@@ -59,6 +59,7 @@ private:
         Program::Configuration::ID configurationId);
     void startProcess(Process::ID processId);
     void stopProcess(Process::ID processId);
+    void killAllProcesses(Cluster::ID id);
 
 
     void log(std::string msg);

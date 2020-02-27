@@ -32,49 +32,23 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__PROCESSWIDGET_H__
-#define __CORE__PROCESSWIDGET_H__
+#ifndef __COMMON__KILLALLMESSAGE_H__
+#define __COMMON__KILLALLMESSAGE_H__
 
-#include <QWidget>
+#include "message.h"
 
-#include "process.h"
-#include <map>
+#include <json/json.hpp>
 
-class QBoxLayout;
-class QLabel;
+namespace common {
 
-class ProcessWidget : public QWidget {
-Q_OBJECT
-public:
-    ProcessWidget(Process::ID processId);
+struct KillAllMessage : public Message {
+    static constexpr const char* Type = "KillAllMessage";
 
-    void updateStatus();
-
-private:
-    const Process::ID _processId;
-    QLabel* _status;
 };
 
+void to_json(nlohmann::json& j, const KillAllMessage& p);
+void from_json(const nlohmann::json& j, KillAllMessage& p);
 
-//////////////////////////////////////////////////////////////////////////////////////////
+} // namespace commmon
 
-
-class ProcessesWidget : public QWidget {
-Q_OBJECT
-public:
-    ProcessesWidget();
-
-    void processAdded(Process::ID processId);
-    void processUpdated(Process::ID processId);
-    void processRemoved(Process::ID processId);
-
-signals:
-    void killAllProcesses();
-
-private:
-    QBoxLayout* _layout;
-
-    std::map<Process::ID, ProcessWidget*> _widgets;
-};
-
-#endif // __CORE__PROCESSWIDGET_H__
+#endif // __COMMON__KILLALLMESSAGE_H__

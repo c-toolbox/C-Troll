@@ -42,6 +42,22 @@
 #include <fmt/format.h>
 #include <assert.h>
 
+namespace {
+
+    std::string stateToString(QAbstractSocket::SocketState state) {
+        switch (state) {
+            case QAbstractSocket::SocketState::UnconnectedState: return "Unconnected";
+            case QAbstractSocket::SocketState::HostLookupState: return "Host Lookup";
+            case QAbstractSocket::SocketState::ConnectingState: return "Connecting";
+            case QAbstractSocket::SocketState::ConnectedState: return "Connected";
+            case QAbstractSocket::SocketState::BoundState: return "Bound";
+            case QAbstractSocket::SocketState::ListeningState: return "Listening";
+            case QAbstractSocket::SocketState::ClosingState: return "Closing";
+        }
+    }
+
+} // namespace
+
 ClusterConnectionHandler::~ClusterConnectionHandler() {
     // We need to do the deletion this way since there will be messages pending for the
     // JsonSocket on the event queue (particuarly the signalling that the connection is
@@ -104,7 +120,8 @@ void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
 
     if (node->isConnected != isConnected) {
         Log(fmt::format(
-            "Socket state change: {}:{} {}", node->ipAddress, node->port, state
+            "Socket state change: {}:{} --> {}",
+            node->ipAddress, node->port, stateToString(state)
         ));
         node->isConnected = isConnected;
     }
@@ -135,9 +152,7 @@ void ClusterConnectionHandler::readyRead(Node::ID nodeId) {
     }
 }
 
-void ClusterConnectionHandler::sendMessage(const Cluster&, const Node& node,
-                                           nlohmann::json msg) const
-{
+void ClusterConnectionHandler::sendMessage(const Node& node, nlohmann::json msg) const {
     assert(!msg.is_null());
 
     Log("Node: " + node.name + '\t' + node.ipAddress + ':' + std::to_string(node.port));
