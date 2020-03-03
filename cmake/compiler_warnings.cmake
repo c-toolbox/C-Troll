@@ -31,11 +31,14 @@
 # DAMAGE.                                                                                #
 #                                                                                        #
 ##########################################################################################
+# Based on Jason Turner's cpp_starter_project                                            #
+##########################################################################################
 
 function (set_project_warnings project_name)
   option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 
   set(MSVC_WARNINGS
+    /MP
     /ZI
     /std:c++latest
     /permissive-
