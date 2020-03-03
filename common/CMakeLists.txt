@@ -33,85 +33,44 @@
 ##########################################################################################
 
 set(HEADER_FILES
-    include/commandmessage.h
-    include/jsonload.h
-    include/jsonsocket.h
-    include/killallmessage.h
-    include/logging.h
-    include/message.h
-    include/processoutputmessage.h
-    include/processstatusmessage.h
-    include/traystatusmessage.h
+  include/commandmessage.h
+  include/jsonload.h
+  include/jsonsocket.h
+  include/killallmessage.h
+  include/logging.h
+  include/message.h
+  include/processoutputmessage.h
+  include/processstatusmessage.h
+  include/traystatusmessage.h
 )
 
 set(SOURCE_FILES
-    src/commandmessage.cpp
-    src/jsonsocket.cpp
-    src/killallmessage.cpp
-    src/logging.cpp
-    src/message.cpp
-    src/processoutputmessage.cpp
-    src/processstatusmessage.cpp
-    src/traystatusmessage.cpp
+  src/commandmessage.cpp
+  src/jsonsocket.cpp
+  src/killallmessage.cpp
+  src/logging.cpp
+  src/message.cpp
+  src/processoutputmessage.cpp
+  src/processstatusmessage.cpp
+  src/traystatusmessage.cpp
 )
 
 find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
 
 set(MOC_FILES "")
 qt5_wrap_cpp(
-    MOC_FILES
-    include/jsonsocket.h
+  MOC_FILES
+  include/jsonsocket.h
 )
 
-add_library(C-Troll-Common
-    ${SOURCE_FILES}
-    ${HEADER_FILES}
-    ${MOC_FILES}
-    ${RESOURCE_FILES}
+add_library(common
+  ${SOURCE_FILES}
+  ${HEADER_FILES}
+  ${MOC_FILES}
+  ${RESOURCE_FILES}
 )
 
 add_subdirectory(ext/fmt)
 
-target_include_directories(C-Troll-Common PUBLIC "include" "ext" "ext/fmt/include")
-target_link_libraries(C-Troll-Common fmt Qt5::Widgets Qt5::Network)
-
-set_property(TARGET C-Troll-Common PROPERTY CXX_STANDARD 17)
-set_property(TARGET C-Troll-Common PROPERTY CXX_STANDARD_REQUIRED On)
-
-if (MSVC)
-    target_compile_options(
-        C-Troll-Common
-        PUBLIC
-        "/ZI"
-        "/MP"
-        "/W4"
-        "/std:c++latest"
-        "/permissive-"
-        "/wd4127"           # conditional expression is constant (thrown in Qt)
-    )
-    target_compile_definitions(
-        C-Troll-Common
-        PUBLIC
-        "_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING"
-    )
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if (APPLE)
-        target_compile_options(C-Troll-Common PUBLIC "-stdlib=libc++")
-    endif ()
-    target_compile_options(
-        C-Troll-Common
-        PUBLIC
-        "-Wall"
-        "-Wextra"
-        "-Wpedantic"
-    )
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    target_compile_options(
-        C-Troll-Common
-        PUBLIC
-        "-ggdb"
-        "-Wall"
-        "-Wextra"
-        "-Wpedantic"
-    )
-endif ()
+target_include_directories(common PUBLIC "include" "ext" "ext/fmt/include")
+target_link_libraries(common project_options fmt Qt5::Widgets Qt5::Network)

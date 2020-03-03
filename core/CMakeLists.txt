@@ -33,58 +33,55 @@
 ##########################################################################################
 
 set(HEADER_FILES
-    src/cluster.h
-    src/clusterconnectionhandler.h
-    src/clusterwidget.h
-    src/configuration.h
-    src/database.h
-    src/mainwindow.h
-    src/node.h
-    src/process.h
-    src/processwidget.h
-    src/program.h
-    src/programwidget.h
+  src/cluster.h
+  src/clusterconnectionhandler.h
+  src/clusterwidget.h
+  src/configuration.h
+  src/database.h
+  src/mainwindow.h
+  src/node.h
+  src/process.h
+  src/processwidget.h
+  src/program.h
+  src/programwidget.h
 )
 
 set(SOURCE_FILES
-    src/cluster.cpp
-    src/clusterconnectionhandler.cpp
-    src/clusterwidget.cpp
-    src/configuration.cpp
-    src/database.cpp
-    src/main.cpp
-    src/mainwindow.cpp
-    src/node.cpp
-    src/process.cpp
-    src/processwidget.cpp
-    src/program.cpp
-    src/programwidget.cpp
+  src/cluster.cpp
+  src/clusterconnectionhandler.cpp
+  src/clusterwidget.cpp
+  src/configuration.cpp
+  src/database.cpp
+  src/main.cpp
+  src/mainwindow.cpp
+  src/node.cpp
+  src/process.cpp
+  src/processwidget.cpp
+  src/program.cpp
+  src/programwidget.cpp
 )
 
 find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
 
 set(MOC_FILES "")
 qt5_wrap_cpp(
-    MOC_FILES
-    src/clusterconnectionhandler.h
-    src/clusterwidget.h
-    src/mainwindow.h
-    src/processwidget.h
-    src/programwidget.h
+  MOC_FILES
+  src/clusterconnectionhandler.h
+  src/clusterwidget.h
+  src/mainwindow.h
+  src/processwidget.h
+  src/programwidget.h
 )
 
 set(RESOURCE_FILES "")
 qt5_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
 
 add_executable(C-Troll WIN32 MACOSX_BUNDLE
-    ${SOURCE_FILES}
-    ${HEADER_FILES}
-    ${MOC_FILES}
-    ${RESOURCE_FILES}
+  ${SOURCE_FILES}
+  ${HEADER_FILES}
+  ${MOC_FILES}
+  ${RESOURCE_FILES}
 )
 
 target_include_directories(C-Troll PUBLIC "src")
-target_link_libraries(C-Troll PUBLIC C-Troll-Common Qt5::Widgets Qt5::Network)
-
-set_property(TARGET C-Troll PROPERTY CXX_STANDARD 17)
-set_property(TARGET C-Troll PROPERTY CXX_STANDARD_REQUIRED On)
+target_link_libraries(C-Troll PUBLIC common Qt5::Widgets Qt5::Network)

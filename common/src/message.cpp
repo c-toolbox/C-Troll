@@ -58,9 +58,6 @@ void validateMessage(const nlohmann::json& message, std::string_view expectedTyp
     }
 }
 
-void from_json(const nlohmann::json& j, Message& p) {
-
-}
-
+void from_json(const nlohmann::json&, Message&) {}
 
 } // namespace common
