@@ -173,6 +173,30 @@ const Program::Configuration& findConfigurationForProgram(const Program& program
     return *it;
 }
 
+bool hasTag(Program::ID id, const std::vector<std::string>& tags) {
+    assert(!tags.empty());
+    Program* program = findProgram(id);
+
+    bool res = true;
+    for (const std::string& tag : tags) {
+        const auto it = std::find(program->tags.begin(), program->tags.end(), tag);
+        bool foundTag = it != program->tags.end();
+        res &= foundTag;
+    }
+    return res;
+}
+
+std::set<std::string> findTags() {
+    std::set<std::string> res;
+    for (Program* program : programs()) {
+        for (const std::string& tag : program->tags) {
+            res.insert(tag);
+        }
+    }
+    return res;
+}
+
+
 Process* findProcess(Process::ID id) {
     const auto it = std::find_if(
         gProcesses.begin(), gProcesses.end(),

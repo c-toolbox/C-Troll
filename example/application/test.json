@@ -3,11 +3,9 @@
   "executable": "executable name",
   "commandlineParameters": "--",
   "workingDirectory": "working directory",
-
   "tags": [
-    "test"
+    "test2"
   ],
-
   "configurations": [
     {
       "id": "unique id",

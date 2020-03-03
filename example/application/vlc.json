@@ -2,6 +2,7 @@
   "name": "VLC",
   "executable": "C:/Program Files (x86)/VideoLAN/VLC/vlc.exe",
   "workingDirectory": "C:/Program Files (x86)/VideoLAN/VLC",
+  "tags": [ "test" ],
   "configurations": [
     {
       "name": "Default",

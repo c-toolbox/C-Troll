@@ -40,9 +40,9 @@
 #include "process.h"
 #include "program.h"
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
-
 
 namespace data {
     
@@ -63,6 +63,8 @@ std::vector<Node*> findNodesForCluster(const Cluster& cluster);
 Program* findProgram(Program::ID id);
 const Program::Configuration& findConfigurationForProgram(const Program& program, 
     Program::Configuration::ID id);
+bool hasTag(Program::ID id, const std::vector<std::string>& tags);
+std::set<std::string> findTags();
 
 Process* findProcess(Process::ID id);
 void addProcess(std::unique_ptr<Process> process);

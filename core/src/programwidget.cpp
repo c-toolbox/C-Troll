@@ -41,6 +41,7 @@
 #include <QLabel>
 #include <QMenu>
 #include <QVBoxLayout>
+#include <set>
 
 namespace programs {
 
@@ -300,6 +301,16 @@ ProgramWidget::ProgramWidget(const Program& program) {
     QLabel* name = new QLabel(QString::fromStdString(program.name));
     layout->addWidget(name);
 
+    QBoxLayout* tagsLayout = new QVBoxLayout;
+    QWidget* tagsBox = new QWidget;
+    tagsBox->setLayout(tagsLayout);
+    for (const std::string& tag : program.tags) {
+        QLabel* label = new QLabel(QString::fromStdString(tag));
+        tagsLayout->addWidget(label);
+    }
+    layout->addWidget(tagsBox);
+
+
     std::vector<Cluster*> clusters = data::findClustersForProgram(program);
     for (Cluster* cluster : clusters) {
         assert(cluster);
@@ -346,9 +357,47 @@ void ProgramWidget::processUpdated(Process::ID processId) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
+TagsWidget::TagsWidget() {
+    std::set<std::string> tags = data::findTags();
+
+    QBoxLayout* layout = new QHBoxLayout;
+    setLayout(layout);
+
+    QLabel* label = new QLabel("Tags");
+    layout->addWidget(label);
+
+    for (const std::string& tag : tags) {
+        QPushButton* button = new QPushButton(QString::fromStdString(tag));
+        button->setCheckable(true);
+        connect(button, &QPushButton::clicked, this, &TagsWidget::buttonPressed);
+
+        layout->addWidget(button);
+        _buttons[button] = tag;
+    }
+}
+
+void TagsWidget::buttonPressed() {
+    std::vector<std::string> selectedTags;
+    for (const std::pair<const QPushButton*, std::string>& p : _buttons) {
+        if (p.first->isChecked()) {
+            selectedTags.push_back(p.second);
+        }
+    }
+
+    emit pickedTags(selectedTags);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
 ProgramsWidget::ProgramsWidget() {
     QBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
+
+    TagsWidget* tags = new TagsWidget;
+    connect(tags, &TagsWidget::pickedTags, this, &ProgramsWidget::tagsPicked);
+    layout->addWidget(tags);
 
     for (Program* p : data::programs()) {
         ProgramWidget* w = new ProgramWidget(*p);
@@ -390,6 +439,20 @@ void ProgramsWidget::processUpdated(Process::ID processId) {
 void ProgramsWidget::connectedStatusChanged(Cluster::ID cluster, Node::ID) {
     for (const std::pair<const Program::ID, ProgramWidget*>& p : _widgets) {
         p.second->updateStatus(cluster);
+    }
+}
+
+void ProgramsWidget::tagsPicked(std::vector<std::string> tags) {
+    if (tags.empty()) {
+        for (std::pair<const Program::ID, ProgramWidget*>& p : _widgets) {
+            p.second->setVisible(true);
+        }
+    }
+    else {
+        for (std::pair<const Program::ID, ProgramWidget*>& p : _widgets) {
+            const bool hasTag = data::hasTag(p.first, tags);
+            p.second->setVisible(hasTag);
+        }
     }
 }
 

@@ -135,6 +135,25 @@ private:
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
+class TagsWidget : public QWidget {
+Q_OBJECT
+public:
+    TagsWidget();
+
+private slots:
+    void buttonPressed();
+
+signals:
+    void pickedTags(std::vector<std::string> tags);
+
+private:
+    std::map<QPushButton*, std::string> _buttons;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
 class ProgramsWidget : public QWidget {
 Q_OBJECT
 public:
@@ -144,6 +163,9 @@ public:
 
 public slots:
     void connectedStatusChanged(Cluster::ID cluster, Node::ID node);
+
+private slots:
+    void tagsPicked(std::vector<std::string> tags);
 
 signals:
     void startProgram(Cluster::ID clusterId, Program::ID programId,

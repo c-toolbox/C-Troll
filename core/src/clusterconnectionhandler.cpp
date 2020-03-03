@@ -53,6 +53,7 @@ namespace {
             case QAbstractSocket::SocketState::BoundState: return "Bound";
             case QAbstractSocket::SocketState::ListeningState: return "Listening";
             case QAbstractSocket::SocketState::ClosingState: return "Closing";
+            default: throw std::logic_error("Missing case label");
         }
     }
 
