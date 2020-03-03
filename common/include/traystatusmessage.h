@@ -32,34 +32,25 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __TRAY__SOCKETHANDLER_H__
-#define __TRAY__SOCKETHANDLER_H__
+#ifndef __COMMON__TRAYSTATUSMESSAGE_H__
+#define __COMMON__TRAYSTATUSMESSAGE_H__
 
-#include <QObject>
-#include <QTcpServer>
+#include "message.h"
+
 #include <json/json.hpp>
+#include <vector>
 
-namespace common { class JsonSocket; }
+namespace common {
 
-class SocketHandler : public QObject {
-Q_OBJECT
-public:
-    void initialize(int port = 5000);
+struct TrayStatusMessage : public Message {
+    static constexpr const char* Type = "TrayStatusMessage";
 
-public slots:    
-    void sendMessage(const nlohmann::json& message);
-
-signals:
-    void newConnectionEstablished();
-    void messageRecieved(const nlohmann::json& message);
-
-private:
-    void newConnection();
-    void disconnected(common::JsonSocket*);
-    void readyRead(common::JsonSocket*);
-
-    QTcpServer _server;
-    std::vector<common::JsonSocket*> _sockets;
+    std::vector<int> runningProcesses;
 };
 
-#endif // __TRAY__SOCKETHANDLER_H__
+void to_json(nlohmann::json& j, const TrayStatusMessage& p);
+void from_json(const nlohmann::json& j, TrayStatusMessage& p);
+
+} // namespace
+
+#endif // __COMMON__TRAYSTATUSMESSAGE_H__

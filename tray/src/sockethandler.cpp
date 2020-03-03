@@ -96,5 +96,7 @@ void SocketHandler::newConnection() {
 
         _sockets.push_back(jsonSocket);
         Log(fmt::format("Socket connected from {}", jsonSocket->peerAddress()));
+
+        emit newConnectionEstablished();
     }
 }

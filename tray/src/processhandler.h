@@ -47,6 +47,7 @@ class ProcessHandler : public QObject {
 Q_OBJECT
 
 public slots:
+    void newConnection();
     void handleSocketMessage(const nlohmann::json& message);
 
     void handlerErrorOccurred(QProcess::ProcessError error);

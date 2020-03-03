@@ -137,6 +137,22 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
         }
     );
     connect(
+        &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayStatus,
+        [this](Node::ID id, common::TrayStatusMessage status) {
+            if (!status.runningProcesses.empty()) {
+                Node* node = data::findNode(id);
+                Log(fmt::format(
+                    "Received status update with {} running processes on node {} @ {}",
+                    static_cast<int>(status.runningProcesses.size()),
+                    node->name,
+                    node->ipAddress
+                ));
+                // @TODO (abock, 2020-02-27) Update the processeswidget with information
+                // about these zombie projects
+            }
+        }
+    );
+    connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::messageReceived,
         [](Cluster::ID clusterId, Node::ID nodeId, nlohmann::json message) {
             Cluster* cluster = data::findCluster(clusterId);

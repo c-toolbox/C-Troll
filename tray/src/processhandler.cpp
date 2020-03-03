@@ -39,6 +39,7 @@
 #include "message.h"
 #include "processoutputmessage.h"
 #include "processstatusmessage.h"
+#include "traystatusmessage.h"
 #include <fmt/format.h>
 #include <functional>
 
@@ -92,7 +93,20 @@ namespace {
     }
 } // namespace
 
+void ProcessHandler::newConnection() {
+    common::TrayStatusMessage msg;
+    for (const std::pair<const int, QProcess*>& p : _processes) {
+        msg.runningProcesses.push_back(p.first);
+    }
+
+    nlohmann::json j = msg;
+    emit sendSocketMessage(j);
+}
+
 void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
+    common::Message msg = message;
+
+
     if (common::isValidMessage<common::CommandMessage>(message)) {
         common::CommandMessage command = message;
 
@@ -131,8 +145,6 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
         }
         _processes.clear();
     }
-
-
 }
 
 void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {

@@ -32,34 +32,26 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __TRAY__SOCKETHANDLER_H__
-#define __TRAY__SOCKETHANDLER_H__
+#include "traystatusmessage.h"
 
-#include <QObject>
-#include <QTcpServer>
-#include <json/json.hpp>
+namespace {
+    constexpr const char* KeyRunningProcesses = "runningProcesses";
+} // namespace
 
-namespace common { class JsonSocket; }
+namespace common {
 
-class SocketHandler : public QObject {
-Q_OBJECT
-public:
-    void initialize(int port = 5000);
+void to_json(nlohmann::json& j, const TrayStatusMessage& p) {
+    j = {
+        { Message::KeyType, TrayStatusMessage::Type },
+        { Message::KeyVersion, p.CurrentVersion },
+        { KeyRunningProcesses, p.runningProcesses }
+    };
+}
 
-public slots:    
-    void sendMessage(const nlohmann::json& message);
+void from_json(const nlohmann::json& j, TrayStatusMessage& p) {
+    validateMessage(j, TrayStatusMessage::Type);
 
-signals:
-    void newConnectionEstablished();
-    void messageRecieved(const nlohmann::json& message);
+    j.at(KeyRunningProcesses).get_to(p.runningProcesses);
+}
 
-private:
-    void newConnection();
-    void disconnected(common::JsonSocket*);
-    void readyRead(common::JsonSocket*);
-
-    QTcpServer _server;
-    std::vector<common::JsonSocket*> _sockets;
-};
-
-#endif // __TRAY__SOCKETHANDLER_H__
+} // namespace
