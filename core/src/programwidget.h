@@ -154,6 +154,18 @@ private:
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
+class SearchWidget : public QWidget {
+Q_OBJECT
+public:
+    SearchWidget();
+
+signals:
+    void updatedSearch(std::string text);
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
 class ProgramsWidget : public QWidget {
 Q_OBJECT
 public:
@@ -166,6 +178,7 @@ public slots:
 
 private slots:
     void tagsPicked(std::vector<std::string> tags);
+    void searchUpdated(std::string text);
 
 signals:
     void startProgram(Cluster::ID clusterId, Program::ID programId,
@@ -177,7 +190,15 @@ signals:
     void stopProcess(Process::ID processId);
 
 private:
+    void updatedVisibilityState();
+
     std::map<Program::ID, ProgramWidget*> _widgets;
+
+    struct VisibilityInfo {
+        bool byTag = true;
+        bool bySearch = true;
+    };
+    std::map<Program::ID, VisibilityInfo> _visibilities;
 };
 
 } // namespace programs

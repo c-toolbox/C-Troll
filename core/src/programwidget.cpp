@@ -39,6 +39,7 @@
 #include "logging.h"
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMenu>
 #include <QVBoxLayout>
 #include <set>
@@ -390,6 +391,23 @@ void TagsWidget::buttonPressed() {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+SearchWidget::SearchWidget() {
+    QBoxLayout* layout = new QHBoxLayout;
+    setLayout(layout);
+
+    QLabel* label = new QLabel("Search");
+    layout->addWidget(label);
+
+    QLineEdit* search = new QLineEdit;
+    layout->addWidget(search);
+
+    connect(search, &QLineEdit::textChanged,
+        [this](const QString& str) { emit updatedSearch(str.toStdString()); }
+    );
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
 
 ProgramsWidget::ProgramsWidget() {
     QBoxLayout* layout = new QVBoxLayout;
@@ -398,6 +416,10 @@ ProgramsWidget::ProgramsWidget() {
     TagsWidget* tags = new TagsWidget;
     connect(tags, &TagsWidget::pickedTags, this, &ProgramsWidget::tagsPicked);
     layout->addWidget(tags);
+
+    SearchWidget* search = new SearchWidget;
+    connect(search, &SearchWidget::updatedSearch, this, &ProgramsWidget::searchUpdated);
+    layout->addWidget(search);
 
     for (Program* p : data::programs()) {
         ProgramWidget* w = new ProgramWidget(*p);
@@ -423,6 +445,7 @@ ProgramsWidget::ProgramsWidget() {
         connect(w, &ProgramWidget::stopProcess, this, &ProgramsWidget::stopProcess);
 
         _widgets[p->id] = w;
+        _visibilities[p->id] = VisibilityInfo{ true, true };
         layout->addWidget(w);
     }
 }
@@ -444,16 +467,58 @@ void ProgramsWidget::connectedStatusChanged(Cluster::ID cluster, Node::ID) {
 
 void ProgramsWidget::tagsPicked(std::vector<std::string> tags) {
     if (tags.empty()) {
-        for (std::pair<const Program::ID, ProgramWidget*>& p : _widgets) {
-            p.second->setVisible(true);
+        for (std::pair<const Program::ID, VisibilityInfo>& p : _visibilities) {
+            p.second.byTag = true;
         }
     }
     else {
-        for (std::pair<const Program::ID, ProgramWidget*>& p : _widgets) {
+        for (std::pair<const Program::ID, VisibilityInfo>& p : _visibilities) {
             const bool hasTag = data::hasTag(p.first, tags);
-            p.second->setVisible(hasTag);
+            p.second.byTag = hasTag;
         }
     }
+
+    updatedVisibilityState();
 }
+
+void ProgramsWidget::searchUpdated(std::string text) {
+    if (text.empty()) {
+        for (std::pair<const Program::ID, VisibilityInfo>& p : _visibilities) {
+            p.second.bySearch = true;
+        }
+    }
+    else {
+        for (std::pair<const Program::ID, VisibilityInfo>& p : _visibilities) {
+            Program* program = data::findProgram(p.first);
+            if (text.size() > program->name.size()) {
+                p.second.bySearch = false;
+            }
+            else {
+                auto toLower = [](const std::string& str) {
+                    std::string res;
+                    std::transform(
+                        str.begin(), str.end(),
+                        std::back_inserter(res),
+                        [](char c) { return static_cast<char>(::tolower(c)); }
+                    );
+                    return res;
+                };
+
+                const std::string sub = program->name.substr(0, text.size());
+                p.second.bySearch = toLower(sub) == toLower(text);
+            }
+        }
+    }
+
+    updatedVisibilityState();
+}
+
+void ProgramsWidget::updatedVisibilityState() {
+    for (std::pair<const Program::ID, ProgramWidget*>& p : _widgets) {
+        VisibilityInfo vi = _visibilities[p.first];
+        p.second->setVisible(vi.bySearch && vi.byTag);
+    }
+}
+
 
 } // namespace programs
