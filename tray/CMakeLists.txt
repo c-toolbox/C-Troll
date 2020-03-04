@@ -53,11 +53,11 @@ qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
 set(RESOURCE_FILES "")
 qt5_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
 
-add_executable(C-Troll-Tray WIN32 MACOSX_BUNDLE
+add_executable(Tray WIN32 MACOSX_BUNDLE
   ${SOURCE_FILES}
   ${HEADER_FILES}
   ${MOC_FILES}
   ${RESOURCE_FILES}
 )
 
-target_link_libraries(C-Troll-Tray PUBLIC common Qt5::Widgets Qt5::Network)
+target_link_libraries(Tray PUBLIC common Qt5::Widgets Qt5::Network)

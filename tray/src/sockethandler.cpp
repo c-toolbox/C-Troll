@@ -44,7 +44,7 @@
 void SocketHandler::initialize(int port) {
     Log(fmt::format("Listening on port: {}", port));
     
-    const bool success = _server.listen(QHostAddress::Any, port);
+    const bool success = _server.listen(QHostAddress::Any, static_cast<quint16>(port));
     if (!success) {
         Log(fmt::format("Error creating socket to listen on port: {}", port));
     }
