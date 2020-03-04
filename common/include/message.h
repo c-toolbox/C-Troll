@@ -43,12 +43,18 @@ namespace common {
 struct Message {
     static constexpr const char* KeyType = "type";
     static constexpr const char* KeyVersion = "version";
+    static constexpr const char* KeySecret = "secret";
+
+    /// The version of the API that should be increased with breaking changes
+    static constexpr const int CurrentVersion = 1;
 
     /// A string representing the type of payload contained in this Message
     std::string type;
 
-    /// The version of the API that should be increased with breaking changes
-    static constexpr const int CurrentVersion = 1;
+    /// A string representing the SHA512 hashed secret that is needed to communicate with
+    /// the tray socket that this message gets sent to. For messages that go from the tray
+    /// to the main application, this value is ignored
+    std::string secret;
 };
 
 template <typename T>

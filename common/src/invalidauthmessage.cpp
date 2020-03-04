@@ -32,81 +32,19 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "clusterwidget.h"
+#include "invalidauthmessage.h"
 
-#include "cluster.h"
-#include "database.h"
-#include "node.h"
-#include <QLabel>
-#include <QVBoxLayout>
+namespace common {
 
-ClusterWidget::ClusterWidget(Cluster::ID clusterId)
-    : _clusterId(clusterId)
-{
-    Cluster* cluster = data::findCluster(clusterId);
-    assert(cluster);
-
-    QBoxLayout* layout = new QHBoxLayout;
-    setLayout(layout);
-
-    QLabel* clusterName = new QLabel(cluster->name.c_str());
-    layout->addWidget(clusterName);
-
-    _connectionLabel = new QLabel("disconnected");
-    layout->addWidget(_connectionLabel);
-
-    std::vector<Node*> nodes = data::findNodesForCluster(*cluster);
-    for (Node* n : nodes) {
-        QWidget* node = new QWidget;
-        layout->addWidget(node);
-        QBoxLayout* nodeLayout = new QVBoxLayout;
-        node->setLayout(nodeLayout);
-
-        QLabel* name = new QLabel(n->name.c_str());
-        nodeLayout->addWidget(name);
-
-        QLabel* ip = new QLabel(n->ipAddress.c_str());
-        nodeLayout->addWidget(ip);
-
-        QString text = n->isConnected ? "connected" : "disconnected";
-        QLabel* connected = new QLabel(text);
-        _nodeConnectionLabels[n->id] = connected;
-        nodeLayout->addWidget(connected);
-    }
+void to_json(nlohmann::json& j, const InvalidAuthMessage& p) {
+    j = {
+        { Message::KeyType, InvalidAuthMessage::Type },
+        { Message::KeyVersion, p.CurrentVersion }
+    };
 }
 
-void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
-    Node* n = data::findNode(nodeId);
-    assert(n);
-    _nodeConnectionLabels[nodeId]->setText(n->isConnected ? "connected" : "disconnected");
-
-    Cluster* cluster = data::findCluster(_clusterId);
-    assert(cluster);
-    std::vector<Node*> nodes = data::findNodesForCluster(*cluster);
-
-    const bool allConnected = std::all_of(
-        nodes.begin(), nodes.end(), std::mem_fn(&Node::isConnected)
-    );
-    _connectionLabel->setText(allConnected ? "connected" : "disconnected");
+void from_json(const nlohmann::json& j, InvalidAuthMessage& p) {
+    validateMessage(j, InvalidAuthMessage::Type);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-ClustersWidget::ClustersWidget() {
-    QBoxLayout* layout = new QVBoxLayout;
-    setLayout(layout);
-
-    for (Cluster* c : data::clusters()) {
-        ClusterWidget* widget = new ClusterWidget(c->id);
-        _clusterWidgets[c->id] = widget;
-        layout->addWidget(widget);
-    }
-}
-
-void ClustersWidget::connectedStatusChanged(Cluster::ID clusterId, Node::ID nodeId) {
-    const auto it = _clusterWidgets.find(clusterId);
-    assert(it != _clusterWidgets.end());
-    it->second->updateConnectionStatus(nodeId);
-}
+} // namespace

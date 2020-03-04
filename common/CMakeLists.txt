@@ -34,6 +34,7 @@
 
 set(HEADER_FILES
   include/commandmessage.h
+  include/invalidauthmessage.h
   include/jsonload.h
   include/jsonsocket.h
   include/killallmessage.h
@@ -46,6 +47,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
   src/commandmessage.cpp
+  src/invalidauthmessage.cpp
   src/jsonsocket.cpp
   src/killallmessage.cpp
   src/logging.cpp
@@ -73,4 +75,4 @@ add_library(common
 add_subdirectory(ext/fmt)
 
 target_include_directories(common PUBLIC "include" "ext" "ext/fmt/include")
-target_link_libraries(common project_options fmt Qt5::Widgets Qt5::Network)
+target_link_libraries(common project_options fmt Qt5::Core Qt5::Widgets Qt5::Network)

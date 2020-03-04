@@ -41,6 +41,7 @@
 #include "killallmessage.h"
 #include "processwidget.h"
 #include "programwidget.h"
+#include <QMessageBox>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <set>
@@ -54,7 +55,7 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that
         [](QtMsgType, const QMessageLogContext&, const QString& msg) {
-            Log(msg.toStdString());
+            Log(msg.toLocal8Bit().constData());
         }
     );
     _messageBox = new QTextEdit;
@@ -153,6 +154,17 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
         }
     );
     connect(
+        &_clusterConnectionHandler, &ClusterConnectionHandler::receivedInvalidAuthStatus,
+        [this](Node::ID id, common::InvalidAuthMessage ) {
+            Node* node = data::findNode(id);
+         
+            std::string msg = fmt::format(
+                "Send invalid authentication token to node {}", node->name
+            );
+            QMessageBox::critical(this, "Error in Connection", msg.c_str());
+        }
+    );
+    connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::messageReceived,
         [](Cluster::ID clusterId, Node::ID nodeId, nlohmann::json message) {
             Cluster* cluster = data::findCluster(clusterId);
@@ -175,7 +187,7 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
 }
 
 void MainWindow::log(std::string msg) {
-    _messageBox->append(QString::fromStdString(msg));
+    _messageBox->append(msg.c_str());
 }
 
 void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
@@ -233,6 +245,9 @@ void MainWindow::startProcess(Process::ID processId) {
     Node* node = data::findNode(process->nodeId);
 
     common::CommandMessage command = startProcessCommand(*process);
+    if (!node->secret.empty()) {
+        command.secret = node->secret;
+    }
 
     // Generate identifier
     Log("Sending message to start program:");
@@ -253,6 +268,10 @@ void MainWindow::stopProcess(Process::ID processId) {
     Node* node = data::findNode(process->nodeId);
 
     common::CommandMessage command = exitProcessCommand(*process);
+    if (!node->secret.empty()) {
+        command.secret = node->secret;
+    }
+
 
     Log("Sending message to stop program:");
     Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id.v));
@@ -269,7 +288,7 @@ void MainWindow::stopProcess(Process::ID processId) {
 void MainWindow::killAllProcesses(Cluster::ID id) {
     Log("Send message to stop all programs");
 
-    std::vector< Node*> nodes;
+    std::vector<Node*> nodes;
     if (id.v == -1 ) {
         // Send kill command to all clusters
         for (Cluster* cluster : data::clusters()) {
@@ -288,9 +307,13 @@ void MainWindow::killAllProcesses(Cluster::ID id) {
         nodes = data::findNodesForCluster(*cluster);
     }
 
-    common::KillAllMessage command;
-    nlohmann::json j = command;
     for (Node* node : nodes) {
+        common::KillAllMessage command;
+        if (!node->secret.empty()) {
+            command.secret = node->secret;
+        }
+        nlohmann::json j = command;
+
         Log("\t" + node->name);
         _clusterConnectionHandler.sendMessage(*node, j);
     }

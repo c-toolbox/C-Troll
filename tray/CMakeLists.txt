@@ -60,4 +60,4 @@ add_executable(Tray WIN32 MACOSX_BUNDLE
   ${RESOURCE_FILES}
 )
 
-target_link_libraries(Tray PUBLIC common Qt5::Widgets Qt5::Network)
+target_link_libraries(Tray PUBLIC common Qt5::Core Qt5::Widgets Qt5::Network)

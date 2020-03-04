@@ -47,7 +47,7 @@ JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket)
     _socket->setProxy(QNetworkProxy::NoProxy);
 }
 void JsonSocket::connectToHost(const std::string& host, int port) {
-    _socket->connectToHost(QString::fromStdString(host), port);
+    _socket->connectToHost(host.c_str(), port);
 }
 
 QTcpSocket::SocketState JsonSocket::state() const {
@@ -98,11 +98,11 @@ nlohmann::json JsonSocket::read() {
 }
 
 std::string JsonSocket::localAddress() const {
-    return _socket->localAddress().toString().toStdString();
+    return _socket->localAddress().toString().toLocal8Bit().constData();
 }
 
 std::string JsonSocket::peerAddress() const {
-    return _socket->peerAddress().toString().toStdString();
+    return _socket->peerAddress().toString().toLocal8Bit().constData();
 }
 
 } // namespace common

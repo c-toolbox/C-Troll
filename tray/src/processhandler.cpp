@@ -106,7 +106,6 @@ void ProcessHandler::newConnection() {
 void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
     common::Message msg = message;
 
-
     if (common::isValidMessage<common::CommandMessage>(message)) {
         common::CommandMessage command = message;
 
@@ -202,30 +201,32 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
 }
 
 void ProcessHandler::handleReadyReadStandardError() {
-    QProcess* process = qobject_cast<QProcess*>(QObject::sender());
+    QProcess* proc = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    auto p = processIt(process);   
+    auto p = processIt(proc);
     if (p != _processes.end()) {
         // Send out the TrayProcessLogMessage with the stderror key
         common::ProcessOutputMessage msg;
         msg.processId = p->first;
         msg.outputType = common::ProcessOutputMessage::OutputType::StdErr;
-        msg.message = QString::fromLatin1(process->readAllStandardError()).toStdString();
+        msg.message =
+            QString::fromLatin1(proc->readAllStandardError()).toLocal8Bit().constData();
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
     }
 }
 
 void ProcessHandler::handleReadyReadStandardOutput() {
-    QProcess* process = qobject_cast<QProcess*>(QObject::sender());
+    QProcess* proc = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
-    auto p = processIt(process);
+    auto p = processIt(proc);
     if (p != _processes.end()) {
         common::ProcessOutputMessage msg;
         msg.processId = p->first;
-        msg.message = QString::fromLatin1(process->readAllStandardOutput()).toStdString();
+        msg.message =
+            QString::fromLatin1(proc->readAllStandardOutput()).toLocal8Bit().constData();
         msg.outputType = common::ProcessOutputMessage::OutputType::StdOut;
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
@@ -244,20 +245,18 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
         emit sendSocketMessage(j);
 
         if (!command.workingDirectory.empty()) {
-            process->setWorkingDirectory(
-                QString::fromStdString(command.workingDirectory)
-            );
+            process->setWorkingDirectory(command.workingDirectory.c_str());
         }
         
         if (command.commandlineParameters.empty()) {
             std::string cmd = fmt::format("\"{}\"", command.executable);
-            process->start(QString::fromStdString(cmd));
+            process->start(cmd.c_str());
         }
         else {
             std::string cmd = fmt::format(
                 "\"{}\" {}", command.executable, command.commandlineParameters
             );
-            process->start(QString::fromStdString(cmd));
+            process->start(cmd.c_str());
         }
     }
     else if (command.command == common::CommandMessage::Command::Kill ||

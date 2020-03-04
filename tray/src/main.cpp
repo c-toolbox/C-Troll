@@ -37,7 +37,9 @@
 #include "processhandler.h"
 #include "sockethandler.h"
 #include <QApplication>
+#include <fmt/format.h>
 #include <json/json.hpp>
+#include <filesystem>
 #include <iostream>
 
 int main(int argc, char** argv) {
@@ -79,7 +81,7 @@ int main(int argc, char** argv) {
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that
         [](QtMsgType, const QMessageLogContext&, const QString& msg) {
-            Log(msg.toStdString());
+            Log(msg.toLocal8Bit().constData());
         }
     );
 
@@ -89,17 +91,33 @@ int main(int argc, char** argv) {
     mw.hide();
 #endif // QT_DEBUG
 
+    std::string configurationFile = "config-tray.json";
+    std::string absPath = std::filesystem::absolute(configurationFile).string();
+    if (!std::filesystem::exists(configurationFile)) {
+        std::string str = fmt::format("Creating new configuration at {}", absPath);
+        Log(str);
 
-    SocketHandler socketHandler;
-    if (argc == 3 && std::string_view(argv[1]) == "-port") {
-        int port = std::atoi(argv[2]);
-        Log("Starting at port " + std::to_string(port));
-        socketHandler.initialize(port);
-    }
-    else {
-        socketHandler.initialize();
+        nlohmann::json obj;
+        obj["port"] = 5000;
+        obj["secret"] = "";
+        std::string content = obj.dump(2);
+        std::ofstream file(absPath);
+        file.write(content.data(), content.size());
     }
 
+    Log(fmt::format("Loading configuration file from {}", absPath));
+    std::ifstream file(absPath);
+    std::string content(
+        (std::istreambuf_iterator<char>(file)),
+        (std::istreambuf_iterator<char>())
+    );
+    file.close();
+    nlohmann::json config = nlohmann::json::parse(content);
+    const int port = config["port"];
+    const std::string secret = config["secret"];
+
+
+    SocketHandler socketHandler(port, secret);
     
     ProcessHandler processHandler;
     

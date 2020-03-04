@@ -77,6 +77,7 @@ void to_json(nlohmann::json& j, const CommandMessage& p) {
     j = {
         { Message::KeyType, CommandMessage::Type },
         { Message::KeyVersion, p.CurrentVersion },
+        { Message::KeySecret, p.secret },
         { KeyId, p.id },
         { KeyForwardOutErr, p.forwardStdOutStdErr },
         { KeyCommand, fromCommand(p.command) },

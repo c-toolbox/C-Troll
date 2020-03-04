@@ -58,6 +58,9 @@ void validateMessage(const nlohmann::json& message, std::string_view expectedTyp
     }
 }
 
-void from_json(const nlohmann::json&, Message&) {}
+void from_json(const nlohmann::json& message, Message& msg) {
+    message.at(Message::KeyType).get_to(msg.type);
+    message.at(Message::KeySecret).get_to(msg.secret);
+}
 
 } // namespace common

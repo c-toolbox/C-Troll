@@ -84,4 +84,4 @@ add_executable(C-Troll WIN32 MACOSX_BUNDLE
 )
 
 target_include_directories(C-Troll PUBLIC "src")
-target_link_libraries(C-Troll PUBLIC common Qt5::Widgets Qt5::Network)
+target_link_libraries(C-Troll PUBLIC common Qt5::Core Qt5::Widgets Qt5::Network)

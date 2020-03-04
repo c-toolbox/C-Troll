@@ -44,7 +44,7 @@ namespace common { class JsonSocket; }
 class SocketHandler : public QObject {
 Q_OBJECT
 public:
-    void initialize(int port = 5000);
+    SocketHandler(int port, std::string secret);
 
 public slots:    
     void sendMessage(const nlohmann::json& message);
@@ -60,6 +60,7 @@ private:
 
     QTcpServer _server;
     std::vector<common::JsonSocket*> _sockets;
+    std::string _secret;
 };
 
 #endif // __TRAY__SOCKETHANDLER_H__

@@ -79,7 +79,7 @@ MainWindow::MainWindow(const QString& title)
 }
  
 void MainWindow::log(std::string msg) {
-    _messageBox->append(QString::fromStdString(std::move(msg)));
+    _messageBox->append(msg.c_str());
 }
 
 // The method that handles the closing event of the application window

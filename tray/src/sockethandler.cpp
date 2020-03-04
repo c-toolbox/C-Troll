@@ -34,14 +34,18 @@
 
 #include "sockethandler.h"
 
+#include "invalidauthmessage.h"
 #include "jsonsocket.h"
 #include "logging.h"
+#include "message.h"
 #include <QTcpSocket.h>
 #include <fmt/format.h>
 #include <iostream>
 #include <memory>
 
-void SocketHandler::initialize(int port) {
+SocketHandler::SocketHandler(int port, std::string secret)
+    : _secret(std::move(secret))
+{
     Log(fmt::format("Listening on port: {}", port));
     
     const bool success = _server.listen(QHostAddress::Any, static_cast<quint16>(port));
@@ -56,7 +60,17 @@ void SocketHandler::initialize(int port) {
 
 void SocketHandler::readyRead(common::JsonSocket* socket) {
     nlohmann::json message = socket->read();
-    emit messageRecieved(std::move(message));
+
+    common::Message msg = message;
+    if (msg.secret == _secret) {
+        emit messageRecieved(std::move(message));
+    }
+    else {
+        ::Log("Received invalid message");
+        common::InvalidAuthMessage msg;
+        nlohmann::json j = msg;
+        socket->write(j);
+    }
 }
 
 void SocketHandler::sendMessage(const nlohmann::json& message) {

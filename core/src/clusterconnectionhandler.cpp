@@ -43,7 +43,6 @@
 #include <assert.h>
 
 namespace {
-
     std::string stateToString(QAbstractSocket::SocketState state) {
         switch (state) {
             case QAbstractSocket::SocketState::UnconnectedState: return "Unconnected";
@@ -56,7 +55,6 @@ namespace {
             default: throw std::logic_error("Missing case label");
         }
     }
-
 } // namespace
 
 ClusterConnectionHandler::~ClusterConnectionHandler() {
@@ -146,6 +144,10 @@ void ClusterConnectionHandler::readyRead(Node::ID nodeId) {
     else if (common::isValidMessage<common::TrayStatusMessage>(message)) {
         common::TrayStatusMessage status = message;
         emit receivedTrayStatus(nodeId, status);
+    }
+    else if (common::isValidMessage<common::InvalidAuthMessage>(message)) {
+        common::InvalidAuthMessage status = message;
+        emit receivedInvalidAuthStatus(nodeId, status);
     }
     else {
         Node* node = data::findNode(nodeId);

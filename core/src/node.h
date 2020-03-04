@@ -56,6 +56,8 @@ struct Node {
     std::string ipAddress;
     /// The port on which the Tray application on that computer is listening
     int port = -1;
+    /// The secret that is sent to the tray application for authentication
+    std::string secret;
     /// A flag representing whether the node is connected or not
     bool isConnected = false;
 };

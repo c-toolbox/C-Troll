@@ -48,7 +48,7 @@ namespace programs {
 
 ProgramButton::ProgramButton(const Cluster* cluster,
                              const Program::Configuration* configuration)
-    : QPushButton(QString::fromStdString(configuration->name) )
+    : QPushButton(configuration->name.c_str())
     , _cluster(cluster)
     , _configuration(configuration)
 {
@@ -85,9 +85,9 @@ void ProgramButton::processUpdated(Process::ID processId) {
         ProcessInfo info;
         info.processId = processId;
         Node* node = data::findNode(process->nodeId);
-        info.menuAction = new QAction(QString::fromStdString(node->name));
+        info.menuAction = new QAction(node->name.c_str());
         // We store the name of the node as the user data in order to sort them later
-        info.menuAction->setData(QString::fromStdString(node->name));
+        info.menuAction->setData(node->name.c_str());
         _processes[process->nodeId] = info;
     }
     else {
@@ -132,19 +132,19 @@ void ProgramButton::updateButton() {
         setMenu(nullptr);
         setObjectName("start"); // used in the QSS sheet to style this button
         // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
-        setText(QString::fromStdString(_cluster->name));
+        setText(_cluster->name.c_str());
     }
     else if (hasAllProcessesRunning()) {
         setMenu(nullptr);
         setObjectName("stop"); // used in the QSS sheet to style this button
         // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
-        setText("Stop:" + QString::fromStdString(_cluster->name));
+        setText(("Stop:" + _cluster->name).c_str());
     }
     else {
         setMenu(_actionMenu);
         setObjectName("mixed"); // used in the QSS sheet to style this button
         // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
-        setText("Mixed:" + QString::fromStdString(_cluster->name));
+        setText(("Mixed:" + _cluster->name).c_str());
 
         updateMenu();
     }
@@ -173,7 +173,7 @@ void ProgramButton::updateMenu() {
     );
 
     for (QAction* action : actions) {
-        const std::string nodeName = action->data().toString().toStdString();
+        const std::string nodeName = action->data().toString().toLocal8Bit().constData();
         const auto it = std::find_if(
             _processes.begin(), _processes.end(),
             [nodeName](const std::pair<const Node::ID, ProcessInfo>& p) {
@@ -245,7 +245,7 @@ ClusterWidget::ClusterWidget(Cluster* cluster,
     QBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
 
-    QLabel* name = new QLabel(QString::fromStdString(cluster->name));
+    QLabel* name = new QLabel(cluster->name.c_str());
     layout->addWidget(name);
 
     for (const Program::Configuration& configuration : configurations) {
@@ -299,14 +299,14 @@ ProgramWidget::ProgramWidget(const Program& program) {
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 
-    QLabel* name = new QLabel(QString::fromStdString(program.name));
+    QLabel* name = new QLabel(program.name.c_str());
     layout->addWidget(name);
 
     QBoxLayout* tagsLayout = new QVBoxLayout;
     QWidget* tagsBox = new QWidget;
     tagsBox->setLayout(tagsLayout);
     for (const std::string& tag : program.tags) {
-        QLabel* label = new QLabel(QString::fromStdString(tag));
+        QLabel* label = new QLabel(tag.c_str());
         tagsLayout->addWidget(label);
     }
     layout->addWidget(tagsBox);
@@ -368,7 +368,7 @@ TagsWidget::TagsWidget() {
     layout->addWidget(label);
 
     for (const std::string& tag : tags) {
-        QPushButton* button = new QPushButton(QString::fromStdString(tag));
+        QPushButton* button = new QPushButton(tag.c_str());
         button->setCheckable(true);
         connect(button, &QPushButton::clicked, this, &TagsWidget::buttonPressed);
 
@@ -402,7 +402,7 @@ SearchWidget::SearchWidget() {
     layout->addWidget(search);
 
     connect(search, &QLineEdit::textChanged,
-        [this](const QString& str) { emit updatedSearch(str.toStdString()); }
+        [this](const QString& str) { emit updatedSearch(str.toLocal8Bit().constData()); }
     );
 }
 

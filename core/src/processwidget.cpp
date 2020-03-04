@@ -85,35 +85,27 @@ ProcessWidget::ProcessWidget(Process::ID processId)
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 
-    QLabel* programLabel = new QLabel(
-        QString::fromStdString("Program: " + program->name)
-    );
+    QLabel* programLabel = new QLabel(("Program: " + program->name).c_str());
     layout->addWidget(programLabel);
 
     QLabel* configurationLabel = new QLabel(
-        QString::fromStdString("Configuration: " + configuration.name)
+        ("Configuration: " + configuration.name).c_str()
     );
     layout->addWidget(configurationLabel);
 
-    QLabel* clusterLabel = new QLabel(
-        QString::fromStdString("Cluster: " + cluster->name)
-    );
+    QLabel* clusterLabel = new QLabel(("Cluster: " + cluster->name).c_str());
     layout->addWidget(clusterLabel);
 
     QLabel* id = new QLabel(QString::number(process->id.v));
     layout->addWidget(id);
 
-    _status = new QLabel(
-        QString::fromStdString("Status: " + statusToString(process->status))
-    );
+    _status = new QLabel(("Status: " + statusToString(process->status)).c_str());
     layout->addWidget(_status);
 }
 
 void ProcessWidget::updateStatus() {
     Process* process = data::findProcess(_processId);
-    _status->setText(
-        QString::fromStdString("Status: " + statusToString(process->status))
-    );
+    _status->setText(("Status: " + statusToString(process->status)).c_str());
 }
 
 
