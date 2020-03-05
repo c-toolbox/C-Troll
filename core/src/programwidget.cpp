@@ -35,6 +35,7 @@
 #include "programwidget.h"
 
 #include "cluster.h"
+#include "color.h"
 #include "database.h"
 #include "logging.h"
 #include <QHBoxLayout>
@@ -365,6 +366,13 @@ TagsWidget::TagsWidget()
 
     for (const std::string& tag : tags) {
         QPushButton* button = new QPushButton(tag.c_str());
+
+        Color color = colorForTag(tag);
+
+        QPixmap pixmap(25, 25);
+        pixmap.fill(QColor(color.r, color.g, color.b));
+        button->setIcon(QIcon(pixmap));
+
         button->setCheckable(true);
         connect(button, &QPushButton::clicked, this, &TagsWidget::buttonPressed);
 
