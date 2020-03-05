@@ -35,11 +35,12 @@
 #ifndef __CORE__PROGRAMWIDGET_H__
 #define __CORE__PROGRAMWIDGET_H__
 
+#include <QGroupbox>
 #include <QPushButton>
+#include <QWidget>
 
 #include "process.h"
 #include "program.h"
-#include <QWidget>
 #include <map>
 
 struct Cluster;
@@ -88,7 +89,7 @@ private:
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-class ClusterWidget : public QWidget {
+class ClusterWidget : public QGroupBox {
 Q_OBJECT
 public:
     ClusterWidget(Cluster* cluster,
@@ -112,7 +113,7 @@ private:
  /////////////////////////////////////////////////////////////////////////////////////////
 
 
-class ProgramWidget : public QWidget {
+class ProgramWidget : public QGroupBox {
 Q_OBJECT
 public:
     ProgramWidget(const Program& program);
@@ -135,7 +136,7 @@ private:
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-class TagsWidget : public QWidget {
+class TagsWidget : public QGroupBox {
 Q_OBJECT
 public:
     TagsWidget();
@@ -148,19 +149,6 @@ signals:
 
 private:
     std::map<QPushButton*, std::string> _buttons;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-class SearchWidget : public QWidget {
-Q_OBJECT
-public:
-    SearchWidget();
-
-signals:
-    void updatedSearch(std::string text);
 };
 
 
@@ -190,6 +178,9 @@ signals:
     void stopProcess(Process::ID processId);
 
 private:
+    QWidget* createControls();
+    QWidget* createPrograms();
+
     void updatedVisibilityState();
 
     std::map<Program::ID, ProgramWidget*> _widgets;

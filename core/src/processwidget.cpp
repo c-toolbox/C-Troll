@@ -116,6 +116,8 @@ ProcessesWidget::ProcessesWidget() {
     _layout = new QVBoxLayout;
     setLayout(_layout);
 
+    _layout->addStretch();
+
     QPushButton* killAll = new QPushButton("Kill all processses");
     _layout->addWidget(killAll);
 

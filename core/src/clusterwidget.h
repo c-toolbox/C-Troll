@@ -35,6 +35,7 @@
 #ifndef __CORE__CLUSTERWIDGET_H__
 #define __CORE__CLUSTERWIDGET_H__
 
+#include <QGroupbox>
 #include <QWidget>
 
 #include "cluster.h"
@@ -42,10 +43,10 @@
 
 class QLabel;
 
-class ClusterWidget : public QWidget {
+class ClusterWidget : public QGroupBox {
 Q_OBJECT
 public:
-    ClusterWidget(Cluster::ID clusterId);
+    ClusterWidget(const Cluster& cluster);
 
     void updateConnectionStatus(Node::ID nodeId);
 

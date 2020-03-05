@@ -40,30 +40,23 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-ClusterWidget::ClusterWidget(Cluster::ID clusterId)
-    : _clusterId(clusterId)
+ClusterWidget::ClusterWidget(const Cluster& cluster)
+    : QGroupBox(cluster.name.c_str())
+    , _clusterId(cluster.id)
 {
-    Cluster* cluster = data::findCluster(clusterId);
-    assert(cluster);
-
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
-
-    QLabel* clusterName = new QLabel(cluster->name.c_str());
-    layout->addWidget(clusterName);
 
     _connectionLabel = new QLabel("disconnected");
     layout->addWidget(_connectionLabel);
 
-    std::vector<Node*> nodes = data::findNodesForCluster(*cluster);
+    std::vector<Node*> nodes = data::findNodesForCluster(cluster);
     for (Node* n : nodes) {
-        QWidget* node = new QWidget;
+        QGroupBox* node = new QGroupBox;
+        node->setTitle(n->name.c_str());
         layout->addWidget(node);
         QBoxLayout* nodeLayout = new QVBoxLayout;
         node->setLayout(nodeLayout);
-
-        QLabel* name = new QLabel(n->name.c_str());
-        nodeLayout->addWidget(name);
 
         QLabel* ip = new QLabel(n->ipAddress.c_str());
         nodeLayout->addWidget(ip);
@@ -99,7 +92,7 @@ ClustersWidget::ClustersWidget() {
     setLayout(layout);
 
     for (Cluster* c : data::clusters()) {
-        ClusterWidget* widget = new ClusterWidget(c->id);
+        ClusterWidget* widget = new ClusterWidget(*c);
         _clusterWidgets[c->id] = widget;
         layout->addWidget(widget);
     }

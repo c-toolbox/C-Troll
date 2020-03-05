@@ -241,12 +241,10 @@ ClusterWidget::ClusterWidget(Cluster* cluster,
                              const std::vector<Program::Configuration>& configurations)
 {
     assert(cluster);
+    setTitle(cluster->name.c_str());
 
     QBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
-
-    QLabel* name = new QLabel(cluster->name.c_str());
-    layout->addWidget(name);
 
     for (const Program::Configuration& configuration : configurations) {
         ProgramButton* button = new ProgramButton(cluster, &configuration);
@@ -295,12 +293,11 @@ void ClusterWidget::processUpdated(Process::ID processId) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ProgramWidget::ProgramWidget(const Program& program) {
+ProgramWidget::ProgramWidget(const Program& program)
+    : QGroupBox(program.name.c_str())
+{
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
-
-    QLabel* name = new QLabel(program.name.c_str());
-    layout->addWidget(name);
 
     QBoxLayout* tagsLayout = new QVBoxLayout;
     QWidget* tagsBox = new QWidget;
@@ -358,14 +355,13 @@ void ProgramWidget::processUpdated(Process::ID processId) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-TagsWidget::TagsWidget() {
+TagsWidget::TagsWidget() 
+    : QGroupBox("Tags")
+{
     std::set<std::string> tags = data::findTags();
 
-    QBoxLayout* layout = new QHBoxLayout;
+    QBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
-
-    QLabel* label = new QLabel("Tags");
-    layout->addWidget(label);
 
     for (const std::string& tag : tags) {
         QPushButton* button = new QPushButton(tag.c_str());
@@ -375,6 +371,8 @@ TagsWidget::TagsWidget() {
         layout->addWidget(button);
         _buttons[button] = tag;
     }
+
+    layout->addStretch();
 }
 
 void TagsWidget::buttonPressed() {
@@ -391,35 +389,46 @@ void TagsWidget::buttonPressed() {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-SearchWidget::SearchWidget() {
+
+ProgramsWidget::ProgramsWidget() {
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 
-    QLabel* label = new QLabel("Search");
-    layout->addWidget(label);
+    QWidget* controls = createControls();
+    layout->addWidget(controls);
+
+    QWidget* programs = createPrograms();
+    layout->addWidget(programs);
+
+    layout->setStretch(1, 5);
+}
+
+QWidget* ProgramsWidget::createControls() {
+    QWidget* controls = new QWidget;
+    QBoxLayout* layout = new QVBoxLayout;
+    controls->setLayout(layout);
 
     QLineEdit* search = new QLineEdit;
+    search->setPlaceholderText("Search...");
     layout->addWidget(search);
 
     connect(search, &QLineEdit::textChanged,
-        [this](const QString& str) { emit updatedSearch(str.toLocal8Bit().constData()); }
+        [this](const QString& str) { emit searchUpdated(str.toLocal8Bit().constData()); }
     );
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-ProgramsWidget::ProgramsWidget() {
-    QBoxLayout* layout = new QVBoxLayout;
-    setLayout(layout);
 
     TagsWidget* tags = new TagsWidget;
     connect(tags, &TagsWidget::pickedTags, this, &ProgramsWidget::tagsPicked);
     layout->addWidget(tags);
 
-    SearchWidget* search = new SearchWidget;
-    connect(search, &SearchWidget::updatedSearch, this, &ProgramsWidget::searchUpdated);
-    layout->addWidget(search);
+
+
+    return controls;
+}
+
+QWidget* ProgramsWidget::createPrograms() {
+    QWidget* controls = new QWidget;
+    QBoxLayout* layout = new QVBoxLayout;
+    controls->setLayout(layout);
 
     for (Program* p : data::programs()) {
         ProgramWidget* w = new ProgramWidget(*p);
@@ -427,18 +436,18 @@ ProgramsWidget::ProgramsWidget() {
         connect(
             w, &ProgramWidget::startProgram,
             [this, programId = p->id](Cluster::ID clusterId,
-                                      Program::Configuration::ID configurationId)
-            {
-                emit startProgram(clusterId, programId, configurationId);
-            }
+                Program::Configuration::ID configurationId)
+        {
+            emit startProgram(clusterId, programId, configurationId);
+        }
         );
         connect(
             w, &ProgramWidget::stopProgram,
             [this, programId = p->id](Cluster::ID clusterId,
-                                      Program::Configuration::ID configurationId)
-            {
-                emit stopProgram(clusterId, programId, configurationId);
-            }
+                Program::Configuration::ID configurationId)
+        {
+            emit stopProgram(clusterId, programId, configurationId);
+        }
         );
 
         connect(w, &ProgramWidget::restartProcess, this, &ProgramsWidget::restartProcess);
@@ -448,6 +457,8 @@ ProgramsWidget::ProgramsWidget() {
         _visibilities[p->id] = VisibilityInfo{ true, true };
         layout->addWidget(w);
     }
+
+    return controls;
 }
 
 void ProgramsWidget::processUpdated(Process::ID processId) {
