@@ -48,14 +48,7 @@ MainWindow::MainWindow(const QString& title)
     : QMainWindow()
 {
     setWindowTitle(title);
-    setMinimumSize(512, 256);
-
-    //QPixmap background(":/images/C_transparent.png");
-    //background = background.scaled(size());
-    //QPalette palette;
-    //palette.setBrush(QPalette::Background, background);
-    //setPalette(palette);
-
+    setFixedSize(512, 256);
 
     QWidget* box = new QWidget;
     setCentralWidget(box);
@@ -71,6 +64,7 @@ MainWindow::MainWindow(const QString& title)
         using namespace std::string_literals;
 
         QWidget* versions = new QWidget;
+        versions->setObjectName("versions");
         QBoxLayout* versionLayout = new QHBoxLayout;
         versionLayout->setContentsMargins(5, 1, 5, 5);
         versions->setLayout(versionLayout);

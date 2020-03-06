@@ -3,6 +3,10 @@
   color: #efefef;
 }
 
+QWidget#versions QLabel {
+  font-size: 14px;
+}
+
 QTextEdit {
   background-image: url(:/images/C_desaturated.png);
   background-position: center;
