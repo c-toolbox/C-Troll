@@ -45,6 +45,7 @@ set(HEADER_FILES
   src/processwidget.h
   src/program.h
   src/programwidget.h
+  src/version.h
 )
 
 set(SOURCE_FILES

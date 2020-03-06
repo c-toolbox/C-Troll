@@ -34,9 +34,14 @@
 
 #include "mainwindow.h"
 
+#include "apiversion.h"
+#include "version.h"
+
 #include <QApplication>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QMenu>
+#include <QVBoxLayout>
 #include <iostream>
 
 MainWindow::MainWindow(const QString& title)
@@ -45,8 +50,41 @@ MainWindow::MainWindow(const QString& title)
     setWindowTitle(title);
     setMinimumSize(512, 256);
 
+    //QPixmap background(":/images/C_transparent.png");
+    //background = background.scaled(size());
+    //QPalette palette;
+    //palette.setBrush(QPalette::Background, background);
+    //setPalette(palette);
+
+
+    QWidget* box = new QWidget;
+    setCentralWidget(box);
+    
+    QLayout* layout = new QVBoxLayout;
+    layout->setMargin(0);
+    box->setLayout(layout);
+
     _messageBox = new QTextEdit();
-    setCentralWidget(_messageBox);
+    layout->addWidget(_messageBox);
+
+    {
+        using namespace std::string_literals;
+
+        QWidget* versions = new QWidget;
+        QBoxLayout* versionLayout = new QHBoxLayout;
+        versionLayout->setContentsMargins(5, 1, 5, 5);
+        versions->setLayout(versionLayout);
+
+        QLabel* trayVersion = new QLabel(("Tray Version: "s + Version).c_str());
+        versionLayout->addWidget(trayVersion);
+        versionLayout->addStretch();
+
+        QLabel* apiVersion = new QLabel(("API Version: "s + api::Version).c_str());
+        versionLayout->addWidget(apiVersion);
+
+        layout->addWidget(versions);
+    }
+
  
     // Initialize the tray icon, set the icon of a set of system icons,
     // as well as set a tooltip

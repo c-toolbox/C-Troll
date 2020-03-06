@@ -32,38 +32,9 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "mainwindow.h"
-#include <QApplication>
-#include <QFile>
-#include <QIcon>
-#include <iostream>
-#include <filesystem>
+#ifndef __TRAY__VERSION_H__
+#define __TRAY__VERSION_H__
 
-int main(int argc, char** argv) {
-    Q_INIT_RESOURCE(resources);
+constexpr const char* Version = "0.9.0";
 
-    QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
-
-    {
-        QFile file(":/qss/core.qss");
-        file.open(QFile::ReadOnly);
-        QString styleSheet = QLatin1String(file.readAll());
-        app.setStyleSheet(styleSheet);
-    }
-
-    // Load configuration file
-    std::string configurationFile = "config.json";
-    if (!std::filesystem::exists(configurationFile)) {
-        std::string absPath = std::filesystem::absolute(configurationFile).string();
-        std::cerr << "Could not find configuration file " << absPath;
-        exit(EXIT_FAILURE);
-    }
-
-    MainWindow mw("C-Troll", configurationFile);
-    mw.show();
-
-    app.exec();
-
-    Q_CLEANUP_RESOURCE(resources);
-}
+#endif // __TRAY__VERSION_H__

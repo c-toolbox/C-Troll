@@ -33,6 +33,7 @@
 ##########################################################################################
 
 set(HEADER_FILES
+  include/apiversion.h
   include/commandmessage.h
   include/invalidauthmessage.h
   include/jsonload.h

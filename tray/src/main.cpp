@@ -74,6 +74,14 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 
+    {
+        QFile file(":/qss/tray.qss");
+        file.open(QFile::ReadOnly);
+        QString styleSheet = QLatin1String(file.readAll());
+        app.setStyleSheet(styleSheet);
+    }
+
+
     MainWindow mw("C-Troll-Tray");
 
     common::Log::initialize("tray", [&mw](std::string msg) { mw.log(msg); });
