@@ -64,10 +64,12 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     // Set up the container widgets
     QWidget* center = new QWidget;
     QBoxLayout* layout = new QVBoxLayout;
+    layout->setMargin(0);
     center->setLayout(layout);
     setCentralWidget(center);
 
     QTabWidget* tabWidget = new QTabWidget;
+    tabWidget->setTabPosition(QTabWidget::West);
     layout->addWidget(tabWidget);
 
     //

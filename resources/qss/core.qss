@@ -1,0 +1,28 @@
+/*
+* {
+  background: #353535;
+  color: #efefef;
+}
+
+QPushButton {
+    background-color: #454545;
+    border-style: outset;
+    border-width: 1px;
+    border-color: #acacac;
+    min-height: 1.25em;
+}
+
+QPushButton:hover {
+    background-color: #505055;
+}
+
+QPushButton:pressed {
+    background-color: #404045;
+    border-style: inset;
+}
+
+QTabWidget::pane {
+  //border-top: 2px solid #C2C7CB;
+}
+
+*/
