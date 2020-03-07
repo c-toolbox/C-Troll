@@ -246,6 +246,7 @@ ClusterWidget::ClusterWidget(Cluster* cluster,
     setTitle(cluster->name.c_str());
 
     QBoxLayout* layout = new QVBoxLayout;
+    layout->setContentsMargins(5, 5, 5, 5);
     setLayout(layout);
 
     for (const Program::Configuration& configuration : configurations) {
@@ -299,6 +300,7 @@ ProgramWidget::ProgramWidget(const Program& program)
     : QGroupBox(program.name.c_str())
 {
     QBoxLayout* layout = new QHBoxLayout;
+    layout->setContentsMargins(5, 5, 5, 5);
     setLayout(layout);
 
     QBoxLayout* tagsLayout = new QVBoxLayout;
@@ -363,6 +365,7 @@ TagsWidget::TagsWidget()
     std::set<std::string> tags = data::findTags();
 
     QBoxLayout* layout = new QVBoxLayout;
+    layout->setContentsMargins(5, 5, 5, 5);
     setLayout(layout);
 
     for (const std::string& tag : tags) {

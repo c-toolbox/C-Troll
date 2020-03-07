@@ -43,6 +43,41 @@
 
 class QLabel;
 
+class ConnectionWidget : public QWidget {
+Q_OBJECT
+public:
+    enum class ConnectionStatus {
+        Connected = 0,
+        SomeConnected,
+        Disconnected
+    };
+
+    ConnectionWidget();
+
+    void setStatus(ConnectionStatus status);
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+class NodeWidget : public QGroupBox {
+Q_OBJECT
+public:
+    NodeWidget(const Node& node);
+
+    void updateConnectionStatus();
+
+private:
+    const Node::ID _nodeId;
+
+    ConnectionWidget* _connectionLabel;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
 class ClusterWidget : public QGroupBox {
 Q_OBJECT
 public:
@@ -53,8 +88,8 @@ public:
 private:
     const Cluster::ID _clusterId;
 
-    QLabel* _connectionLabel;
-    std::map<Node::ID, QLabel*> _nodeConnectionLabels;
+    ConnectionWidget* _connectionLabel;
+    std::map<Node::ID, NodeWidget*> _nodeWidgets;
 };
 
 

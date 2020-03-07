@@ -48,7 +48,7 @@ MainWindow::MainWindow(const QString& title)
     : QMainWindow()
 {
     setWindowTitle(title);
-    setFixedSize(512, 256);
+    setFixedSize(768, 256);
 
     QWidget* box = new QWidget;
     setCentralWidget(box);
