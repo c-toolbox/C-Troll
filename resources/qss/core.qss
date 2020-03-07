@@ -1,6 +1,5 @@
-/*
 * {
-  background: #353535;
+  background: #252525;
   color: #efefef;
 }
 
@@ -10,6 +9,14 @@ QPushButton {
     border-width: 1px;
     border-color: #acacac;
     min-height: 1.25em;
+    font-size: 18px;
+
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+QLineEdit {
+  font-size: 22px;
 }
 
 QPushButton:hover {
@@ -22,7 +29,33 @@ QPushButton:pressed {
 }
 
 QTabWidget::pane {
-  //border-top: 2px solid #C2C7CB;
+  border-left: 2px solid #acacac;
 }
 
+QTabBar::tab {
+  background: #353535;
+  color: #efefef;
+
+  border: 1px solid #efefef;
+
+  min-width: 40px;
+  min-height: 150px;
+}
+
+QTabBar::tab:hover {
+  background-color: #404045;
+}
+
+QTabBar::tab:selected {
+  background-color: #505055;
+  border-color: #acacac;
+}
+/*
+QGroupBox#connected {
+  background-color: #458545
+}
+
+QGroupBox#disconnected {
+  background-color: #854545
+}
 */

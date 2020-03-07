@@ -38,6 +38,7 @@
 #include "color.h"
 #include "database.h"
 #include "logging.h"
+#include <fmt/format.h>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -368,10 +369,32 @@ TagsWidget::TagsWidget()
         QPushButton* button = new QPushButton(tag.c_str());
 
         Color color = colorForTag(tag);
+        constexpr const int Delta = 40;
+        Color lightColor = Color {
+            std::min(255, color.r + Delta),
+            std::min(255, color.g + Delta),
+            std::min(255, color.b + Delta)
+        };
+        std::string colorText = fmt::format(
+            R"(
+                QPushButton {{
+                    background-color: #{0:x}{1:x}{2:x}; color: #202020;
+                    border-color: #303030;
+                }}
 
-        QPixmap pixmap(25, 25);
-        pixmap.fill(QColor(color.r, color.g, color.b));
-        button->setIcon(QIcon(pixmap));
+                QPushButton:hover {{
+                    background-color: #{3:x}{4:x}{5:x}; color: #202020;
+                }}
+            )",
+            color.r, color.g, color.b,
+            lightColor.r, lightColor.g, lightColor.b
+        );
+        button->setStyleSheet(colorText.c_str());
+
+        //QPixmap pixmap(25, 25);
+        //pixmap.fill(QColor(color.r, color.g, color.b));
+        //button->setIcon(QIcon(pixmap));
+
 
         button->setCheckable(true);
         connect(button, &QPushButton::clicked, this, &TagsWidget::buttonPressed);
@@ -414,6 +437,7 @@ ProgramsWidget::ProgramsWidget() {
 QWidget* ProgramsWidget::createControls() {
     QWidget* controls = new QWidget;
     QBoxLayout* layout = new QVBoxLayout;
+    layout->setMargin(0);
     controls->setLayout(layout);
 
     QLineEdit* search = new QLineEdit;
@@ -436,6 +460,7 @@ QWidget* ProgramsWidget::createControls() {
 QWidget* ProgramsWidget::createPrograms() {
     QWidget* controls = new QWidget;
     QBoxLayout* layout = new QVBoxLayout;
+    layout->setMargin(0);
     controls->setLayout(layout);
 
     for (Program* p : data::programs()) {
@@ -465,6 +490,8 @@ QWidget* ProgramsWidget::createPrograms() {
         _visibilities[p->id] = VisibilityInfo{ true, true };
         layout->addWidget(w);
     }
+
+    layout->addStretch();
 
     return controls;
 }
