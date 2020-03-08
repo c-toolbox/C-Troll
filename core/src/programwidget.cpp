@@ -296,6 +296,31 @@ void ClusterWidget::processUpdated(Process::ID processId) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
+TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
+    setFixedSize(50, 20);
+
+    QBoxLayout* layout = new QHBoxLayout;
+    layout->setMargin(0);
+
+    setLayout(layout);
+
+    for (const std::string& tag : tags) {
+        QWidget* w = new QWidget;
+        //w->setFixedSize(20, 20);
+
+        Color color = colorForTag(tag);
+        w->setStyleSheet(fmt::format(
+            "background: #{0:x}{1:x}{2:x}",
+            color.r, color.g, color.b
+        ).c_str());
+        layout->addWidget(w);
+    }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
 ProgramWidget::ProgramWidget(const Program& program)
     : QGroupBox(program.name.c_str())
 {
@@ -303,15 +328,8 @@ ProgramWidget::ProgramWidget(const Program& program)
     layout->setContentsMargins(5, 5, 5, 5);
     setLayout(layout);
 
-    QBoxLayout* tagsLayout = new QVBoxLayout;
-    QWidget* tagsBox = new QWidget;
-    tagsBox->setLayout(tagsLayout);
-    for (const std::string& tag : program.tags) {
-        QLabel* label = new QLabel(tag.c_str());
-        tagsLayout->addWidget(label);
-    }
-    layout->addWidget(tagsBox);
-
+    TagInfoWidget* tagInfo = new TagInfoWidget(program.tags);
+    layout->addWidget(tagInfo);
 
     std::vector<Cluster*> clusters = data::findClustersForProgram(program);
     for (Cluster* cluster : clusters) {
