@@ -1,5 +1,5 @@
 * {
-  background: #252525;
+  background: #202020;
   color: #efefef;
 }
 
@@ -9,14 +9,14 @@ QPushButton {
     border-width: 1px;
     border-color: #acacac;
     min-height: 1.25em;
-    font-size: 14px;
+    font-size: 11pt;
 
     padding-left: 25%;
     padding-right: 25%;
 }
 
 QLineEdit {
-  font-size: 20px;
+  font-size: 14pt;
 }
 
 QPushButton:hover {
@@ -38,15 +38,17 @@ QTabWidget::pane {
 }
 
 QTabBar::tab {
-  background: #202020;
+  background: #303030;
   color: #efefef;
 
   border: 1px solid #efefef;
 
-  font-size: 14px;
+  font-size: 14pt;
+  padding-top: 7px;
+  padding-bottom: 7px;
 
-  min-width: 40%;
-  min-height: 100%;
+  /*min-width: 40%;*/
+  /*min-height: 150%;*/
 }
 
 QTabBar::tab:hover {

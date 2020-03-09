@@ -49,7 +49,7 @@ namespace programs { class ProgramsWidget; }
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
-    explicit MainWindow(QString title, const std::string& configurationFile);
+    explicit MainWindow(const std::string& configurationFile);
 
 private:
     // private slots

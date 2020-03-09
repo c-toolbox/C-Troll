@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
     }
 
-    MainWindow mw("C-Troll", configurationFile);
+    MainWindow mw(configurationFile);
     mw.show();
 
     app.exec();

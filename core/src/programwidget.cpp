@@ -39,6 +39,8 @@
 #include "database.h"
 #include "logging.h"
 #include <fmt/format.h>
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -296,12 +298,23 @@ void ClusterWidget::processUpdated(Process::ID processId) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
+namespace {
+    constexpr const float TabInfoWidgetWidthRatio = 0.01f;
+    constexpr const float TabInfoWidgetHeightRatio = 0.015f;
+} // namespace
+
 TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
-    setFixedSize(50, 20);
+    // We calculate the size of the window based on the screen resolution to be somewhat
+    // safe against high and low DPI monitors
+    const int screenWidth = QApplication::desktop()->screenGeometry().width();
+    const int screenHeight = QApplication::desktop()->screenGeometry().height();
+    setFixedSize(
+        screenWidth * TabInfoWidgetWidthRatio,
+        screenHeight * TabInfoWidgetHeightRatio
+    );
 
     QBoxLayout* layout = new QHBoxLayout;
     layout->setMargin(0);
-
     setLayout(layout);
 
     for (const std::string& tag : tags) {
@@ -380,6 +393,7 @@ void ProgramWidget::processUpdated(Process::ID processId) {
 TagsWidget::TagsWidget() 
     : QGroupBox("Tags")
 {
+    setObjectName("tags");
     std::set<std::string> tags = data::findTags();
 
     QBoxLayout* layout = new QVBoxLayout;
@@ -412,11 +426,6 @@ TagsWidget::TagsWidget()
         );
         button->setStyleSheet(colorText.c_str());
 
-        //QPixmap pixmap(25, 25);
-        //pixmap.fill(QColor(color.r, color.g, color.b));
-        //button->setIcon(QIcon(pixmap));
-
-
         button->setCheckable(true);
         connect(button, &QPushButton::clicked, this, &TagsWidget::buttonPressed);
 
@@ -443,6 +452,8 @@ void TagsWidget::buttonPressed() {
 
 
 ProgramsWidget::ProgramsWidget() {
+    setObjectName("programs");
+
     QBoxLayout* layout = new QHBoxLayout;
     setLayout(layout);
 

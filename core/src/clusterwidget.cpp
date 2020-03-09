@@ -38,6 +38,8 @@
 #include "database.h"
 #include "node.h"
 #include <fmt/format.h>
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QLabel>
 #include <QVBoxLayout>
 
@@ -45,11 +47,18 @@ namespace {
     constexpr const char* ColorConnected = "#33cc33";
     constexpr const char* ColorSomeConnected = "#aaaa33";
     constexpr const char* ColorDisconnected = "#dd3333";
+
+    constexpr const float ConnectionWidgetWidthRatio = 0.005f;
+    constexpr const float ConnectionWidgetHeightRatio = 0.015f;
 } // namespace
 
 ConnectionWidget::ConnectionWidget() {
-    setMinimumHeight(32);
-    setMaximumWidth(20);
+    // We calculate the size of the window based on the screen resolution to be somewhat
+    // safe against high and low DPI monitors
+    const int screenWidth = QApplication::desktop()->screenGeometry().width();
+    const int screenHeight = QApplication::desktop()->screenGeometry().height();
+    setMinimumHeight(screenHeight * ConnectionWidgetHeightRatio);
+    setMaximumWidth(screenWidth * ConnectionWidgetWidthRatio);
 
     QLayout* layout = new QHBoxLayout;
     layout->setMargin(0);

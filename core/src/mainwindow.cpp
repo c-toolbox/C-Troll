@@ -41,13 +41,35 @@
 #include "killallmessage.h"
 #include "processwidget.h"
 #include "programwidget.h"
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QMessageBox>
+#include <QTabBar>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <set>
 
-MainWindow::MainWindow(QString title, const std::string& configurationFile) {
-    setWindowTitle(title);
+namespace {
+    constexpr const char* Title = "C-Troll";
+
+    constexpr const float MainWindowWidthRatio = 0.35f;
+    constexpr const float MainWindowHeightRatio = 0.25f;
+
+    constexpr const float TabWidthRatio = 0.0333f;
+    constexpr const float TabHeightRatio = 0.24f;
+} // namespace
+
+MainWindow::MainWindow(const std::string& configurationFile) {
+    // We calculate the size of the window based on the screen resolution to be somewhat
+    // safe against high and low DPI monitors
+    const int screenWidth = QApplication::desktop()->screenGeometry().width();
+    const int screenHeight = QApplication::desktop()->screenGeometry().height();
+
+    const int widgetWidth = screenWidth * MainWindowWidthRatio;
+    const int widgetHeight = screenHeight * MainWindowHeightRatio;
+
+    setWindowTitle(Title);
+    resize(widgetWidth, widgetHeight);
 
     //
     // Set up the logging
@@ -184,6 +206,12 @@ MainWindow::MainWindow(QString title, const std::string& configurationFile) {
     tabWidget->addTab(_clustersWidget, "Clusters");
     tabWidget->addTab(_processesWidget, "Processes");
     tabWidget->addTab(_messageBox, "Log");
+
+    std::string style = fmt::format(
+        "QTabBar::tab {{ height: {}px; width: {}px; }}",
+        widgetHeight * TabHeightRatio, widgetWidth * TabWidthRatio
+    );
+    tabWidget->setStyleSheet(style.c_str());
 
     _clusterConnectionHandler.initialize();
 }
