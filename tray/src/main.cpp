@@ -82,8 +82,7 @@ int main(int argc, char** argv) {
     }
 
 
-    MainWindow mw("C-Troll-Tray");
-
+    MainWindow mw;
     common::Log::initialize("tray", [&mw](std::string msg) { mw.log(msg); });
 
     qInstallMessageHandler(
@@ -124,12 +123,11 @@ int main(int argc, char** argv) {
     const int port = config["port"];
     const std::string secret = config["secret"];
 
+    mw.setPort(port);
 
     SocketHandler socketHandler(port, secret);
-    
     ProcessHandler processHandler;
     
-    // Connect the sockethandler and the processhandler
     QObject::connect(
         &socketHandler, &SocketHandler::messageRecieved,
         &processHandler, &ProcessHandler::handleSocketMessage

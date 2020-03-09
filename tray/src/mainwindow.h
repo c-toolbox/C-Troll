@@ -38,7 +38,7 @@
 #include <QMainWindow>
 #include <QCloseEvent>
 #include <QSystemTrayIcon>
-#include <QAction>
+#include <QLabel>
 #include <QTextEdit>
  
 namespace Ui { class MainWindow; }
@@ -46,7 +46,9 @@ namespace Ui { class MainWindow; }
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
-    explicit MainWindow(const QString& title);
+    MainWindow();
+
+    void setPort(int port);
 
     void log(std::string msg);
 
@@ -58,8 +60,8 @@ private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
  
 private:
-    // Declare the object of future applications for the tray icon
     QTextEdit* _messageBox;
+    QLabel* _portLabel;
 };
  
 #endif // __TRAY__MAINWINDOW_H__

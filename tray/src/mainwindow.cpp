@@ -36,19 +36,32 @@
 
 #include "apiversion.h"
 #include "version.h"
-
+#include <fmt/format.h>
 #include <QApplication>
+#include <QDesktopWidget>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>
 #include <QVBoxLayout>
 #include <iostream>
 
-MainWindow::MainWindow(const QString& title)
-    : QMainWindow()
-{
-    setWindowTitle(title);
-    setFixedSize(768, 256);
+namespace {
+    constexpr const char* Title = "C-Troll Tray";
+
+    constexpr const float MainWindowWidthRatio = 0.2f;
+    constexpr const float MainWindowHeightRatio = 0.15f;
+} // namespace
+
+MainWindow::MainWindow() {
+    // We calculate the size of the window based on the screen resolution to be somewhat
+    // safe against high and low DPI monitors
+    const int screenWidth = QApplication::desktop()->screenGeometry().width();
+    const int screenHeight = QApplication::desktop()->screenGeometry().height();
+
+    setWindowTitle(Title);
+    setFixedSize(
+        screenWidth * MainWindowWidthRatio, screenHeight * MainWindowHeightRatio
+    );
 
     QWidget* box = new QWidget;
     setCentralWidget(box);
@@ -63,20 +76,24 @@ MainWindow::MainWindow(const QString& title)
     {
         using namespace std::string_literals;
 
-        QWidget* versions = new QWidget;
-        versions->setObjectName("versions");
-        QBoxLayout* versionLayout = new QHBoxLayout;
-        versionLayout->setContentsMargins(5, 1, 5, 5);
-        versions->setLayout(versionLayout);
+        QWidget* info = new QWidget;
+        info->setObjectName("info");
+        QBoxLayout* infoLayout = new QHBoxLayout;
+        infoLayout->setContentsMargins(5, 1, 5, 5);
+        info->setLayout(infoLayout);
 
         QLabel* trayVersion = new QLabel(("Tray Version: "s + Version).c_str());
-        versionLayout->addWidget(trayVersion);
-        versionLayout->addStretch();
+        infoLayout->addWidget(trayVersion);
+        
+        infoLayout->addStretch();
+        _portLabel = new QLabel;
+        infoLayout->addWidget(_portLabel);
+        infoLayout->addStretch();
 
         QLabel* apiVersion = new QLabel(("API Version: "s + api::Version).c_str());
-        versionLayout->addWidget(apiVersion);
+        infoLayout->addWidget(apiVersion);
 
-        layout->addWidget(versions);
+        layout->addWidget(info);
     }
 
  
@@ -85,7 +102,10 @@ MainWindow::MainWindow(const QString& title)
     QSystemTrayIcon* trayIcon = new QSystemTrayIcon(
         QIcon(":/images/C_transparent.png"), this
     );
-    trayIcon->setToolTip(title + QString("\nCluster Launcher Application"));
+    std::string tooltip = fmt::format(
+        "{}\nVersion: {}\nAPI: {}", Title, Version, api::Version
+    );
+    trayIcon->setToolTip(tooltip.c_str());
 
     // After that create a context menu of two items
     QMenu* menu = new QMenu(this);
@@ -110,6 +130,11 @@ MainWindow::MainWindow(const QString& title)
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
 }
  
+void MainWindow::setPort(int port) {
+    QString p = "Port: " + QString::number(port);
+    _portLabel->setText(p);
+}
+
 void MainWindow::log(std::string msg) {
     _messageBox->append(msg.c_str());
 }
