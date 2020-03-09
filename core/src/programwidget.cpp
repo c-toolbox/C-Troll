@@ -405,24 +405,42 @@ TagsWidget::TagsWidget()
 
         Color color = colorForTag(tag);
         constexpr const int Delta = 40;
-        Color lightColor = Color {
+        Color lightColor = Color{
             std::min(255, color.r + Delta),
             std::min(255, color.g + Delta),
             std::min(255, color.b + Delta)
         };
+        Color darkColor = Color{
+            std::max(0, color.r - Delta),
+            std::max(0, color.g - Delta),
+            std::max(0, color.b - Delta)
+        };
+
         std::string colorText = fmt::format(
             R"(
                 QPushButton {{
                     background-color: #{0:x}{1:x}{2:x}; color: #202020;
                     border-color: #303030;
+                    border-style: outset;
                 }}
 
                 QPushButton:hover {{
                     background-color: #{3:x}{4:x}{5:x}; color: #202020;
                 }}
+
+                QPushButton:pressed {{
+                    background-color: #{6:x}{7:x}{8:x};
+                    border-style: inset;
+                }}
+
+                QPushButton:open {{
+                    background-color: #{6:x}{7:x}{8:x};
+                    border-style: inset;
+                }}
             )",
             color.r, color.g, color.b,
-            lightColor.r, lightColor.g, lightColor.b
+            lightColor.r, lightColor.g, lightColor.b,
+            darkColor.r, darkColor.g, darkColor.b
         );
         button->setStyleSheet(colorText.c_str());
 

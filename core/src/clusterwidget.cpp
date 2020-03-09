@@ -80,6 +80,16 @@ void ConnectionWidget::setStatus(ConnectionStatus status) {
         }
     }(status);
 
+    const char* string = [](ConnectionStatus s) {
+        switch (s) {
+            case ConnectionStatus::Connected: return "connected";
+            case ConnectionStatus::SomeConnected: return "partially connected";
+            case ConnectionStatus::Disconnected: return "disconnected";
+            default: throw std::logic_error("Missing case label");
+        }
+    }(status);
+    setToolTip(string);
+
     setStyleSheet(fmt::format(R"(background: {})", color).c_str());
 }
 
