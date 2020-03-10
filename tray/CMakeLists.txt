@@ -33,6 +33,7 @@
 ##########################################################################################
 
 set(HEADER_FILES
+  src/centralwidget.h
   src/mainwindow.h
   src/processhandler.h
   src/sockethandler.h
@@ -40,6 +41,7 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+  src/centralwidget.cpp
   src/main.cpp
   src/mainwindow.cpp
   src/processhandler.cpp
@@ -49,7 +51,12 @@ set(SOURCE_FILES
 find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
 
 set(MOC_FILES "")
-qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
+qt5_wrap_cpp(MOC_FILES
+  src/centralwidget.h
+  src/mainwindow.h
+  src/processhandler.h
+  src/sockethandler.h
+)
 
 set(RESOURCE_FILES "")
 qt5_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)

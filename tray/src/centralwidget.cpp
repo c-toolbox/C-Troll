@@ -32,46 +32,88 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __TRAY__PROCESSHANDLER_H__
-#define __TRAY__PROCESSHANDLER_H__
+#include "centralwidget.h"
 
-#include <QObject>
+#include "apiversion.h"
+#include "version.h"
+#include <QGroupBox>
+#include <QVBoxLayout>
 
-#include "commandmessage.h"
-#include <QProcess>
-#include <json/json.hpp>
-#include <map>
-#include <string>
+CentralWidget::CentralWidget() {
+    QLayout* layout = new QVBoxLayout(this);
+    layout->setMargin(0);
 
-class ProcessHandler : public QObject {
-Q_OBJECT
+    _messageBox = new QTextEdit();
+    layout->addWidget(_messageBox);
 
-public slots:
-    void newConnection();
-    void handleSocketMessage(const nlohmann::json& message);
+    QGroupBox* connectionsWidget = new QGroupBox("Connected controllers");
+    _connectionsLayout = new QVBoxLayout(connectionsWidget);
+    layout->addWidget(connectionsWidget);
 
-    void handlerErrorOccurred(QProcess::ProcessError error);
-    void handleFinished(int exitCode, QProcess::ExitStatus exitStatus);
-    void handleReadyReadStandardError();
-    void handleReadyReadStandardOutput();
-    void handleStarted();
+    QGroupBox* processesWidget = new QGroupBox("Processes");
+    _processesLayout = new QVBoxLayout(processesWidget);
+    layout->addWidget(processesWidget);
 
-signals:
-    void sendSocketMessage(const nlohmann::json& message);
+    QWidget* info = createInfoWidget();
+    layout->addWidget(info);
+}
 
-    void startedProcess(const std::string& process);
-    void closedProcess(const std::string& process);
+void CentralWidget::setPort(int port) {
+    QString p = "Port: " + QString::number(port);
+    _portLabel->setText(p);
+}
 
-private:
-    void executeProcessWithCommandMessage(QProcess* process,
-        const common::CommandMessage& command);
-    void createAndRunProcessFromCommandMessage(const common::CommandMessage& command);
-    
-    std::map<int, QProcess*>::const_iterator processIt(QProcess* process);
+void CentralWidget::log(std::string msg) {
+    _messageBox->append(msg.c_str());
+}
 
-    // The key of this map is a unique id (received from core)
-    // The value is the process which is running
-    std::map<int, QProcess*> _processes;
-};
+void CentralWidget::newConnection(const std::string& peerAddress) {
+    QLabel* label = new QLabel(peerAddress.c_str());
+    _connectionsLayout->addWidget(label);
+    _connections[peerAddress] = label;
+}
 
-#endif // __TRAY__PROCESSHANDLER_H__
+void CentralWidget::closedConnection(const std::string& peerAddress) {
+    const auto it = _connections.find(peerAddress);
+    assert(it != _connections.end());
+
+    _connectionsLayout->removeWidget(it->second);
+    _connections.erase(it);
+}
+
+void CentralWidget::newProcess(const std::string& process) {
+    QLabel* label = new QLabel(process.c_str());
+    _processesLayout->addWidget(label);
+    _processes[process] = label;
+}
+
+void CentralWidget::endedProcess(const std::string& process) {
+    const auto it = _processes.find(process);
+    assert(it != _processes.end());
+
+    _processesLayout->removeWidget(it->second);
+    _processes.erase(it);
+}
+
+QWidget* CentralWidget::createInfoWidget() {
+    using namespace std::string_literals;
+
+    QWidget* info = new QWidget;
+    info->setObjectName("info");
+    QBoxLayout* infoLayout = new QHBoxLayout;
+    infoLayout->setContentsMargins(5, 1, 5, 5);
+    info->setLayout(infoLayout);
+
+    QLabel* trayVersion = new QLabel(("Tray Version: "s + Version).c_str());
+    infoLayout->addWidget(trayVersion);
+
+    infoLayout->addStretch();
+    _portLabel = new QLabel;
+    infoLayout->addWidget(_portLabel);
+    infoLayout->addStretch();
+
+    QLabel* apiVersion = new QLabel(("API Version: "s + api::Version).c_str());
+    infoLayout->addWidget(apiVersion);
+
+    return info;
+}

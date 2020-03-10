@@ -35,6 +35,7 @@
 #include "mainwindow.h"
 
 #include "apiversion.h"
+#include "centralwidget.h"
 #include "version.h"
 #include <fmt/format.h>
 #include <QApplication>
@@ -49,7 +50,7 @@ namespace {
     constexpr const char* Title = "C-Troll Tray";
 
     constexpr const float MainWindowWidthRatio = 0.2f;
-    constexpr const float MainWindowHeightRatio = 0.15f;
+    constexpr const float MainWindowHeightRatio = 0.35f;
 } // namespace
 
 MainWindow::MainWindow() {
@@ -63,40 +64,9 @@ MainWindow::MainWindow() {
         screenWidth * MainWindowWidthRatio, screenHeight * MainWindowHeightRatio
     );
 
-    QWidget* box = new QWidget;
-    setCentralWidget(box);
-    
-    QLayout* layout = new QVBoxLayout;
-    layout->setMargin(0);
-    box->setLayout(layout);
+    _centralWidget = new CentralWidget;
+    setCentralWidget(_centralWidget);
 
-    _messageBox = new QTextEdit();
-    layout->addWidget(_messageBox);
-
-    {
-        using namespace std::string_literals;
-
-        QWidget* info = new QWidget;
-        info->setObjectName("info");
-        QBoxLayout* infoLayout = new QHBoxLayout;
-        infoLayout->setContentsMargins(5, 1, 5, 5);
-        info->setLayout(infoLayout);
-
-        QLabel* trayVersion = new QLabel(("Tray Version: "s + Version).c_str());
-        infoLayout->addWidget(trayVersion);
-        
-        infoLayout->addStretch();
-        _portLabel = new QLabel;
-        infoLayout->addWidget(_portLabel);
-        infoLayout->addStretch();
-
-        QLabel* apiVersion = new QLabel(("API Version: "s + api::Version).c_str());
-        infoLayout->addWidget(apiVersion);
-
-        layout->addWidget(info);
-    }
-
- 
     // Initialize the tray icon, set the icon of a set of system icons,
     // as well as set a tooltip
     QSystemTrayIcon* trayIcon = new QSystemTrayIcon(
@@ -129,14 +99,29 @@ MainWindow::MainWindow() {
     // Also connect clicking on the icon to the signal processor of this press 
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
 }
- 
+
 void MainWindow::setPort(int port) {
-    QString p = "Port: " + QString::number(port);
-    _portLabel->setText(p);
+    _centralWidget->setPort(port);
 }
 
 void MainWindow::log(std::string msg) {
-    _messageBox->append(msg.c_str());
+    _centralWidget->log(std::move(msg));
+}
+
+void MainWindow::newConnection(const std::string& peerAddress) {
+    _centralWidget->newConnection(peerAddress);
+}
+
+void MainWindow::closedConnection(const std::string& peerAddress) {
+    _centralWidget->closedConnection(peerAddress);
+}
+
+void MainWindow::newProcess(const std::string& process) {
+    _centralWidget->newProcess(process);
+}
+
+void MainWindow::endedProcess(const std::string& process) {
+    _centralWidget->endedProcess(process);
 }
 
 // The method that handles the closing event of the application window

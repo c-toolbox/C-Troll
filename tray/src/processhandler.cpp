@@ -197,6 +197,8 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
         
         // Remove this process from the list as we consider it finished
         _processes.erase(p);
+
+        emit closedProcess("ABC");
     }
 }
 
@@ -258,6 +260,8 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
             );
             process->start(cmd.c_str());
         }
+
+        emit startedProcess("ABC");
     }
     else if (command.command == common::CommandMessage::Command::Kill ||
              command.command == common::CommandMessage::Command::Exit)

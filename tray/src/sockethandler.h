@@ -50,11 +50,12 @@ public slots:
     void sendMessage(const nlohmann::json& message);
 
 signals:
-    void newConnectionEstablished();
+    void newConnection(const std::string& peerAddress);
+    void closedConnection(const std::string& peerAddress);
     void messageRecieved(const nlohmann::json& message);
 
 private:
-    void newConnection();
+    void newConnectionEstablished();
     void disconnected(common::JsonSocket*);
     void readyRead(common::JsonSocket*);
 

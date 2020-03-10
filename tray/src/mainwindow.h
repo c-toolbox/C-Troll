@@ -41,8 +41,8 @@
 #include <QLabel>
 #include <QTextEdit>
  
-namespace Ui { class MainWindow; }
- 
+class CentralWidget;
+
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
@@ -52,16 +52,22 @@ public:
 
     void log(std::string msg);
 
+public slots:
+    void newConnection(const std::string& peerAddress);
+    void closedConnection(const std::string& peerAddress);
+
+    void newProcess(const std::string& process);
+    void endedProcess(const std::string& process);
+
 protected:
     void closeEvent(QCloseEvent* event);
     void changeEvent(QEvent* event);
  
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
- 
+
 private:
-    QTextEdit* _messageBox;
-    QLabel* _portLabel;
+    CentralWidget* _centralWidget;
 };
  
 #endif // __TRAY__MAINWINDOW_H__

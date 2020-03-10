@@ -133,12 +133,28 @@ int main(int argc, char** argv) {
         &processHandler, &ProcessHandler::handleSocketMessage
     );
     QObject::connect(
-        &socketHandler, &SocketHandler::newConnectionEstablished,
+        &socketHandler, &SocketHandler::newConnection,
         &processHandler, &ProcessHandler::newConnection
     );
     QObject::connect(
         &processHandler, &ProcessHandler::sendSocketMessage,
         &socketHandler, &SocketHandler::sendMessage
+    );
+    QObject::connect(
+        &socketHandler, &SocketHandler::newConnection,
+        &mw, &MainWindow::newConnection
+    );
+    QObject::connect(
+        &socketHandler, &SocketHandler::closedConnection,
+        &mw, &MainWindow::closedConnection
+    );
+    QObject::connect(
+        &processHandler, &ProcessHandler::startedProcess,
+        &mw, &MainWindow::newProcess
+    );
+    QObject::connect(
+        &processHandler, &ProcessHandler::closedProcess,
+        &mw, &MainWindow::endedProcess
     );
 
     app.exec();

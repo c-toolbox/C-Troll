@@ -32,46 +32,40 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __TRAY__PROCESSHANDLER_H__
-#define __TRAY__PROCESSHANDLER_H__
+#ifndef __TRAY__CENTRALWIDGET_H__
+#define __TRAY__CENTRALWIDGET_H__
 
-#include <QObject>
+#include <QWidget>
 
-#include "commandmessage.h"
-#include <QProcess>
-#include <json/json.hpp>
+#include <QLabel>
+#include <QTextEdit>
 #include <map>
-#include <string>
 
-class ProcessHandler : public QObject {
+class CentralWidget : public QWidget {
 Q_OBJECT
+public:
+    CentralWidget();
+
+    void setPort(int port);
+    void log(std::string msg);
 
 public slots:
-    void newConnection();
-    void handleSocketMessage(const nlohmann::json& message);
+    void newConnection(const std::string& peerAddress);
+    void closedConnection(const std::string& peerAddress);
 
-    void handlerErrorOccurred(QProcess::ProcessError error);
-    void handleFinished(int exitCode, QProcess::ExitStatus exitStatus);
-    void handleReadyReadStandardError();
-    void handleReadyReadStandardOutput();
-    void handleStarted();
-
-signals:
-    void sendSocketMessage(const nlohmann::json& message);
-
-    void startedProcess(const std::string& process);
-    void closedProcess(const std::string& process);
+    void newProcess(const std::string& process);
+    void endedProcess(const std::string& process);
 
 private:
-    void executeProcessWithCommandMessage(QProcess* process,
-        const common::CommandMessage& command);
-    void createAndRunProcessFromCommandMessage(const common::CommandMessage& command);
-    
-    std::map<int, QProcess*>::const_iterator processIt(QProcess* process);
+    QWidget* createInfoWidget();
 
-    // The key of this map is a unique id (received from core)
-    // The value is the process which is running
-    std::map<int, QProcess*> _processes;
+    QTextEdit* _messageBox;
+    QLabel* _portLabel;
+
+    QLayout* _connectionsLayout;
+    std::map<std::string, QLabel*> _connections;
+    QLayout* _processesLayout;
+    std::map<std::string, QLabel*> _processes;
 };
 
-#endif // __TRAY__PROCESSHANDLER_H__
+#endif // __TRAY__CENTRALWIDGET_H__

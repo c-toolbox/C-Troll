@@ -54,7 +54,7 @@ SocketHandler::SocketHandler(int port, std::string secret)
     }
     QObject::connect(
         &_server, &QTcpServer::newConnection,
-        this, &SocketHandler::newConnection
+        this, &SocketHandler::newConnectionEstablished
     );
 }
 
@@ -89,10 +89,12 @@ void SocketHandler::disconnected(common::JsonSocket* socket) {
         (*ptr)->deleteLater();
         _sockets.erase(ptr);
         Log(fmt::format("Socket from {} disconnected", socket->peerAddress()));
+
+        emit closedConnection(socket->peerAddress());
     }
 }
 
-void SocketHandler::newConnection() {
+void SocketHandler::newConnectionEstablished() {
     while (_server.hasPendingConnections()) {
         common::JsonSocket* jsonSocket = new common::JsonSocket(
             std::unique_ptr<QTcpSocket>(_server.nextPendingConnection())
@@ -111,6 +113,6 @@ void SocketHandler::newConnection() {
         _sockets.push_back(jsonSocket);
         Log(fmt::format("Socket connected from {}", jsonSocket->peerAddress()));
 
-        emit newConnectionEstablished();
+        emit newConnection(jsonSocket->peerAddress());
     }
 }
