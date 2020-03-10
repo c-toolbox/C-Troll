@@ -320,8 +320,11 @@ TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
 
         Color color = colorForTag(tag);
         w->setStyleSheet(fmt::format(
-            "background: #{0:x}{1:x}{2:x}", color.r, color.g, color.b
+            "background: #{0:02x}{1:02x}{2:02x}", color.r, color.g, color.b
         ).c_str());
+
+        w->setToolTip(tag.c_str());
+
         layout->addWidget(w);
     }
 }
@@ -413,22 +416,22 @@ TagsWidget::TagsWidget()
         std::string colorText = fmt::format(
             R"(
                 QPushButton {{
-                    background-color: #{0:x}{1:x}{2:x}; color: #202020;
+                    background-color: #{0:02x}{1:02x}{2:02x}; color: #202020;
                     border-color: #303030;
                     border-style: outset;
                 }}
 
                 QPushButton:hover {{
-                    background-color: #{3:x}{4:x}{5:x}; color: #202020;
+                    background-color: #{3:02x}{4:02x}{5:02x}; color: #202020;
                 }}
 
                 QPushButton:pressed {{
-                    background-color: #{6:x}{7:x}{8:x};
+                    background-color: #{6:02x}{7:02x}{8:02x};
                     border-style: inset;
                 }}
 
                 QPushButton:open {{
-                    background-color: #{6:x}{7:x}{8:x};
+                    background-color: #{6:02x}{7:02x}{8:02x};
                     border-style: inset;
                 }}
             )",
@@ -508,18 +511,18 @@ QWidget* ProgramsWidget::createPrograms() {
         connect(
             w, &ProgramWidget::startProgram,
             [this, programId = p->id](Cluster::ID clusterId,
-                Program::Configuration::ID configurationId)
-        {
-            emit startProgram(clusterId, programId, configurationId);
-        }
+                                      Program::Configuration::ID configurationId)
+            {
+                emit startProgram(clusterId, programId, configurationId);
+            }
         );
         connect(
             w, &ProgramWidget::stopProgram,
             [this, programId = p->id](Cluster::ID clusterId,
-                Program::Configuration::ID configurationId)
-        {
-            emit stopProgram(clusterId, programId, configurationId);
-        }
+                                      Program::Configuration::ID configurationId)
+            {
+                emit stopProgram(clusterId, programId, configurationId);
+            }
         );
 
         connect(w, &ProgramWidget::restartProcess, this, &ProgramsWidget::restartProcess);
