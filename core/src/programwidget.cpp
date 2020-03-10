@@ -156,7 +156,7 @@ void ProgramButton::updateButton() {
 
 void ProgramButton::updateMenu() {
     // First a bit of cleanup so that we don't have old signal connections laying around
-    for (const std::pair<Node::ID, ProcessInfo>& p : _processes) {
+    for (const std::pair<const Node::ID, ProcessInfo>& p : _processes) {
         QObject::disconnect(p.second.menuAction);
     }
     _actionMenu->clear();
@@ -247,9 +247,8 @@ ClusterWidget::ClusterWidget(Cluster* cluster,
     assert(cluster);
     setTitle(cluster->name.c_str());
 
-    QBoxLayout* layout = new QVBoxLayout;
+    QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
-    setLayout(layout);
 
     for (const Program::Configuration& configuration : configurations) {
         ProgramButton* button = new ProgramButton(cluster, &configuration);
@@ -313,18 +312,15 @@ TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
         screenHeight * TabInfoWidgetHeightRatio
     );
 
-    QBoxLayout* layout = new QHBoxLayout;
+    QBoxLayout* layout = new QHBoxLayout(this);
     layout->setMargin(0);
-    setLayout(layout);
 
     for (const std::string& tag : tags) {
         QWidget* w = new QWidget;
-        //w->setFixedSize(20, 20);
 
         Color color = colorForTag(tag);
         w->setStyleSheet(fmt::format(
-            "background: #{0:x}{1:x}{2:x}",
-            color.r, color.g, color.b
+            "background: #{0:x}{1:x}{2:x}", color.r, color.g, color.b
         ).c_str());
         layout->addWidget(w);
     }
@@ -337,9 +333,8 @@ TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
 ProgramWidget::ProgramWidget(const Program& program)
     : QGroupBox(program.name.c_str())
 {
-    QBoxLayout* layout = new QHBoxLayout;
+    QBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
-    setLayout(layout);
 
     TagInfoWidget* tagInfo = new TagInfoWidget(program.tags);
     layout->addWidget(tagInfo);
@@ -396,9 +391,8 @@ TagsWidget::TagsWidget()
     setObjectName("tags");
     std::set<std::string> tags = data::findTags();
 
-    QBoxLayout* layout = new QVBoxLayout;
+    QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
-    setLayout(layout);
 
     for (const std::string& tag : tags) {
         QPushButton* button = new QPushButton(tag.c_str());
@@ -472,8 +466,7 @@ void TagsWidget::buttonPressed() {
 ProgramsWidget::ProgramsWidget() {
     setObjectName("programs");
 
-    QBoxLayout* layout = new QHBoxLayout;
-    setLayout(layout);
+    QBoxLayout* layout = new QHBoxLayout(this);
 
     QWidget* controls = createControls();
     layout->addWidget(controls);
@@ -486,9 +479,8 @@ ProgramsWidget::ProgramsWidget() {
 
 QWidget* ProgramsWidget::createControls() {
     QWidget* controls = new QWidget;
-    QBoxLayout* layout = new QVBoxLayout;
+    QBoxLayout* layout = new QVBoxLayout(controls);
     layout->setMargin(0);
-    controls->setLayout(layout);
 
     QLineEdit* search = new QLineEdit;
     search->setPlaceholderText("Search...");
@@ -502,16 +494,13 @@ QWidget* ProgramsWidget::createControls() {
     connect(tags, &TagsWidget::pickedTags, this, &ProgramsWidget::tagsPicked);
     layout->addWidget(tags);
 
-
-
     return controls;
 }
 
 QWidget* ProgramsWidget::createPrograms() {
     QWidget* controls = new QWidget;
-    QBoxLayout* layout = new QVBoxLayout;
+    QBoxLayout* layout = new QVBoxLayout(controls);
     layout->setMargin(0);
-    controls->setLayout(layout);
 
     for (Program* p : data::programs()) {
         ProgramWidget* w = new ProgramWidget(*p);

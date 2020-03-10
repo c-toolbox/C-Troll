@@ -60,9 +60,8 @@ ConnectionWidget::ConnectionWidget() {
     setMinimumHeight(screenHeight * ConnectionWidgetHeightRatio);
     setMaximumWidth(screenWidth * ConnectionWidgetWidthRatio);
 
-    QLayout* layout = new QHBoxLayout;
+    QLayout* layout = new QHBoxLayout(this);
     layout->setMargin(0);
-    setLayout(layout);
 
     QWidget* w = new QWidget;
     layout->addWidget(w);
@@ -103,9 +102,8 @@ NodeWidget::NodeWidget(const Node& node)
 {
     setObjectName("node");
 
-    QBoxLayout* layout = new QHBoxLayout;
+    QBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
-    setLayout(layout);
 
     _connectionLabel = new ConnectionWidget;
     _connectionLabel->setStatus(
@@ -138,9 +136,8 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
     , _clusterId(cluster.id)
 {
     setObjectName("cluster");
-    QBoxLayout* layout = new QHBoxLayout;
+    QBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
-    setLayout(layout);
 
     _connectionLabel = new ConnectionWidget;
     _connectionLabel->setStatus(ConnectionWidget::ConnectionStatus::Disconnected);
@@ -186,8 +183,7 @@ void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
 ClustersWidget::ClustersWidget() {
     setObjectName("clusterwidget");
 
-    QBoxLayout* layout = new QVBoxLayout;
-    setLayout(layout);
+    QBoxLayout* layout = new QVBoxLayout(this);
 
     for (Cluster* c : data::clusters()) {
         ClusterWidget* widget = new ClusterWidget(*c);

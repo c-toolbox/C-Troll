@@ -85,9 +85,8 @@ MainWindow::MainWindow(const std::string& configurationFile) {
     //
     // Set up the container widgets
     QWidget* center = new QWidget;
-    QBoxLayout* layout = new QVBoxLayout;
+    QBoxLayout* layout = new QVBoxLayout(center);
     layout->setMargin(0);
-    center->setLayout(layout);
     setCentralWidget(center);
 
     QTabWidget* tabWidget = new QTabWidget;
@@ -301,7 +300,6 @@ void MainWindow::stopProcess(Process::ID processId) {
     if (!node->secret.empty()) {
         command.secret = node->secret;
     }
-
 
     Log("Sending message to stop program:");
     Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id.v));

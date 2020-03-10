@@ -42,28 +42,19 @@
 
 namespace {
     std::string statusToString(common::ProcessStatusMessage::Status status) {
+        using Status = common::ProcessStatusMessage::Status;
         switch (status) {
-            case common::ProcessStatusMessage::Status::Unknown:
-                return "Unknown";
-            case common::ProcessStatusMessage::Status::Starting:
-                return "Starting";
-            case common::ProcessStatusMessage::Status::Running:
-                return "Running";
-            case common::ProcessStatusMessage::Status::NormalExit:
-                return "Normal Exit";
-            case common::ProcessStatusMessage::Status::CrashExit:
-                return "Crash Exit";
-            case common::ProcessStatusMessage::Status::FailedToStart:
-                return "Failed To Start";
-            case common::ProcessStatusMessage::Status::TimedOut:
-                return "Timed Out";
-            case common::ProcessStatusMessage::Status::WriteError:
-                return "Write Error";
-            case common::ProcessStatusMessage::Status::ReadError:
-                return "Read Error";
-            case common::ProcessStatusMessage::Status::UnknownError:
-            default:
-                return "UnknownError";
+            case Status::Unknown:       return "Unknown";
+            case Status::Starting:      return "Starting";
+            case Status::Running:       return "Running";
+            case Status::NormalExit:    return "Normal Exit";
+            case Status::CrashExit:     return "Crash Exit";
+            case Status::FailedToStart: return "Failed To Start";
+            case Status::TimedOut:      return "Timed Out";
+            case Status::WriteError:    return "Write Error";
+            case Status::ReadError:     return "Read Error";
+            case Status::UnknownError:  return "UnknownError";
+            default:                    throw std::logic_error("Missing case label");
         }
     }
 } // namespace
@@ -82,8 +73,7 @@ ProcessWidget::ProcessWidget(Process::ID processId)
     assert(cluster);
 
 
-    QBoxLayout* layout = new QHBoxLayout;
-    setLayout(layout);
+    QBoxLayout* layout = new QHBoxLayout(this);
 
     QLabel* programLabel = new QLabel(("Program: " + program->name).c_str());
     layout->addWidget(programLabel);
@@ -113,8 +103,7 @@ void ProcessWidget::updateStatus() {
 
 
 ProcessesWidget::ProcessesWidget() {
-    _layout = new QVBoxLayout;
-    setLayout(_layout);
+    _layout = new QVBoxLayout(this);
 
     _layout->addStretch();
 
