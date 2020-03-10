@@ -77,6 +77,7 @@ void CentralWidget::closedConnection(const std::string& peerAddress) {
     const auto it = _connections.find(peerAddress);
     assert(it != _connections.end());
 
+    it->second->deleteLater();
     _connectionsLayout->removeWidget(it->second);
     _connections.erase(it);
 }
@@ -91,6 +92,7 @@ void CentralWidget::endedProcess(const std::string& process) {
     const auto it = _processes.find(process);
     assert(it != _processes.end());
 
+    it->second->deleteLater();
     _processesLayout->removeWidget(it->second);
     _processes.erase(it);
 }
