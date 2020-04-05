@@ -82,14 +82,15 @@ void CentralWidget::closedConnection(const std::string& peerAddress) {
     _connections.erase(it);
 }
 
-void CentralWidget::newProcess(const std::string& process) {
-    QLabel* label = new QLabel(process.c_str());
+void CentralWidget::newProcess(ProcessHandler::ProcessInfo process) {
+    std::string text = std::to_string(process.id) + ": " + process.executable;
+    QLabel* label = new QLabel(text.c_str());
     _processesLayout->addWidget(label);
-    _processes[process] = label;
+    _processes[process.id] = label;
 }
 
-void CentralWidget::endedProcess(const std::string& process) {
-    const auto it = _processes.find(process);
+void CentralWidget::endedProcess(ProcessHandler::ProcessInfo process) {
+    const auto it = _processes.find(process.id);
     assert(it != _processes.end());
 
     it->second->deleteLater();

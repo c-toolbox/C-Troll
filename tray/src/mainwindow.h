@@ -36,6 +36,8 @@
 #define __TRAY__MAINWINDOW_H__
  
 #include <QMainWindow>
+
+#include "processhandler.h"
 #include <QCloseEvent>
 #include <QSystemTrayIcon>
 #include <QLabel>
@@ -56,8 +58,8 @@ public slots:
     void newConnection(const std::string& peerAddress);
     void closedConnection(const std::string& peerAddress);
 
-    void newProcess(const std::string& process);
-    void endedProcess(const std::string& process);
+    void newProcess(ProcessHandler::ProcessInfo process);
+    void endedProcess(ProcessHandler::ProcessInfo process);
 
 protected:
     void closeEvent(QCloseEvent* event);

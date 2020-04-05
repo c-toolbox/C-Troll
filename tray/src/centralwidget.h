@@ -37,6 +37,7 @@
 
 #include <QWidget>
 
+#include "processhandler.h"
 #include <QLabel>
 #include <QTextEdit>
 #include <map>
@@ -53,8 +54,8 @@ public slots:
     void newConnection(const std::string& peerAddress);
     void closedConnection(const std::string& peerAddress);
 
-    void newProcess(const std::string& process);
-    void endedProcess(const std::string& process);
+    void newProcess(ProcessHandler::ProcessInfo process);
+    void endedProcess(ProcessHandler::ProcessInfo process);
 
 private:
     QWidget* createInfoWidget();
@@ -65,7 +66,7 @@ private:
     QLayout* _connectionsLayout;
     std::map<std::string, QLabel*> _connections;
     QLayout* _processesLayout;
-    std::map<std::string, QLabel*> _processes;
+    std::map<int, QLabel*> _processes;
 };
 
 #endif // __TRAY__CENTRALWIDGET_H__

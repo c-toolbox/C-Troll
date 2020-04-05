@@ -49,8 +49,8 @@
 namespace {
     constexpr const char* Title = "C-Troll Tray";
 
-    constexpr const float MainWindowWidthRatio = 0.2f;
-    constexpr const float MainWindowHeightRatio = 0.35f;
+    constexpr const float MainWindowWidthRatio = 0.3f;
+    constexpr const float MainWindowHeightRatio = 0.25f;
 } // namespace
 
 MainWindow::MainWindow() {
@@ -116,11 +116,11 @@ void MainWindow::closedConnection(const std::string& peerAddress) {
     _centralWidget->closedConnection(peerAddress);
 }
 
-void MainWindow::newProcess(const std::string& process) {
+void MainWindow::newProcess(ProcessHandler::ProcessInfo process) {
     _centralWidget->newProcess(process);
 }
 
-void MainWindow::endedProcess(const std::string& process) {
+void MainWindow::endedProcess(ProcessHandler::ProcessInfo process) {
     _centralWidget->endedProcess(process);
 }
 

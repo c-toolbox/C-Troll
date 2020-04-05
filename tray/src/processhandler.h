@@ -45,6 +45,14 @@
 
 class ProcessHandler : public QObject {
 Q_OBJECT
+public:
+    struct ProcessInfo {
+        int id;
+        QProcess* process;
+        std::string executable;
+        std::string workingDirectory;
+        std::string commandlineParameters;
+    };
 
 public slots:
     void newConnection();
@@ -59,19 +67,20 @@ public slots:
 signals:
     void sendSocketMessage(const nlohmann::json& message);
 
-    void startedProcess(const std::string& process);
-    void closedProcess(const std::string& process);
+    void startedProcess(ProcessInfo process);
+    void closedProcess(ProcessInfo process);
 
 private:
     void executeProcessWithCommandMessage(QProcess* process,
         const common::CommandMessage& command);
     void createAndRunProcessFromCommandMessage(const common::CommandMessage& command);
     
-    std::map<int, QProcess*>::const_iterator processIt(QProcess* process);
+    std::vector<ProcessInfo>::const_iterator processIt(QProcess* process);
+    std::vector<ProcessInfo>::const_iterator processIt(int id);
 
     // The key of this map is a unique id (received from core)
     // The value is the process which is running
-    std::map<int, QProcess*> _processes;
+    std::vector<ProcessInfo> _processes;
 };
 
 #endif // __TRAY__PROCESSHANDLER_H__

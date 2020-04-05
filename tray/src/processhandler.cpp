@@ -95,8 +95,8 @@ namespace {
 
 void ProcessHandler::newConnection() {
     common::TrayStatusMessage msg;
-    for (const std::pair<const int, QProcess*>& p : _processes) {
-        msg.runningProcesses.push_back(p.first);
+    for (const ProcessInfo& p : _processes) {
+        msg.runningProcesses.push_back(p.id);
     }
 
     nlohmann::json j = msg;
@@ -118,7 +118,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
 
         // Check if the identifier of traycommand already is tied to a process
         // We don't allow the same id for multiple processes
-        const auto p = _processes.find(command.id);
+        const auto p = processIt(command.id);
         if (p == _processes.end()) {
             if (command.command == common::CommandMessage::Command::Start) {
                 // Not Found, create and run a process with it
@@ -130,17 +130,17 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
         }
         else {
             // Found
-            executeProcessWithCommandMessage(p->second, command);
+            executeProcessWithCommandMessage(p->process, command);
         }
     }
     else if (common::isValidMessage<common::KillAllMessage>(message)) {
         Log("Received KillAllMessage");
 
-        for (const std::pair<const int, QProcess*>& p : _processes) {
-            Log("Killing process " + std::to_string(p.first));
+        for (const ProcessInfo& p : _processes) {
+            Log("Killing process " + std::to_string(p.id));
 
-            p.second->close();
-            p.second->deleteLater();
+            p.process->close();
+            p.process->deleteLater();
         }
         _processes.clear();
     }
@@ -159,7 +159,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
         // the core got stuck in a "Starting" state
 
         common::ProcessStatusMessage msg;
-        msg.processId = p->first;
+        msg.processId = p->id;
         msg.status = toTrayStatus(error);
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
@@ -175,7 +175,7 @@ void ProcessHandler::handleStarted() {
     if (p != _processes.end()) {
         // Send out the TrayProcessStatus with the status string
         common::ProcessStatusMessage msg;
-        msg.processId = p->first;
+        msg.processId = p->id;
         msg.status = common::ProcessStatusMessage::Status::Running;
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
@@ -190,15 +190,16 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     
     if (p != _processes.end()) {
         common::ProcessStatusMessage msg;
-        msg.processId = p->first;
+        msg.processId = p->id;
         msg.status = toTrayStatus(exitStatus);
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
         
         // Remove this process from the list as we consider it finished
+        ProcessInfo info = *p;
         _processes.erase(p);
 
-        emit closedProcess("ABC");
+        emit closedProcess(info);
     }
 }
 
@@ -210,7 +211,7 @@ void ProcessHandler::handleReadyReadStandardError() {
     if (p != _processes.end()) {
         // Send out the TrayProcessLogMessage with the stderror key
         common::ProcessOutputMessage msg;
-        msg.processId = p->first;
+        msg.processId = p->id;
         msg.outputType = common::ProcessOutputMessage::OutputType::StdErr;
         msg.message =
             QString::fromLatin1(proc->readAllStandardError()).toLocal8Bit().constData();
@@ -226,7 +227,7 @@ void ProcessHandler::handleReadyReadStandardOutput() {
     auto p = processIt(proc);
     if (p != _processes.end()) {
         common::ProcessOutputMessage msg;
-        msg.processId = p->first;
+        msg.processId = p->id;
         msg.message =
             QString::fromLatin1(proc->readAllStandardOutput()).toLocal8Bit().constData();
         msg.outputType = common::ProcessOutputMessage::OutputType::StdOut;
@@ -261,7 +262,8 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
             process->start(cmd.c_str());
         }
 
-        emit startedProcess("ABC");
+        const auto p = processIt(process);
+        emit startedProcess(*p);
     }
     else if (command.command == common::CommandMessage::Command::Kill ||
              command.command == common::CommandMessage::Command::Exit)
@@ -276,14 +278,10 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
             msg.status = common::ProcessStatusMessage::Status::NormalExit;
         }
         // Find specifc value in process map i.e. process
-        const auto p = std::find_if(
-            _processes.cbegin(),
-            _processes.cend(),
-            [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
-        );
+        const auto p = processIt(process);
 
         if (p != _processes.end()) {
-            msg.processId = p->first;
+            msg.processId = p->id;
             nlohmann::json j = msg;
             emit sendSocketMessage(j);
             // Remove this process from the list as we consider it finished
@@ -318,17 +316,37 @@ void ProcessHandler::createAndRunProcessFromCommandMessage(
     connect(proc, &QProcess::started, this, &ProcessHandler::handleStarted);
     
     // Insert command identifier and process into out lists
-    _processes.insert(std::make_pair(cmd.id, proc));
+    ProcessInfo info;
+    info.id = cmd.id;
+    info.process = proc;
+    info.executable = cmd.executable;
+    info.workingDirectory = cmd.workingDirectory;
+    info.commandlineParameters = cmd.commandlineParameters;
+    _processes.push_back(info);
     
     // Run the process with the command
     executeProcessWithCommandMessage(proc, cmd);
 }
 
-std::map<int, QProcess*>::const_iterator ProcessHandler::processIt(QProcess* process) {
+std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::processIt(
+                                                                        QProcess* process)
+{
     const auto p = std::find_if(
         _processes.cbegin(),
         _processes.cend(),
-        [process](const std::pair<int, QProcess*>& p) { return p.second == process; }
+        [process](const ProcessInfo& p) { return p.process == process; }
     );
     return p;
 }
+
+std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::processIt(
+                                                                                   int id)
+{
+    const auto p = std::find_if(
+        _processes.cbegin(),
+        _processes.cend(),
+        [id](const ProcessInfo& p) { return p.id == id; }
+    );
+    return p;
+}
+
