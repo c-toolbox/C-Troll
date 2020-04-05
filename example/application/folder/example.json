@@ -11,12 +11,10 @@
 
   "configurations": [
     {
-      "id": "unique id",
       "name": "user-facing name",
       "parameters": "---"
     },
     {
-      "id": "second unique id",
       "name": "second user-facing name",
       "parameters": "---"
     }

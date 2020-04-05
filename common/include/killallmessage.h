@@ -43,7 +43,6 @@ namespace common {
 
 struct KillAllMessage : public Message {
     static constexpr const char* Type = "KillAllMessage";
-
 };
 
 void to_json(nlohmann::json& j, const KillAllMessage& p);

@@ -108,6 +108,16 @@ std::vector<Program> loadProgramsFromDirectory(const std::string& directory) {
                 "No clusters specified for program {}", program.name
             ));
         }
+
+        const bool hasEmptyTag = std::any_of(
+            program.tags.begin(), program.tags.end(),
+            std::mem_fn(&std::string::empty)
+        );
+        if (hasEmptyTag) {
+            throw std::runtime_error(fmt::format(
+                "At least one tag of the program {} has an empty tag", program.name
+            ));
+        }
     }
 
     // Inject the unique identifiers into the nodes

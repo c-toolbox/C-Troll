@@ -38,6 +38,10 @@
 #include <fmt/format.h>
 #include <optional>
 
+// @TODO (abock, 2020-04-05) This message should be split up into three separate messages,
+// each dedicated to the "Start", "Kill", and "Exit" commands.  There is no reason to
+// reuse this message type between all of these
+
 namespace {
     constexpr const char* KeyId = "id";
     constexpr const char* KeyForwardOutErr = "forwardOutErr";

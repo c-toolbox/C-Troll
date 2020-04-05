@@ -109,12 +109,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
     if (common::isValidMessage<common::CommandMessage>(message)) {
         common::CommandMessage command = message;
 
-        Log("Received CommandMessage");
-        Log(fmt::format("\tCommand: {}", command.command));
-        Log(fmt::format("\tId: {}", command.id));
-        Log(fmt::format("\tExecutable: {}", command.executable));
-        Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
-        Log(fmt::format("\tCurrent Working Directory: {}", command.workingDirectory));
+        Log(fmt::format("Received message: {}", message.dump()));
 
         // Check if the identifier of traycommand already is tied to a process
         // We don't allow the same id for multiple processes
