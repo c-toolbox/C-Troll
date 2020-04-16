@@ -106,26 +106,47 @@ void ProcessHandler::newConnection() {
 void ProcessHandler::handleSocketMessage(const nlohmann::json& message) {
     common::Message msg = message;
 
-    if (common::isValidMessage<common::CommandMessage>(message)) {
-        common::CommandMessage command = message;
-
+    if (common::isValidMessage<common::StartCommandMessage>(message)) {
+        common::StartCommandMessage command = message;
         Log(fmt::format("Received message: {}", message.dump()));
 
         // Check if the identifier of traycommand already is tied to a process
         // We don't allow the same id for multiple processes
         const auto p = processIt(command.id);
         if (p == _processes.end()) {
-            if (command.command == common::CommandMessage::Command::Start) {
-                // Not Found, create and run a process with it
-                createAndRunProcessFromCommandMessage(command);
-            }
-            else {
-                handlerErrorOccurred(QProcess::ProcessError::FailedToStart);
-            }
+            // Not Found, create and run a process with it
+            createAndRunProcessFromCommandMessage(command);
         }
         else {
             // Found
             executeProcessWithCommandMessage(p->process, command);
+        }
+    }
+    else if (common::isValidMessage<common::ExitCommandMessage>(message)) {
+        common::ExitCommandMessage command = message;
+        Log(fmt::format("Received message: {}", message.dump()));
+
+        // Check if the identifier of traycommand already is tied to a process
+        // We don't allow the same id for multiple processes
+        const auto p = processIt(command.id);
+        if (p == _processes.end()) {
+            handlerErrorOccurred(QProcess::ProcessError::FailedToStart);
+        }
+        else {
+            // Found
+            common::ProcessStatusMessage returnMsg;
+            p->process->terminate();
+            returnMsg.status = common::ProcessStatusMessage::Status::NormalExit;
+            // Find specifc value in process map i.e. process
+            const auto pIt = processIt(p->process);
+
+            if (pIt != _processes.end()) {
+                returnMsg.processId = pIt->id;
+                nlohmann::json j = returnMsg;
+                emit sendSocketMessage(j);
+                // Remove this process from the list as we consider it finished
+                _processes.erase(pIt);
+            }
         }
     }
     else if (common::isValidMessage<common::KillAllMessage>(message)) {
@@ -232,61 +253,36 @@ void ProcessHandler::handleReadyReadStandardOutput() {
 }
 
 void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
-                                                    const common::CommandMessage& command)
+                                               const common::StartCommandMessage& command)
 {
-    if (command.command == common::CommandMessage::Command::Start) {
-        // Send out the TrayProcessStatus with the status "Started"
-        common::ProcessStatusMessage msg;
-        msg.processId = command.id;
-        msg.status = common::ProcessStatusMessage::Status::Starting;
-        nlohmann::json j = msg;
-        emit sendSocketMessage(j);
+    // Send out the TrayProcessStatus with the status "Started"
+    common::ProcessStatusMessage msg;
+    msg.processId = command.id;
+    msg.status = common::ProcessStatusMessage::Status::Starting;
+    nlohmann::json j = msg;
+    emit sendSocketMessage(j);
 
-        if (!command.workingDirectory.empty()) {
-            process->setWorkingDirectory(command.workingDirectory.c_str());
-        }
+    if (!command.workingDirectory.empty()) {
+        process->setWorkingDirectory(command.workingDirectory.c_str());
+    }
         
-        if (command.commandlineParameters.empty()) {
-            std::string cmd = fmt::format("\"{}\"", command.executable);
-            process->start(cmd.c_str());
-        }
-        else {
-            std::string cmd = fmt::format(
-                "\"{}\" {}", command.executable, command.commandlineParameters
-            );
-            process->start(cmd.c_str());
-        }
-
-        const auto p = processIt(process);
-        emit startedProcess(*p);
+    if (command.commandlineParameters.empty()) {
+        std::string cmd = fmt::format("\"{}\"", command.executable);
+        process->start(cmd.c_str());
     }
-    else if (command.command == common::CommandMessage::Command::Kill ||
-             command.command == common::CommandMessage::Command::Exit)
-    {
-        common::ProcessStatusMessage msg;
-        if (command.command == common::CommandMessage::Command::Kill) {
-            process->kill();
-            msg.status = common::ProcessStatusMessage::Status::CrashExit;
-        }
-        else {
-            process->terminate();
-            msg.status = common::ProcessStatusMessage::Status::NormalExit;
-        }
-        // Find specifc value in process map i.e. process
-        const auto p = processIt(process);
-
-        if (p != _processes.end()) {
-            msg.processId = p->id;
-            nlohmann::json j = msg;
-            emit sendSocketMessage(j);
-            // Remove this process from the list as we consider it finished
-            _processes.erase(p);
-        }
+    else {
+        std::string cmd = fmt::format(
+            "\"{}\" {}", command.executable, command.commandlineParameters
+        );
+        process->start(cmd.c_str());
     }
+
+    const auto p = processIt(process);
+    emit startedProcess(*p);
 }
 
 void ProcessHandler::createAndRunProcessFromCommandMessage(
-                                                        const common::CommandMessage& cmd)
+                                                   const common::StartCommandMessage& cmd)
 {
     QProcess* proc = new QProcess(this);
     

@@ -35,10 +35,11 @@
 #ifndef __CORE__PROCESS_H__
 #define __CORE__PROCESS_H__
 
-#include "commandmessage.h"
+#include "exitcommandmessage.h"
 #include "node.h"
 #include "processstatusmessage.h"
 #include "program.h"
+#include "startcommandmessage.h"
 #include "typedid.h"
 
 struct Process {
@@ -58,8 +59,8 @@ private:
     static int nextId;
 };
 
-common::CommandMessage startProcessCommand(const Process& process);
-common::CommandMessage exitProcessCommand(const Process& process);
+common::StartCommandMessage startProcessCommand(const Process& process);
+common::ExitCommandMessage exitProcessCommand(const Process& process);
 
 
 #endif // __CORE__PROCESS_H__

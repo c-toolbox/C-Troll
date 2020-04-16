@@ -273,7 +273,7 @@ void MainWindow::startProcess(Process::ID processId) {
     Cluster* cluster = data::findCluster(process->clusterId);
     Node* node = data::findNode(process->nodeId);
 
-    common::CommandMessage command = startProcessCommand(*process);
+    common::StartCommandMessage command = startProcessCommand(*process);
     if (!node->secret.empty()) {
         command.secret = node->secret;
     }
@@ -281,7 +281,6 @@ void MainWindow::startProcess(Process::ID processId) {
     // Generate identifier
     Log("Sending message to start program:");
     Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id.v));
-    Log(fmt::format("\tCommand: {}", command.command));
     Log(fmt::format("\tExecutable: {}", command.executable));
     Log(fmt::format("\tIdentifier: {}", command.id));
     Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
@@ -296,18 +295,14 @@ void MainWindow::stopProcess(Process::ID processId) {
     Cluster* cluster = data::findCluster(process->clusterId);
     Node* node = data::findNode(process->nodeId);
 
-    common::CommandMessage command = exitProcessCommand(*process);
+    common::ExitCommandMessage command = exitProcessCommand(*process);
     if (!node->secret.empty()) {
         command.secret = node->secret;
     }
 
     Log("Sending message to stop program:");
     Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id.v));
-    Log(fmt::format("\tCommand: {}", command.command));
-    Log(fmt::format("\tExecutable: {}", command.executable));
     Log(fmt::format("\tIdentifier: {}", command.id));
-    Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
-    Log(fmt::format("\tCWD: {}", command.workingDirectory));
 
     nlohmann::json j = command;
     _clusterConnectionHandler.sendMessage(*node, j);

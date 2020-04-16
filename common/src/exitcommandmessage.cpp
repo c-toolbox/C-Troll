@@ -32,82 +32,31 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "commandmessage.h"
+#include "exitcommandmessage.h"
 
 #include "logging.h"
 #include <fmt/format.h>
 #include <optional>
 
-// @TODO (abock, 2020-04-05) This message should be split up into three separate messages,
-// each dedicated to the "Start", "Kill", and "Exit" commands.  There is no reason to
-// reuse this message type between all of these
-
 namespace {
     constexpr const char* KeyId = "id";
-    constexpr const char* KeyForwardOutErr = "forwardOutErr";
-    constexpr const char* KeyCommand = "command";
-    constexpr const char* KeyExecutable = "executable";
-    constexpr const char* KeyWorkingDirectory = "workingDirectory";
-    constexpr const char* KeyCommandlineArguments = "commandlineArguments";
-
-    std::string fromCommand(common::CommandMessage::Command command) {
-        switch (command) {
-            case common::CommandMessage::Command::Start: return "Start";
-            case common::CommandMessage::Command::Kill: return "Kill";
-            case common::CommandMessage::Command::Exit: return "Exit";
-            default: throw std::logic_error("Unhandled case label");
-        }
-    }
-
-    common::CommandMessage::Command toCommand(const std::string& command) {
-        if (command == "Start") {
-            return common::CommandMessage::Command::Start;
-        }
-        else if (command == "Kill") {
-            return common::CommandMessage::Command::Kill;
-        }
-        else if (command == "Exit") {
-            return common::CommandMessage::Command::Exit;
-        }
-        else {
-            return common::CommandMessage::Command::None;
-        }
-    }
 } // namespace
 
 namespace common {
 
-void to_json(nlohmann::json& j, const CommandMessage& p) {
+void to_json(nlohmann::json& j, const ExitCommandMessage& p) {
     j = {
-        { Message::KeyType, CommandMessage::Type },
+        { Message::KeyType, ExitCommandMessage::Type },
         { Message::KeyVersion, p.CurrentVersion },
         { Message::KeySecret, p.secret },
-        { KeyId, p.id },
-        { KeyForwardOutErr, p.forwardStdOutStdErr },
-        { KeyCommand, fromCommand(p.command) },
-        { KeyExecutable, p.executable },
-        { KeyWorkingDirectory, p.workingDirectory },
-        { KeyCommandlineArguments, p.commandlineParameters }
+        { KeyId, p.id }
     };
 }
 
-void from_json(const nlohmann::json& j, CommandMessage& p) {
-    validateMessage(j, CommandMessage::Type);
+void from_json(const nlohmann::json& j, ExitCommandMessage& p) {
+    validateMessage(j, ExitCommandMessage::Type);
 
     j.at(KeyId).get_to(p.id);
-    j.at(KeyForwardOutErr).get_to(p.forwardStdOutStdErr);
-    
-    const std::string commandString = j.at(KeyCommand).get<std::string>();
-    p.command = toCommand(commandString);
-
-    j.at(KeyExecutable).get_to(p.executable);
-    j.at(KeyWorkingDirectory).get_to(p.workingDirectory);
-    j.at(KeyCommandlineArguments).get_to(p.commandlineParameters);
-
-    if (p.command == CommandMessage::Command::None) {
-        ::Log(fmt::format("Received unknown command {} with payload {}",
-            commandString, j.dump()));
-    }
 }
 
 } // namespace common

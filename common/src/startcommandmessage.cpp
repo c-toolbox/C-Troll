@@ -32,39 +32,44 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __COMMON__COMMANDMESSAGE_H__
-#define __COMMON__COMMANDMESSAGE_H__
+#include "startcommandmessage.h"
 
-#include "message.h"
+#include "logging.h"
+#include <fmt/format.h>
+#include <optional>
 
-#include <json/json.hpp>
+namespace {
+    constexpr const char* KeyId = "id";
+    constexpr const char* KeyForwardOutErr = "forwardOutErr";
+    constexpr const char* KeyExecutable = "executable";
+    constexpr const char* KeyWorkingDirectory = "workingDirectory";
+    constexpr const char* KeyCommandlineArguments = "commandlineArguments";
+} // namespace
 
 namespace common {
 
-/// This struct is the data structure that gets send from the Core to the Tray to signal
-/// that the Tray should perform a task
-struct CommandMessage : public Message {
-    static constexpr const char* Type = "CommandMessage";
+void to_json(nlohmann::json& j, const StartCommandMessage& p) {
+    j = {
+        { Message::KeyType, StartCommandMessage::Type },
+        { Message::KeyVersion, p.CurrentVersion },
+        { Message::KeySecret, p.secret },
+        { KeyId, p.id },
+        { KeyForwardOutErr, p.forwardStdOutStdErr },
+        { KeyExecutable, p.executable },
+        { KeyWorkingDirectory, p.workingDirectory },
+        { KeyCommandlineArguments, p.commandlineParameters }
+    };
+}
 
-    enum class Command { Start, Kill, Exit, None };
+void from_json(const nlohmann::json& j, StartCommandMessage& p) {
+    validateMessage(j, StartCommandMessage::Type);
+
+    j.at(KeyId).get_to(p.id);
+    j.at(KeyForwardOutErr).get_to(p.forwardStdOutStdErr);
     
-    /// The unique identifier for the process that will be created
-    int id = -1;
-    /// This value determines whether the process should send back console messages
-    bool forwardStdOutStdErr = false;
-    /// The kind of command that is to be executed
-    Command command;
-    /// The name of the executable
-    std::string executable;
-    /// The location that should be set as the working directory prior to execution
-    std::string workingDirectory;
-    /// The list of commandline parameters to be passed to executable
-    std::string commandlineParameters;
-};
+    j.at(KeyExecutable).get_to(p.executable);
+    j.at(KeyWorkingDirectory).get_to(p.workingDirectory);
+    j.at(KeyCommandlineArguments).get_to(p.commandlineParameters);
+}
 
-void to_json(nlohmann::json& j, const CommandMessage& p);
-void from_json(const nlohmann::json& j, CommandMessage& p);
-
-} // namespace commmon
-
-#endif // __COMMON__COMMANDMESSAGE_H__
+} // namespace common

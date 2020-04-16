@@ -32,44 +32,35 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "process.h"
+#ifndef __COMMON__STARTCOMMANDMESSAGE_H__
+#define __COMMON__STARTCOMMANDMESSAGE_H__
 
-#include "database.h"
-#include "program.h"
-#include "logging.h"
-#include <assert.h>
+#include "message.h"
 
-common::StartCommandMessage startProcessCommand(const Process& process) {
-    Program* program = data::findProgram(process.programId);
-    const Program::Configuration& configuration = data::findConfigurationForProgram(
-        *program, process.configurationId
-    );
+#include <json/json.hpp>
 
-    common::StartCommandMessage t;
-    t.id = process.id.v;
-    t.executable = program->executable;
-    t.workingDirectory = program->workingDirectory;
+namespace common {
 
-    t.commandlineParameters =
-        program->commandlineParameters + ' ' + configuration.parameters;
+/// This struct is the data structure that gets send from the Core to the Tray to signal
+/// that the Tray should perform a task
+struct StartCommandMessage : public Message {
+    static constexpr const char* Type = "StartCommandMessage";
 
-    return t;
-}
+    /// The unique identifier for the process that will be created
+    int id = -1;
+    /// This value determines whether the process should send back console messages
+    bool forwardStdOutStdErr = false;
+    /// The name of the executable
+    std::string executable;
+    /// The location that should be set as the working directory prior to execution
+    std::string workingDirectory;
+    /// The list of commandline parameters to be passed to executable
+    std::string commandlineParameters;
+};
 
-common::ExitCommandMessage exitProcessCommand(const Process& process) {
-    common::ExitCommandMessage t;
-    t.id = process.id.v;
-    return t;
-}
+void to_json(nlohmann::json& j, const StartCommandMessage& p);
+void from_json(const nlohmann::json& j, StartCommandMessage& p);
 
-int Process::nextId = 0;
+} // namespace commmon
 
-Process::Process(Program::ID programId, Program::Configuration::ID configurationId,
-                 Cluster::ID clusterId, Node::ID nodeId)
-    : id{ nextId++ }
-    , programId(programId)
-    , configurationId(configurationId)
-    , clusterId(clusterId)
-    , nodeId(nodeId)
-    , status(common::ProcessStatusMessage::Status::Unknown)
-{}
+#endif // __COMMON__STARTCOMMANDMESSAGE_H__

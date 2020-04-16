@@ -34,7 +34,7 @@
 
 set(HEADER_FILES
   include/apiversion.h
-  include/commandmessage.h
+  include/exitcommandmessage.h
   include/invalidauthmessage.h
   include/jsonload.h
   include/jsonsocket.h
@@ -43,11 +43,12 @@ set(HEADER_FILES
   include/message.h
   include/processoutputmessage.h
   include/processstatusmessage.h
+  include/startcommandmessage.h
   include/traystatusmessage.h
 )
 
 set(SOURCE_FILES
-  src/commandmessage.cpp
+  src/exitcommandmessage.cpp
   src/invalidauthmessage.cpp
   src/jsonsocket.cpp
   src/killallmessage.cpp
@@ -55,6 +56,7 @@ set(SOURCE_FILES
   src/message.cpp
   src/processoutputmessage.cpp
   src/processstatusmessage.cpp
+  src/startcommandmessage.cpp
   src/traystatusmessage.cpp
 )
 

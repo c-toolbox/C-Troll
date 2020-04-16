@@ -32,44 +32,27 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "process.h"
+#ifndef __COMMON__EXITCOMMANDMESSAGE_H__
+#define __COMMON__EXITCOMMANDMESSAGE_H__
 
-#include "database.h"
-#include "program.h"
-#include "logging.h"
-#include <assert.h>
+#include "message.h"
 
-common::StartCommandMessage startProcessCommand(const Process& process) {
-    Program* program = data::findProgram(process.programId);
-    const Program::Configuration& configuration = data::findConfigurationForProgram(
-        *program, process.configurationId
-    );
+#include <json/json.hpp>
 
-    common::StartCommandMessage t;
-    t.id = process.id.v;
-    t.executable = program->executable;
-    t.workingDirectory = program->workingDirectory;
+namespace common {
 
-    t.commandlineParameters =
-        program->commandlineParameters + ' ' + configuration.parameters;
+/// This struct is the data structure that gets send from the Core to the Tray to signal
+/// that the Tray should perform a task
+struct ExitCommandMessage : public Message {
+    static constexpr const char* Type = "ExitCommandMessage";
 
-    return t;
-}
+    /// The unique identifier for the process that will be created
+    int id = -1;
+};
 
-common::ExitCommandMessage exitProcessCommand(const Process& process) {
-    common::ExitCommandMessage t;
-    t.id = process.id.v;
-    return t;
-}
+void to_json(nlohmann::json& j, const ExitCommandMessage& p);
+void from_json(const nlohmann::json& j, ExitCommandMessage& p);
 
-int Process::nextId = 0;
+} // namespace commmon
 
-Process::Process(Program::ID programId, Program::Configuration::ID configurationId,
-                 Cluster::ID clusterId, Node::ID nodeId)
-    : id{ nextId++ }
-    , programId(programId)
-    , configurationId(configurationId)
-    , clusterId(clusterId)
-    , nodeId(nodeId)
-    , status(common::ProcessStatusMessage::Status::Unknown)
-{}
+#endif // __COMMON__EXITCOMMANDMESSAGE_H__

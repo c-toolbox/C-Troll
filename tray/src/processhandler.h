@@ -37,7 +37,8 @@
 
 #include <QObject>
 
-#include "commandmessage.h"
+#include "exitcommandmessage.h"
+#include "startcommandmessage.h"
 #include <QProcess>
 #include <json/json.hpp>
 #include <map>
@@ -72,8 +73,10 @@ signals:
 
 private:
     void executeProcessWithCommandMessage(QProcess* process,
-        const common::CommandMessage& command);
-    void createAndRunProcessFromCommandMessage(const common::CommandMessage& command);
+        const common::StartCommandMessage& command);
+
+    void createAndRunProcessFromCommandMessage(
+        const common::StartCommandMessage& command);
     
     std::vector<ProcessInfo>::const_iterator processIt(QProcess* process);
     std::vector<ProcessInfo>::const_iterator processIt(int id);
