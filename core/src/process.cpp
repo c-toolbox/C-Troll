@@ -56,6 +56,7 @@ common::StartCommandMessage startProcessCommand(const Process& process) {
     t.configurationId = process.configurationId.v;
     t.clusterId = process.clusterId.v;
     t.nodeId = process.nodeId.v;
+    t.dataHash = data::dataHash();
 
     return t;
 }

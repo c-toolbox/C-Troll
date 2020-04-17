@@ -60,6 +60,7 @@ public:
         int configurationId;
         int clusterId;
         int nodeId;
+        std::size_t dataHash;
     };
 
 public slots:
@@ -91,6 +92,8 @@ private:
     // The key of this map is a unique id (received from core)
     // The value is the process which is running
     std::vector<ProcessInfo> _processes;
+
+    std::size_t _controllerDataHash = 0;
 };
 
 #endif // __TRAY__PROCESSHANDLER_H__

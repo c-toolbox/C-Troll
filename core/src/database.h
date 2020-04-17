@@ -72,6 +72,8 @@ void addProcess(std::unique_ptr<Process> process);
 void loadData(const std::string& programPath, const std::string& clusterPath,
     const std::string& nodePath);
 
+std::size_t dataHash();
+
 } // namespace data
 
 #endif // __CORE__DATABASE_H__

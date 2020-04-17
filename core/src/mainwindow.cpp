@@ -187,10 +187,6 @@ MainWindow::MainWindow(const std::string& configurationFile) {
             Process::setNextIdIfHigher(hightestId + 1);
 
             for (const common::TrayStatusMessage::ProcessInfo& pi : status.processes) {
-                // @TODO (abock, 2020-04-17); We should include a check that makes sure
-                // that noone fudged with the identifiers that we sent out originally,
-                // for example by modifying a configuration file
-
                 // We need to check if a process with this ID already exists as we might
                 // have made two connections to the node under two different IP addresses
                 Process* proc = data::findProcess(Process::ID(pi.processId));
@@ -200,6 +196,16 @@ MainWindow::MainWindow(const std::string& configurationFile) {
                     ));
                     continue;
                 }
+
+                if (pi.dataHash != data::dataHash()) {
+                    constexpr const char* Text = "Received information from a tray about "
+                        "a running process that was started from a controller with a "
+                        "different set of configurations. Depending on what was changed "
+                        "this might lead to very strange behavior";
+                    QMessageBox::warning(this, "Different Data", Text);
+                    Log(Text);
+                }
+
 
                 std::unique_ptr<Process> process = std::make_unique<Process>(
                     Process::ID(pi.processId),
@@ -213,19 +219,6 @@ MainWindow::MainWindow(const std::string& configurationFile) {
                 _processesWidget->processAdded(Process::ID(pi.processId));
                 _programWidget->processUpdated(Process::ID(pi.processId));
             }
-
-
-            //if (!status.runningProcesses.empty()) {
-            //    Node* node = data::findNode(id);
-            //    Log(fmt::format(
-            //        "Received status update with {} running processes on node {} @ {}",
-            //        static_cast<int>(status.runningProcesses.size()),
-            //        node->name,
-            //        node->ipAddress
-            //    ));
-            //    // @TODO (abock, 2020-02-27) Update the processeswidget with information
-            //    // about these zombie projects
-            //}
         }
     );
     connect(

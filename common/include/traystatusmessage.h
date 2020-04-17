@@ -51,6 +51,7 @@ struct TrayStatusMessage : public Message {
         int configurationId;
         int clusterId;
         int nodeId;
+        std::size_t dataHash;
     };
 
     std::vector<ProcessInfo> processes;

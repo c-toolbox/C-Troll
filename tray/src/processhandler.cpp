@@ -96,13 +96,13 @@ namespace {
 void ProcessHandler::newConnection() {
     common::TrayStatusMessage msg;
     for (const ProcessInfo& p : _processes) {
-
         common::TrayStatusMessage::ProcessInfo pi;
         pi.processId = p.processId;
         pi.programId = p.programId;
         pi.configurationId = p.configurationId;
         pi.clusterId = p.clusterId;
         pi.nodeId = p.nodeId;
+        pi.dataHash = p.dataHash;
         msg.processes.push_back(std::move(pi));
     }
 
@@ -322,6 +322,7 @@ void ProcessHandler::createAndRunProcessFromCommandMessage(
     info.configurationId = cmd.configurationId;
     info.clusterId = cmd.clusterId;
     info.nodeId = cmd.nodeId;
+    info.dataHash = cmd.dataHash;
     _processes.push_back(info);
     
     // Run the process with the command

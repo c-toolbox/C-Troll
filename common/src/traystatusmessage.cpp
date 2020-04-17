@@ -42,6 +42,7 @@ namespace {
     constexpr const char* KeyConfigurationId = "configurationId";
     constexpr const char* KeyClusterId = "clusterId";
     constexpr const char* KeyNodeId = "nodeId";
+    constexpr const char* KeyDataHash = "datahash";
 } // namespace
 
 namespace common {
@@ -53,6 +54,7 @@ void to_json(nlohmann::json& j, const TrayStatusMessage::ProcessInfo& p) {
         { KeyConfigurationId, p.configurationId },
         { KeyClusterId, p.clusterId },
         { KeyNodeId, p.nodeId },
+        { KeyDataHash, p.dataHash }
     };
 }
 
@@ -62,6 +64,7 @@ void from_json(const nlohmann::json & j, TrayStatusMessage::ProcessInfo& p) {
     j.at(KeyConfigurationId).get_to(p.configurationId);
     j.at(KeyClusterId).get_to(p.clusterId);
     j.at(KeyNodeId).get_to(p.nodeId);
+    j.at(KeyDataHash).get_to(p.dataHash);
 }
 
 void to_json(nlohmann::json& j, const TrayStatusMessage& p) {

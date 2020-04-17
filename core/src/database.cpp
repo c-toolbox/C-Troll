@@ -42,6 +42,8 @@ std::vector<std::unique_ptr<Node>> gNodes;
 std::vector<std::unique_ptr<Program>> gPrograms;
 std::vector<std::unique_ptr<Process>> gProcesses;
 
+std::size_t gDataHash = 0;
+
 } // namespace
 
 namespace data {
@@ -238,6 +240,60 @@ void loadData(const std::string& programPath, const std::string& clusterPath,
         std::unique_ptr<Program> p = std::make_unique<Program>(std::move(program));
         gPrograms.push_back(std::move(p));
     }
+
+    // Calculate the hash of all the data that was just loaded
+    std::size_t hash = 0;
+
+    auto addHash = [&hash](std::size_t rhs) {
+        // Based on boost:hash_combine
+        hash ^= rhs + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+    };
+
+    // Clusters
+    for (const std::unique_ptr<Cluster>& cluster : gClusters) {
+        addHash(std::hash<int>()(cluster->id.v));
+        addHash(std::hash<std::string>()(cluster->name));
+        addHash(std::hash<bool>()(cluster->isEnabled));
+        for (Node::ID node : cluster->nodes) {
+            addHash(std::hash<int>()(node.v));
+        }
+    }
+
+    // Nodes
+    for (const std::unique_ptr<Node>& node : gNodes) {
+        addHash(std::hash<int>()(node->id.v));
+        addHash(std::hash<std::string>()(node->name));
+        addHash(std::hash<std::string>()(node->ipAddress));
+        addHash(std::hash<int>()(node->port));
+        addHash(std::hash<std::string>()(node->secret));
+        addHash(std::hash<bool>()(node->isConnected));
+    }
+
+    // Programs
+    for (const std::unique_ptr<Program>& program : gPrograms) {
+        addHash(std::hash<int>()(program->id.v));
+        addHash(std::hash<std::string>()(program->name));
+        addHash(std::hash<std::string>()(program->executable));
+        addHash(std::hash<std::string>()(program->commandlineParameters));
+        addHash(std::hash<std::string>()(program->workingDirectory));
+        for (const std::string& tag : program->tags) {
+            addHash(std::hash<std::string>()(tag));
+        }
+        for (const Program::Configuration& conf : program->configurations) {
+            addHash(std::hash<int>()(conf.id.v));
+            addHash(std::hash<std::string>()(conf.name));
+            addHash(std::hash<std::string>()(conf.parameters));
+        }
+        for (Cluster::ID cluster : program->clusters) {
+            addHash(std::hash<int>()(cluster.v));
+        }
+    }
+
+    gDataHash = hash;
+}
+
+std::size_t dataHash() {
+    return gDataHash;
 }
 
 } // namespace data

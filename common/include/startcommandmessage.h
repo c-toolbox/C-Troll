@@ -63,6 +63,7 @@ struct StartCommandMessage : public Message {
     int configurationId = -1;
     int clusterId = -1;
     int nodeId = -1;
+    std::size_t dataHash = 0;
 };
 
 void to_json(nlohmann::json& j, const StartCommandMessage& p);
