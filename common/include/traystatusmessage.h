@@ -45,7 +45,15 @@ namespace common {
 struct TrayStatusMessage : public Message {
     static constexpr const char* Type = "TrayStatusMessage";
 
-    std::vector<int> runningProcesses;
+    struct ProcessInfo {
+        int processId;
+        int programId;
+        int configurationId;
+        int clusterId;
+        int nodeId;
+    };
+
+    std::vector<ProcessInfo> processes;
 };
 
 void to_json(nlohmann::json& j, const TrayStatusMessage& p);

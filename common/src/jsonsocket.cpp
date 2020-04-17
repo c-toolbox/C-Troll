@@ -47,7 +47,7 @@ JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket)
     _socket->setProxy(QNetworkProxy::NoProxy);
 }
 void JsonSocket::connectToHost(const std::string& host, int port) {
-    _socket->connectToHost(host.c_str(), port);
+    _socket->connectToHost(host.c_str(), static_cast<quint16>(port));
 }
 
 QTcpSocket::SocketState JsonSocket::state() const {

@@ -67,8 +67,8 @@ void SocketHandler::readyRead(common::JsonSocket* socket) {
     }
     else {
         ::Log("Received invalid message");
-        common::InvalidAuthMessage msg;
-        nlohmann::json j = msg;
+        common::InvalidAuthMessage invalidAuthMsg;
+        nlohmann::json j = invalidAuthMsg;
         socket->write(j);
     }
 }

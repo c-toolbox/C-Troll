@@ -157,7 +157,6 @@ void ClusterConnectionHandler::readyRead(Node::ID nodeId) {
             emit messageReceived(cluster->id, node->id, message);
         }
     }
-    
 }
 
 void ClusterConnectionHandler::sendMessage(const Node& node, nlohmann::json msg) const {

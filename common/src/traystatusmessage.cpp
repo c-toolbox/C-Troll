@@ -35,23 +35,47 @@
 #include "traystatusmessage.h"
 
 namespace {
-    constexpr const char* KeyRunningProcesses = "runningProcesses";
+    constexpr const char* KeyProcesses = "processes";
+
+    constexpr const char* KeyProcessId = "processId";
+    constexpr const char* KeyProgramId = "programId";
+    constexpr const char* KeyConfigurationId = "configurationId";
+    constexpr const char* KeyClusterId = "clusterId";
+    constexpr const char* KeyNodeId = "nodeId";
 } // namespace
 
 namespace common {
+
+void to_json(nlohmann::json& j, const TrayStatusMessage::ProcessInfo& p) {
+    j = {
+        { KeyProcessId, p.processId },
+        { KeyProgramId, p.programId },
+        { KeyConfigurationId, p.configurationId },
+        { KeyClusterId, p.clusterId },
+        { KeyNodeId, p.nodeId },
+    };
+}
+
+void from_json(const nlohmann::json & j, TrayStatusMessage::ProcessInfo& p) {
+    j.at(KeyProcessId).get_to(p.processId);
+    j.at(KeyProgramId).get_to(p.programId);
+    j.at(KeyConfigurationId).get_to(p.configurationId);
+    j.at(KeyClusterId).get_to(p.clusterId);
+    j.at(KeyNodeId).get_to(p.nodeId);
+}
 
 void to_json(nlohmann::json& j, const TrayStatusMessage& p) {
     j = {
         { Message::KeyType, TrayStatusMessage::Type },
         { Message::KeyVersion, p.CurrentVersion },
-        { KeyRunningProcesses, p.runningProcesses }
+        { KeyProcesses, p.processes }
     };
 }
 
 void from_json(const nlohmann::json& j, TrayStatusMessage& p) {
     validateMessage(j, TrayStatusMessage::Type);
 
-    j.at(KeyRunningProcesses).get_to(p.runningProcesses);
+    j.at(KeyProcesses).get_to(p.processes);
 }
 
 } // namespace

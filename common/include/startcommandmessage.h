@@ -48,14 +48,21 @@ struct StartCommandMessage : public Message {
 
     /// The unique identifier for the process that will be created
     int id = -1;
-    /// This value determines whether the process should send back console messages
-    bool forwardStdOutStdErr = false;
     /// The name of the executable
     std::string executable;
     /// The location that should be set as the working directory prior to execution
     std::string workingDirectory;
     /// The list of commandline parameters to be passed to executable
     std::string commandlineParameters;
+    /// This value determines whether the process should send back console messages
+    bool forwardStdOutStdErr = false;
+
+    // This information is not used directly, but mirrored back by the tray in case the
+    // C-Troll reconnects and the process started by this command is still running
+    int programId = -1;
+    int configurationId = -1;
+    int clusterId = -1;
+    int nodeId = -1;
 };
 
 void to_json(nlohmann::json& j, const StartCommandMessage& p);

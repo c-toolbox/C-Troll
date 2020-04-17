@@ -48,11 +48,18 @@ class ProcessHandler : public QObject {
 Q_OBJECT
 public:
     struct ProcessInfo {
-        int id;
+        int processId;
         QProcess* process;
+
         std::string executable;
-        std::string workingDirectory;
-        std::string commandlineParameters;
+
+        // Additional information that was sent to us from the C-Troll application so that
+        // we can mirror it back if a new instance connects. We don't do anything with
+        // this information directly
+        int programId;
+        int configurationId;
+        int clusterId;
+        int nodeId;
     };
 
 public slots:

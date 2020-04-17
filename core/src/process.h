@@ -48,12 +48,19 @@ struct Process {
     Process(Program::ID programId, Program::Configuration::ID configurationId,
         Cluster::ID clusterId, Node::ID NodeId);
 
+    // Explicitely setting the ID;  only use this constructor if you are absolutely sure
+    // what you are doing as the process id is used as a unique identifier
+    Process(ID id, Program::ID programId, Program::Configuration::ID configurationId,
+        Cluster::ID clusterId, Node::ID NodeId);
+
     const ID id;
     const Program::ID programId;
     const Program::Configuration::ID configurationId;
     const Cluster::ID clusterId;
     const Node::ID nodeId;
     common::ProcessStatusMessage::Status status;
+
+    static void setNextIdIfHigher(int id);
 
 private:
     static int nextId;

@@ -49,9 +49,13 @@ common::StartCommandMessage startProcessCommand(const Process& process) {
     t.id = process.id.v;
     t.executable = program->executable;
     t.workingDirectory = program->workingDirectory;
-
     t.commandlineParameters =
         program->commandlineParameters + ' ' + configuration.parameters;
+
+    t.programId = process.programId.v;
+    t.configurationId = process.configurationId.v;
+    t.clusterId = process.clusterId.v;
+    t.nodeId = process.nodeId.v;
 
     return t;
 }
@@ -73,3 +77,18 @@ Process::Process(Program::ID programId, Program::Configuration::ID configuration
     , nodeId(nodeId)
     , status(common::ProcessStatusMessage::Status::Unknown)
 {}
+
+Process::Process(ID id, Program::ID programId, Program::Configuration::ID configurationId,
+                 Cluster::ID clusterId, Node::ID nodeId)
+    : id(id)
+    , programId(programId)
+    , configurationId(configurationId)
+    , clusterId(clusterId)
+    , nodeId(nodeId)
+    , status(common::ProcessStatusMessage::Status::Unknown)
+{}
+
+void Process::setNextIdIfHigher(int id) {
+    nextId = std::max(nextId, id);
+}
+

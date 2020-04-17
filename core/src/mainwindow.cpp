@@ -163,17 +163,69 @@ MainWindow::MainWindow(const std::string& configurationFile) {
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayStatus,
         [this](Node::ID id, common::TrayStatusMessage status) {
-            if (!status.runningProcesses.empty()) {
-                Node* node = data::findNode(id);
-                Log(fmt::format(
-                    "Received status update with {} running processes on node {} @ {}",
-                    static_cast<int>(status.runningProcesses.size()),
-                    node->name,
-                    node->ipAddress
-                ));
-                // @TODO (abock, 2020-02-27) Update the processeswidget with information
-                // about these zombie projects
+            if (status.processes.empty()) {
+                // Nothing to do here
+                return;
             }
+
+            // Just a sanity check
+            //for (const common::TrayStatusMessage::ProcessInfo& pi : status.processes) {
+            //    assert(pi.nodeId == id.v);
+            //}
+
+            // We need to sort the incoming status messages as we need to figure out which
+            // id values for new processes we should use
+            std::sort(
+                status.processes.begin(), status.processes.end(),
+                [](const common::TrayStatusMessage::ProcessInfo& lhs,
+                   const common::TrayStatusMessage::ProcessInfo& rhs)
+                {
+                    return lhs.processId < rhs.processId;
+                }
+            );
+            const int hightestId = status.processes.back().processId;
+            Process::setNextIdIfHigher(hightestId + 1);
+
+            for (const common::TrayStatusMessage::ProcessInfo& pi : status.processes) {
+                // @TODO (abock, 2020-04-17); We should include a check that makes sure
+                // that noone fudged with the identifiers that we sent out originally,
+                // for example by modifying a configuration file
+
+                // We need to check if a process with this ID already exists as we might
+                // have made two connections to the node under two different IP addresses
+                Process* proc = data::findProcess(Process::ID(pi.processId));
+                if (proc) {
+                    ::Log(fmt::format(
+                        "Ignoring process with duplicate id {}", pi.processId
+                    ));
+                    continue;
+                }
+
+                std::unique_ptr<Process> process = std::make_unique<Process>(
+                    Process::ID(pi.processId),
+                    Program::ID(pi.programId),
+                    Program::Configuration::ID(pi.configurationId), 
+                    Cluster::ID(pi.clusterId),
+                    Node::ID(pi.nodeId)
+                );
+                process->status = common::ProcessStatusMessage::Status::Running;
+                data::addProcess(std::move(process));
+                _processesWidget->processAdded(Process::ID(pi.processId));
+                _programWidget->processUpdated(Process::ID(pi.processId));
+            }
+
+
+            //if (!status.runningProcesses.empty()) {
+            //    Node* node = data::findNode(id);
+            //    Log(fmt::format(
+            //        "Received status update with {} running processes on node {} @ {}",
+            //        static_cast<int>(status.runningProcesses.size()),
+            //        node->name,
+            //        node->ipAddress
+            //    ));
+            //    // @TODO (abock, 2020-02-27) Update the processeswidget with information
+            //    // about these zombie projects
+            //}
         }
     );
     connect(

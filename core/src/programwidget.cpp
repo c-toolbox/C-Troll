@@ -84,7 +84,7 @@ void ProgramButton::processUpdated(Process::ID processId) {
     );
     if (it == _processes.end()) {
         // This is a brand new process, so it better be in a Starting status
-        assert(process->status == common::ProcessStatusMessage::Status::Starting);
+        //assert(process->status == common::ProcessStatusMessage::Status::Starting);
 
         ProcessInfo info;
         info.processId = processId;

@@ -44,6 +44,11 @@ namespace {
     constexpr const char* KeyExecutable = "executable";
     constexpr const char* KeyWorkingDirectory = "workingDirectory";
     constexpr const char* KeyCommandlineArguments = "commandlineArguments";
+
+    constexpr const char* KeyProgramId = "programId";
+    constexpr const char* KeyConfigurationId = "configurationId";
+    constexpr const char* KeyClusterId = "clusterId";
+    constexpr const char* KeyNodeId = "nodeId";
 } // namespace
 
 namespace common {
@@ -57,7 +62,11 @@ void to_json(nlohmann::json& j, const StartCommandMessage& p) {
         { KeyForwardOutErr, p.forwardStdOutStdErr },
         { KeyExecutable, p.executable },
         { KeyWorkingDirectory, p.workingDirectory },
-        { KeyCommandlineArguments, p.commandlineParameters }
+        { KeyCommandlineArguments, p.commandlineParameters },
+        { KeyProgramId, p.programId },
+        { KeyConfigurationId, p.configurationId },
+        { KeyClusterId, p.clusterId },
+        { KeyNodeId, p.nodeId }
     };
 }
 
@@ -70,6 +79,11 @@ void from_json(const nlohmann::json& j, StartCommandMessage& p) {
     j.at(KeyExecutable).get_to(p.executable);
     j.at(KeyWorkingDirectory).get_to(p.workingDirectory);
     j.at(KeyCommandlineArguments).get_to(p.commandlineParameters);
+
+    j.at(KeyProgramId).get_to(p.programId);
+    j.at(KeyConfigurationId).get_to(p.configurationId);
+    j.at(KeyClusterId).get_to(p.clusterId);
+    j.at(KeyNodeId).get_to(p.nodeId);
 }
 
 } // namespace common
