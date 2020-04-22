@@ -9,15 +9,15 @@
  * permitted provided that the following conditions are met:                             *
  *                                                                                       *
  * 1. Redistributions of source code must retain the above copyright notice, this list   *
- * of conditions and the following disclaimer.                                           *
+ *    of conditions and the following disclaimer.                                        *
  *                                                                                       *
  * 2. Redistributions in binary form must reproduce the above copyright notice, this     *
- * list of conditions and the following disclaimer in the documentation and/or other     *
- * materials provided with the distribution.                                             *
+ *    list of conditions and the following disclaimer in the documentation and/or other  *
+ *    materials provided with the distribution.                                          *
  *                                                                                       *
  * 3. Neither the name of the copyright holder nor the names of its contributors may be  *
- * used to endorse or promote products derived from this software without specific prior *
- * written permission.                                                                   *
+ *    used to endorse or promote products derived from this software without specific    *
+ *    prior written permission.                                                          *
  *                                                                                       *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY   *
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES  *
@@ -47,7 +47,7 @@ JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket)
     _socket->setProxy(QNetworkProxy::NoProxy);
 }
 void JsonSocket::connectToHost(const std::string& host, int port) {
-    _socket->connectToHost(QString::fromStdString(host), port);
+    _socket->connectToHost(host.c_str(), static_cast<quint16>(port));
 }
 
 QTcpSocket::SocketState JsonSocket::state() const {
@@ -98,11 +98,11 @@ nlohmann::json JsonSocket::read() {
 }
 
 std::string JsonSocket::localAddress() const {
-    return _socket->localAddress().toString().toStdString();
+    return _socket->localAddress().toString().toLocal8Bit().constData();
 }
 
 std::string JsonSocket::peerAddress() const {
-    return _socket->peerAddress().toString().toStdString();
+    return _socket->peerAddress().toString().toLocal8Bit().constData();
 }
 
 } // namespace common

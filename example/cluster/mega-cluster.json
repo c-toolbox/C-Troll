@@ -1,0 +1,5 @@
+{
+    "name": "Mega Cluster",
+    "enabled": true,
+    "nodes": [ "Local", "Office", "Laptop" ]
+}

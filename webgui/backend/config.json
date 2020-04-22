@@ -1,8 +1,0 @@
-{
-	"webPort": 3001,
-	"webAddress": "localhost",
-	"coreAddress": "127.0.0.1",
-	"corePort": 19850,
-	"public": "public/",
-	"verbose": true
-}

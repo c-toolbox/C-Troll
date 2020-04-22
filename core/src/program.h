@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016 - 2020                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -9,15 +9,15 @@
  * permitted provided that the following conditions are met:                             *
  *                                                                                       *
  * 1. Redistributions of source code must retain the above copyright notice, this list   *
- * of conditions and the following disclaimer.                                           *
+ *    of conditions and the following disclaimer.                                        *
  *                                                                                       *
  * 2. Redistributions in binary form must reproduce the above copyright notice, this     *
- * list of conditions and the following disclaimer in the documentation and/or other     *
- * materials provided with the distribution.                                             *
+ *    list of conditions and the following disclaimer in the documentation and/or other  *
+ *    materials provided with the distribution.                                          *
  *                                                                                       *
  * 3. Neither the name of the copyright holder nor the names of its contributors may be  *
- * used to endorse or promote products derived from this software without specific prior *
- * written permission.                                                                   *
+ *    used to endorse or promote products derived from this software without specific    *
+ *    prior written permission.                                                          *
  *                                                                                       *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY   *
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES  *
@@ -35,53 +35,48 @@
 #ifndef __CORE__PROGRAM_H__
 #define __CORE__PROGRAM_H__
 
-#include "guiinitialization.h"
+#include "cluster.h"
+#include "typedid.h"
 #include <json/json.hpp>
 #include <string>
 #include <vector>
 
-class Process;
-
-class Program {
-public:
+struct Program {
     struct Configuration {
-        std::string id;
+        using ID = TypedId<int, struct ConfigurationTag>;
+
+        /// Unique identifier of the configuration
+        ID id{ -1 };
+
+        /// User-facing name of the configuration
         std::string name;
-        std::map<std::string, std::string> clusterCommandlineParameters;
+
+        /// Commandline parameters that are associated with the configuration
+        std::string parameters;
     };
 
-    Program() = default;
-    ~Program();
-    
+    using ID = TypedId<int, struct ProgramTag>;
+
     /// A unique identifier
-    std::string id;
+    ID id{ -1 };
     /// A human readable name for this Program
     std::string name;
     /// The full path to the executable
     std::string executable;
-    /// The base directory of the application
-    std::string baseDirectory;
     /// A fixed set of commandline parameters
     std::string commandlineParameters;
     /// The current working directory from which the Program is started
-    std::string currentWorkingDirectory;
+    std::string workingDirectory;
     /// A list of tags that are associated with this Program
     std::vector<std::string> tags;
-    // List of all configurations
+    /// List of all configurations
     std::vector<Configuration> configurations;
-    // Default configuration id
-    std::string defaultConfiguration;
-    // Default cluster id
-    std::string defaultCluster;
-    /// A vector of processes that derive from this program.
-    std::vector<Process*> processes;
+    /// List of all clusters
+    std::vector<Cluster::ID> clusters;
 };
 
 std::vector<Program> loadProgramsFromDirectory(const std::string& directory);
 
-common::GuiInitialization::Application programToGuiApplication(const Program& p);
-
-void to_json(nlohmann::json& j, const Program& p);
 void from_json(const nlohmann::json& j, Program& p);
 
 #endif // __CORE__PROGRAM_H__

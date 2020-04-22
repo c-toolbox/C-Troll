@@ -9,15 +9,15 @@
  * permitted provided that the following conditions are met:                             *
  *                                                                                       *
  * 1. Redistributions of source code must retain the above copyright notice, this list   *
- * of conditions and the following disclaimer.                                           *
+ *    of conditions and the following disclaimer.                                        *
  *                                                                                       *
  * 2. Redistributions in binary form must reproduce the above copyright notice, this     *
- * list of conditions and the following disclaimer in the documentation and/or other     *
- * materials provided with the distribution.                                             *
+ *    list of conditions and the following disclaimer in the documentation and/or other  *
+ *    materials provided with the distribution.                                          *
  *                                                                                       *
  * 3. Neither the name of the copyright holder nor the names of its contributors may be  *
- * used to endorse or promote products derived from this software without specific prior *
- * written permission.                                                                   *
+ *    used to endorse or promote products derived from this software without specific    *
+ *    prior written permission.                                                          *
  *                                                                                       *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY   *
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES  *
@@ -44,6 +44,12 @@
 
 namespace common {
 
+/**
+ * This socket handles connections that transmit entire JSON messages. Individual packages
+ * are cached. When a complete JSON object is received the readyRead signal is emitted,
+ * after which the JSON object is available through the read method. Similarly, the
+ * write method will transmit a JSON object through the socket to the receiver.
+ */
 class JsonSocket : public QObject {
 Q_OBJECT
 public:

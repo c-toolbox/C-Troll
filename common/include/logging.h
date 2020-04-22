@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016 - 2020                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -9,15 +9,15 @@
  * permitted provided that the following conditions are met:                             *
  *                                                                                       *
  * 1. Redistributions of source code must retain the above copyright notice, this list   *
- * of conditions and the following disclaimer.                                           *
+ *    of conditions and the following disclaimer.                                        *
  *                                                                                       *
  * 2. Redistributions in binary form must reproduce the above copyright notice, this     *
- * list of conditions and the following disclaimer in the documentation and/or other     *
- * materials provided with the distribution.                                             *
+ *    list of conditions and the following disclaimer in the documentation and/or other  *
+ *    materials provided with the distribution.                                          *
  *                                                                                       *
  * 3. Neither the name of the copyright holder nor the names of its contributors may be  *
- * used to endorse or promote products derived from this software without specific prior *
- * written permission.                                                                   *
+ *    used to endorse or promote products derived from this software without specific    *
+ *    prior written permission.                                                          *
  *                                                                                       *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY   *
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES  *
@@ -53,14 +53,18 @@ class Log {
 public:
     /**
      * Initializes the static Log and opens the log file for reading.
+     *
      * \param application The name of the application. This is used for creating
-     * unique(ish) names for the log.
+     *        unique(ish) names for the log.
+     * \param loggingFunction This callback function is called whenever a message is
+     *        logged
      */
     static void initialize(std::string application,
         std::function<void(std::string)> loggingFunction);
     
     /**
      * Returns the static reference to the Log instance.
+     *
      * \return The static reference to the Log instance
      * \pre Log::initialize needs to be called before the first call to Log::ref
      */
@@ -70,6 +74,7 @@ public:
      * Logs a message with the Log. This message is both logged to the log file as well
      * as to the console using the \c qDebug macro. Every content to the file is flushed
      * immediately.
+     *
      * \param message The message that is to be logged
      */
     void logMessage(std::string message);
@@ -78,6 +83,7 @@ private:
     /**
      * Constructs a Log and opens the file for reading, overwriting any old content that
      * was in the file previously.
+     *
      * \param application The name of the application that requested the log file
      */
     Log(std::string application);
@@ -99,8 +105,9 @@ private:
 /**
  * This method is a shortcut for a more convenient logging. Calling this function is
  * equivalent to calling <code>common::Log::ref().logMessage(msg)</code>.
+ *
  * \param message The message that is to be logged and passed to the Log::logMessage
- * function
+ *        function
  */
 void Log(std::string message);
 

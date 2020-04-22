@@ -1,7 +1,7 @@
 ##########################################################################################
 #                                                                                        #
 # Copyright (c) 2016 - 2020                                                              #
-# Alexander Bock, Erik Sunden, Emil Axelsson                                             #
+# Alexander Bock, Erik Sundén, Emil Axelsson                                             #
 #                                                                                        #
 # All rights reserved.                                                                   #
 #                                                                                        #
@@ -9,15 +9,15 @@
 # permitted provided that the following conditions are met:                              #
 #                                                                                        #
 # 1. Redistributions of source code must retain the above copyright notice, this list    #
-# of conditions and the following disclaimer.                                            #
+#    of conditions and the following disclaimer.                                         #
 #                                                                                        #
 # 2. Redistributions in binary form must reproduce the above copyright notice, this      #
-# list of conditions and the following disclaimer in the documentation and/or other      #
-# materials provided with the distribution.                                              #
+#    list of conditions and the following disclaimer in the documentation and/or other   #
+#    materials provided with the distribution.                                           #
 #                                                                                        #
 # 3. Neither the name of the copyright holder nor the names of its contributors may be   #
-# used to endorse or promote products derived from this software without specific prior  #
-# written permission.                                                                    #
+#    used to endorse or promote products derived from this software without specific     #
+#    prior written permission.                                                           #
 #                                                                                        #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY    #
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES   #
@@ -33,32 +33,39 @@
 ##########################################################################################
 
 set(HEADER_FILES
-    src/mainwindow.h
-    src/processhandler.h
-    src/sockethandler.h
+  src/centralwidget.h
+  src/mainwindow.h
+  src/processhandler.h
+  src/sockethandler.h
+  src/version.h
 )
 
 set(SOURCE_FILES
-    src/main.cpp
-    src/mainwindow.cpp
-    src/processhandler.cpp
-    src/sockethandler.cpp
+  src/centralwidget.cpp
+  src/main.cpp
+  src/mainwindow.cpp
+  src/processhandler.cpp
+  src/sockethandler.cpp
 )
 
 find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
 
 set(MOC_FILES "")
-qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
+qt5_wrap_cpp(MOC_FILES
+  src/centralwidget.h
+  src/mainwindow.h
+  src/processhandler.h
+  src/sockethandler.h
+)
 
 set(RESOURCE_FILES "")
 qt5_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
 
-set(APPLICATION_NAME C-Troll-Tray)
-add_executable(${APPLICATION_NAME} WIN32 MACOSX_BUNDLE
-    ${SOURCE_FILES}
-    ${HEADER_FILES}
-    ${MOC_FILES}
-    ${RESOURCE_FILES}
+add_executable(Tray WIN32 MACOSX_BUNDLE
+  ${SOURCE_FILES}
+  ${HEADER_FILES}
+  ${MOC_FILES}
+  ${RESOURCE_FILES}
 )
 
-target_link_libraries(${APPLICATION_NAME} PUBLIC C-Troll-Common Qt5::Widgets Qt5::Network)
+target_link_libraries(Tray PUBLIC common Qt5::Core Qt5::Widgets Qt5::Network)

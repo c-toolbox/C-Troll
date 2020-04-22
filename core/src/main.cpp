@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016 - 2020                                                             *
- * Alexander Bock, Erik SundÃ©n, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -9,15 +9,15 @@
  * permitted provided that the following conditions are met:                             *
  *                                                                                       *
  * 1. Redistributions of source code must retain the above copyright notice, this list   *
- * of conditions and the following disclaimer.                                           *
+ *    of conditions and the following disclaimer.                                        *
  *                                                                                       *
  * 2. Redistributions in binary form must reproduce the above copyright notice, this     *
- * list of conditions and the following disclaimer in the documentation and/or other     *
- * materials provided with the distribution.                                             *
+ *    list of conditions and the following disclaimer in the documentation and/or other  *
+ *    materials provided with the distribution.                                          *
  *                                                                                       *
  * 3. Neither the name of the copyright holder nor the names of its contributors may be  *
- * used to endorse or promote products derived from this software without specific prior *
- * written permission.                                                                   *
+ *    used to endorse or promote products derived from this software without specific    *
+ *    prior written permission.                                                          *
  *                                                                                       *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY   *
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES  *
@@ -32,71 +32,38 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "application.h"
-#include "logging.h"
 #include "mainwindow.h"
 #include <QApplication>
-#include <QDir>
-#include <QFileInfo>
+#include <QFile>
+#include <QIcon>
 #include <iostream>
 #include <filesystem>
 
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
 
-    qInstallMessageHandler(
-        // The first message handler is used for Qt error messages that show up before
-        // the main window is initialized
-        [](QtMsgType type, const QMessageLogContext& context, const QString& msg) {
-            QByteArray localMsg = msg.toLocal8Bit();
-            switch (type) {
-                case QtDebugMsg:
-                std::cerr << "Debug: ";
-                break;
-            case QtWarningMsg:
-                std::cerr << "Warning: ";
-                break;
-            case QtCriticalMsg:
-                std::cerr << "Critical: ";
-                break;
-            case QtFatalMsg:
-                std::cerr << "Fatal: ";
-                break;
-            }
-
-            std::cerr << localMsg.constData() << " (" << context.file << ":" <<
-                context.line << ", " << context.function << ")\n";
-        }
-    );
-
-
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 
-    MainWindow mw("C-Troll-Core");
-#ifdef QT_DEBUG
-    mw.show();
-#else
-    mw.hide();
-#endif // QT_DEBUG
-    
-    common::Log::initialize("core", [&mw](std::string msg) { mw.log(msg); });
+    {
+        QFile file(":/qss/core.qss");
+        file.open(QFile::ReadOnly);
+        QString styleSheet = QLatin1String(file.readAll());
+        app.setStyleSheet(styleSheet);
+    }
 
-    qInstallMessageHandler(
-        // Now that the log is enabled and available, we can pipe all Qt messages to that
-        [](QtMsgType, const QMessageLogContext&, const QString& msg) {
-            Log(msg.toStdString());
-        }
-    );
-    
-    // Load configuration file;  use the passed argument if it exists
-    std::string configurationFile = (argc == 2) ? argv[1] : "config.json";
+    // Load configuration file
+    std::string configurationFile = "config.json";
     if (!std::filesystem::exists(configurationFile)) {
         std::string absPath = std::filesystem::absolute(configurationFile).string();
-        Log("Could not find configuration file " + absPath);
+        std::cerr << "Could not find configuration file " << absPath;
         exit(EXIT_FAILURE);
     }
 
-    Application application(configurationFile);
+    MainWindow mw(configurationFile);
+    mw.show();
+
     app.exec();
+
+    Q_CLEANUP_RESOURCE(resources);
 }

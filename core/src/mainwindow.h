@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016 - 2020                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -9,15 +9,15 @@
  * permitted provided that the following conditions are met:                             *
  *                                                                                       *
  * 1. Redistributions of source code must retain the above copyright notice, this list   *
- * of conditions and the following disclaimer.                                           *
+ *    of conditions and the following disclaimer.                                        *
  *                                                                                       *
  * 2. Redistributions in binary form must reproduce the above copyright notice, this     *
- * list of conditions and the following disclaimer in the documentation and/or other     *
- * materials provided with the distribution.                                             *
+ *    list of conditions and the following disclaimer in the documentation and/or other  *
+ *    materials provided with the distribution.                                          *
  *                                                                                       *
  * 3. Neither the name of the copyright holder nor the names of its contributors may be  *
- * used to endorse or promote products derived from this software without specific prior *
- * written permission.                                                                   *
+ *    used to endorse or promote products derived from this software without specific    *
+ *    prior written permission.                                                          *
  *                                                                                       *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY   *
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES  *
@@ -34,33 +34,43 @@
 
 #ifndef __CORE__MAINWINDOW_H__
 #define __CORE__MAINWINDOW_H__
- 
+
 #include <QMainWindow>
-#include <QCloseEvent>
-#include <QSystemTrayIcon>
-#include <QAction>
-#include <QTextEdit>
- 
-namespace Ui { class MainWindow; }
- 
+
+#include "clusterconnectionhandler.h"
+#include "process.h"
+
+class ClustersWidget;
+class ProcessesWidget;
+class QTextEdit;
+
+namespace programs { class ProgramsWidget; }
+
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
-    explicit MainWindow(const QString& title);
+    explicit MainWindow(const std::string& configurationFile);
+
+private:
+    // private slots
+    void startProgram(Cluster::ID clusterId, Program::ID programId,
+        Program::Configuration::ID configurationId);
+    void stopProgram(Cluster::ID clusterId, Program::ID programId,
+        Program::Configuration::ID configurationId);
+    void startProcess(Process::ID processId);
+    void stopProcess(Process::ID processId);
+    void killAllProcesses(Cluster::ID id);
+
 
     void log(std::string msg);
 
-protected:
-    void closeEvent(QCloseEvent* event);
-    void changeEvent(QEvent* event);
- 
-private slots:
-    void iconActivated(QSystemTrayIcon::ActivationReason reason);
- 
-private:
-    // Declare the object of future applications for the tray icon
-    QTextEdit* _messageBox;
-    QSystemTrayIcon* _trayIcon;
+    programs::ProgramsWidget* _programWidget;
+    ClustersWidget* _clustersWidget;
+    ProcessesWidget* _processesWidget;
+
+    ClusterConnectionHandler _clusterConnectionHandler;
+
+    QTextEdit* _messageBox = nullptr;
 };
- 
+
 #endif // __CORE__MAINWINDOW_H__

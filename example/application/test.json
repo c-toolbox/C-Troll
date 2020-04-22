@@ -1,25 +1,23 @@
 {
-    "name": "Application name",
-    "executable": "executable name",
-    "baseDirectory": "base directory",
-    "commandlineParameters": "--",
-    "currentWorkingDirectory": "current working directory",
-    "tags": [
-        "test"
-    ],
-    "configurations": {
-        "stereo": {
-            "name": "Stereo",
-            "clusters": {
-                "alpha0": "--stereo"
-            }
-        },
-        "mono": {
-            "name": "Mono",
-            "clusters": {
-                "alpha0": "--mono",
-                "alpha": "--mono"
-            }
-        }
+  "name": "Application name",
+  "executable": "executable name",
+  "commandlineParameters": "--",
+  "workingDirectory": "working directory",
+  "tags": [
+    "test2"
+  ],
+  "configurations": [
+    {
+      "name": "user-facing name",
+      "parameters": "---"
+    },
+    {
+      "name": "second user-facing name",
+      "parameters": "---"
     }
+  ],
+  "clusters": [
+    "Local",
+    "Mega Cluster"
+  ]
 }

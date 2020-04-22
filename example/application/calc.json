@@ -1,0 +1,6 @@
+{
+  "name": "Calc",
+  "executable": "calc.exe",
+  "tags": [ "test", "test2" ],
+  "clusters": [ "Local", "Local+Office" ]
+}

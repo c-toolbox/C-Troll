@@ -9,15 +9,15 @@
  * permitted provided that the following conditions are met:                             *
  *                                                                                       *
  * 1. Redistributions of source code must retain the above copyright notice, this list   *
- * of conditions and the following disclaimer.                                           *
+ *    of conditions and the following disclaimer.                                        *
  *                                                                                       *
  * 2. Redistributions in binary form must reproduce the above copyright notice, this     *
- * list of conditions and the following disclaimer in the documentation and/or other     *
- * materials provided with the distribution.                                             *
+ *    list of conditions and the following disclaimer in the documentation and/or other  *
+ *    materials provided with the distribution.                                          *
  *                                                                                       *
  * 3. Neither the name of the copyright holder nor the names of its contributors may be  *
- * used to endorse or promote products derived from this software without specific prior *
- * written permission.                                                                   *
+ *    used to endorse or promote products derived from this software without specific    *
+ *    prior written permission.                                                          *
  *                                                                                       *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY   *
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES  *
@@ -34,27 +34,48 @@
 
 #include "mainwindow.h"
 
-#include <QMenu>
+#include "apiversion.h"
+#include "centralwidget.h"
+#include "version.h"
+#include <fmt/format.h>
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QHBoxLayout>
+#include <QLabel>
+#include <QMenu>
+#include <QVBoxLayout>
 #include <iostream>
 
-void MainWindow::log(std::string msg) {
-    _messageBox->append(QString::fromStdString(std::move(msg)));
-}
+namespace {
+    constexpr const char* Title = "C-Troll Tray";
 
-MainWindow::MainWindow(const QString& title)
-    : QMainWindow()
-{
-    setWindowTitle(title);
-    setMinimumSize(512, 256);
+    constexpr const float MainWindowWidthRatio = 0.3f;
+    constexpr const float MainWindowHeightRatio = 0.25f;
+} // namespace
 
-    _messageBox = new QTextEdit();
-    setCentralWidget(_messageBox);
- 
+MainWindow::MainWindow() {
+    // We calculate the size of the window based on the screen resolution to be somewhat
+    // safe against high and low DPI monitors
+    const int screenWidth = QApplication::desktop()->screenGeometry().width();
+    const int screenHeight = QApplication::desktop()->screenGeometry().height();
+
+    setWindowTitle(Title);
+    setFixedSize(
+        screenWidth * MainWindowWidthRatio, screenHeight * MainWindowHeightRatio
+    );
+
+    _centralWidget = new CentralWidget;
+    setCentralWidget(_centralWidget);
+
     // Initialize the tray icon, set the icon of a set of system icons,
     // as well as set a tooltip
-    _trayIcon = new QSystemTrayIcon(QIcon(":/images/C_transparent.png"), this);
-    _trayIcon->setToolTip(title + QString("\nCluster Launcher Application"));
+    QSystemTrayIcon* trayIcon = new QSystemTrayIcon(
+        QIcon(":/images/C_transparent.png"), this
+    );
+    std::string tooltip = fmt::format(
+        "{}\nVersion: {}\nAPI: {}", Title, Version, api::Version
+    );
+    trayIcon->setToolTip(tooltip.c_str());
 
     // After that create a context menu of two items
     QMenu* menu = new QMenu(this);
@@ -65,17 +86,44 @@ MainWindow::MainWindow(const QString& title)
 
     // The second menu item terminates the application
     QAction* quitAction = new QAction(trUtf8("Quit"), this);
-    connect(quitAction, &QAction::triggered, this, &MainWindow::close);
+    connect(
+        quitAction, &QAction::triggered,
+        QApplication::instance(), &QApplication::quit
+    );
     menu->addAction(quitAction);
  
     // Set the context menu on the icon and show the application icon in the system tray
-    _trayIcon->setContextMenu(menu);
-    _trayIcon->show();
+    trayIcon->setContextMenu(menu);
+    trayIcon->show();
  
     // Also connect clicking on the icon to the signal processor of this press 
-    connect(_trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
+    connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
 }
- 
+
+void MainWindow::setPort(int port) {
+    _centralWidget->setPort(port);
+}
+
+void MainWindow::log(std::string msg) {
+    _centralWidget->log(std::move(msg));
+}
+
+void MainWindow::newConnection(const std::string& peerAddress) {
+    _centralWidget->newConnection(peerAddress);
+}
+
+void MainWindow::closedConnection(const std::string& peerAddress) {
+    _centralWidget->closedConnection(peerAddress);
+}
+
+void MainWindow::newProcess(ProcessHandler::ProcessInfo process) {
+    _centralWidget->newProcess(process);
+}
+
+void MainWindow::endedProcess(ProcessHandler::ProcessInfo process) {
+    _centralWidget->endedProcess(process);
+}
+
 // The method that handles the closing event of the application window
 void MainWindow::closeEvent(QCloseEvent* event) {
     // If the window is visible, and the checkbox is checked, then the completion of the
@@ -84,13 +132,6 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     if (isVisible()) {
         event->ignore();
         hide();
- 
-        _trayIcon->showMessage(
-            windowTitle(),
-            trUtf8("The application is still running in the background"),
-            QSystemTrayIcon::Information,
-            2000
-        );
     }
 }
 

@@ -1,0 +1,71 @@
+* {
+  background: #202020;
+  color: #efefef;
+}
+
+QLineEdit {
+  font-size: 14pt;
+}
+
+QToolTip {
+  color: #151515;
+  border: 2px solid #202020;
+  padding: 5px;
+  border-radius: 3px;
+}
+
+QPushButton {
+  background-color: #454545;
+  border-style: outset;
+  border-width: 1px;
+  border-color: #acacac;
+  min-height: 1.25em;
+  font-size: 11pt;
+
+  padding-left: 25%;
+  padding-right: 25%;
+}
+
+QPushButton:hover {
+  background-color: #505055;
+}
+
+QPushButton:pressed {
+  background-color: #404045;
+  border-style: inset;
+}
+
+QPushButton:disabled {
+  background-color: #606060;
+  color: #a0a0a0;
+}
+
+QTabWidget::pane {
+  border-left: 2px solid #acacac;
+}
+
+QTabBar::tab {
+  background: #303030;
+  color: #efefef;
+
+  border: 1px solid #efefef;
+
+  font-size: 14pt;
+  padding-top: 7px;
+  padding-bottom: 7px;
+
+  /*min-width: 40%;*/
+  /*min-height: 150%;*/
+}
+
+QTabBar::tab:hover {
+  background-color: #353535;
+}
+
+QTabBar::tab:selected {
+  background-color: #505055;
+  border-color: #acacac;
+}
+
+QWidget#clusterwidget QGroupBox#cluster {
+}

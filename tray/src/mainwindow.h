@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
  * Copyright (c) 2016 - 2020                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Alexander Bock, Erik Sundén, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -9,15 +9,15 @@
  * permitted provided that the following conditions are met:                             *
  *                                                                                       *
  * 1. Redistributions of source code must retain the above copyright notice, this list   *
- * of conditions and the following disclaimer.                                           *
+ *    of conditions and the following disclaimer.                                        *
  *                                                                                       *
  * 2. Redistributions in binary form must reproduce the above copyright notice, this     *
- * list of conditions and the following disclaimer in the documentation and/or other     *
- * materials provided with the distribution.                                             *
+ *    list of conditions and the following disclaimer in the documentation and/or other  *
+ *    materials provided with the distribution.                                          *
  *                                                                                       *
  * 3. Neither the name of the copyright holder nor the names of its contributors may be  *
- * used to endorse or promote products derived from this software without specific prior *
- * written permission.                                                                   *
+ *    used to endorse or promote products derived from this software without specific    *
+ *    prior written permission.                                                          *
  *                                                                                       *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY   *
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES  *
@@ -36,19 +36,30 @@
 #define __TRAY__MAINWINDOW_H__
  
 #include <QMainWindow>
+
+#include "processhandler.h"
 #include <QCloseEvent>
 #include <QSystemTrayIcon>
-#include <QAction>
+#include <QLabel>
 #include <QTextEdit>
  
-namespace Ui { class MainWindow; }
- 
+class CentralWidget;
+
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
-    explicit MainWindow(const QString& title);
+    MainWindow();
+
+    void setPort(int port);
 
     void log(std::string msg);
+
+public slots:
+    void newConnection(const std::string& peerAddress);
+    void closedConnection(const std::string& peerAddress);
+
+    void newProcess(ProcessHandler::ProcessInfo process);
+    void endedProcess(ProcessHandler::ProcessInfo process);
 
 protected:
     void closeEvent(QCloseEvent* event);
@@ -56,11 +67,9 @@ protected:
  
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
- 
+
 private:
-    // Declare the object of future applications for the tray icon
-    QTextEdit* _messageBox;
-    QSystemTrayIcon* _trayIcon;
+    CentralWidget* _centralWidget;
 };
  
 #endif // __TRAY__MAINWINDOW_H__

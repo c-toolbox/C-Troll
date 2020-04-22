@@ -1,7 +1,0 @@
-{
-    "name": "Emil's Office",
-    "enabled": true,
-    "nodes": {
-        "emil": { "name": "Desktop", "ip": "130.236.243.213", "port": 5000 }
-    }
-}

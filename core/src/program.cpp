@@ -9,15 +9,15 @@
  * permitted provided that the following conditions are met:                             *
  *                                                                                       *
  * 1. Redistributions of source code must retain the above copyright notice, this list   *
- * of conditions and the following disclaimer.                                           *
+ *    of conditions and the following disclaimer.                                        *
  *                                                                                       *
  * 2. Redistributions in binary form must reproduce the above copyright notice, this     *
- * list of conditions and the following disclaimer in the documentation and/or other     *
- * materials provided with the distribution.                                             *
+ *    list of conditions and the following disclaimer in the documentation and/or other  *
+ *    materials provided with the distribution.                                          *
  *                                                                                       *
  * 3. Neither the name of the copyright holder nor the names of its contributors may be  *
- * used to endorse or promote products derived from this software without specific prior *
- * written permission.                                                                   *
+ *    used to endorse or promote products derived from this software without specific    *
+ *    prior written permission.                                                          *
  *                                                                                       *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY   *
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES  *
@@ -34,136 +34,104 @@
 
 #include "program.h"
 
+#include "cluster.h"
+#include "database.h"
 #include "jsonload.h"
 #include "logging.h"
+#include <fmt/format.h>
 #include <assert.h>
 
 namespace {
-    constexpr const char* KeyId = "id";
     constexpr const char* KeyName = "name";
     constexpr const char* KeyExecutable = "executable";
-    constexpr const char* KeyBaseDirectory = "baseDirectory";
     constexpr const char* KeyCommandlineParameters = "commandlineParameters";
-    constexpr const char* KeyCurrentWorkingDirectory = "currentWorkingDirectory";
-    constexpr const char* KeyClusterCommandlineParameters = "clusters";
-    constexpr const char* KeyDefaults = "defaults";
-    constexpr const char* KeyDefaultCluster = "cluster";
-    constexpr const char* KeyDefaultConfiguration = "configuration";
+    constexpr const char* KeyWorkingDirectory = "workingDirectory";
+    constexpr const char* KeyClusters = "clusters";
     constexpr const char* KeyTags = "tags";
     constexpr const char* KeyConfigurations = "configurations";
 
     constexpr const char* KeyConfigurationName = "name";
-    constexpr const char* KeyConfigurationIdentifier = "identifier";
-    constexpr const char* KeyConfigurationParameters = "commandlineParameters";
+    constexpr const char* KeyConfigurationParameters = "parameters";
 } // namespace
-
-void to_json(nlohmann::json& j, const Program::Configuration& p) {
-    j = {
-        { KeyConfigurationName, p.name },
-        { KeyClusterCommandlineParameters, p.clusterCommandlineParameters }
-    };
-}
 
 void from_json(const nlohmann::json& j, Program::Configuration& p) {
     j.at(KeyConfigurationName).get_to(p.name);
-    j.at(KeyClusterCommandlineParameters).get_to(p.clusterCommandlineParameters);
-}
-
-void to_json(nlohmann::json& j, const Program& p) {
-    j = {
-        { KeyId, p.id },
-        { KeyName, p.name },
-        { KeyExecutable, p.executable },
-    };
-    if (!p.baseDirectory.empty()) {
-        j[KeyBaseDirectory] = p.baseDirectory;
-    }
-    if (!p.commandlineParameters.empty()) {
-        j[KeyCommandlineParameters] = p.commandlineParameters;
-    }
-    if (!p.currentWorkingDirectory.empty()) {
-        j[KeyCurrentWorkingDirectory] = p.currentWorkingDirectory;
-    }
-    if (!p.tags.empty()) {
-        j[KeyTags] = p.tags;
-    }
-    if (!p.configurations.empty()) {
-        std::map<std::string, Program::Configuration> confs;
-        for (const Program::Configuration& c : p.configurations) {
-            confs[c.id] = c;
-        }
-
-        j[KeyConfigurations] = confs;
-    }
-
-    if (!p.defaultConfiguration.empty() || !p.defaultCluster.empty()) {
-        j[KeyDefaults][KeyDefaultCluster] = p.defaultCluster;
-        j[KeyDefaults][KeyDefaultConfiguration] = p.defaultConfiguration;
-    }
+    j.at(KeyConfigurationParameters).get_to(p.parameters);
 }
 
 void from_json(const nlohmann::json& j, Program& p) {
-    j.at(KeyId).get_to(p.id);
     j.at(KeyName).get_to(p.name);
     j.at(KeyExecutable).get_to(p.executable);
-    if (j.find(KeyBaseDirectory) != j.end()) {
-        j.at(KeyBaseDirectory).get_to(p.baseDirectory);
-    }
     if (j.find(KeyCommandlineParameters) != j.end()) {
         j.at(KeyCommandlineParameters).get_to(p.commandlineParameters);
     }
-    p.currentWorkingDirectory = p.baseDirectory;
-    if (j.find(KeyCurrentWorkingDirectory) != j.end()) {
-        j.at(KeyCurrentWorkingDirectory).get_to(p.currentWorkingDirectory);
+    if (j.find(KeyWorkingDirectory) != j.end()) {
+        j.at(KeyWorkingDirectory).get_to(p.workingDirectory);
     }
     if (j.find(KeyTags) != j.end()) {
         j.at(KeyTags).get_to(p.tags);
     }
-    if (j.find(KeyDefaults) != j.end()) {
-        nlohmann::json defaults = j.at(KeyDefaults);
-        defaults.at(KeyDefaultConfiguration).get_to(p.defaultConfiguration);
-        defaults.at(KeyDefaultCluster).get_to(p.defaultCluster);
-    }
     if (j.find(KeyConfigurations) != j.end()) {
-        std::map<std::string, Program::Configuration> confs;
-        j.at(KeyConfigurations).get_to(confs);
-        for (const std::pair<std::string, Program::Configuration>& conf : confs) {
-            Program::Configuration c = conf.second;
-            c.id = conf.first;
-            p.configurations.push_back(std::move(c));
+        j.at(KeyConfigurations).get_to(p.configurations);
+    }
+    else {
+        // There always has to be at least a default configuration
+        p.configurations.push_back({ Program::Configuration::ID{ 0 }, "Default", "" });
+    }
+
+    std::vector<std::string> clusters = j.at(KeyClusters).get<std::vector<std::string>>();
+    for (const std::string& cluster : clusters) {
+        Cluster* c = data::findCluster(cluster);
+        if (!c) {
+            std::string message = fmt::format("Could not find cluster {}", cluster);
+            ::Log(message);
+            throw std::runtime_error(message);
         }
+        p.clusters.push_back(c->id);
     }
 }
 
 std::vector<Program> loadProgramsFromDirectory(const std::string& directory) {
-    return common::loadJsonFromDirectory<Program>(directory);
-}
+    std::vector<Program> programs = common::loadJsonFromDirectory<Program>(directory);
 
-common::GuiInitialization::Application programToGuiApplication(const Program& prog) {
-    common::GuiInitialization::Application app;
-    app.name = prog.name;
-    app.id = prog.id;
-    app.tags = prog.tags;
-
-    for (const Program::Configuration& conf : prog.configurations) {
-        common::GuiInitialization::Application::Configuration c;
-        c.name = conf.name;
-        c.id = conf.id;
-        for (const std::pair<std::string, std::string>& p :
-             conf.clusterCommandlineParameters)
-        {
-            c.clusters.push_back(p.first);
+    for (const Program& program : programs) {
+        if (program.name.empty()) {
+            throw std::runtime_error("No name specified for program");
+        }
+        if (program.executable.empty()) {
+            throw std::runtime_error(fmt::format(
+                "No executable specified for program {}", program.name
+            ));
+        }
+        if (program.clusters.empty()) {
+            throw std::runtime_error(fmt::format(
+                "No clusters specified for program {}", program.name
+            ));
         }
 
-        app.configurations.push_back(c);
+        const bool hasEmptyTag = std::any_of(
+            program.tags.begin(), program.tags.end(),
+            std::mem_fn(&std::string::empty)
+        );
+        if (hasEmptyTag) {
+            throw std::runtime_error(fmt::format(
+                "At least one tag of the program {} has an empty tag", program.name
+            ));
+        }
     }
 
-    app.defaultCluster = prog.defaultCluster;
-    app.defaultConfiguration = prog.defaultConfiguration;
-    
-    return app;
-}
+    // Inject the unique identifiers into the nodes
+    int programId = 0;
+    for (Program& program : programs) {
+        program.id = programId;
+        programId++;
 
-Program::~Program() {
-    assert(processes.empty());
+        int configurationId = 0;
+        for (Program::Configuration& conf : program.configurations) {
+            conf.id = configurationId;
+            configurationId++;
+        }
+    }
+
+    return programs;
 }

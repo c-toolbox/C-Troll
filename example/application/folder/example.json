@@ -1,0 +1,26 @@
+{
+  "name": "Application name",
+  "executable": "executable name",
+  "commandlineParameters": "--",
+  "workingDirectory": "working directory",
+
+  "tags": [
+    "test",
+    "second test"
+  ],
+
+  "configurations": [
+    {
+      "name": "user-facing name",
+      "parameters": "---"
+    },
+    {
+      "name": "second user-facing name",
+      "parameters": "---"
+    }
+  ],
+  "clusters": [
+    "Local",
+    "Mega Cluster"
+  ]
+}
