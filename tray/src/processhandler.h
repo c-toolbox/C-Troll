@@ -65,7 +65,8 @@ public:
 
 public slots:
     void newConnection();
-    void handleSocketMessage(const nlohmann::json& message);
+    void handleSocketMessage(const nlohmann::json& message,
+        const std::string& peerAddress);
 
     void handlerErrorOccurred(QProcess::ProcessError error);
     void handleFinished(int exitCode, QProcess::ExitStatus exitStatus);

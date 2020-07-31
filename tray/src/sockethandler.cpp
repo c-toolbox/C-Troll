@@ -63,7 +63,7 @@ void SocketHandler::readyRead(common::JsonSocket* socket) {
 
     common::Message msg = message;
     if (msg.secret == _secret) {
-        emit messageRecieved(std::move(message));
+        emit messageRecieved(std::move(message), socket->peerAddress());
     }
     else {
         ::Log("Received invalid message");
@@ -74,11 +74,9 @@ void SocketHandler::readyRead(common::JsonSocket* socket) {
 }
 
 void SocketHandler::sendMessage(const nlohmann::json& message) {
-    Log(fmt::format("Sending message: {}", message.dump()));
     for (common::JsonSocket* jsonSocket : _sockets) {
-        std::string local = jsonSocket->localAddress();
         std::string peer = jsonSocket->peerAddress();
-        Log(local + " -> " + peer);
+        Log(fmt::format("Sending: {} => {}", message.dump(), peer));
         jsonSocket->write(message);
     }
 }

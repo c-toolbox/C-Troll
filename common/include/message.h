@@ -65,6 +65,10 @@ bool isValidMessage(const nlohmann::json& message) {
     return type == T::Type && version == Message::CurrentVersion;
 }
 
+// Returns true, if the message has the required fields. Returns false if they are not
+// present, preventing us from deciphering the message
+[[ nodiscard ]] bool validateMessage(const nlohmann::json& message);
+
 // Throws std::logic_error if the internal type is different from the expected type
 // Throws std::runtime_error if the version is different from the current version
 void validateMessage(const nlohmann::json& message, std::string_view expectedType);

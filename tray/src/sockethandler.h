@@ -52,7 +52,7 @@ public slots:
 signals:
     void newConnection(const std::string& peerAddress);
     void closedConnection(const std::string& peerAddress);
-    void messageRecieved(const nlohmann::json& message);
+    void messageRecieved(const nlohmann::json& message, const std::string& peerAddress);
 
 private:
     void newConnectionEstablished();
