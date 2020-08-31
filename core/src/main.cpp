@@ -36,8 +36,10 @@
 #include <QApplication>
 #include <QFile>
 #include <QIcon>
+#include <QMessageBox>
 #include <iostream>
 #include <filesystem>
+#include <thread>
 
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
@@ -56,7 +58,11 @@ int main(int argc, char** argv) {
     std::string configurationFile = "config.json";
     if (!std::filesystem::exists(configurationFile)) {
         std::string absPath = std::filesystem::absolute(configurationFile).string();
-        std::cerr << "Could not find configuration file " << absPath;
+        QMessageBox::critical(
+            nullptr,
+            "Configuration Error",
+            "Could not find configuration file " + QString::fromStdString(absPath)
+        );
         exit(EXIT_FAILURE);
     }
 
