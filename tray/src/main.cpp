@@ -92,12 +92,6 @@ int main(int argc, char** argv) {
         }
     );
 
-#ifdef QT_DEBUG
-    mw.show();
-#else
-    mw.hide();
-#endif // QT_DEBUG
-
     std::string configurationFile = "config-tray.json";
     std::string absPath = std::filesystem::absolute(configurationFile).string();
     if (!std::filesystem::exists(configurationFile)) {
@@ -107,6 +101,7 @@ int main(int argc, char** argv) {
         nlohmann::json obj;
         obj["port"] = 5000;
         obj["secret"] = "";
+        obj["showWindow"] = false;
         std::string content = obj.dump(2);
         std::ofstream file(absPath);
         file.write(content.data(), content.size());
@@ -122,6 +117,17 @@ int main(int argc, char** argv) {
     nlohmann::json config = nlohmann::json::parse(content);
     const int port = config["port"];
     const std::string secret = config["secret"];
+
+#ifdef QT_DEBUG
+    mw.show();
+#else
+    if ((config.find("showWindow") != config.end()) && config["showWindow"]) {
+        mw.show();
+    }
+    else {
+        mw.hide();
+    }
+#endif // QT_DEBUG
 
     mw.setPort(port);
 
