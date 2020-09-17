@@ -48,6 +48,7 @@ namespace {
     constexpr const char* KeyWorkingDirectory = "workingDirectory";
     constexpr const char* KeyClusters = "clusters";
     constexpr const char* KeyTags = "tags";
+    constexpr const char* KeyDelay = "delay";
     constexpr const char* KeyConfigurations = "configurations";
 
     constexpr const char* KeyConfigurationName = "name";
@@ -70,6 +71,10 @@ void from_json(const nlohmann::json& j, Program& p) {
     }
     if (j.find(KeyTags) != j.end()) {
         j.at(KeyTags).get_to(p.tags);
+    }
+    if (j.find(KeyDelay) != j.end()) {
+        const unsigned int delay = j.at(KeyDelay).get<unsigned int>();
+        p.delay = std::chrono::milliseconds(delay);
     }
     if (j.find(KeyConfigurations) != j.end()) {
         j.at(KeyConfigurations).get_to(p.configurations);

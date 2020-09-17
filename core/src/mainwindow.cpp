@@ -48,6 +48,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <set>
+#include <thread>
 
 namespace {
     constexpr const char* Title = "C-Troll";
@@ -273,6 +274,8 @@ void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
     Cluster* cluster = data::findCluster(clusterId);
     assert(cluster);
 
+    Program* p = data::findProgram(programId);
+    assert(p);
     for (Node::ID node : cluster->nodes) {
         std::unique_ptr<Process> process = std::make_unique<Process>(
             programId,
@@ -285,6 +288,12 @@ void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
 
         startProcess(id);
         _processesWidget->processAdded(id);
+
+        // If the program wants, we need to sleep for a duration before submitting the
+        // next process
+        if (p->delay.has_value()) {
+            std::this_thread::sleep_for(*p->delay);
+        }
     }
 }
 

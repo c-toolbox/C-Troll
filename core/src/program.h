@@ -38,6 +38,8 @@
 #include "cluster.h"
 #include "typedid.h"
 #include <json/json.hpp>
+#include <chrono>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -67,6 +69,8 @@ struct Program {
     std::string commandlineParameters;
     /// The current working directory from which the Program is started
     std::string workingDirectory;
+    /// An optional delay that is introduced between startup of individual instances
+    std::optional<std::chrono::milliseconds> delay;
     /// A list of tags that are associated with this Program
     std::vector<std::string> tags;
     /// List of all configurations
