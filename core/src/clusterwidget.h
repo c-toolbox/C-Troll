@@ -35,7 +35,7 @@
 #ifndef __CORE__CLUSTERWIDGET_H__
 #define __CORE__CLUSTERWIDGET_H__
 
-#include <QGroupbox>
+#include <QGroupBox>
 #include <QWidget>
 
 #include "cluster.h"
