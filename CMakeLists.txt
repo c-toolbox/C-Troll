@@ -74,6 +74,7 @@ endif ()
 
 if (APPLE)
   set(CMAKE_PREFIX_PATH
+    "~/Qt/5.15.1/clang_64/lib/cmake"
     "~/Qt/5.6/clang_64/lib/cmake"
     "~/Qt/5.7/clang_64/lib/cmake"
   )
