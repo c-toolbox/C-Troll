@@ -83,6 +83,8 @@ elseif (WIN32)
     "C:/Qt/Development/5.12.1/msvc2017_64"
     "C:/Qt/5.12.6/msvc2017_64"
     "C:/Qt/Development/5.12.6/msvc2017_64"
+    "C:/Qt/5.15.1/msvc2017_64"
+    "C:/Qt/Development/5.15.1/msvc2017_64"
   )
 endif ()
 
