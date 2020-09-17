@@ -69,3 +69,14 @@ QTabBar::tab:selected {
 
 QWidget#clusterwidget QGroupBox#cluster {
 }
+
+QPushButton#removeprocess {
+  background-color: #801512;
+  color: #dddddd;
+
+  font-size: 8pt;
+}
+
+QPushButton#removeprocess:disabled {
+  background-color: #555555;
+}

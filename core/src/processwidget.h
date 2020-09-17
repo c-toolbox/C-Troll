@@ -42,6 +42,9 @@
 
 class QBoxLayout;
 class QLabel;
+class QPushButton;
+class QScrollArea;
+class QTimer;
 
 class ProcessWidget : public QWidget {
 Q_OBJECT
@@ -50,9 +53,14 @@ public:
 
     void updateStatus();
 
+signals:
+    void remove(Process::ID processId);
+
 private:
     const Process::ID _processId;
     QLabel* _status;
+    QPushButton* _remove;
+    QTimer* _removalTimer;
 };
 
 
@@ -72,7 +80,7 @@ signals:
     void killAllProcesses();
 
 private:
-    QBoxLayout* _layout;
+    QBoxLayout* _contentLayout;
 
     std::map<Process::ID, ProcessWidget*> _widgets;
 };

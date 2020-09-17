@@ -38,6 +38,8 @@
 #include "processstatusmessage.h"
 #include <QLabel>
 #include <QPushButton>
+#include <QScrollArea>
+#include <QTimer>
 #include <QVBoxLayout>
 
 namespace {
@@ -72,7 +74,6 @@ ProcessWidget::ProcessWidget(Process::ID processId)
     Cluster* cluster = data::findCluster(process->clusterId);
     assert(cluster);
 
-
     QBoxLayout* layout = new QHBoxLayout(this);
 
     QLabel* programLabel = new QLabel(("Program: " + program->name).c_str());
@@ -91,11 +92,39 @@ ProcessWidget::ProcessWidget(Process::ID processId)
 
     _status = new QLabel(("Status: " + statusToString(process->status)).c_str());
     layout->addWidget(_status);
+
+    //layout->insertStretch(5, 0);
+
+    _remove = new QPushButton("Remove");
+    _remove->setObjectName("removeprocess");
+    _remove->setEnabled(false);
+    connect(
+        _remove, &QPushButton::clicked,
+        [this]() {
+            _removalTimer->stop();
+            emit remove(_processId);
+        }
+    );
+    layout->insertWidget(6, _remove, 0, Qt::AlignRight);
+
+    _removalTimer = new QTimer();
+    _removalTimer->setSingleShot(true);
+    connect(_removalTimer, &QTimer::timeout, [this]() { emit remove(_processId); });
+
 }
 
 void ProcessWidget::updateStatus() {
     Process* process = data::findProcess(_processId);
     _status->setText(("Status: " + statusToString(process->status)).c_str());
+
+    if (process->status == common::ProcessStatusMessage::Status::NormalExit) {
+        // Start a timer to automatically remove a process if it exited normally
+        _removalTimer->start(15000);
+    }
+
+    // The user should only be able to remove the process entry if the process has
+    // finished in some state
+    _remove->setEnabled(process->status != common::ProcessStatusMessage::Status::Running);
 }
 
 
@@ -103,12 +132,24 @@ void ProcessWidget::updateStatus() {
 
 
 ProcessesWidget::ProcessesWidget() {
-    _layout = new QVBoxLayout(this);
+    QBoxLayout* layout = new QVBoxLayout(this);
+    
+    QScrollArea* area = new QScrollArea;
+    area->setWidgetResizable(true);
+    area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    _layout->addStretch();
+    QWidget* content = new QWidget;
+    area->setWidget(content);
+
+    _contentLayout = new QVBoxLayout(content);
+    area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    //_contentLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    layout->addWidget(area);
+
+    _contentLayout->addStretch();
 
     QPushButton* killAll = new QPushButton("Kill all processses");
-    _layout->addWidget(killAll);
+    layout->addWidget(killAll);
 
     connect(killAll, &QPushButton::clicked, this, &ProcessesWidget::killAllProcesses);
 }
@@ -116,8 +157,10 @@ ProcessesWidget::ProcessesWidget() {
 void ProcessesWidget::processAdded(Process::ID processId) {
     // The process has been created, but the widget did not exist yet
     ProcessWidget* w = new ProcessWidget(processId);
+    w->setMinimumWidth(width());
+    connect(w, &ProcessWidget::remove, this, &ProcessesWidget::processRemoved);
     _widgets[processId] = w;
-    _layout->insertWidget(static_cast<int>(_widgets.size() - 1), w);
+    _contentLayout->insertWidget(static_cast<int>(_widgets.size() - 1), w);
 }
 
 void ProcessesWidget::processUpdated(Process::ID processId) {
@@ -128,8 +171,13 @@ void ProcessesWidget::processUpdated(Process::ID processId) {
 
 void ProcessesWidget::processRemoved(Process::ID processId) {
     const auto it = _widgets.find(processId);
-    assert(it != _widgets.end());
 
-    _layout->removeWidget(it->second);
-    _widgets.erase(processId);
+    if (it != _widgets.end()) {
+        // We need to check this because there might be timer running in the background
+        // that will try to remove a process while the user has removed the same process
+        // manually in the meantime
+        it->second->deleteLater();
+        _contentLayout->removeWidget(it->second);
+        _widgets.erase(processId);
+    }
 }
