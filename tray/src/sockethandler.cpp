@@ -38,7 +38,7 @@
 #include "jsonsocket.h"
 #include "logging.h"
 #include "message.h"
-#include <QTcpSocket.h>
+#include <QTcpSocket>
 #include <fmt/format.h>
 #include <iostream>
 #include <memory>

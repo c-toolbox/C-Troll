@@ -35,7 +35,7 @@
 #ifndef __CORE__PROGRAMWIDGET_H__
 #define __CORE__PROGRAMWIDGET_H__
 
-#include <QGroupbox>
+#include <QGroupBox>
 #include <QPushButton>
 #include <QWidget>
 
