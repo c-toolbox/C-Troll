@@ -64,32 +64,24 @@ namespace {
     }
 
     common::ProcessStatusMessage::Status toTrayStatus(QProcess::ProcessError error) {
+        using PSM = common::ProcessStatusMessage;
         switch (error) {
-            case QProcess::FailedToStart:
-                return common::ProcessStatusMessage::Status::FailedToStart;
-            case QProcess::Crashed:
-                return common::ProcessStatusMessage::Status::CrashExit;
-            case QProcess::Timedout:
-                return common::ProcessStatusMessage::Status::TimedOut;
-            case QProcess::WriteError:
-                return common::ProcessStatusMessage::Status::WriteError;
-            case QProcess::ReadError:
-                return common::ProcessStatusMessage::Status::ReadError;
-            case QProcess::UnknownError:
-                return common::ProcessStatusMessage::Status::UnknownError;
-            default:
-                throw std::logic_error("Unhandled case exception");
+            case QProcess::FailedToStart: return PSM::Status::FailedToStart;
+            case QProcess::Crashed:       return PSM::Status::CrashExit;
+            case QProcess::Timedout:      return PSM::Status::TimedOut;
+            case QProcess::WriteError:    return PSM::Status::WriteError;
+            case QProcess::ReadError:     return PSM::Status::ReadError;
+            case QProcess::UnknownError:  return PSM::Status::UnknownError;
+            default:                   throw std::logic_error("Unhandled case exception");
         }
     }
 
     common::ProcessStatusMessage::Status toTrayStatus(QProcess::ExitStatus status) {
+        using PSM = common::ProcessStatusMessage;
         switch (status) {
-            case QProcess::NormalExit:
-                return common::ProcessStatusMessage::Status::NormalExit;
-            case QProcess::CrashExit:
-                return common::ProcessStatusMessage::Status::CrashExit;
-            default:
-                throw std::logic_error("Unhandled case exception");
+            case QProcess::NormalExit: return PSM::Status::NormalExit;
+            case QProcess::CrashExit:  return PSM::Status::CrashExit;
+            default:                   throw std::logic_error("Unhandled case exception");
         }
     }
 } // namespace
@@ -189,7 +181,6 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     
     // Find specifc value in process map i.e. process
     const auto p = processIt(process);
-    
     if (p != _processes.end() ) {
         common::ProcessStatusMessage msg;
         msg.processId = p->processId;
@@ -204,7 +195,6 @@ void ProcessHandler::handleStarted() {
     
     // Find specifc value in process map i.e. process
     auto p = processIt(process);
-    
     if (p != _processes.end()) {
         // Send out the TrayProcessStatus with the status string
         common::ProcessStatusMessage msg;
@@ -220,7 +210,6 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     
     // Find specifc value in process map i.e. process
     auto p = processIt(process);
-    
     if (p != _processes.end()) {
         common::ProcessStatusMessage msg;
         msg.processId = p->processId;
@@ -231,7 +220,6 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
         // Remove this process from the list as we consider it finished
         ProcessInfo info = *p;
         _processes.erase(p);
-
         emit closedProcess(info);
     }
 }
@@ -266,8 +254,7 @@ void ProcessHandler::handleReadyReadStandardOutput() {
         msg.outputType = common::ProcessOutputMessage::OutputType::StdOut;
         nlohmann::json j = msg;
 
-        // false -> We don't need to print every console message to the log of the tray
-        // application
+        // We don't need to print every console message to the log of the tray application
         emit sendSocketMessage(j, false);
     }
 }
@@ -288,13 +275,13 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
         
     if (command.commandlineParameters.empty()) {
         std::string cmd = fmt::format("\"{}\"", command.executable);
-        process->start(cmd.c_str());
+        process->start(QString::fromStdString(cmd));
     }
     else {
         std::string cmd = fmt::format(
             "\"{}\" {}", command.executable, command.commandlineParameters
         );
-        process->start(cmd.c_str());
+        process->start(QString::fromStdString(cmd));
     }
 
     const auto p = processIt(process);
@@ -362,4 +349,3 @@ std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::process
     );
     return p;
 }
-

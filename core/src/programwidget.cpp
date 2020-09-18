@@ -55,11 +55,9 @@ ProgramButton::ProgramButton(const Cluster* cluster,
     : QPushButton(configuration->name.c_str())
     , _cluster(cluster)
     , _configuration(configuration)
+    , _actionMenu(new QMenu(this))
 {
-    _actionMenu = new QMenu(this);
-
     setEnabled(false);
-
     connect(this, &QPushButton::clicked, this, &ProgramButton::handleButtonPress);
 }
 
@@ -67,7 +65,7 @@ void ProgramButton::updateStatus() {
     std::vector<Node*> nodes = data::findNodesForCluster(*_cluster);
 
     const bool allConnected = std::all_of(
-        nodes.begin(), nodes.end(),
+        nodes.cbegin(), nodes.cend(),
         std::mem_fn(&Node::isConnected)
     );
     setEnabled(allConnected);
@@ -77,7 +75,7 @@ void ProgramButton::processUpdated(Process::ID processId) {
     Process* process = data::findProcess(processId);
 
     auto it = std::find_if(
-        _processes.begin(), _processes.end(),
+        _processes.cbegin(), _processes.cend(),
         [processId](const std::pair<const Node::ID, ProcessInfo>& p) {
             return p.second.processId.v == processId.v;
         }
@@ -163,7 +161,7 @@ void ProgramButton::updateMenu() {
 
     std::vector<QAction*> actions;
     std::transform(
-        _processes.begin(), _processes.end(),
+        _processes.cbegin(), _processes.cend(),
         std::back_inserter(actions),
         [](const std::pair<const Node::ID, ProcessInfo>& p) {
             return p.second.menuAction;
@@ -225,14 +223,14 @@ bool ProgramButton::isProcessRunning(Node::ID nodeId) const {
 
 bool ProgramButton::hasNoProcessRunning() const {
     return std::none_of(
-        _cluster->nodes.begin(), _cluster->nodes.end(),
+        _cluster->nodes.cbegin(), _cluster->nodes.cend(),
         [this](Node::ID n) { return isProcessRunning(n); }
     );
 }
 
 bool ProgramButton::hasAllProcessesRunning() const {
     return std::all_of(
-        _cluster->nodes.begin(), _cluster->nodes.end(),
+        _cluster->nodes.cbegin(), _cluster->nodes.cend(),
         [this](Node::ID n) { return isProcessRunning(n); }
     );
 }
@@ -245,7 +243,7 @@ ClusterWidget::ClusterWidget(Cluster* cluster,
                              const std::vector<Program::Configuration>& configurations)
 {
     assert(cluster);
-    setTitle(cluster->name.c_str());
+    setTitle(QString::fromStdString(cluster->name));
 
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
@@ -278,7 +276,7 @@ ClusterWidget::ClusterWidget(Cluster* cluster,
 
 void ClusterWidget::updateStatus() {
     std::for_each(
-        _startButtons.begin(), _startButtons.end(),
+        _startButtons.cbegin(), _startButtons.cend(),
         [](const std::pair<const Program::Configuration::ID, ProgramButton*>& p) {
             p.second->updateStatus();
         }
@@ -324,7 +322,6 @@ TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
         ).c_str());
 
         w->setToolTip(tag.c_str());
-
         layout->addWidget(w);
     }
 }
@@ -334,13 +331,12 @@ TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
 
 
 ProgramWidget::ProgramWidget(const Program& program)
-    : QGroupBox(program.name.c_str())
+    : QGroupBox(QString::fromStdString(program.name))
 {
     QBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
 
-    TagInfoWidget* tagInfo = new TagInfoWidget(program.tags);
-    layout->addWidget(tagInfo);
+    layout->addWidget(new TagInfoWidget(program.tags));
 
     std::vector<Cluster*> clusters = data::findClustersForProgram(program);
     for (Cluster* cluster : clusters) {
@@ -439,7 +435,7 @@ TagsWidget::TagsWidget()
             lightColor.r, lightColor.g, lightColor.b,
             darkColor.r, darkColor.g, darkColor.b
         );
-        button->setStyleSheet(colorText.c_str());
+        button->setStyleSheet(QString::fromStdString(colorText));
 
         button->setCheckable(true);
         connect(button, &QPushButton::clicked, this, &TagsWidget::buttonPressed);
@@ -470,13 +466,8 @@ ProgramsWidget::ProgramsWidget() {
     setObjectName("programs");
 
     QBoxLayout* layout = new QHBoxLayout(this);
-
-    QWidget* controls = createControls();
-    layout->addWidget(controls);
-
-    QWidget* programs = createPrograms();
-    layout->addWidget(programs);
-
+    layout->addWidget(createControls());
+    layout->addWidget(createPrograms());
     layout->setStretch(1, 5);
 }
 
@@ -585,7 +576,7 @@ void ProgramsWidget::searchUpdated(std::string text) {
                 auto toLower = [](const std::string& str) {
                     std::string res;
                     std::transform(
-                        str.begin(), str.end(),
+                        str.cbegin(), str.cend(),
                         std::back_inserter(res),
                         [](char c) { return static_cast<char>(::tolower(c)); }
                     );
@@ -607,6 +598,5 @@ void ProgramsWidget::updatedVisibilityState() {
         p.second->setVisible(vi.bySearch && vi.byTag);
     }
 }
-
 
 } // namespace programs

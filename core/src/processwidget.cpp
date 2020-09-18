@@ -135,16 +135,21 @@ QWidget* ProcessWidget::createMessageContainer() {
     {
         QGroupBox* messages = new QGroupBox("Stdout");
         QVBoxLayout* l = new QVBoxLayout(messages);
+        l->setContentsMargins(0, 0, 0, 0);
         _messages = new QPlainTextEdit;
         _messages->setReadOnly(true);
+        _messages->setCenterOnScroll(true);
         l->addWidget(_messages);
         containerLayout->addWidget(messages);
     }
     {
         QGroupBox* messages = new QGroupBox("Stderr");
         QVBoxLayout* l = new QVBoxLayout(messages);
+        l->setContentsMargins(0, 0, 0, 0);
+
         _errorMessages = new QPlainTextEdit;
         _errorMessages->setReadOnly(true);
+        _messages->setCenterOnScroll(true);
         l->addWidget(_errorMessages);
         containerLayout->addWidget(messages);
     }
