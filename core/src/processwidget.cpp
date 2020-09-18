@@ -183,9 +183,11 @@ void ProcessWidget::addMessage(common::ProcessOutputMessage message) {
     }
     if (message.outputType == common::ProcessOutputMessage::OutputType::StdOut) {
         _messages->insertPlainText(QString::fromStdString(msg));
+        _messages->ensureCursorVisible();
     }
     else {
         _errorMessages->insertPlainText(QString::fromStdString(msg));
+        _errorMessages->ensureCursorVisible();
     }
 }
 

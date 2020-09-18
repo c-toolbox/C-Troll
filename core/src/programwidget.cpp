@@ -45,6 +45,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenu>
+#include <QScrollArea>
 #include <QVBoxLayout>
 #include <set>
 
@@ -492,9 +493,13 @@ QWidget* ProgramsWidget::createControls() {
 }
 
 QWidget* ProgramsWidget::createPrograms() {
-    QWidget* controls = new QWidget;
-    QBoxLayout* layout = new QVBoxLayout(controls);
-    layout->setMargin(0);
+    QScrollArea* area = new QScrollArea;
+    area->setWidgetResizable(true);
+    area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QWidget* content = new QWidget;
+    area->setWidget(content);
+    QBoxLayout* contentLayout = new QVBoxLayout(content);
+    area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     for (Program* p : data::programs()) {
         ProgramWidget* w = new ProgramWidget(*p);
@@ -521,12 +526,12 @@ QWidget* ProgramsWidget::createPrograms() {
 
         _widgets[p->id] = w;
         _visibilities[p->id] = VisibilityInfo{ true, true };
-        layout->addWidget(w);
+        contentLayout->addWidget(w);
     }
 
-    layout->addStretch();
+    //layout->addStretch();
 
-    return controls;
+    return area;
 }
 
 void ProgramsWidget::processUpdated(Process::ID processId) {
