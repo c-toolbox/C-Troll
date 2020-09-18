@@ -47,7 +47,7 @@ public:
     SocketHandler(int port, std::string secret);
 
 public slots:    
-    void sendMessage(const nlohmann::json& message);
+    void sendMessage(const nlohmann::json& message, bool printMessage = true);
 
 signals:
     void newConnection(const std::string& peerAddress);

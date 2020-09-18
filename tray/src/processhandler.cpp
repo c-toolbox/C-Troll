@@ -34,6 +34,7 @@
 
 #include "processhandler.h"
 
+#include <QMetaEnum>
 #include "killallmessage.h"
 #include "logging.h"
 #include "message.h"
@@ -182,17 +183,14 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
 }
 
 void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
-    Log("Error occurred: " + error);
+    std::string err = QMetaEnum::fromType<QProcess::ProcessError>().valueToKey(error);
+    Log("Error occurred: " + err);
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
     const auto p = processIt(process);
     
     if (p != _processes.end() ) {
-        // @TODO (abock, 2020-02-26) Me thinks this codepath should also send a
-        // "failedtostart" message. When trying to open the same process multiple times,
-        // the core got stuck in a "Starting" state
-
         common::ProcessStatusMessage msg;
         msg.processId = p->processId;
         msg.status = toTrayStatus(error);
@@ -267,7 +265,10 @@ void ProcessHandler::handleReadyReadStandardOutput() {
             QString::fromLatin1(proc->readAllStandardOutput()).toLocal8Bit().constData();
         msg.outputType = common::ProcessOutputMessage::OutputType::StdOut;
         nlohmann::json j = msg;
-        emit sendSocketMessage(j);
+
+        // false -> We don't need to print every console message to the log of the tray
+        // application
+        emit sendSocketMessage(j, false);
     }
 }
 

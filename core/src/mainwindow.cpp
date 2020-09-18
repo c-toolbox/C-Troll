@@ -163,7 +163,7 @@ MainWindow::MainWindow(const std::string& configurationFile) {
     );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayStatus,
-        [this](Node::ID id, common::TrayStatusMessage status) {
+        [this](Node::ID, common::TrayStatusMessage status) {
             if (status.processes.empty()) {
                 // Nothing to do here
                 return;
@@ -240,6 +240,10 @@ MainWindow::MainWindow(const std::string& configurationFile) {
             Node* node = data::findNode(nodeId);
             Log(fmt::format("{} {} {}", cluster->name, node->name, std::string(message)));
         }
+    );
+    connect(
+        &_clusterConnectionHandler, &ClusterConnectionHandler::receivedProcessMessage,
+        _processesWidget, &ProcessesWidget::receivedProcessMessage
     );
     connect(
         _processesWidget, &ProcessesWidget::killAllProcesses,
@@ -338,6 +342,7 @@ void MainWindow::startProcess(Process::ID processId) {
     Log(fmt::format("\tExecutable: {}", command.executable));
     Log(fmt::format("\tIdentifier: {}", command.id));
     Log(fmt::format("\tCommandline Parameters: {}", command.commandlineParameters));
+    Log(fmt::format("\tForward StdErr: {}", command.forwardStdOutStdErr));
     Log(fmt::format("\tCWD: {}", command.workingDirectory));
     
     nlohmann::json j = command;

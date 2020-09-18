@@ -39,7 +39,7 @@
 namespace {
     constexpr const char* KeyIdentifier = "processId";
     constexpr const char* KeyMessage = "message";
-    constexpr const char* KeyType = "type";
+    constexpr const char* KeyOutputType = "outputType";
 } // namespace
 
 namespace common {
@@ -51,7 +51,7 @@ void to_json(nlohmann::json& j, const ProcessOutputMessage& p) {
         { KeyIdentifier, p.processId },
         { KeyMessage, p.message },
         // @TODO (abock, 2020-02-21) Replace this with a string
-        { KeyType, static_cast<int>(p.outputType) }
+        { KeyOutputType, static_cast<int>(p.outputType) }
     };
 }
 
@@ -60,7 +60,7 @@ void from_json(const nlohmann::json& j, ProcessOutputMessage& p) {
 
     j.at(KeyIdentifier).get_to(p.processId);
     j.at(KeyMessage).get_to(p.message);
-    int outputType = j.at(KeyType).get<int>();
+    int outputType = j.at(KeyOutputType).get<int>();
     p.outputType = static_cast<ProcessOutputMessage::OutputType>(outputType);
 }
     

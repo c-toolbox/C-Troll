@@ -146,8 +146,12 @@ void ClusterConnectionHandler::readyRead(Node::ID nodeId) {
         emit receivedTrayStatus(nodeId, status);
     }
     else if (common::isValidMessage<common::InvalidAuthMessage>(message)) {
-        common::InvalidAuthMessage status = message;
-        emit receivedInvalidAuthStatus(nodeId, status);
+        common::InvalidAuthMessage msg = message;
+        emit receivedInvalidAuthStatus(nodeId, msg);
+    }
+    else if (common::isValidMessage<common::ProcessOutputMessage>(message)) {
+        common::ProcessOutputMessage msg = message;
+        emit receivedProcessMessage(nodeId, msg);
     }
     else {
         Node* node = data::findNode(nodeId);

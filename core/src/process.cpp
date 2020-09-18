@@ -49,13 +49,20 @@ common::StartCommandMessage startProcessCommand(const Process& process) {
     t.id = process.id.v;
     t.executable = program->executable;
     t.workingDirectory = program->workingDirectory;
-    t.commandlineParameters =
-        program->commandlineParameters + ' ' + configuration.parameters;
+
+    if (!program->commandlineParameters.empty()) {
+        t.commandlineParameters = program->commandlineParameters;
+    }
+    if (!configuration.parameters.empty()) {
+        t.commandlineParameters += ' ';
+        t.commandlineParameters += configuration.parameters;
+    }
 
     t.programId = process.programId.v;
     t.configurationId = process.configurationId.v;
     t.clusterId = process.clusterId.v;
     t.nodeId = process.nodeId.v;
+    t.forwardStdOutStdErr = program->shouldForwardMessages;
     t.dataHash = data::dataHash();
 
     return t;

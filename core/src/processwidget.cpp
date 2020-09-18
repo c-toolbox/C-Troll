@@ -36,7 +36,9 @@
 
 #include "database.h"
 #include "processstatusmessage.h"
+#include <QGroupBox>
 #include <QLabel>
+#include <QPlainTextEdit>
 #include <QPushButton>
 #include <QScrollArea>
 #include <QTimer>
@@ -76,24 +78,27 @@ ProcessWidget::ProcessWidget(Process::ID processId)
 
     QBoxLayout* layout = new QHBoxLayout(this);
 
-    QLabel* programLabel = new QLabel(("Program: " + program->name).c_str());
-    layout->addWidget(programLabel);
-
-    QLabel* configurationLabel = new QLabel(
-        ("Configuration: " + configuration.name).c_str()
-    );
-    layout->addWidget(configurationLabel);
-
-    QLabel* clusterLabel = new QLabel(("Cluster: " + cluster->name).c_str());
-    layout->addWidget(clusterLabel);
-
-    QLabel* id = new QLabel(QString::number(process->id.v));
-    layout->addWidget(id);
+    layout->addWidget(new QLabel(("Program: " + program->name).c_str()));
+    layout->addWidget(new QLabel(("Configuration: " + configuration.name).c_str()));
+    layout->addWidget(new QLabel(("Cluster: " + cluster->name).c_str()));
+    layout->addWidget(new QLabel(QString::number(process->id.v)));
 
     _status = new QLabel(("Status: " + statusToString(process->status)).c_str());
     layout->addWidget(_status);
 
-    //layout->insertStretch(5, 0);
+    QWidget* messageContainer = createMessageContainer();
+
+
+    QPushButton* output = new QPushButton("Output");
+    output->setCheckable(true);
+    output->setObjectName("output");
+    connect(
+        output, &QPushButton::clicked,
+        [output, messageContainer]() {
+            messageContainer->setHidden(!output->isChecked());
+        }
+    );
+    layout->insertWidget(5, output, 0, Qt::AlignRight);
 
     _remove = new QPushButton("Remove");
     _remove->setObjectName("removeprocess");
@@ -109,8 +114,45 @@ ProcessWidget::ProcessWidget(Process::ID processId)
 
     _removalTimer = new QTimer();
     _removalTimer->setSingleShot(true);
-    connect(_removalTimer, &QTimer::timeout, [this]() { emit remove(_processId); });
+    connect(
+        _removalTimer, &QTimer::timeout,
+        [this, messageContainer]() {
+            if (messageContainer->isVisible()) {
+                _removalTimer->start(15000);
+            }
+            else {
+                emit remove(_processId);
+            }
+        }
+    );
+}
 
+QWidget* ProcessWidget::createMessageContainer() {
+    QWidget* container = new QWidget;
+    container->setMinimumSize(1200, 500);
+    QVBoxLayout* containerLayout = new QVBoxLayout(container);
+
+    {
+        QGroupBox* messages = new QGroupBox("Stdout");
+        QVBoxLayout* l = new QVBoxLayout(messages);
+        _messages = new QPlainTextEdit;
+        _messages->setReadOnly(true);
+        l->addWidget(_messages);
+        containerLayout->addWidget(messages);
+    }
+    {
+        QGroupBox* messages = new QGroupBox("Stderr");
+        QVBoxLayout* l = new QVBoxLayout(messages);
+        _errorMessages = new QPlainTextEdit;
+        _errorMessages->setReadOnly(true);
+        l->addWidget(_errorMessages);
+        containerLayout->addWidget(messages);
+    }
+
+    containerLayout->setStretch(0, 3);
+    containerLayout->setStretch(1, 1);
+
+    return container;
 }
 
 void ProcessWidget::updateStatus() {
@@ -125,6 +167,21 @@ void ProcessWidget::updateStatus() {
     // The user should only be able to remove the process entry if the process has
     // finished in some state
     _remove->setEnabled(process->status != common::ProcessStatusMessage::Status::Running);
+}
+
+void ProcessWidget::addMessage(common::ProcessOutputMessage message) {
+    std::string msg = message.message;
+    // Some of the incoming messages might have a newline character at the end, but we
+    // want to normalize that
+    if (msg.back() != '\n') {
+        msg.push_back('\n');
+    }
+    if (message.outputType == common::ProcessOutputMessage::OutputType::StdOut) {
+        _messages->insertPlainText(QString::fromStdString(msg));
+    }
+    else {
+        _errorMessages->insertPlainText(QString::fromStdString(msg));
+    }
 }
 
 
@@ -149,9 +206,17 @@ ProcessesWidget::ProcessesWidget() {
     _contentLayout->addStretch();
 
     QPushButton* killAll = new QPushButton("Kill all processses");
-    layout->addWidget(killAll);
-
     connect(killAll, &QPushButton::clicked, this, &ProcessesWidget::killAllProcesses);
+    layout->addWidget(killAll);
+}
+
+void ProcessesWidget::receivedProcessMessage(Node::ID,
+                                             common::ProcessOutputMessage message)
+{
+    Process::ID pid =  Process::ID(message.processId);
+    const auto it = _widgets.find(pid);
+    assert(it != _widgets.end());
+    it->second->addMessage(std::move(message));
 }
 
 void ProcessesWidget::processAdded(Process::ID processId) {
@@ -161,6 +226,7 @@ void ProcessesWidget::processAdded(Process::ID processId) {
     connect(w, &ProcessWidget::remove, this, &ProcessesWidget::processRemoved);
     _widgets[processId] = w;
     _contentLayout->insertWidget(static_cast<int>(_widgets.size() - 1), w);
+    //layout()->update();
 }
 
 void ProcessesWidget::processUpdated(Process::ID processId) {

@@ -40,6 +40,7 @@
 #include "cluster.h"
 #include "invalidauthmessage.h"
 #include "jsonsocket.h"
+#include "processoutputmessage.h"
 #include "processstatusmessage.h"
 #include "traystatusmessage.h"
 #include <QAbstractSocket>
@@ -65,7 +66,8 @@ signals:
 
     void receivedTrayProcess(common::ProcessStatusMessage status);
     void receivedTrayStatus(Node::ID id, common::TrayStatusMessage status);
-    void receivedInvalidAuthStatus(Node::ID id, common::InvalidAuthMessage status);
+    void receivedInvalidAuthStatus(Node::ID id, common::InvalidAuthMessage message);
+    void receivedProcessMessage(Node::ID id, common::ProcessOutputMessage message);
 
 private slots:
     void handleSocketStateChange(Node::ID nodeId, QAbstractSocket::SocketState state);

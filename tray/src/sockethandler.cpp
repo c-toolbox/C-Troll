@@ -73,10 +73,15 @@ void SocketHandler::readyRead(common::JsonSocket* socket) {
     }
 }
 
-void SocketHandler::sendMessage(const nlohmann::json& message) {
+void SocketHandler::sendMessage(const nlohmann::json& message, bool printMessage) {
     for (common::JsonSocket* jsonSocket : _sockets) {
         std::string peer = jsonSocket->peerAddress();
-        Log(fmt::format("Sending: {} => {}", message.dump(), peer));
+        if (printMessage) {
+            Log(fmt::format("Sending: {} => {}", message.dump(), peer));
+        }
+        else {
+            Log(fmt::format("Sending: {} => {}", message["type"].dump(), peer));
+        }
         jsonSocket->write(message);
     }
 }

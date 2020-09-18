@@ -75,7 +75,7 @@ public slots:
     void handleStarted();
 
 signals:
-    void sendSocketMessage(const nlohmann::json& message);
+    void sendSocketMessage(const nlohmann::json& message, bool printMessage = true);
 
     void startedProcess(ProcessInfo process);
     void closedProcess(ProcessInfo process);

@@ -48,6 +48,7 @@ namespace {
     constexpr const char* KeyWorkingDirectory = "workingDirectory";
     constexpr const char* KeyClusters = "clusters";
     constexpr const char* KeyTags = "tags";
+    constexpr const char* KeySendConsole = "shouldForwardMessages";
     constexpr const char* KeyDelay = "delay";
     constexpr const char* KeyConfigurations = "configurations";
 
@@ -71,6 +72,9 @@ void from_json(const nlohmann::json& j, Program& p) {
     }
     if (j.find(KeyTags) != j.end()) {
         j.at(KeyTags).get_to(p.tags);
+    }
+    if (j.find(KeySendConsole) != j.end()) {
+        j.at(KeySendConsole).get_to(p.shouldForwardMessages);
     }
     if (j.find(KeyDelay) != j.end()) {
         const unsigned int delay = j.at(KeyDelay).get<unsigned int>();

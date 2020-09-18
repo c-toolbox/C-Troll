@@ -38,10 +38,12 @@
 #include <QWidget>
 
 #include "process.h"
+#include <processoutputmessage.h>
 #include <map>
 
 class QBoxLayout;
 class QLabel;
+class QPlainTextEdit;
 class QPushButton;
 class QScrollArea;
 class QTimer;
@@ -52,13 +54,18 @@ public:
     ProcessWidget(Process::ID processId);
 
     void updateStatus();
+    void addMessage(common::ProcessOutputMessage message);
 
 signals:
     void remove(Process::ID processId);
 
 private:
+    QWidget* createMessageContainer();
+
     const Process::ID _processId;
     QLabel* _status;
+    QPlainTextEdit* _messages;
+    QPlainTextEdit* _errorMessages;
     QPushButton* _remove;
     QTimer* _removalTimer;
 };
@@ -75,6 +82,9 @@ public:
     void processAdded(Process::ID processId);
     void processUpdated(Process::ID processId);
     void processRemoved(Process::ID processId);
+
+public slots:
+    void receivedProcessMessage(Node::ID node, common::ProcessOutputMessage message);
 
 signals:
     void killAllProcesses();
