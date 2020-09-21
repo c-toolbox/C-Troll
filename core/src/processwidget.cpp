@@ -88,43 +88,56 @@ ProcessWidget::ProcessWidget(Process::ID processId)
 
     QWidget* messageContainer = createMessageContainer();
 
-
-    QPushButton* output = new QPushButton("Output");
-    output->setCheckable(true);
-    output->setObjectName("output");
-    connect(
-        output, &QPushButton::clicked,
-        [output, messageContainer]() {
-            messageContainer->setHidden(!output->isChecked());
-        }
-    );
-    layout->insertWidget(5, output, 0, Qt::AlignRight);
-
-    _remove = new QPushButton("Remove");
-    _remove->setObjectName("removeprocess");
-    _remove->setEnabled(false);
-    connect(
-        _remove, &QPushButton::clicked,
-        [this]() {
+    {
+        QPushButton* output = new QPushButton("Output");
+        output->setCheckable(true);
+        output->setObjectName("output");
+        connect(
+            output, &QPushButton::clicked,
+            [output, messageContainer]() {
+                messageContainer->setHidden(!output->isChecked());
+            }
+        );
+        layout->insertWidget(5, output, 0, Qt::AlignRight);
+    }
+    {
+        QPushButton* kill = new QPushButton("Kill");
+        kill->setObjectName("kill");
+        connect(
+            kill, &QPushButton::clicked,
+            [this]() { emit this->kill(_processId); }
+        );
+        layout->insertWidget(6, kill, 0, Qt::AlignRight);
+    }
+    {
+        _remove = new QPushButton("Remove");
+        _remove->setObjectName("removeprocess");
+        _remove->setEnabled(false);
+        connect(
+            _remove, &QPushButton::clicked,
+            [this]() {
             _removalTimer->stop();
             emit remove(_processId);
         }
-    );
-    layout->insertWidget(6, _remove, 0, Qt::AlignRight);
-
-    _removalTimer = new QTimer();
-    _removalTimer->setSingleShot(true);
-    connect(
-        _removalTimer, &QTimer::timeout,
-        [this, messageContainer]() {
-            if (messageContainer->isVisible()) {
-                _removalTimer->start(15000);
+        );
+        layout->insertWidget(7, _remove, 0, Qt::AlignRight);
+    }
+    
+    {
+        _removalTimer = new QTimer();
+        _removalTimer->setSingleShot(true);
+        connect(
+            _removalTimer, &QTimer::timeout,
+            [this, messageContainer]() {
+                if (messageContainer->isVisible()) {
+                    _removalTimer->start(15000);
+                }
+                else {
+                    emit remove(_processId);
+                }
             }
-            else {
-                emit remove(_processId);
-            }
-        }
-    );
+        );
+    }
 }
 
 QWidget* ProcessWidget::createMessageContainer() {
@@ -231,6 +244,7 @@ void ProcessesWidget::processAdded(Process::ID processId) {
     ProcessWidget* w = new ProcessWidget(processId);
     w->setMinimumWidth(width());
     connect(w, &ProcessWidget::remove, this, &ProcessesWidget::processRemoved);
+    connect(w, &ProcessWidget::kill, this, &ProcessesWidget::killProcess);
     _widgets[processId] = w;
     _contentLayout->insertWidget(static_cast<int>(_widgets.size() - 1), w);
     //layout()->update();

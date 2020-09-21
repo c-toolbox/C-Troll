@@ -58,6 +58,7 @@ public:
 
 signals:
     void remove(Process::ID processId);
+    void kill(Process::ID processId);
 
 private:
     QWidget* createMessageContainer();
@@ -87,6 +88,7 @@ public slots:
     void receivedProcessMessage(Node::ID node, common::ProcessOutputMessage message);
 
 signals:
+    void killProcess(Process::ID processId);
     void killAllProcesses();
 
 private:

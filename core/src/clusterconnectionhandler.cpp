@@ -136,6 +136,9 @@ void ClusterConnectionHandler::readyRead(Node::ID nodeId) {
     assert(it != _sockets.end());
 
     nlohmann::json message = it->second->read();
+#ifdef QT_DEBUG
+    Log(std::to_string(nodeId.v) + " " + message.dump());
+#endif // QT_DEBUG
 
     if (common::isValidMessage<common::ProcessStatusMessage>(message)) {
         common::ProcessStatusMessage status = message;

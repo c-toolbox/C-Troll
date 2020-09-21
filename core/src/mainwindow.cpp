@@ -246,6 +246,10 @@ MainWindow::MainWindow(const std::string& configurationFile) {
         _processesWidget, &ProcessesWidget::receivedProcessMessage
     );
     connect(
+        _processesWidget, &ProcessesWidget::killProcess,
+        [this](Process::ID processId) { stopProcess(processId); }
+    );
+    connect(
         _processesWidget, &ProcessesWidget::killAllProcesses,
         [this]() { killAllProcesses(Cluster::ID{ -1 }); }
     );
