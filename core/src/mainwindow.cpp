@@ -332,7 +332,6 @@ void MainWindow::stopProgram(Cluster::ID clusterId, Program::ID programId,
 
 void MainWindow::startProcess(Process::ID processId) {
     Process* process = data::findProcess(processId);
-    Cluster* cluster = data::findCluster(process->clusterId);
     Node* node = data::findNode(process->nodeId);
 
     common::StartCommandMessage command = startProcessCommand(*process);
@@ -347,7 +346,6 @@ void MainWindow::startProcess(Process::ID processId) {
 
 void MainWindow::stopProcess(Process::ID processId) {
     Process* process = data::findProcess(processId);
-    Cluster* cluster = data::findCluster(process->clusterId);
     Node* node = data::findNode(process->nodeId);
 
     common::ExitCommandMessage command = exitProcessCommand(*process);
@@ -355,11 +353,8 @@ void MainWindow::stopProcess(Process::ID processId) {
         command.secret = node->secret;
     }
 
-    Log("Sending message to stop program:");
-    Log(fmt::format("\tCluster: {} {}", cluster->name, cluster->id.v));
-    Log(fmt::format("\tIdentifier: {}", command.id));
-
     nlohmann::json j = command;
+    Log("Sending: " + j.dump());
     _clusterConnectionHandler.sendMessage(*node, j);
 }
 

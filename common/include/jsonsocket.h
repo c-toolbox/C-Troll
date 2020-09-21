@@ -60,17 +60,17 @@ public:
     QTcpSocket::SocketState state() const;
 
     void write(nlohmann::json json);
-    nlohmann::json read();
 
     std::string localAddress() const;
     std::string peerAddress() const;
 
 signals:
-    void readyRead();
+    void messageReceived(nlohmann::json message);
     void disconnected();
 
 private: 
     void readToBuffer();
+    void parseBuffer();
 
     std::unique_ptr<QTcpSocket> _socket;
     std::vector<char> _buffer;

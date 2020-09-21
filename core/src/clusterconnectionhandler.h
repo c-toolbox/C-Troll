@@ -71,7 +71,7 @@ signals:
 
 private slots:
     void handleSocketStateChange(Node::ID nodeId, QAbstractSocket::SocketState state);
-    void readyRead(Node::ID nodeId);
+    void handleMessage(nlohmann::json message, Node::ID nodeId);
 
 private:
     std::map<Node::ID, std::unique_ptr<common::JsonSocket>> _sockets;

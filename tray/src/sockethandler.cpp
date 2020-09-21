@@ -58,8 +58,7 @@ SocketHandler::SocketHandler(int port, std::string secret)
     );
 }
 
-void SocketHandler::readyRead(common::JsonSocket* socket) {
-    nlohmann::json message = socket->read();
+void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* socket) {
 #ifdef QT_DEBUG
     ::Log(fmt::format("Received from {}: {}", socket->peerAddress(), message.dump()));
 #endif // QT_DEBUG
@@ -102,23 +101,23 @@ void SocketHandler::disconnected(common::JsonSocket* socket) {
 
 void SocketHandler::newConnectionEstablished() {
     while (_server.hasPendingConnections()) {
-        common::JsonSocket* jsonSocket = new common::JsonSocket(
+        common::JsonSocket* socket = new common::JsonSocket(
             std::unique_ptr<QTcpSocket>(_server.nextPendingConnection())
         );
         
         QObject::connect(
-            jsonSocket, &common::JsonSocket::disconnected,
-            [this, jsonSocket]() { disconnected(jsonSocket); }
+            socket, &common::JsonSocket::disconnected,
+            [this, socket]() { disconnected(socket); }
         );
 
         QObject::connect(
-            jsonSocket, &common::JsonSocket::readyRead,
-            [this, jsonSocket]() { readyRead(jsonSocket); }
+            socket, &common::JsonSocket::messageReceived,
+            [this, socket](nlohmann::json message) { handleMessage(message, socket); }
         );
 
-        _sockets.push_back(jsonSocket);
-        Log(fmt::format("Socket connected from {}", jsonSocket->peerAddress()));
+        _sockets.push_back(socket);
+        Log(fmt::format("Socket connected from {}", socket->peerAddress()));
 
-        emit newConnection(jsonSocket->peerAddress());
+        emit newConnection(socket->peerAddress());
     }
 }

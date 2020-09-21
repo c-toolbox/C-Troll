@@ -83,8 +83,8 @@ void ClusterConnectionHandler::initialize() {
 
         auto jsonSocket = std::make_unique<common::JsonSocket>(std::move(socket));
         connect(
-            jsonSocket.get(), &common::JsonSocket::readyRead,
-            [this, id = node->id]() { readyRead(id); }
+            jsonSocket.get(), &common::JsonSocket::messageReceived,
+            [this, id = node->id](nlohmann::json message) { handleMessage(message, id); }
         );
         common::JsonSocket* s = jsonSocket.get();
         _sockets[node->id] = std::move(jsonSocket);
@@ -131,11 +131,9 @@ void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
     }
 }
 
-void ClusterConnectionHandler::readyRead(Node::ID nodeId) {
+void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID nodeId) {
     const auto it = _sockets.find(nodeId);
     assert(it != _sockets.end());
-
-    nlohmann::json message = it->second->read();
 #ifdef QT_DEBUG
     Log(std::to_string(nodeId.v) + ":  " + message.dump());
 #endif // QT_DEBUG

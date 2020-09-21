@@ -148,6 +148,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
             // Found
             common::ProcessStatusMessage returnMsg;
             p->process->terminate();
+            //handleFinished
             returnMsg.status = common::ProcessStatusMessage::Status::NormalExit;
             // Find specifc value in process map i.e. process
             const auto pIt = processIt(p->process);
@@ -156,8 +157,11 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                 returnMsg.processId = pIt->processId;
                 nlohmann::json j = returnMsg;
                 emit sendSocketMessage(j);
+                
                 // Remove this process from the list as we consider it finished
+                ProcessInfo info = *pIt;
                 _processes.erase(pIt);
+                emit closedProcess(info);
             }
         }
     }

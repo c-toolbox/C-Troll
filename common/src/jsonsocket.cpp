@@ -73,6 +73,10 @@ void JsonSocket::readToBuffer() {
     _buffer.resize(incomingData.size());
     std::copy(incomingData.begin(), incomingData.end(), _buffer.begin());
 
+    parseBuffer();
+}
+
+void JsonSocket::parseBuffer() {
     // If it is the first package to arrive, we extract the expected length of the message
     if (_payloadSize == -1) {
         const auto it = std::find(_buffer.cbegin(), _buffer.cend(), '#');
@@ -84,28 +88,38 @@ void JsonSocket::readToBuffer() {
     }
 
     if (_payloadSize > 0 && (_payloadSize <= _buffer.size())) {
-        emit readyRead();
+        std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
+        std::string json(data.data(), _payloadSize);
+        _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
+        _payloadSize = -1;
+
+        nlohmann::json message = nlohmann::json::parse(json);
+        emit messageReceived(message);
+
+        if (!_buffer.empty()) {
+            // This can only happen if we received one TCP package with multiple messages
+            // in it
+            parseBuffer();
+        }
     }
-    //readToBuffer();
 }
 
-nlohmann::json JsonSocket::read() {
-    if (_payloadSize > _buffer.size()) {
-#ifdef QT_DEBUG
-        ::Log(fmt::format("Incomplete buffer: {} != {}", _payloadSize, _buffer.size()));
-#endif // QT_DEBUG
-        return nlohmann::json();
-    }
-
-    // Two messages in one -> second one gets killed
-    std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
-    std::string json(data.data(), _payloadSize);
-    _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
-    std::fill(_buffer.begin(), _buffer.end(), static_cast<char>(0));
-    _payloadSize = -1;
-
-    return nlohmann::json::parse(json);
-}
+//nlohmann::json JsonSocket::read() {
+//    if (_payloadSize > _buffer.size()) {
+//#ifdef QT_DEBUG
+//        ::Log(fmt::format("Incomplete buffer: {} != {}", _payloadSize, _buffer.size()));
+//#endif // QT_DEBUG
+//        return nlohmann::json();
+//    }
+//
+//    // Two messages in one -> second one gets killed
+//    std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
+//    std::string json(data.data(), _payloadSize);
+//    _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
+//    _payloadSize = -1;
+//
+//    return nlohmann::json::parse(json);
+//}
 
 std::string JsonSocket::localAddress() const {
     return _socket->localAddress().toString().toLocal8Bit().constData();
