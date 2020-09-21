@@ -35,6 +35,6 @@
 #ifndef __TRAY__VERSION_H__
 #define __TRAY__VERSION_H__
 
-constexpr const char* Version = "0.9.0";
+constexpr const char* Version = "0.9.1";
 
 #endif // __TRAY__VERSION_H__
