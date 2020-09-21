@@ -529,7 +529,7 @@ QWidget* ProgramsWidget::createPrograms() {
         contentLayout->addWidget(w);
     }
 
-    //layout->addStretch();
+    contentLayout->addStretch();
 
     return area;
 }

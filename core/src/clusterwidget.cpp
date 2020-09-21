@@ -41,6 +41,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QLabel>
+#include <QScrollArea>
 #include <QVBoxLayout>
 
 namespace {
@@ -184,13 +185,21 @@ ClustersWidget::ClustersWidget() {
     setObjectName("clusterwidget");
 
     QBoxLayout* layout = new QVBoxLayout(this);
+    QScrollArea* area = new QScrollArea;
+    area->setWidgetResizable(true);
+    area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QWidget* content = new QWidget;
+    area->setWidget(content);
+    QBoxLayout* contentLayout = new QVBoxLayout(content);
+    area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    layout->addWidget(area);
 
     for (Cluster* c : data::clusters()) {
         ClusterWidget* widget = new ClusterWidget(*c);
         _clusterWidgets[c->id] = widget;
-        layout->addWidget(widget);
+        contentLayout->addWidget(widget);
     }
-    layout->addStretch();
+    contentLayout->addStretch();
 }
 
 void ClustersWidget::connectedStatusChanged(Cluster::ID clusterId, Node::ID nodeId) {
