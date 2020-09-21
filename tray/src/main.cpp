@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
     ProcessHandler processHandler;
     
     QObject::connect(
-        &socketHandler, &SocketHandler::messageRecieved,
+        &socketHandler, &SocketHandler::messageReceived,
         &processHandler, &ProcessHandler::handleSocketMessage
     );
     QObject::connect(

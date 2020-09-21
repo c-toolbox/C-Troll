@@ -60,10 +60,13 @@ SocketHandler::SocketHandler(int port, std::string secret)
 
 void SocketHandler::readyRead(common::JsonSocket* socket) {
     nlohmann::json message = socket->read();
+#ifdef QT_DEBUG
+    ::Log(fmt::format("Received from {}: {}", socket->peerAddress(), message.dump()));
+#endif // QT_DEBUG
 
     common::Message msg = message;
     if (msg.secret == _secret) {
-        emit messageRecieved(std::move(message), socket->peerAddress());
+        emit messageReceived(std::move(message), socket->peerAddress());
     }
     else {
         ::Log("Received invalid message");

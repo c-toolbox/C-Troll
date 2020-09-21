@@ -33,8 +33,9 @@
  ****************************************************************************************/
 
 #include "jsonsocket.h"
-
+#include "logging.h"
 #include <QNetworkProxy>
+#include <fmt/format.h>
 
 namespace common {
 
@@ -59,7 +60,11 @@ void JsonSocket::write(nlohmann::json jsonDocument) {
     std::string length = std::to_string(jsonText.size());
     std::string msg = length + '#' + jsonText;
 
-    _socket->write(msg.c_str());
+    const size_t messageSize = msg.size();
+    qint64 res = _socket->write(msg.c_str());
+    if (static_cast<qint64>(messageSize) != res) {
+        ::Log(fmt::format("Error writing message: {} ({} != {})", msg, res, messageSize));
+    }
     _socket->flush();
 }
 
@@ -80,18 +85,23 @@ void JsonSocket::readToBuffer() {
 
     if (_payloadSize > 0 && (_payloadSize <= _buffer.size())) {
         emit readyRead();
-        readToBuffer();
     }
+    //readToBuffer();
 }
 
 nlohmann::json JsonSocket::read() {
     if (_payloadSize > _buffer.size()) {
+#ifdef QT_DEBUG
+        ::Log(fmt::format("Incomplete buffer: {} != {}", _payloadSize, _buffer.size()));
+#endif // QT_DEBUG
         return nlohmann::json();
     }
 
+    // Two messages in one -> second one gets killed
     std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
     std::string json(data.data(), _payloadSize);
     _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
+    std::fill(_buffer.begin(), _buffer.end(), static_cast<char>(0));
     _payloadSize = -1;
 
     return nlohmann::json::parse(json);

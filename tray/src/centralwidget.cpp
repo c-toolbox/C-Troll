@@ -65,6 +65,7 @@ void CentralWidget::setPort(int port) {
 
 void CentralWidget::log(std::string msg) {
     _messageBox->append(msg.c_str());
+    _messageBox->ensureCursorVisible();
 }
 
 void CentralWidget::newConnection(const std::string& peerAddress) {
