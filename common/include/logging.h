@@ -77,7 +77,7 @@ public:
      *
      * \param message The message that is to be logged
      */
-    void logMessage(std::string message);
+    void logMessage(std::string category, std::string message);
   
 private:
     /**
@@ -109,6 +109,6 @@ private:
  * \param message The message that is to be logged and passed to the Log::logMessage
  *        function
  */
-void Log(std::string message);
+void Log(std::string category, std::string message);
 
 #endif // __COMMON__LOGGING_H__

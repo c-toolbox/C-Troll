@@ -118,10 +118,10 @@ void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
     const bool isConnected = state == QAbstractSocket::SocketState::ConnectedState;
 
     if (node->isConnected != isConnected) {
-        Log(fmt::format(
-            "Socket state change: {}:{} --> {}",
-            node->ipAddress, node->port, stateToString(state)
-        ));
+        Log(
+            fmt::format("Socket State Change [{}:{}]", node->ipAddress, node->port),
+            stateToString(state)
+        );
         node->isConnected = isConnected;
     }
 
@@ -135,7 +135,11 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
     const auto it = _sockets.find(nodeId);
     assert(it != _sockets.end());
 #ifdef QT_DEBUG
-    Log(std::to_string(nodeId.v) + ":  " + message.dump());
+    Node* node = data::findNode(nodeId);
+    Log(
+        fmt::format("Received [{}:{} ({})]", node->ipAddress, node->port, node->name),
+        message.dump()
+    );
 #endif // QT_DEBUG
 
     if (common::isValidMessage<common::ProcessStatusMessage>(message)) {
@@ -167,8 +171,10 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
 void ClusterConnectionHandler::sendMessage(const Node& node, nlohmann::json msg) const {
     assert(!msg.is_null());
 
-    Log("Node: " + node.name + '\t' + node.ipAddress + ':' + std::to_string(node.port));
-
+    Log(
+        fmt::format("Sending [{}:{} ({})]", node.ipAddress, node.port, node.name),
+        msg.dump()
+    );
     const auto it = _sockets.find(node.id);
     assert(it != _sockets.end());
 

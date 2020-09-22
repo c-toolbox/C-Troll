@@ -102,14 +102,15 @@ std::vector<T> loadJsonFromDirectory(const std::string& directory) {
         }
 
         const std::string file = p.path().string();
-        ::Log(fmt::format("Loading file {}", file));
+        ::Log("Status", fmt::format("Loading file '{}'", file));
         try {
             T obj = common::loadFromJson<T>(file, directory);
             res.push_back(std::move(obj));
         }
         catch (const std::runtime_error& e) {
             ::Log(
-                fmt::format("Failed to load file {}: {}", file, e.what())
+                "Error",
+                fmt::format("Failed to load file '{}': {}", file, e.what())
             );
         }
     }

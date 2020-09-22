@@ -78,7 +78,7 @@ MainWindow::MainWindow(const std::string& configurationFile) {
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that
         [](QtMsgType, const QMessageLogContext&, const QString& msg) {
-            Log(msg.toLocal8Bit().constData());
+            Log("Qt", msg.toLocal8Bit().constData());
         }
     );
     _messageBox = new QTextEdit;
@@ -96,14 +96,14 @@ MainWindow::MainWindow(const std::string& configurationFile) {
 
     //
     // Load the configuration
-    Log(fmt::format("Loading configuration file {}", configurationFile));
+    Log("Status", fmt::format("Loading configuration file '{}'", configurationFile));
     Configuration config = common::loadFromJson<Configuration>(configurationFile, "");
 
     //
     // Load the data
-    Log(fmt::format("Loading programs from directory {}", config.applicationPath));
-    Log(fmt::format("Loading nodes from directory {}", config.nodePath));
-    Log(fmt::format("Loading clusters from directory {}", config.clusterPath));
+    Log("Status", fmt::format("Loading programs from '{}'", config.applicationPath));
+    Log("Status", fmt::format("Loading nodes from '{}'", config.nodePath));
+    Log("Status", fmt::format("Loading clusters from '{}'", config.clusterPath));
     data::loadData(config.applicationPath, config.clusterPath, config.nodePath);
 
     //
@@ -192,9 +192,10 @@ MainWindow::MainWindow(const std::string& configurationFile) {
                 // have made two connections to the node under two different IP addresses
                 Process* proc = data::findProcess(Process::ID(pi.processId));
                 if (proc) {
-                    ::Log(fmt::format(
-                        "Ignoring process with duplicate id {}", pi.processId
-                    ));
+                    ::Log(
+                        "Status",
+                        fmt::format("Ignoring process with duplicate id {}", pi.processId)
+                    );
                     continue;
                 }
 
@@ -204,7 +205,7 @@ MainWindow::MainWindow(const std::string& configurationFile) {
                         "different set of configurations. Depending on what was changed "
                         "this might lead to very strange behavior";
                     QMessageBox::warning(this, "Different Data", Text);
-                    Log(Text);
+                    Log("Warning", Text);
                 }
 
 
@@ -238,7 +239,10 @@ MainWindow::MainWindow(const std::string& configurationFile) {
         [](Cluster::ID clusterId, Node::ID nodeId, nlohmann::json message) {
             Cluster* cluster = data::findCluster(clusterId);
             Node* node = data::findNode(nodeId);
-            Log(fmt::format("{} {} {}", cluster->name, node->name, std::string(message)));
+            Log(
+                fmt::format("Received [{} / {}]", cluster->name, node->name),
+                message.dump()
+            );
         }
     );
     connect(
@@ -270,7 +274,7 @@ MainWindow::MainWindow(const std::string& configurationFile) {
 }
 
 void MainWindow::log(std::string msg) {
-    _messageBox->append(msg.c_str());
+    _messageBox->append(QString::fromStdString(msg));
 }
 
 void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
@@ -340,7 +344,10 @@ void MainWindow::startProcess(Process::ID processId) {
     }
     
     nlohmann::json j = command;
-    Log("Sending: " + j.dump());
+    Log(
+        fmt::format("Sending [{}:{} ({})]", node->ipAddress, node->port, node->name),
+        j.dump()
+    );
     _clusterConnectionHandler.sendMessage(*node, j);
 }
 
@@ -354,12 +361,12 @@ void MainWindow::stopProcess(Process::ID processId) {
     }
 
     nlohmann::json j = command;
-    Log("Sending: " + j.dump());
+    Log("Sending", j.dump());
     _clusterConnectionHandler.sendMessage(*node, j);
 }
 
 void MainWindow::killAllProcesses(Cluster::ID id) {
-    Log("Send message to stop all programs");
+    Log("Sending", "Send message to stop all programs");
 
     std::vector<Node*> nodes;
     if (id.v == -1 ) {
@@ -387,7 +394,10 @@ void MainWindow::killAllProcesses(Cluster::ID id) {
         }
         nlohmann::json j = command;
 
-        Log("\t" + node->name);
+        Log(
+            fmt::format("Sending [{}:{} ({})]", node->ipAddress, node->port, node->name),
+            j.dump()
+        );
         _clusterConnectionHandler.sendMessage(*node, j);
     }
 }

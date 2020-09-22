@@ -34,6 +34,7 @@
 
 #include "logging.h"
 
+#include <fmt/format.h>
 #include <assert.h>
 
 #ifdef WIN32
@@ -43,6 +44,26 @@
 namespace {
     constexpr const char* LogPrefix = "log_";
     constexpr const char* LogPostfix = ".txt";
+
+    std::string currentTime() {
+#ifdef WIN32
+        SYSTEMTIME t = {};
+        GetLocalTime(&t);
+
+        return fmt::format(
+            "{:0>2}:{:0>2}:{:0>2}.{:0<3}", t.wHour, t.wMinute, t.wSecond, t.wMilliseconds
+        );
+#else
+        struct timeval t;
+        gettimeofday(&t, nullptr);
+        tm* m = gmtime(&t.tv_sec);
+
+        return fmt::format(
+            "{:0>2}:{:0>2}:{:0>2}.{:0<3}",
+            m->tm_hour, m->tm_min, m->tm_sec, t.tv_usec / 1000
+        );
+#endif
+    }
 } // namespace
 
 namespace common {
@@ -70,7 +91,9 @@ Log::~Log() {
     _file.close();
 }
     
-void Log::logMessage(std::string message) {
+void Log::logMessage(std::string category, std::string message) {
+    message = fmt::format("{}  ({}): {}", currentTime(), category, message);
+
     // First the file
     _file << message << '\n';
     _file.flush();
@@ -79,13 +102,12 @@ void Log::logMessage(std::string message) {
 
     // And if we are running in Visual Studio, this output, too
 #ifdef WIN32
-    message = message + "\n";
-    OutputDebugString(message.c_str());
+    OutputDebugString((message + '\n').c_str());
 #endif
 }
     
 } // namespace common
 
-void Log(std::string msg) {
-    common::Log::ref().logMessage(std::move(msg));
+void Log(std::string category, std::string msg) {
+    common::Log::ref().logMessage(std::move(category), std::move(msg));
 }

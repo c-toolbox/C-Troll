@@ -120,7 +120,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
 
     if (common::isValidMessage<common::StartCommandMessage>(message)) {
         common::StartCommandMessage command = message;
-        Log(fmt::format("Received message: {}", message.dump()));
+        Log(fmt::format("Received [{}]", peerAddress), message.dump());
 
         // Check if the identifier of traycommand already is tied to a process
         // We don't allow the same id for multiple processes
@@ -136,7 +136,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
     }
     else if (common::isValidMessage<common::ExitCommandMessage>(message)) {
         common::ExitCommandMessage command = message;
-        Log(fmt::format("Received message: {}", message.dump()));
+        Log(fmt::format("Received [{}]", peerAddress), message.dump());
 
         // Check if the identifier of traycommand already is tied to a process
         // We don't allow the same id for multiple processes
@@ -148,7 +148,6 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
             // Found
             common::ProcessStatusMessage returnMsg;
             p->process->terminate();
-            //handleFinished
             returnMsg.status = common::ProcessStatusMessage::Status::NormalExit;
             // Find specifc value in process map i.e. process
             const auto pIt = processIt(p->process);
@@ -166,10 +165,10 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
         }
     }
     else if (common::isValidMessage<common::KillAllMessage>(message)) {
-        Log("Received KillAllMessage");
+        Log(fmt::format("Received [{}]", peerAddress), message.dump());
 
         for (const ProcessInfo& p : _processes) {
-            Log("Killing process " + std::to_string(p.processId));
+            Log("Killing", fmt::format("Process {}", p.processId));
 
             p.process->close();
             p.process->deleteLater();
@@ -180,7 +179,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
 
 void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     std::string err = QMetaEnum::fromType<QProcess::ProcessError>().valueToKey(error);
-    Log("Error occurred: " + err);
+    Log("Process Error", err);
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
     
     // Find specifc value in process map i.e. process
@@ -287,6 +286,7 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
         );
         process->start(QString::fromStdString(cmd));
     }
+    process->waitForStarted();
 
     const auto p = processIt(process);
     emit startedProcess(*p);
@@ -314,6 +314,11 @@ void ProcessHandler::createAndRunProcessFromCommandMessage(
             proc, &QProcess::readyReadStandardOutput,
             this, &ProcessHandler::handleReadyReadStandardOutput
         );
+    }
+    else {
+        // We are not interested in the output of the process
+        proc->closeReadChannel(QProcess::ProcessChannel::StandardOutput);
+        proc->closeReadChannel(QProcess::ProcessChannel::StandardError);
     }
     connect(proc, &QProcess::started, this, &ProcessHandler::handleStarted);
     

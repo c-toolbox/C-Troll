@@ -68,17 +68,18 @@ public slots:
     void handleSocketMessage(const nlohmann::json& message,
         const std::string& peerAddress);
 
-    void handlerErrorOccurred(QProcess::ProcessError error);
-    void handleFinished(int exitCode, QProcess::ExitStatus exitStatus);
-    void handleReadyReadStandardError();
-    void handleReadyReadStandardOutput();
-    void handleStarted();
-
 signals:
     void sendSocketMessage(const nlohmann::json& message, bool printMessage = true);
 
     void startedProcess(ProcessInfo process);
     void closedProcess(ProcessInfo process);
+
+private slots:
+    void handlerErrorOccurred(QProcess::ProcessError error);
+    void handleFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void handleReadyReadStandardError();
+    void handleReadyReadStandardOutput();
+    void handleStarted();
 
 private:
     void executeProcessWithCommandMessage(QProcess* process,

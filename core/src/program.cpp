@@ -93,7 +93,7 @@ void from_json(const nlohmann::json& j, Program& p) {
         Cluster* c = data::findCluster(cluster);
         if (!c) {
             std::string message = fmt::format("Could not find cluster {}", cluster);
-            ::Log(message);
+            ::Log("Error", message);
             throw std::runtime_error(message);
         }
         p.clusters.push_back(c->id);

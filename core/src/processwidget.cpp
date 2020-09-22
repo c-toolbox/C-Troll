@@ -252,8 +252,21 @@ void ProcessesWidget::processAdded(Process::ID processId) {
 
 void ProcessesWidget::processUpdated(Process::ID processId) {
     const auto it = _widgets.find(processId);
-    assert(it != _widgets.end());
-    it->second->updateStatus();
+
+    if (it == _widgets.end()) {
+        // The only reason why the widget might not exist if:
+        // 1. The process is part of a cluster
+        // 2. This particular process was killed/terminated
+        // 3. The QTimer above ran out and the widget was destroyed
+        // 4. We are restarting the process
+
+        Process* p = data::findProcess(processId);
+        assert(p->status == common::ProcessStatusMessage::Status::Starting);
+        processAdded(processId);
+    }
+    else {
+        it->second->updateStatus();
+    }
 }
 
 void ProcessesWidget::processRemoved(Process::ID processId) {

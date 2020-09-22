@@ -63,7 +63,10 @@ void JsonSocket::write(nlohmann::json jsonDocument) {
     const size_t messageSize = msg.size();
     qint64 res = _socket->write(msg.c_str());
     if (static_cast<qint64>(messageSize) != res) {
-        ::Log(fmt::format("Error writing message: {} ({} != {})", msg, res, messageSize));
+        ::Log(
+            "JsonSocket",
+            fmt::format("Error writing message: {} ({} != {})", msg, res, messageSize)
+        );
     }
     _socket->flush();
 }
@@ -103,23 +106,6 @@ void JsonSocket::parseBuffer() {
         }
     }
 }
-
-//nlohmann::json JsonSocket::read() {
-//    if (_payloadSize > _buffer.size()) {
-//#ifdef QT_DEBUG
-//        ::Log(fmt::format("Incomplete buffer: {} != {}", _payloadSize, _buffer.size()));
-//#endif // QT_DEBUG
-//        return nlohmann::json();
-//    }
-//
-//    // Two messages in one -> second one gets killed
-//    std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
-//    std::string json(data.data(), _payloadSize);
-//    _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
-//    _payloadSize = -1;
-//
-//    return nlohmann::json::parse(json);
-//}
 
 std::string JsonSocket::localAddress() const {
     return _socket->localAddress().toString().toLocal8Bit().constData();

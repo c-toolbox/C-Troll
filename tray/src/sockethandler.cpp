@@ -46,11 +46,11 @@
 SocketHandler::SocketHandler(int port, std::string secret)
     : _secret(std::move(secret))
 {
-    Log(fmt::format("Listening on port: {}", port));
+    Log("Status", fmt::format("Listening on port: {}", port));
     
     const bool success = _server.listen(QHostAddress::Any, static_cast<quint16>(port));
     if (!success) {
-        Log(fmt::format("Error creating socket to listen on port: {}", port));
+        Log("Error", fmt::format("Creating socket to listen on port {} failed", port));
     }
     QObject::connect(
         &_server, &QTcpServer::newConnection,
@@ -60,7 +60,7 @@ SocketHandler::SocketHandler(int port, std::string secret)
 
 void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* socket) {
 #ifdef QT_DEBUG
-    ::Log(fmt::format("Received from {}: {}", socket->peerAddress(), message.dump()));
+    ::Log(fmt::format("Received [{}]", socket->peerAddress()), message.dump());
 #endif // QT_DEBUG
 
     common::Message msg = message;
@@ -68,7 +68,7 @@ void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* so
         emit messageReceived(std::move(message), socket->peerAddress());
     }
     else {
-        ::Log("Received invalid message");
+        ::Log(fmt::format("Received [{}]", socket->peerAddress()), "Invalid message");
         common::InvalidAuthMessage invalidAuthMsg;
         nlohmann::json j = invalidAuthMsg;
         socket->write(j);
@@ -79,10 +79,10 @@ void SocketHandler::sendMessage(const nlohmann::json& message, bool printMessage
     for (common::JsonSocket* jsonSocket : _sockets) {
         std::string peer = jsonSocket->peerAddress();
         if (printMessage) {
-            Log(fmt::format("Sending: {} => {}", message.dump(), peer));
+            Log(fmt::format("Sending [{}]", peer), message.dump());
         }
         else {
-            Log(fmt::format("Sending: {} => {}", message["type"].dump(), peer));
+            Log(fmt::format("Sending [{}]", peer), message["type"].dump());
         }
         jsonSocket->write(message);
     }
@@ -93,7 +93,7 @@ void SocketHandler::disconnected(common::JsonSocket* socket) {
     if (ptr != _sockets.end()) {
         (*ptr)->deleteLater();
         _sockets.erase(ptr);
-        Log(fmt::format("Socket from {} disconnected", socket->peerAddress()));
+        Log("Status", fmt::format("Socket from {} disconnected", socket->peerAddress()));
 
         emit closedConnection(socket->peerAddress());
     }
@@ -116,7 +116,7 @@ void SocketHandler::newConnectionEstablished() {
         );
 
         _sockets.push_back(socket);
-        Log(fmt::format("Socket connected from {}", socket->peerAddress()));
+        Log("Status", fmt::format("Socket connected from {}", socket->peerAddress()));
 
         emit newConnection(socket->peerAddress());
     }

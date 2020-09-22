@@ -65,8 +65,10 @@ int main(int argc, char** argv) {
                 break;
             }
 
-            std::cerr << localMsg.constData() << " (" << context.file << ":" <<
-                context.line << ", " << context.function << ")\n";
+            std::cerr << fmt::format(
+                "{} ({}: {}, {})\n",
+                localMsg.constData(), context.file, context.line, context.function
+            );
         }
     );
 
@@ -88,7 +90,7 @@ int main(int argc, char** argv) {
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that
         [](QtMsgType, const QMessageLogContext&, const QString& msg) {
-            Log(msg.toLocal8Bit().constData());
+            Log("Qt", msg.toLocal8Bit().constData());
         }
     );
 
@@ -96,7 +98,7 @@ int main(int argc, char** argv) {
     std::string absPath = std::filesystem::absolute(configurationFile).string();
     if (!std::filesystem::exists(configurationFile)) {
         std::string str = fmt::format("Creating new configuration at {}", absPath);
-        Log(str);
+        Log("Status", str);
 
         nlohmann::json obj;
         obj["port"] = 5000;
@@ -107,7 +109,7 @@ int main(int argc, char** argv) {
         file.write(content.data(), content.size());
     }
 
-    Log(fmt::format("Loading configuration file from {}", absPath));
+    Log("Status", fmt::format("Loading configuration file from {}", absPath));
     std::ifstream file(absPath);
     std::string content(
         (std::istreambuf_iterator<char>(file)),
@@ -164,5 +166,5 @@ int main(int argc, char** argv) {
     );
 
     app.exec();
-    Log("Application finished");
+    Log("Status", "Application finished");
 }

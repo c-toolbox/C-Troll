@@ -60,7 +60,7 @@ void from_json(const nlohmann::json& j, Cluster& p) {
         Node* n = data::findNode(node);
         if (!n) {
             std::string message = fmt::format("Could not find node with name {}", node);
-            Log(message);
+            Log("Error", message);
             throw std::runtime_error(message);
         }
 
