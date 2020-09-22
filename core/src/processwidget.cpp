@@ -88,7 +88,7 @@ ProcessWidget::ProcessWidget(Process::ID processId)
 
     QWidget* messageContainer = createMessageContainer();
 
-    {
+    if (program->shouldForwardMessages) {
         QPushButton* output = new QPushButton("Output");
         output->setCheckable(true);
         output->setObjectName("output");
