@@ -34,10 +34,6 @@
 
 #include "startcommandmessage.h"
 
-#include "logging.h"
-#include <fmt/format.h>
-#include <optional>
-
 namespace {
     constexpr const char* KeyId = "id";
     constexpr const char* KeyForwardOutErr = "forwardOutErr";

@@ -34,10 +34,6 @@
 
 #include "killallmessage.h"
 
-#include "logging.h"
-#include <fmt/format.h>
-#include <optional>
-
 namespace common {
 
 void to_json(nlohmann::json& j, const KillAllMessage& p) {

@@ -59,11 +59,6 @@ endif ()
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_17)
 
-option(ENABLE_MESSAGE_DEBUGGING "Enable Message Debugging" OFF)
-if (ENABLE_MESSAGE_DEBUGGING)
-  target_compile_definitions(project_options INTERFACE "ENABLE_MESSAGE_DEBUGGING")
-endif ()
-
 include (cmake/compiler_warnings.cmake)
 set_project_warnings(project_options)
 

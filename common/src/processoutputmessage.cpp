@@ -34,6 +34,7 @@
 
 #include "processoutputmessage.h"
 
+#include "logging.h"
 #include <fmt/format.h>
 
 namespace {
@@ -45,13 +46,20 @@ namespace {
 namespace common {
     
 void to_json(nlohmann::json& j, const ProcessOutputMessage& p) {
+    std::string type = [](ProcessOutputMessage::OutputType type) {
+        switch (type) {
+            case ProcessOutputMessage::OutputType::StdOut: return "stdout";
+            case ProcessOutputMessage::OutputType::StdErr: return "stderr";
+            default: throw std::logic_error("Missing case label");
+        }
+    }(p.outputType);
+
     j = {
         { Message::KeyType, ProcessOutputMessage::Type },
         { Message::KeyVersion, p.CurrentVersion },
         { KeyIdentifier, p.processId },
         { KeyMessage, p.message },
-        // @TODO (abock, 2020-02-21) Replace this with a string
-        { KeyOutputType, static_cast<int>(p.outputType) }
+        { KeyOutputType, type }
     };
 }
 
@@ -60,8 +68,16 @@ void from_json(const nlohmann::json& j, ProcessOutputMessage& p) {
 
     j.at(KeyIdentifier).get_to(p.processId);
     j.at(KeyMessage).get_to(p.message);
-    int outputType = j.at(KeyOutputType).get<int>();
-    p.outputType = static_cast<ProcessOutputMessage::OutputType>(outputType);
+    std::string type = j.at(KeyOutputType).get<std::string>();
+    if (type == "stdout") {
+        p.outputType = ProcessOutputMessage::OutputType::StdOut;
+    }
+    else if (type == "stderr") {
+        p.outputType = ProcessOutputMessage::OutputType::StdErr;
+    }
+    else {
+        ::Log("Error", fmt::format("Unknown output type '{}'", type));
+    }
 }
     
 } // namespace common

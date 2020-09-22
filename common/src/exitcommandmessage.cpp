@@ -34,10 +34,6 @@
 
 #include "exitcommandmessage.h"
 
-#include "logging.h"
-#include <fmt/format.h>
-#include <optional>
-
 namespace {
     constexpr const char* KeyId = "id";
 } // namespace
@@ -55,7 +51,6 @@ void to_json(nlohmann::json& j, const ExitCommandMessage& p) {
 
 void from_json(const nlohmann::json& j, ExitCommandMessage& p) {
     validateMessage(j, ExitCommandMessage::Type);
-
     j.at(KeyId).get_to(p.id);
 }
 

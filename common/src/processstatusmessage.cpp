@@ -84,7 +84,6 @@ namespace {
             return common::ProcessStatusMessage::Status::UnknownError;
         }
     }
-
 } // namespace
 
 namespace common {

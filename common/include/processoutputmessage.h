@@ -36,6 +36,7 @@
 #define __COMMON__PROCESSOUTPUTMESSAGE_H__
 
 #include "message.h"
+
 #include <json/json.hpp>
 
 namespace common {

@@ -108,11 +108,6 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
 {
     const bool validMessage = common::validateMessage(message);
     if (!validMessage) {
-#ifdef ENABLE_MESSAGE_DEBUGGING
-        Log(fmt::format(
-            "Unknown message received from {}: {}", peerAddress, message.dump()
-        ));
-#endif // ENABLE_MESSAGE_DEBUGGING
         return;
     }
 

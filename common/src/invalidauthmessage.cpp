@@ -47,4 +47,4 @@ void from_json(const nlohmann::json& j, InvalidAuthMessage&) {
     validateMessage(j, InvalidAuthMessage::Type);
 }
 
-} // namespace
+} // namespace common

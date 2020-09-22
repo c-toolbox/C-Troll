@@ -78,20 +78,21 @@ ProcessWidget::ProcessWidget(Process::ID processId)
 
     QBoxLayout* layout = new QHBoxLayout(this);
 
-    layout->addWidget(new QLabel(("Program: " + program->name).c_str()));
-    layout->addWidget(new QLabel(("Configuration: " + configuration.name).c_str()));
-    layout->addWidget(new QLabel(("Cluster: " + cluster->name).c_str()));
+    layout->addWidget(new QLabel(QString::fromStdString(program->name)));
+    layout->addWidget(new QLabel(QString::fromStdString(configuration.name)));
+    layout->addWidget(new QLabel(QString::fromStdString(cluster->name)));
     layout->addWidget(new QLabel(QString::number(process->id.v)));
 
-    _status = new QLabel(("Status: " + statusToString(process->status)).c_str());
+    _status = new QLabel(QString::fromStdString(statusToString(process->status)));
     layout->addWidget(_status);
 
     QWidget* messageContainer = createMessageContainer();
 
-    if (program->shouldForwardMessages) {
+    {
         QPushButton* output = new QPushButton("Output");
         output->setCheckable(true);
         output->setObjectName("output");
+        output->setEnabled(program->shouldForwardMessages);
         connect(
             output, &QPushButton::clicked,
             [output, messageContainer]() {
@@ -220,7 +221,6 @@ ProcessesWidget::ProcessesWidget() {
 
     _contentLayout = new QVBoxLayout(content);
     area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
-    //_contentLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     layout->addWidget(area);
 
     _contentLayout->addStretch();

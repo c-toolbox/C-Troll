@@ -75,7 +75,6 @@ void validateMessage(const nlohmann::json& message, std::string_view expectedTyp
     
 void from_json(const nlohmann::json& j, Message& p);
 
-
 } // namespace common
     
 #endif // __COMMON__MESSAGE_H__

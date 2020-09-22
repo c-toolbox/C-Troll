@@ -136,9 +136,13 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
     assert(it != _sockets.end());
 #ifdef QT_DEBUG
     Node* node = data::findNode(nodeId);
+    std::string content = common::isValidMessage<common::ProcessOutputMessage>(message) ?
+        common::ProcessOutputMessage::Type :
+        message.dump();
+
     Log(
         fmt::format("Received [{}:{} ({})]", node->ipAddress, node->port, node->name),
-        message.dump()
+        content
     );
 #endif // QT_DEBUG
 

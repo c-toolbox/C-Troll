@@ -46,12 +46,6 @@ bool validateMessage(const nlohmann::json& message) {
 }
 
 void validateMessage(const nlohmann::json& message, std::string_view expectedType) {
-#ifdef ENABLE_MESSAGE_DEBUGGING
-    if (!validateMessage(message)) {
-        throw std::runtime_error("Misformed message received");
-    }
-#endif // ENABLE_MESSAGE_DEBUGGING
-
     // Sanity checks
     const std::string type = message.at(Message::KeyType).get<std::string>();
     if (type != expectedType) {
