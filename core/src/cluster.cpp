@@ -37,7 +37,6 @@
 #include "database.h"
 #include "jsonload.h"
 #include "logging.h"
-#include "node.h"
 #include <fmt/format.h>
 #include <assert.h>
 #include <filesystem>
@@ -50,18 +49,20 @@ namespace {
 
 void from_json(const nlohmann::json& j, Cluster& p) {
     j.at(KeyName).get_to(p.name);
-    p.isEnabled = true;
     if (j.find(KeyEnabled) != j.end()) {
         j.at(KeyEnabled).get_to(p.isEnabled);
+    }
+    else {
+        p.isEnabled = true;
     }
     
     std::vector<std::string> nodes = j.at(KeyNodes).get<std::vector<std::string>>();
     for (const std::string& node : nodes) {
         Node* n = data::findNode(node);
         if (!n) {
-            std::string message = fmt::format("Could not find node with name {}", node);
-            Log("Error", message);
-            throw std::runtime_error(message);
+            throw std::runtime_error(
+                fmt::format("Could not find node with name {}", node)
+            );
         }
 
         p.nodes.push_back(n->id);
@@ -83,7 +84,20 @@ std::vector<Cluster> loadClustersFromDirectory(const std::string& directory) {
         }
     }
 
-    // @TODO (abock, 2020-02-27) Check whether there are any duplicate clusters specified
+    // Check for duplicates
+    std::sort(
+        clusters.begin(), clusters.end(),
+        [](const Cluster& lhs, const Cluster& rhs) { return lhs.name < rhs.name; }
+    );
+    const auto it = std::adjacent_find(
+        clusters.begin(), clusters.end(),
+        [](const Cluster& lhs, const Cluster& rhs) { return lhs.name == rhs.name; }
+    );
+    if (it != clusters.end()) {
+        throw std::runtime_error(fmt::format(
+            "Duplicate cluster name '{}' found", it->name
+        ));
+    }
 
     // Inject the unique identifiers into the nodes
     int id = 0;

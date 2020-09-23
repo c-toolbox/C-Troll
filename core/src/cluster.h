@@ -41,8 +41,8 @@
 
 /**
  * This structure represents a cluster setup, that is, a collection of computers that are
- * addressed as a unit. Each cluster has a human readable \m name, a unique
- * \m id, a setting whether or not it is \m enabled and a list of computer \m nodes.
+ * addressed as a unit. Each cluster has a human readable \m name, a unique \m id, a
+ * setting whether or not it is \m enabled and a list of computer \m nodes.
  */
 struct Cluster {
     using ID = TypedId<int, struct ClusterTag>;
