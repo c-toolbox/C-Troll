@@ -60,7 +60,7 @@ struct Program {
     using ID = TypedId<int, struct ProgramTag>;
 
     /// A unique identifier
-    ID id{ -1 };
+    ID id = ID(-1);
     /// A human readable name for this Program
     std::string name;
     /// The full path to the executable
@@ -81,7 +81,7 @@ struct Program {
     std::vector<Cluster::ID> clusters;
 };
 
-std::vector<Program> loadProgramsFromDirectory(const std::string& directory);
+std::vector<Program> loadProgramsFromDirectory(std::string_view directory);
 
 void from_json(const nlohmann::json& j, Program& p);
 

@@ -73,15 +73,15 @@ private:
     bool hasNoProcessRunning() const;
     bool hasAllProcessesRunning() const;
 
-    const Cluster* _cluster;
-    const Program::Configuration* _configuration;
+    const Cluster* _cluster = nullptr;
+    const Program::Configuration* _configuration = nullptr;
 
     struct ProcessInfo {
         Process::ID processId;
-        QAction* menuAction;
+        QAction* menuAction = nullptr;
     };
 
-    QMenu* _actionMenu;
+    QMenu* _actionMenu = nullptr;
     std::map<Node::ID, ProcessInfo> _processes;
 };
 
@@ -111,6 +111,7 @@ private:
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
+
 
 class TagInfoWidget : public QWidget {
 Q_OBJECT

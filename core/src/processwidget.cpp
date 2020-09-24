@@ -86,7 +86,7 @@ ProcessWidget::ProcessWidget(Process::ID processId)
     _status = new QLabel(QString::fromStdString(statusToString(process->status)));
     layout->addWidget(_status);
 
-    QWidget* messageContainer = createMessageContainer();
+    _messageContainer = createMessageContainer();
 
     {
         QPushButton* output = new QPushButton("Output");
@@ -95,7 +95,7 @@ ProcessWidget::ProcessWidget(Process::ID processId)
         output->setEnabled(program->shouldForwardMessages);
         connect(
             output, &QPushButton::clicked,
-            [output, messageContainer]() {
+            [output, messageContainer = _messageContainer]() {
                 messageContainer->setHidden(!output->isChecked());
             }
         );
@@ -124,21 +124,25 @@ ProcessWidget::ProcessWidget(Process::ID processId)
         layout->insertWidget(7, _remove, 0, Qt::AlignRight);
     }
     
-    {
-        _removalTimer = new QTimer();
-        _removalTimer->setSingleShot(true);
-        connect(
-            _removalTimer, &QTimer::timeout,
-            [this, messageContainer]() {
-                if (messageContainer->isVisible()) {
-                    _removalTimer->start(15000);
-                }
-                else {
-                    emit remove(_processId);
-                }
+    _removalTimer = new QTimer(this);
+    _removalTimer->setSingleShot(true);
+    connect(
+        _removalTimer, &QTimer::timeout,
+        [this, messageContainer = _messageContainer]() {
+            if (messageContainer->isVisible()) {
+                _removalTimer->start(15000);
             }
-        );
-    }
+            else {
+                emit remove(_processId);
+            }
+        }
+    );
+}
+
+ProcessWidget::~ProcessWidget() {
+    // No need to delete the rest of the widgets as they are parented to us and will get
+    // deleted by the QWidget destructor
+    delete _messageContainer;
 }
 
 QWidget* ProcessWidget::createMessageContainer() {
@@ -175,19 +179,17 @@ QWidget* ProcessWidget::createMessageContainer() {
 }
 
 void ProcessWidget::updateStatus() {
-    Process* process = data::findProcess(_processId);
-    _status->setText(QString::fromStdString(
-        "Status: " + statusToString(process->status)
-    ));
+    Process* p = data::findProcess(_processId);
+    _status->setText(QString::fromStdString("Status: " + statusToString(p->status)));
 
-    if (process->status == common::ProcessStatusMessage::Status::NormalExit) {
+    if (p->status == common::ProcessStatusMessage::Status::NormalExit) {
         // Start a timer to automatically remove a process if it exited normally
         _removalTimer->start(15000);
     }
 
     // The user should only be able to remove the process entry if the process has
     // finished in some state
-    _remove->setEnabled(process->status != common::ProcessStatusMessage::Status::Running);
+    _remove->setEnabled(p->status != common::ProcessStatusMessage::Status::Running);
 }
 
 void ProcessWidget::addMessage(common::ProcessOutputMessage message) {
@@ -232,13 +234,11 @@ ProcessesWidget::ProcessesWidget() {
     layout->addWidget(killAll);
 }
 
-void ProcessesWidget::receivedProcessMessage(Node::ID,
-                                             common::ProcessOutputMessage message)
-{
-    Process::ID pid =  Process::ID(message.processId);
+void ProcessesWidget::receivedProcessMessage(Node::ID, common::ProcessOutputMessage msg) {
+    Process::ID pid =  Process::ID(msg.processId);
     const auto it = _widgets.find(pid);
     assert(it != _widgets.end());
-    it->second->addMessage(std::move(message));
+    it->second->addMessage(std::move(msg));
 }
 
 void ProcessesWidget::processAdded(Process::ID processId) {
@@ -249,7 +249,6 @@ void ProcessesWidget::processAdded(Process::ID processId) {
     connect(w, &ProcessWidget::kill, this, &ProcessesWidget::killProcess);
     _widgets[processId] = w;
     _contentLayout->insertWidget(static_cast<int>(_widgets.size() - 1), w);
-    //layout()->update();
 }
 
 void ProcessesWidget::processUpdated(Process::ID processId) {

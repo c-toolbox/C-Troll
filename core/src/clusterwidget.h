@@ -71,7 +71,7 @@ public:
 private:
     const Node::ID _nodeId;
 
-    ConnectionWidget* _connectionLabel;
+    ConnectionWidget* _connectionLabel = nullptr;
 };
 
 
@@ -88,7 +88,7 @@ public:
 private:
     const Cluster::ID _clusterId;
 
-    ConnectionWidget* _connectionLabel;
+    ConnectionWidget* _connectionLabel = nullptr;
     std::map<Node::ID, NodeWidget*> _nodeWidgets;
 };
 

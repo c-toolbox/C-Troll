@@ -40,6 +40,7 @@
 #include <fmt/format.h>
 #include <filesystem>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace common {
@@ -58,7 +59,7 @@ namespace common {
  * \return A constructed object T that is initialized from the JSON file \p jsonFile
  */
 template <typename T>
-T loadFromJson(const std::string& jsonFile, const std::string& baseDirectory) {
+T loadFromJson(std::string_view jsonFile, std::string_view baseDirectory) {
     std::string id = std::filesystem::relative(jsonFile, baseDirectory).string();
 
     // Remove the last 5 characters '.json'
@@ -87,7 +88,7 @@ T loadFromJson(const std::string& jsonFile, const std::string& baseDirectory) {
  * \return A list of \tparam T objects that was created from JSON files in \p directory
  */
 template <typename T>
-std::vector<T> loadJsonFromDirectory(const std::string& directory) {
+std::vector<T> loadJsonFromDirectory(std::string_view directory) {
     std::vector<T> res;
 
     namespace fs = std::filesystem;
@@ -108,10 +109,7 @@ std::vector<T> loadJsonFromDirectory(const std::string& directory) {
             res.push_back(std::move(obj));
         }
         catch (const std::runtime_error& e) {
-            ::Log(
-                "Error",
-                fmt::format("Failed to load file '{}': {}", file, e.what())
-            );
+            ::Log("Error",fmt::format("Failed to load file '{}': {}", file, e.what()));
         }
     }
 

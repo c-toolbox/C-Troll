@@ -41,6 +41,7 @@
 
 common::StartCommandMessage startProcessCommand(const Process& process) {
     Program* program = data::findProgram(process.programId);
+    assert(program);
     const Program::Configuration& configuration = data::findConfigurationForProgram(
         *program, process.configurationId
     );
@@ -78,7 +79,7 @@ int Process::nextId = 0;
 
 Process::Process(Program::ID programId, Program::Configuration::ID configurationId,
                  Cluster::ID clusterId, Node::ID nodeId)
-    : id{ nextId++ }
+    : id(nextId++)
     , programId(programId)
     , configurationId(configurationId)
     , clusterId(clusterId)

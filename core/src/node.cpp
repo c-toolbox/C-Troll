@@ -74,16 +74,20 @@ void from_json(const nlohmann::json& j, Node& p) {
     }
 }
 
-std::vector<Node> loadNodesFromDirectory(const std::string& directory) {
+std::vector<Node> loadNodesFromDirectory(std::string_view directory) {
     std::vector<Node> nodes = common::loadJsonFromDirectory<Node>(directory);
 
-    // First check that no names for nodes are duplicated
-    std::set<std::string> nodeNames;
-    for (const Node& n : nodes) {
-        if (nodeNames.find(n.name) != nodeNames.end()) {
-            throw std::runtime_error(fmt::format("Found duplicate node name: {}", n));
-        }
-        nodeNames.insert(n.name);
+    // Check for duplicates
+    std::sort(
+        nodes.begin(), nodes.end(),
+        [](const Node& lhs, const Node& rhs) { return lhs.name < rhs.name; }
+    );
+    const auto it = std::adjacent_find(
+        nodes.begin(), nodes.end(),
+        [](const Node& lhs, const Node& rhs) { return lhs.name == rhs.name; }
+    );
+    if (it != nodes.end()) {
+        throw std::runtime_error(fmt::format("Duplicate node name '{}' found", it->name));
     }
 
     for (const Node& node : nodes) {
@@ -99,9 +103,9 @@ std::vector<Node> loadNodesFromDirectory(const std::string& directory) {
         // is a valid DNS name or IP address
 
         if (node.port <= 0 || node.port >= 65536) {
-            throw std::runtime_error(fmt::format(
-                "Found node with invalid port: {}", node
-            ));
+            throw std::runtime_error(
+                fmt::format("Found node with invalid port: {}", node)
+            );
         }
     }
 

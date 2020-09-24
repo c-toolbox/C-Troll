@@ -34,7 +34,6 @@
 
 #include "program.h"
 
-#include "cluster.h"
 #include "database.h"
 #include "jsonload.h"
 #include "logging.h"
@@ -85,7 +84,7 @@ void from_json(const nlohmann::json& j, Program& p) {
     }
     else {
         // There always has to be at least a default configuration
-        p.configurations.push_back({ Program::Configuration::ID{ 0 }, "Default", "" });
+        p.configurations.push_back({ Program::Configuration::ID(0), "Default", "" });
     }
 
     std::vector<std::string> clusters = j.at(KeyClusters).get<std::vector<std::string>>();
@@ -93,14 +92,14 @@ void from_json(const nlohmann::json& j, Program& p) {
         Cluster* c = data::findCluster(cluster);
         if (!c) {
             std::string message = fmt::format("Could not find cluster {}", cluster);
-            ::Log("Error", message);
+            Log("Error", message);
             throw std::runtime_error(message);
         }
         p.clusters.push_back(c->id);
     }
 }
 
-std::vector<Program> loadProgramsFromDirectory(const std::string& directory) {
+std::vector<Program> loadProgramsFromDirectory(std::string_view directory) {
     std::vector<Program> programs = common::loadJsonFromDirectory<Program>(directory);
 
     for (const Program& program : programs) {
@@ -119,7 +118,7 @@ std::vector<Program> loadProgramsFromDirectory(const std::string& directory) {
         }
 
         const bool hasEmptyTag = std::any_of(
-            program.tags.begin(), program.tags.end(),
+            program.tags.cbegin(), program.tags.cend(),
             std::mem_fn(&std::string::empty)
         );
         if (hasEmptyTag) {

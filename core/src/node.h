@@ -51,8 +51,7 @@ struct Node {
 
     /// The human readable name of the computer node
     std::string name;
-    /// The IP address at which the computer is reachable; this can also be a
-    /// hostname
+    /// The IP address at which the computer is reachable; this can also be a hostname
     std::string ipAddress;
     /// The port on which the Tray application on that computer is listening
     int port = -1;
@@ -69,10 +68,10 @@ void from_json(const nlohmann::json& j, Node& p);
  * This method walks the passed \p directory and looks for all <code>*.json</code>
  * files in it. Any \c JSON file in it will be interpreted as a node configuration and
  * returned.
- * \param directory The directory that is walked in search for <code>*.json</code>
- *        files
+ *
+ * \param directory The directory that is walked in search for <code>*.json</code> files
  * \return A list of all Nodes%s that were found by walking the \p directory
  */
-std::vector<Node> loadNodesFromDirectory(const std::string& directory);
+std::vector<Node> loadNodesFromDirectory(std::string_view directory);
 
 #endif // __CORE__CLUSTER_H__

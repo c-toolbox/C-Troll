@@ -38,7 +38,6 @@
 #include "color.h"
 #include "database.h"
 #include "logging.h"
-#include <fmt/format.h>
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QHBoxLayout>
@@ -47,6 +46,7 @@
 #include <QMenu>
 #include <QScrollArea>
 #include <QVBoxLayout>
+#include <fmt/format.h>
 #include <set>
 
 namespace programs {
@@ -83,7 +83,6 @@ void ProgramButton::processUpdated(Process::ID processId) {
     );
     if (it == _processes.end()) {
         // This is a brand new process, so it better be in a Starting status
-        //assert(process->status == common::ProcessStatusMessage::Status::Starting);
 
         ProcessInfo info;
         info.processId = processId;
@@ -176,7 +175,8 @@ void ProgramButton::updateMenu() {
     );
 
     for (QAction* action : actions) {
-        const std::string nodeName = action->data().toString().toLocal8Bit().constData();
+        QString actName = action->data().toString();
+        const std::string nodeName = actName.toLocal8Bit().constData();
         const auto it = std::find_if(
             _processes.begin(), _processes.end(),
             [nodeName](const std::pair<const Node::ID, ProcessInfo>& p) {
@@ -198,7 +198,7 @@ void ProgramButton::updateMenu() {
             );
 
             // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
-            action->setText("Stop: " + action->data().toString());
+            action->setText("Stop: " + actName);
         }
         else {
             setObjectName("restart"); // used in the QSS sheet to style this button
@@ -208,7 +208,7 @@ void ProgramButton::updateMenu() {
             );
 
             // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
-            action->setText("Restart: " + action->data().toString());
+            action->setText("Restart: " + actName);
         }
 
         _actionMenu->addAction(action);
@@ -389,11 +389,11 @@ TagsWidget::TagsWidget()
     : QGroupBox("Tags")
 {
     setObjectName("tags");
-    std::set<std::string> tags = data::findTags();
 
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
 
+    std::set<std::string> tags = data::findTags();
     for (const std::string& tag : tags) {
         QPushButton* button = new QPushButton(QString::fromStdString(tag));
 
@@ -481,7 +481,8 @@ QWidget* ProgramsWidget::createControls() {
     search->setPlaceholderText("Search...");
     layout->addWidget(search);
 
-    connect(search, &QLineEdit::textChanged,
+    connect(
+        search, &QLineEdit::textChanged,
         [this](const QString& str) { emit searchUpdated(str.toLocal8Bit().constData()); }
     );
 
@@ -525,7 +526,10 @@ QWidget* ProgramsWidget::createPrograms() {
         connect(w, &ProgramWidget::stopProcess, this, &ProgramsWidget::stopProcess);
 
         _widgets[p->id] = w;
-        _visibilities[p->id] = VisibilityInfo{ true, true };
+        VisibilityInfo info;
+        info.bySearch = true;
+        info.byTag = true;
+        _visibilities[p->id] = info;
         contentLayout->addWidget(w);
     }
 

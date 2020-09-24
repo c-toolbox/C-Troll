@@ -69,6 +69,6 @@ void from_json(const nlohmann::json& j, Cluster& p);
  * files
  * \return A list of all Cluster%s that were found by walking the \p directory
  */
-std::vector<Cluster> loadClustersFromDirectory(const std::string& directory);
+std::vector<Cluster> loadClustersFromDirectory(std::string_view directory);
 
 #endif // __CORE__CLUSTER_H__

@@ -40,6 +40,7 @@
 #include <fmt/format.h>
 #include <assert.h>
 #include <filesystem>
+#include <string_view>
 
 namespace {
     constexpr const char* KeyName = "name";
@@ -69,7 +70,7 @@ void from_json(const nlohmann::json& j, Cluster& p) {
     }
 }
 
-std::vector<Cluster> loadClustersFromDirectory(const std::string& directory) {
+std::vector<Cluster> loadClustersFromDirectory(std::string_view directory) {
     std::vector<Cluster> clusters = common::loadJsonFromDirectory<Cluster>(directory);
 
     for (const Cluster& cluster : clusters) {

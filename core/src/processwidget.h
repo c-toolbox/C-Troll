@@ -52,6 +52,7 @@ class ProcessWidget : public QWidget {
 Q_OBJECT
 public:
     ProcessWidget(Process::ID processId);
+    ~ProcessWidget();
 
     void updateStatus();
     void addMessage(common::ProcessOutputMessage message);
@@ -64,11 +65,12 @@ private:
     QWidget* createMessageContainer();
 
     const Process::ID _processId;
-    QLabel* _status;
-    QPlainTextEdit* _messages;
-    QPlainTextEdit* _errorMessages;
-    QPushButton* _remove;
-    QTimer* _removalTimer;
+    QLabel* _status = nullptr;
+    QWidget* _messageContainer = nullptr;
+    QPlainTextEdit* _messages = nullptr;
+    QPlainTextEdit* _errorMessages = nullptr;
+    QPushButton* _remove = nullptr;
+    QTimer* _removalTimer = nullptr;
 };
 
 
@@ -92,7 +94,7 @@ signals:
     void killAllProcesses();
 
 private:
-    QBoxLayout* _contentLayout;
+    QBoxLayout* _contentLayout = nullptr;
 
     std::map<Process::ID, ProcessWidget*> _widgets;
 };

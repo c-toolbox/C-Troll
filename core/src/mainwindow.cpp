@@ -141,7 +141,7 @@ MainWindow::MainWindow(const std::string& configurationFile) {
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
         [this](common::ProcessStatusMessage status) {
-            Process* process = data::findProcess(Process::ID{ status.processId });
+            Process* process = data::findProcess(Process::ID(status.processId));
             if (!process) {
                 // This state might happen if C-Troll was restarted while programs were
                 // still running on the trays, if we than issue a killall command, we are
@@ -164,11 +164,6 @@ MainWindow::MainWindow(const std::string& configurationFile) {
                 return;
             }
 
-            // Just a sanity check
-            //for (const common::TrayStatusMessage::ProcessInfo& pi : status.processes) {
-            //    assert(pi.nodeId == id.v);
-            //}
-
             // We need to sort the incoming status messages as we need to figure out which
             // id values for new processes we should use
             std::sort(
@@ -183,11 +178,13 @@ MainWindow::MainWindow(const std::string& configurationFile) {
             Process::setNextIdIfHigher(hightestId + 1);
 
             for (const common::TrayStatusMessage::ProcessInfo& pi : status.processes) {
+                const Process::ID pid = Process::ID(pi.processId);
+
                 // We need to check if a process with this ID already exists as we might
                 // have made two connections to the node under two different IP addresses
-                Process* proc = data::findProcess(Process::ID(pi.processId));
+                Process* proc = data::findProcess(pid);
                 if (proc) {
-                    ::Log(
+                    Log(
                         "Status",
                         fmt::format("Ignoring process with duplicate id {}", pi.processId)
                     );
@@ -205,7 +202,7 @@ MainWindow::MainWindow(const std::string& configurationFile) {
 
 
                 std::unique_ptr<Process> process = std::make_unique<Process>(
-                    Process::ID(pi.processId),
+                    pid,
                     Program::ID(pi.programId),
                     Program::Configuration::ID(pi.configurationId), 
                     Cluster::ID(pi.clusterId),
@@ -213,14 +210,14 @@ MainWindow::MainWindow(const std::string& configurationFile) {
                 );
                 process->status = common::ProcessStatusMessage::Status::Running;
                 data::addProcess(std::move(process));
-                _processesWidget->processAdded(Process::ID(pi.processId));
-                _programWidget->processUpdated(Process::ID(pi.processId));
+                _processesWidget->processAdded(pid);
+                _programWidget->processUpdated(pid);
             }
         }
     );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedInvalidAuthStatus,
-        [this](Node::ID id, common::InvalidAuthMessage ) {
+        [this](Node::ID id, common::InvalidAuthMessage) {
             Node* node = data::findNode(id);
          
             std::string m = fmt::format(
@@ -239,7 +236,7 @@ MainWindow::MainWindow(const std::string& configurationFile) {
     );
     connect(
         _processesWidget.get(), &ProcessesWidget::killAllProcesses,
-        [this]() { killAllProcesses(Cluster::ID{ -1 }); }
+        [this]() { killAllProcesses(Cluster::ID(-1)); }
     );
 
     // Set up the tab widget
@@ -262,7 +259,7 @@ void MainWindow::log(std::string msg) {
 }
 
 void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
-                              Program::Configuration::ID configurationId)
+                              Program::Configuration::ID configId)
 {
     // We don't want to make sure that the program isn't already running as it might be
     // perfectly valid to start the program multiple times
@@ -273,12 +270,7 @@ void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
     Program* p = data::findProgram(programId);
     assert(p);
     for (Node::ID node : cluster->nodes) {
-        std::unique_ptr<Process> process = std::make_unique<Process>(
-            programId,
-            configurationId,
-            clusterId,
-            node
-        );
+        auto process = std::make_unique<Process>(programId, configId, clusterId, node);
         Process::ID id = process->id;
         data::addProcess(std::move(process));
 
@@ -294,14 +286,14 @@ void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
 }
 
 void MainWindow::stopProgram(Cluster::ID clusterId, Program::ID programId,
-                             Program::Configuration::ID configurationId)
+                             Program::Configuration::ID configurationId) const
 {
     // First, collect all the processes that belong to this program combination
     std::vector<Process*> processes;
     for (Process* process : data::processes()) {
-        const bool clusterMatch = process->clusterId == clusterId;
-        const bool programMatch = process->programId == programId;
-        const bool configurationMatch = process->configurationId == configurationId;
+        const bool clusterMatch = (process->clusterId == clusterId);
+        const bool programMatch = (process->programId == programId);
+        const bool configurationMatch = (process->configurationId == configurationId);
 
         if (clusterMatch && programMatch && configurationMatch) {
             processes.push_back(process);
@@ -318,7 +310,7 @@ void MainWindow::stopProgram(Cluster::ID clusterId, Program::ID programId,
     }
 }
 
-void MainWindow::startProcess(Process::ID processId) {
+void MainWindow::startProcess(Process::ID processId) const {
     Process* process = data::findProcess(processId);
     Node* node = data::findNode(process->nodeId);
 
@@ -335,7 +327,7 @@ void MainWindow::startProcess(Process::ID processId) {
     _clusterConnectionHandler.sendMessage(*node, j);
 }
 
-void MainWindow::stopProcess(Process::ID processId) {
+void MainWindow::stopProcess(Process::ID processId) const {
     Process* process = data::findProcess(processId);
     Node* node = data::findNode(process->nodeId);
 
@@ -349,7 +341,7 @@ void MainWindow::stopProcess(Process::ID processId) {
     _clusterConnectionHandler.sendMessage(*node, j);
 }
 
-void MainWindow::killAllProcesses(Cluster::ID id) {
+void MainWindow::killAllProcesses(Cluster::ID id) const {
     Log("Sending", "Send message to stop all programs");
 
     std::vector<Node*> nodes;

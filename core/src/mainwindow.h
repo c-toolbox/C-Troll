@@ -59,10 +59,10 @@ private:
     void startProgram(Cluster::ID clusterId, Program::ID programId,
         Program::Configuration::ID configurationId);
     void stopProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId);
-    void startProcess(Process::ID processId);
-    void stopProcess(Process::ID processId);
-    void killAllProcesses(Cluster::ID id);
+        Program::Configuration::ID configurationId) const;
+    void startProcess(Process::ID processId) const;
+    void stopProcess(Process::ID processId) const;
+    void killAllProcesses(Cluster::ID id) const;
 
 
     void log(std::string msg);
