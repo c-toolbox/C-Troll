@@ -34,18 +34,14 @@
 
 #include "mainwindow.h"
 
-#include "clusterwidget.h"
 #include "configuration.h"
 #include "database.h"
 #include "jsonload.h"
 #include "killallmessage.h"
-#include "processwidget.h"
-#include "programwidget.h"
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QTabBar>
-#include <QTextEdit>
 #include <QVBoxLayout>
 #include <set>
 #include <thread>
@@ -74,14 +70,13 @@ MainWindow::MainWindow(const std::string& configurationFile) {
 
     //
     // Set up the logging
-    common::Log::initialize("core", [this](std::string msg) { log(msg); });
+    common::Log::initialize("core", [this](std::string msg) { log(std::move(msg)); });
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that
         [](QtMsgType, const QMessageLogContext&, const QString& msg) {
             Log("Qt", msg.toLocal8Bit().constData());
         }
     );
-    _messageBox = new QTextEdit;
 
     //
     // Set up the container widgets
@@ -109,40 +104,40 @@ MainWindow::MainWindow(const std::string& configurationFile) {
     //
     // Create the widgets
     // Programs
-    _programWidget = new programs::ProgramsWidget;
+    _programWidget = std::make_unique<programs::ProgramsWidget>();
     connect(
-        _programWidget, &programs::ProgramsWidget::startProgram,
+        _programWidget.get(), &programs::ProgramsWidget::startProgram,
         this, &MainWindow::startProgram
     );
     connect(
-        _programWidget, &programs::ProgramsWidget::stopProgram,
+        _programWidget.get(), &programs::ProgramsWidget::stopProgram,
         this, &MainWindow::stopProgram
     );
     connect(
-        _programWidget, &programs::ProgramsWidget::restartProcess,
+        _programWidget.get(), &programs::ProgramsWidget::restartProcess,
         this, &MainWindow::startProcess
     );
     connect(
-        _programWidget, &programs::ProgramsWidget::stopProcess,
+        _programWidget.get(), &programs::ProgramsWidget::stopProcess,
         this, &MainWindow::stopProcess
     );
 
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
-        _programWidget, &programs::ProgramsWidget::connectedStatusChanged
+        _programWidget.get(), &programs::ProgramsWidget::connectedStatusChanged
     );
 
 
     // Clusters
-    _clustersWidget = new ClustersWidget;
+    _clustersWidget = std::make_unique<ClustersWidget>();
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
-        _clustersWidget, &ClustersWidget::connectedStatusChanged
+        _clustersWidget.get(), &ClustersWidget::connectedStatusChanged
     );
 
 
     // Processes
-    _processesWidget = new ProcessesWidget;
+    _processesWidget = std::make_unique<ProcessesWidget>();
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
         [this](common::ProcessStatusMessage status) {
@@ -228,53 +223,42 @@ MainWindow::MainWindow(const std::string& configurationFile) {
         [this](Node::ID id, common::InvalidAuthMessage ) {
             Node* node = data::findNode(id);
          
-            std::string msg = fmt::format(
+            std::string m = fmt::format(
                 "Send invalid authentication token to node {}", node->name
             );
-            QMessageBox::critical(this, "Error in Connection", msg.c_str());
-        }
-    );
-    connect(
-        &_clusterConnectionHandler, &ClusterConnectionHandler::messageReceived,
-        [](Cluster::ID clusterId, Node::ID nodeId, nlohmann::json message) {
-            Cluster* cluster = data::findCluster(clusterId);
-            Node* node = data::findNode(nodeId);
-            Log(
-                fmt::format("Received [{} / {}]", cluster->name, node->name),
-                message.dump()
-            );
+            QMessageBox::critical(this, "Error in Connection", QString::fromStdString(m));
         }
     );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedProcessMessage,
-        _processesWidget, &ProcessesWidget::receivedProcessMessage
+        _processesWidget.get(), &ProcessesWidget::receivedProcessMessage
     );
     connect(
-        _processesWidget, &ProcessesWidget::killProcess,
+        _processesWidget.get(), &ProcessesWidget::killProcess,
         [this](Process::ID processId) { stopProcess(processId); }
     );
     connect(
-        _processesWidget, &ProcessesWidget::killAllProcesses,
+        _processesWidget.get(), &ProcessesWidget::killAllProcesses,
         [this]() { killAllProcesses(Cluster::ID{ -1 }); }
     );
 
     // Set up the tab widget
-    tabWidget->addTab(_programWidget, "Programs");
-    tabWidget->addTab(_clustersWidget, "Clusters");
-    tabWidget->addTab(_processesWidget, "Processes");
-    tabWidget->addTab(_messageBox, "Log");
+    tabWidget->addTab(_programWidget.get(), "Programs");
+    tabWidget->addTab(_clustersWidget.get(), "Clusters");
+    tabWidget->addTab(_processesWidget.get(), "Processes");
+    tabWidget->addTab(&_messageBox, "Log");
 
     std::string style = fmt::format(
         "QTabBar::tab {{ height: {}px; width: {}px; }}",
         widgetHeight * TabHeightRatio, widgetWidth * TabWidthRatio
     );
-    tabWidget->setStyleSheet(style.c_str());
+    tabWidget->setStyleSheet(QString::fromStdString(style));
 
     _clusterConnectionHandler.initialize();
 }
 
 void MainWindow::log(std::string msg) {
-    _messageBox->append(QString::fromStdString(msg));
+    _messageBox.append(QString::fromStdString(msg));
 }
 
 void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,

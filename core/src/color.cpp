@@ -41,7 +41,9 @@
 namespace {
     // Colors taken from https://en.wikipedia.org/wiki/Help:Distinguishable_colors
     std::array<Color, 25> AllColors = {
-        Color{ 255, 255, 128 }, // Xanthin
+        Color{ 255, 80, 5 }, // Zinnia
+        Color{ 157, 204, 0 }, // Lime
+        Color{ 94, 241, 242 }, // Sky
         Color{ 43, 206, 72 }, // Green
         Color{ 240, 163, 255 }, // Amethyst
         Color{ 0, 117, 220 },   // Blue
@@ -54,19 +56,17 @@ namespace {
         Color{ 255, 204, 153 }, // Honeydew
         Color{ 128, 128, 128 }, // Iron
         Color{ 143, 124, 0 }, // Khaki
-        Color{ 157, 204, 0 }, // Lime
         Color{ 0, 51, 128 }, // Navy
         Color{ 255, 168, 187 }, // Pink
         Color{ 66, 102, 0 }, // Quagmire
         Color{ 153, 63, 0 }, // Caramel
         Color{ 255, 0, 16 }, // Red
-        Color{ 94, 241, 242 }, // Sky
         Color{ 0, 153, 143 }, // Turquoise
         Color{ 224, 255, 102 }, // Uranium
         Color{ 116, 10, 255 }, // Violet
         Color{ 153, 0, 0 }, // Wine
-        Color{ 255, 255, 0 }, // Yellow
-        Color{ 255, 80, 5 } // Zinnia
+        Color{ 255, 255, 128 }, // Xanthin
+        Color{ 255, 255, 0 } // Yellow
     };
 
     int LastColor = -1;

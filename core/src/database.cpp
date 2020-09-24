@@ -36,7 +36,6 @@
 
 namespace {
 
-// @TODO (abock, 2020-02-26) Replace these with in-place storage
 std::vector<std::unique_ptr<Cluster>> gClusters;
 std::vector<std::unique_ptr<Node>> gNodes;
 std::vector<std::unique_ptr<Program>> gPrograms;
@@ -86,20 +85,16 @@ std::vector<Process*> processes() {
 
 Cluster* findCluster(Cluster::ID id) {
     const auto it = std::find_if(
-        gClusters.begin(), gClusters.end(),
-        [id](const std::unique_ptr<Cluster>& c) {
-            return c->id == id;
-        }
+        gClusters.cbegin(), gClusters.cend(),
+        [id](const std::unique_ptr<Cluster>& c) { return c->id == id; }
     );
-    return it != gClusters.end() ? it->get() : nullptr;
+    return it != gClusters.cend() ? it->get() : nullptr;
 }
 
 Cluster* findCluster(const std::string& name) {
     const auto it = std::find_if(
-        gClusters.begin(), gClusters.end(),
-        [name](const std::unique_ptr<Cluster>& c) {
-            return c->name == name;
-        }
+        gClusters.cbegin(), gClusters.cend(),
+        [name](const std::unique_ptr<Cluster>& c) { return c->name == name; }
     );
     return it != gClusters.end() ? it->get() : nullptr;
 }
@@ -117,8 +112,8 @@ std::vector<Cluster*> findClustersForProgram(const Program& program) {
 std::vector<Cluster*> findClusterForNode(const Node& node) {
     std::vector<Cluster*> clusters;
     for (const std::unique_ptr<Cluster>& cluster : gClusters) {
-        const auto it = std::find(cluster->nodes.begin(), cluster->nodes.end(), node.id);
-        if (it != cluster->nodes.end()) {
+        const auto i = std::find(cluster->nodes.cbegin(), cluster->nodes.cend(), node.id);
+        if (i != cluster->nodes.cend()) {
             clusters.push_back(cluster.get());
         }
     }
@@ -127,22 +122,18 @@ std::vector<Cluster*> findClusterForNode(const Node& node) {
 
 Node* findNode(Node::ID id) {
     const auto it = std::find_if(
-        gNodes.begin(), gNodes.end(),
-        [id](const std::unique_ptr<Node>& n) {
-            return n->id == id;
-        }
+        gNodes.cbegin(), gNodes.cend(),
+        [id](const std::unique_ptr<Node>& n) { return n->id == id; }
     );
-    return it != gNodes.end() ? it->get() : nullptr;
+    return it != gNodes.cend() ? it->get() : nullptr;
 }
 
 Node* findNode(const std::string& name) {
     const auto it = std::find_if(
-        gNodes.begin(), gNodes.end(),
-        [name](const std::unique_ptr<Node>& n) {
-            return n->name == name;
-        }
+        gNodes.cbegin(), gNodes.cend(),
+        [name](const std::unique_ptr<Node>& n) { return n->name == name; }
     );
-    return it != gNodes.end() ? it->get() : nullptr;
+    return it != gNodes.cend() ? it->get() : nullptr;
 }
 
 std::vector<Node*> findNodesForCluster(const Cluster& cluster) {
@@ -157,19 +148,17 @@ std::vector<Node*> findNodesForCluster(const Cluster& cluster) {
 
 Program* findProgram(Program::ID id) {
     const auto it = std::find_if(
-        gPrograms.begin(), gPrograms.end(),
-        [id](const std::unique_ptr<Program>& p) {
-            return p->id == id;
-        }
+        gPrograms.cbegin(), gPrograms.cend(),
+        [id](const std::unique_ptr<Program>& p) { return p->id == id; }
     );
-    return it != gPrograms.end() ? it->get() : nullptr;
+    return it != gPrograms.cend() ? it->get() : nullptr;
 }
 
 const Program::Configuration& findConfigurationForProgram(const Program& program,
                                                           Program::Configuration::ID id)
 {
     const auto it = std::find_if(
-        program.configurations.begin(), program.configurations.end(),
+        program.configurations.cbegin(), program.configurations.cend(),
         [id](const Program::Configuration& c) { return c.id == id; }
     );
     return *it;
@@ -181,8 +170,8 @@ bool hasTag(Program::ID id, const std::vector<std::string>& tags) {
 
     bool res = true;
     for (const std::string& tag : tags) {
-        const auto it = std::find(program->tags.begin(), program->tags.end(), tag);
-        bool foundTag = it != program->tags.end();
+        const auto it = std::find(program->tags.cbegin(), program->tags.cend(), tag);
+        bool foundTag = it != program->tags.cend();
         res &= foundTag;
     }
     return res;
@@ -198,15 +187,12 @@ std::set<std::string> findTags() {
     return res;
 }
 
-
 Process* findProcess(Process::ID id) {
     const auto it = std::find_if(
-        gProcesses.begin(), gProcesses.end(),
-        [id](const std::unique_ptr<Process>& p) {
-            return p->id.v == id.v;
-        }
+        gProcesses.cbegin(), gProcesses.cend(),
+        [id](const std::unique_ptr<Process>& p) { return p->id.v == id.v; }
     );
-    return it != gProcesses.end() ? it->get() : nullptr;
+    return it != gProcesses.cend() ? it->get() : nullptr;
 }
 
 void addProcess(std::unique_ptr<Process> process) {
@@ -245,8 +231,16 @@ void loadData(const std::string& programPath, const std::string& clusterPath,
     std::size_t hash = 0;
 
     auto addHash = [&hash](std::size_t rhs) {
-        // Based on boost:hash_combine
-        hash ^= rhs + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+        // Based on boost:hash_combine (Golden Ratio Hashing)
+        // The Art of Computer Programming: Volume 3: Sorting and Searching
+
+        // Unfortunately, sqrt is not constexpr, so:
+        // constexpr const double phi = (std::sqrt(5) - 1.0) / 2.0;
+        // constexpr const double salt = round(phi * std::numeric_limits<uint_32>::max());
+        // constexpr const uint32_t hashConstant = static_cast<uint32_t>(salt);
+        constexpr const uint32_t hashConstant = 0x9e3779b9;
+
+        hash ^= rhs + hashConstant + (hash << 6) + (hash >> 2);
     };
 
     // Clusters

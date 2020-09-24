@@ -33,6 +33,7 @@
  ****************************************************************************************/
 
 #include "mainwindow.h"
+#include <fmt/format.h>
 #include <QApplication>
 #include <QFile>
 #include <QIcon>
@@ -61,15 +62,25 @@ int main(int argc, char** argv) {
         QMessageBox::critical(
             nullptr,
             "Configuration Error",
-            "Could not find configuration file " + QString::fromStdString(absPath)
+            QString::fromStdString(
+                fmt::format("Could not find configuration file '{}'", absPath)
+            )
         );
         exit(EXIT_FAILURE);
     }
 
     MainWindow mw(configurationFile);
     mw.show();
-
-    app.exec();
+    try {
+        app.exec();
+    }
+    catch (const std::exception& e) {
+        QMessageBox::critical(
+            nullptr,
+            "Exception",
+            e.what()
+        );
+    }
 
     Q_CLEANUP_RESOURCE(resources);
 }

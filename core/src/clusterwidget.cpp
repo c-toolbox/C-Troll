@@ -34,7 +34,6 @@
 
 #include "clusterwidget.h"
 
-#include "cluster.h"
 #include "database.h"
 #include "node.h"
 #include <fmt/format.h>
@@ -46,7 +45,7 @@
 
 namespace {
     constexpr const char* ColorConnected = "#33cc33";
-    constexpr const char* ColorSomeConnected = "#aaaa33";
+    constexpr const char* ColorPartiallyConnected = "#aaaa33";
     constexpr const char* ColorDisconnected = "#dd3333";
 
     constexpr const float ConnectionWidgetWidthRatio = 0.005f;
@@ -71,10 +70,10 @@ ConnectionWidget::ConnectionWidget() {
 }
 
 void ConnectionWidget::setStatus(ConnectionStatus status) {
-    const char* color = [](ConnectionStatus s) {
+    std::string_view color = [](ConnectionStatus s) {
         switch (s) {
             case ConnectionStatus::Connected: return ColorConnected;
-            case ConnectionStatus::SomeConnected: return ColorSomeConnected;
+            case ConnectionStatus::PartiallyConnected: return ColorPartiallyConnected;
             case ConnectionStatus::Disconnected: return ColorDisconnected;
             default: throw std::logic_error("Missing case label");
         }
@@ -83,14 +82,14 @@ void ConnectionWidget::setStatus(ConnectionStatus status) {
     const char* string = [](ConnectionStatus s) {
         switch (s) {
             case ConnectionStatus::Connected: return "connected";
-            case ConnectionStatus::SomeConnected: return "partially connected";
+            case ConnectionStatus::PartiallyConnected: return "partially connected";
             case ConnectionStatus::Disconnected: return "disconnected";
             default: throw std::logic_error("Missing case label");
         }
     }(status);
     setToolTip(string);
 
-    setStyleSheet(fmt::format(R"(background: {})", color).c_str());
+    setStyleSheet(QString::fromStdString(fmt::format(R"(background: {})", color)));
 }
 
 
@@ -98,7 +97,7 @@ void ConnectionWidget::setStatus(ConnectionStatus status) {
 
 
 NodeWidget::NodeWidget(const Node& node)
-    : QGroupBox(node.name.c_str())
+    : QGroupBox(QString::fromStdString(node.name))
     , _nodeId(node.id)
 {
     setObjectName("node");
@@ -114,7 +113,7 @@ NodeWidget::NodeWidget(const Node& node)
     );
     layout->addWidget(_connectionLabel);
 
-    QLabel* ip = new QLabel(node.ipAddress.c_str());
+    QLabel* ip = new QLabel(QString::fromStdString(node.ipAddress));
     layout->addWidget(ip);
 }
 
@@ -133,7 +132,7 @@ void NodeWidget::updateConnectionStatus() {
 
 
 ClusterWidget::ClusterWidget(const Cluster& cluster)
-    : QGroupBox(cluster.name.c_str())
+    : QGroupBox(QString::fromStdString(cluster.name))
     , _clusterId(cluster.id)
 {
     setObjectName("cluster");
@@ -161,17 +160,17 @@ void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
     std::vector<Node*> nodes = data::findNodesForCluster(*cluster);
 
     const bool allConnected = std::all_of(
-        nodes.begin(), nodes.end(), std::mem_fn(&Node::isConnected)
+        nodes.cbegin(), nodes.cend(), std::mem_fn(&Node::isConnected)
     );
     const bool someConnected = !std::none_of(
-        nodes.begin(), nodes.end(), std::mem_fn(&Node::isConnected)
+        nodes.cbegin(), nodes.cend(), std::mem_fn(&Node::isConnected)
     );
 
     ConnectionWidget::ConnectionStatus status =
         allConnected ?
         ConnectionWidget::ConnectionStatus::Connected :
             someConnected ?
-            ConnectionWidget::ConnectionStatus::SomeConnected :
+            ConnectionWidget::ConnectionStatus::PartiallyConnected :
             ConnectionWidget::ConnectionStatus::Disconnected;
 
     _connectionLabel->setStatus(status);

@@ -53,7 +53,7 @@ namespace programs {
 
 ProgramButton::ProgramButton(const Cluster* cluster,
                              const Program::Configuration* configuration)
-    : QPushButton(configuration->name.c_str())
+    : QPushButton(QString::fromStdString(configuration->name))
     , _cluster(cluster)
     , _configuration(configuration)
     , _actionMenu(new QMenu(this))
@@ -88,9 +88,9 @@ void ProgramButton::processUpdated(Process::ID processId) {
         ProcessInfo info;
         info.processId = processId;
         Node* node = data::findNode(process->nodeId);
-        info.menuAction = new QAction(node->name.c_str());
+        info.menuAction = new QAction(QString::fromStdString(node->name));
         // We store the name of the node as the user data in order to sort them later
-        info.menuAction->setData(node->name.c_str());
+        info.menuAction->setData(QString::fromStdString(node->name));
         _processes[process->nodeId] = info;
     }
     else {
@@ -135,19 +135,19 @@ void ProgramButton::updateButton() {
         setMenu(nullptr);
         setObjectName("start"); // used in the QSS sheet to style this button
         // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
-        setText(_cluster->name.c_str());
+        setText(QString::fromStdString(_cluster->name));
     }
     else if (hasAllProcessesRunning()) {
         setMenu(nullptr);
         setObjectName("stop"); // used in the QSS sheet to style this button
         // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
-        setText(("Stop:" + _cluster->name).c_str());
+        setText(QString::fromStdString("Stop:" + _cluster->name));
     }
     else {
         setMenu(_actionMenu);
         setObjectName("mixed"); // used in the QSS sheet to style this button
         // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
-        setText(("Mixed:" + _cluster->name).c_str());
+        setText(QString::fromStdString("Mixed:" + _cluster->name));
 
         updateMenu();
     }
@@ -318,11 +318,11 @@ TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
         QWidget* w = new QWidget;
 
         Color color = colorForTag(tag);
-        w->setStyleSheet(fmt::format(
+        w->setStyleSheet(QString::fromStdString(fmt::format(
             "background: #{0:02x}{1:02x}{2:02x}", color.r, color.g, color.b
-        ).c_str());
+        )));
 
-        w->setToolTip(tag.c_str());
+        w->setToolTip(QString::fromStdString(tag));
         layout->addWidget(w);
     }
 }
@@ -395,7 +395,7 @@ TagsWidget::TagsWidget()
     layout->setContentsMargins(5, 5, 5, 5);
 
     for (const std::string& tag : tags) {
-        QPushButton* button = new QPushButton(tag.c_str());
+        QPushButton* button = new QPushButton(QString::fromStdString(tag));
 
         Color color = colorForTag(tag);
         constexpr const int Delta = 40;

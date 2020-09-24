@@ -34,7 +34,6 @@
 
 #include "clusterconnectionhandler.h"
 
-#include "cluster.h"
 #include "database.h"
 #include "logging.h"
 #include "node.h"
@@ -98,8 +97,7 @@ void ClusterConnectionHandler::initialize() {
             using V = std::unique_ptr<common::JsonSocket>;
             for (const std::pair<const K, V>& p : _sockets) {
                 // Try to reconnect all sockets that are currently unconnected
-                QAbstractSocket::SocketState state = p.second->state();
-                if (state == QAbstractSocket::SocketState::UnconnectedState) {
+                if (p.second->state() == QAbstractSocket::SocketState::UnconnectedState) {
                     Node* node = data::findNode(p.first);
                     p.second->connectToHost(node->ipAddress, node->port);
                 }
@@ -116,7 +114,6 @@ void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
     assert(node);
 
     const bool isConnected = state == QAbstractSocket::SocketState::ConnectedState;
-
     if (node->isConnected != isConnected) {
         Log(
             fmt::format("Socket State Change [{}:{}]", node->ipAddress, node->port),
@@ -136,6 +133,7 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
     assert(it != _sockets.end());
 #ifdef QT_DEBUG
     Node* node = data::findNode(nodeId);
+    assert(node);
     std::string content = common::isValidMessage<common::ProcessOutputMessage>(message) ?
         common::ProcessOutputMessage::Type :
         message.dump();
@@ -163,11 +161,13 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
         emit receivedProcessMessage(nodeId, msg);
     }
     else {
-        Node* node = data::findNode(nodeId);
-        std::vector<Cluster*> clusters = data::findClusterForNode(*node);
+        Node* n = data::findNode(nodeId);
+        assert(n);
+        std::vector<Cluster*> clusters = data::findClusterForNode(*n);
 
-        for (Cluster* cluster : clusters) {
-            emit messageReceived(cluster->id, node->id, message);
+        for (Cluster* c : clusters) {
+            assert(c);
+            Log(fmt::format("Received [{} / {}]", c->name, n->name), message.dump());
         }
     }
 }

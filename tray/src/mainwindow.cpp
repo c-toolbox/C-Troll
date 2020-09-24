@@ -75,7 +75,7 @@ MainWindow::MainWindow() {
     std::string tooltip = fmt::format(
         "{}\nVersion: {}\nAPI: {}", Title, Version, api::Version
     );
-    trayIcon->setToolTip(tooltip.c_str());
+    trayIcon->setToolTip(QString::fromStdString(tooltip));
 
     // After that create a context menu of two items
     QMenu* menu = new QMenu(this);

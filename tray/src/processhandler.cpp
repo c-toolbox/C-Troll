@@ -268,7 +268,7 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
     emit sendSocketMessage(j);
 
     if (!command.workingDirectory.empty()) {
-        process->setWorkingDirectory(command.workingDirectory.c_str());
+        process->setWorkingDirectory(QString::fromStdString(command.workingDirectory));
     }
         
     if (command.commandlineParameters.empty()) {

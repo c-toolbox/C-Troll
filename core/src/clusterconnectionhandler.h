@@ -56,12 +56,9 @@ public:
     ~ClusterConnectionHandler();
 
     void initialize();
-
     void sendMessage(const Node& node, nlohmann::json message) const;
 
 signals:
-    void messageReceived(Cluster::ID clusterId, Node::ID nodeId, nlohmann::json message);
-
     void connectedStatusChanged(Cluster::ID clusterId, Node::ID nodeId);
 
     void receivedTrayProcess(common::ProcessStatusMessage status);
@@ -69,11 +66,10 @@ signals:
     void receivedInvalidAuthStatus(Node::ID id, common::InvalidAuthMessage message);
     void receivedProcessMessage(Node::ID id, common::ProcessOutputMessage message);
 
-private slots:
+private:
     void handleSocketStateChange(Node::ID nodeId, QAbstractSocket::SocketState state);
     void handleMessage(nlohmann::json message, Node::ID nodeId);
-
-private:
+    
     std::map<Node::ID, std::unique_ptr<common::JsonSocket>> _sockets;
 };
 

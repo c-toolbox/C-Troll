@@ -36,6 +36,7 @@
 #define __CORE__CONFIGURATION_H__
 
 #include <json/json.hpp>
+#include <string>
 
 /// This structure represents the configuration loaded at startup
 struct Configuration {

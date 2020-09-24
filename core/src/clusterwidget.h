@@ -48,7 +48,7 @@ Q_OBJECT
 public:
     enum class ConnectionStatus {
         Connected = 0,
-        SomeConnected,
+        PartiallyConnected,
         Disconnected
     };
 

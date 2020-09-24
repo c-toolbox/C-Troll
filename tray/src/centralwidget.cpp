@@ -64,12 +64,12 @@ void CentralWidget::setPort(int port) {
 }
 
 void CentralWidget::log(std::string msg) {
-    _messageBox->append(msg.c_str());
+    _messageBox->append(QString::fromStdString(msg));
     _messageBox->ensureCursorVisible();
 }
 
 void CentralWidget::newConnection(const std::string& peerAddress) {
-    QLabel* label = new QLabel(peerAddress.c_str());
+    QLabel* label = new QLabel(QString::fromStdString(peerAddress));
     _connectionsLayout->addWidget(label);
     _connections[peerAddress] = label;
 }
@@ -85,7 +85,7 @@ void CentralWidget::closedConnection(const std::string& peerAddress) {
 
 void CentralWidget::newProcess(ProcessHandler::ProcessInfo process) {
     std::string text = std::to_string(process.processId) + ": " + process.executable;
-    QLabel* label = new QLabel(text.c_str());
+    QLabel* label = new QLabel(QString::fromStdString(text));
     _processesLayout->addWidget(label);
     _processes[process.processId] = label;
 }
@@ -108,7 +108,7 @@ QWidget* CentralWidget::createInfoWidget() {
     infoLayout->setContentsMargins(5, 1, 5, 5);
     info->setLayout(infoLayout);
 
-    QLabel* trayVersion = new QLabel(("Tray Version: "s + Version).c_str());
+    QLabel* trayVersion = new QLabel(QString::fromStdString("Tray Version: "s + Version));
     infoLayout->addWidget(trayVersion);
 
     infoLayout->addStretch();
@@ -116,7 +116,9 @@ QWidget* CentralWidget::createInfoWidget() {
     infoLayout->addWidget(_portLabel);
     infoLayout->addStretch();
 
-    QLabel* apiVersion = new QLabel(("API Version: "s + api::Version).c_str());
+    QLabel* apiVersion = new QLabel(
+        QString::fromStdString("API Version: "s + api::Version)
+    );
     infoLayout->addWidget(apiVersion);
 
     return info;

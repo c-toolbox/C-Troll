@@ -176,7 +176,9 @@ QWidget* ProcessWidget::createMessageContainer() {
 
 void ProcessWidget::updateStatus() {
     Process* process = data::findProcess(_processId);
-    _status->setText(("Status: " + statusToString(process->status)).c_str());
+    _status->setText(QString::fromStdString(
+        "Status: " + statusToString(process->status)
+    ));
 
     if (process->status == common::ProcessStatusMessage::Status::NormalExit) {
         // Start a timer to automatically remove a process if it exited normally

@@ -38,11 +38,15 @@
 #include <QMainWindow>
 
 #include "clusterconnectionhandler.h"
+#include "clusterwidget.h"
 #include "process.h"
+#include "processwidget.h"
+#include "programwidget.h"
+#include <QTextEdit>
+#include <memory>
 
 class ClustersWidget;
 class ProcessesWidget;
-class QTextEdit;
 
 namespace programs { class ProgramsWidget; }
 
@@ -52,7 +56,6 @@ public:
     explicit MainWindow(const std::string& configurationFile);
 
 private:
-    // private slots
     void startProgram(Cluster::ID clusterId, Program::ID programId,
         Program::Configuration::ID configurationId);
     void stopProgram(Cluster::ID clusterId, Program::ID programId,
@@ -64,13 +67,13 @@ private:
 
     void log(std::string msg);
 
-    programs::ProgramsWidget* _programWidget;
-    ClustersWidget* _clustersWidget;
-    ProcessesWidget* _processesWidget;
+    std::unique_ptr<programs::ProgramsWidget> _programWidget;
+    std::unique_ptr<ClustersWidget> _clustersWidget;
+    std::unique_ptr<ProcessesWidget> _processesWidget;
 
     ClusterConnectionHandler _clusterConnectionHandler;
 
-    QTextEdit* _messageBox = nullptr;
+    QTextEdit _messageBox;
 };
 
 #endif // __CORE__MAINWINDOW_H__
