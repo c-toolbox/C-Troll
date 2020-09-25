@@ -42,7 +42,7 @@
 #include "process.h"
 #include <QTextEdit>
 #include <memory>
-#include <string_view>
+#include <string>
 
 class ClustersWidget;
 class ProcessesWidget;
@@ -52,7 +52,7 @@ namespace programs { class ProgramsWidget; }
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
-    explicit MainWindow(std::string_view configurationFile);
+    MainWindow();
 
 private:
     void startProgram(Cluster::ID clusterId, Program::ID programId,
@@ -62,7 +62,6 @@ private:
     void startProcess(Process::ID processId) const;
     void stopProcess(Process::ID processId) const;
     void killAllProcesses(Cluster::ID id) const;
-
 
     void log(std::string msg);
 

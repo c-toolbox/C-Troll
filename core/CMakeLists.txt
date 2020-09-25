@@ -36,7 +36,6 @@ set(HEADER_FILES
   src/cluster.h
   src/clusterconnectionhandler.h
   src/clusterwidget.h
-  src/color.h
   src/configuration.h
   src/configurationwidget.h
   src/database.h
@@ -53,7 +52,6 @@ set(SOURCE_FILES
   src/cluster.cpp
   src/clusterconnectionhandler.cpp
   src/clusterwidget.cpp
-  src/color.cpp
   src/configuration.cpp
   src/configurationwidget.cpp
   src/database.cpp

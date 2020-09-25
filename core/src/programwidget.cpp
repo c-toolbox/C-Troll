@@ -35,7 +35,7 @@
 #include "programwidget.h"
 
 #include "cluster.h"
-#include "color.h"
+#include "configuration.h"
 #include "database.h"
 #include "logging.h"
 #include <QApplication>
@@ -314,10 +314,13 @@ TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
     QBoxLayout* layout = new QHBoxLayout(this);
     layout->setMargin(0);
 
+    int LastColor = -1;
+    std::map<std::string, Configuration::Color> MappedColors;
+
     for (const std::string& tag : tags) {
         QWidget* w = new QWidget;
 
-        Color color = colorForTag(tag);
+        Configuration::Color color = data::colorForTag(tag);
         w->setStyleSheet(QString::fromStdString(fmt::format(
             "background: #{0:02x}{1:02x}{2:02x}", color.r, color.g, color.b
         )));
@@ -397,14 +400,14 @@ TagsWidget::TagsWidget()
     for (const std::string& tag : tags) {
         QPushButton* button = new QPushButton(QString::fromStdString(tag));
 
-        Color color = colorForTag(tag);
+        Configuration::Color color = data::colorForTag(tag);
         constexpr const int Delta = 40;
-        Color lightColor = Color{
+        Configuration::Color lightColor = Configuration::Color {
             std::min(255, color.r + Delta),
             std::min(255, color.g + Delta),
             std::min(255, color.b + Delta)
         };
-        Color darkColor = Color{
+        Configuration::Color darkColor = Configuration::Color {
             std::max(0, color.r - Delta),
             std::max(0, color.g - Delta),
             std::max(0, color.b - Delta)

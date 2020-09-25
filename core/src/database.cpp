@@ -41,6 +41,8 @@ std::vector<std::unique_ptr<Node>> gNodes;
 std::vector<std::unique_ptr<Program>> gPrograms;
 std::vector<std::unique_ptr<Process>> gProcesses;
 
+std::vector<Configuration::Color> gTagColors;
+
 std::size_t gDataHash = 0;
 
 } // namespace
@@ -197,6 +199,33 @@ Process* findProcess(Process::ID id) {
 
 void addProcess(std::unique_ptr<Process> process) {
     gProcesses.push_back(std::move(process));
+}
+
+Configuration::Color colorForTag(const std::string& tag) {
+    static int LastColor = -1;
+    static std::map<std::string, Configuration::Color> Colors;
+
+    if (Colors.find(tag) != Colors.end()) {
+        // Someone already requested the color for this tag
+        return Colors[tag];
+    }
+    else {
+        // Color not yet requested
+        ++LastColor;
+        Configuration::Color c = LastColor < gTagColors.size() ?
+            gTagColors[LastColor] :
+            Configuration::Color{ 255, 255, 255 };
+
+        Colors[tag] = c;
+        return c;
+    }
+}
+
+void setTagColors(std::vector<Configuration::Color> colors) {
+    // This function should only be called once, so if the colors are already filled,
+    // something went wrong
+    assert(gTagColors.empty());
+    gTagColors = std::move(colors);
 }
 
 

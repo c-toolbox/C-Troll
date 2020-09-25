@@ -46,11 +46,14 @@
 #include <QMessageBox>
 #include <QTabBar>
 #include <QVBoxLayout>
+#include <filesystem>
 #include <set>
 #include <thread>
 
 namespace {
     constexpr const char* Title = "C-Troll";
+
+    constexpr const char* ConfigurationFile = "config.json";
 
     constexpr const float MainWindowWidthRatio = 0.35f;
     constexpr const float MainWindowHeightRatio = 0.25f;
@@ -59,7 +62,7 @@ namespace {
     constexpr const float TabHeightRatio = 0.24f;
 } // namespace
 
-MainWindow::MainWindow(std::string_view configurationFile) {
+MainWindow::MainWindow() {
     // We calculate the size of the window based on the screen resolution to be somewhat
     // safe against high and low DPI monitors
     const int screenWidth = QApplication::desktop()->screenGeometry().width();
@@ -94,8 +97,18 @@ MainWindow::MainWindow(std::string_view configurationFile) {
 
     //
     // Load the configuration
-    Log("Status", fmt::format("Loading configuration file '{}'", configurationFile));
-    _config = common::loadFromJson<Configuration>(configurationFile);
+    if (!std::filesystem::exists(ConfigurationFile)) {
+        Log(
+            "Status",
+            fmt::format("Creating new configuration at '{}'", ConfigurationFile)
+        );
+
+        nlohmann::json obj = Configuration();
+        std::ofstream file(ConfigurationFile);
+        file << obj.dump(2);
+    }
+    Log("Status", fmt::format("Loading configuration file '{}'", ConfigurationFile));
+    _config = common::loadFromJson<Configuration>(ConfigurationFile);
 
     //
     // Load the data
@@ -103,6 +116,7 @@ MainWindow::MainWindow(std::string_view configurationFile) {
     Log("Status", fmt::format("Loading nodes from '{}'", _config.nodePath));
     Log("Status", fmt::format("Loading clusters from '{}'", _config.clusterPath));
     data::loadData(_config.applicationPath, _config.clusterPath, _config.nodePath);
+    data::setTagColors(_config.tagColors);
 
     //
     // Create the widgets
@@ -247,10 +261,7 @@ MainWindow::MainWindow(std::string_view configurationFile) {
     tabWidget->addTab(_clustersWidget, "Clusters");
     tabWidget->addTab(_processesWidget, "Processes");
     tabWidget->addTab(&_messageBox, "Log");
-    tabWidget->addTab(
-        new ConfigurationWidget(_config, std::string(configurationFile)),
-        "Settings"
-    );
+    tabWidget->addTab(new ConfigurationWidget(_config, ConfigurationFile), "Settings");
 
     std::string style = fmt::format(
         "QTabBar::tab {{ height: {}px; width: {}px; }}",

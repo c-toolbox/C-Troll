@@ -39,15 +39,35 @@ namespace {
     constexpr const char* KeyClusterPath = "clusterPath";
     constexpr const char* KeyNodePath = "nodePath";
     constexpr const char* KeyRemovalTimeout = "removalTimeout";
+    constexpr const char* KeyTagColors = "tagColors";
+
+    constexpr const char* KeyRed = "r";
+    constexpr const char* KeyGreen = "g";
+    constexpr const char* KeyBlue = "b";
 } // namespace
+
+void to_json(nlohmann::json& j, const Configuration::Color& c) {
+    j = { { KeyRed, c.r }, { KeyGreen, c.g }, { KeyBlue, c.b } };
+}
 
 void to_json(nlohmann::json& j, const Configuration& c) {
     j = {
         { KeyApplicationPath, c.applicationPath },
         { KeyClusterPath, c.clusterPath },
         { KeyNodePath, c.nodePath },
-        { KeyRemovalTimeout, static_cast<int>(c.removalTimeout.count()) }
+        { KeyRemovalTimeout, static_cast<int>(c.removalTimeout.count()) },
+        { KeyTagColors, c.tagColors }
     };
+}
+
+void from_json(const nlohmann::json& j, Configuration::Color& c) {
+    j.at(KeyRed).get_to(c.r);
+    j.at(KeyGreen).get_to(c.g);
+    j.at(KeyBlue).get_to(c.b);
+
+    if (c.r < 0 || c.r > 255 || c.g < 0 || c.g > 255 || c.b < 0 || c.b > 255) {
+        throw std::runtime_error("All color components must be in [0, 255]");
+    }
 }
 
 void from_json(const nlohmann::json& j, Configuration& c) {
@@ -63,5 +83,11 @@ void from_json(const nlohmann::json& j, Configuration& c) {
         }
 
         c.removalTimeout = std::chrono::milliseconds(ms);
+    }
+
+    if (j.find(KeyTagColors) != j.end()) {
+        // get_to adds the values to the end of the vector, so we have to clear it first
+        c.tagColors.clear();
+        j.at(KeyTagColors).get_to(c.tagColors);
     }
 }

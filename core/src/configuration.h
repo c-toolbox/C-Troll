@@ -38,17 +38,38 @@
 #include <json/json.hpp>
 #include <chrono>
 #include <string>
+#include <vector>
 
 /// This structure represents the configuration loaded at startup
 struct Configuration {
     /// The path that contains the JSON objects describing the available applications
-    std::string applicationPath;
+    std::string applicationPath = "application";
     /// The path that contains the JSON objects describing the available clusters
-    std::string clusterPath;
+    std::string clusterPath = "cluster";
     /// The path that contains the JSON objects describing the available nodes
-    std::string nodePath;
+    std::string nodePath = "nodes";
     /// The timeout after which the information of a successful process is removed
     std::chrono::milliseconds removalTimeout = std::chrono::milliseconds(15000);
+
+    struct Color {
+        int r = 255;
+        int g = 255;
+        int b = 255;
+    };
+    /// The colors that are used for coloring the tags in the side selection widget
+    std::vector<Color> tagColors = {
+        // Colors taken from https://en.wikipedia.org/wiki/Help:Distinguishable_colors
+        Color{ 255, 80, 5 }, // Zinnia
+        Color{ 157, 204, 0 }, // Lime
+        Color{ 94, 241, 242 }, // Sky
+        Color{ 43, 206, 72 }, // Green
+        Color{ 240, 163, 255 }, // Amethyst
+        Color{ 0, 117, 220 },   // Blue
+        Color{ 255, 164, 5 }, // Orpiment
+        Color{ 194, 0, 136 }, // Mallow
+        Color{ 148, 255, 181 }, // Jade
+        Color{ 76, 0, 92 } // Damson
+    };
 };
 
 void to_json(nlohmann::json& j, const Configuration& c);

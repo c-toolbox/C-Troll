@@ -103,9 +103,8 @@ int main(int argc, char** argv) {
         Log("Status", fmt::format("Creating new configuration at '{}'", absPath));
 
         nlohmann::json obj = Configuration();
-        std::string content = obj.dump(2);
         std::ofstream file(absPath);
-        file.write(content.data(), content.size());
+        file << obj.dump(2);
     }
 
     Log("Status", fmt::format("Loading configuration file from '{}'", absPath));

@@ -36,6 +36,7 @@
 #define __CORE__DATABASE_H__
 
 #include "cluster.h"
+#include "configuration.h"
 #include "node.h"
 #include "process.h"
 #include "program.h"
@@ -68,6 +69,9 @@ std::set<std::string> findTags();
 
 Process* findProcess(Process::ID id);
 void addProcess(std::unique_ptr<Process> process);
+
+Configuration::Color colorForTag(const std::string& tag);
+void setTagColors(std::vector<Configuration::Color> colors);
 
 void loadData(const std::string& programPath, const std::string& clusterPath,
     const std::string& nodePath);

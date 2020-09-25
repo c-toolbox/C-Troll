@@ -33,14 +33,10 @@
  ****************************************************************************************/
 
 #include "mainwindow.h"
-#include <fmt/format.h>
 #include <QApplication>
 #include <QFile>
 #include <QIcon>
 #include <QMessageBox>
-#include <iostream>
-#include <filesystem>
-#include <thread>
 
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
@@ -55,31 +51,16 @@ int main(int argc, char** argv) {
         app.setStyleSheet(styleSheet);
     }
 
-    // Load configuration file
-    std::string configurationFile = "config.json";
-    if (!std::filesystem::exists(configurationFile)) {
-        std::string absPath = std::filesystem::absolute(configurationFile).string();
-        QMessageBox::critical(
-            nullptr,
-            "Configuration Error",
-            QString::fromStdString(
-                fmt::format("Could not find configuration file '{}'", absPath)
-            )
-        );
-        exit(EXIT_FAILURE);
-    }
-
-    MainWindow mw(configurationFile);
+    MainWindow mw;
     mw.show();
     try {
         app.exec();
     }
     catch (const std::exception& e) {
-        QMessageBox::critical(
-            nullptr,
-            "Exception",
-            e.what()
-        );
+        QMessageBox::critical(nullptr, "Exception", e.what());
+    }
+    catch (...) {
+        QMessageBox::critical(nullptr, "Exception", "Unknown error");
     }
 
     Q_CLEANUP_RESOURCE(resources);
