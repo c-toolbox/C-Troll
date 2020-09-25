@@ -40,6 +40,13 @@
 #include <string>
 #include <vector>
 
+struct Color {
+    int r = 255;
+    int g = 255;
+    int b = 255;
+};
+bool operator==(const Color& lhs, const Color& rhs);
+
 /// This structure represents the configuration loaded at startup
 struct Configuration {
     /// The path that contains the JSON objects describing the available applications
@@ -51,11 +58,6 @@ struct Configuration {
     /// The timeout after which the information of a successful process is removed
     std::chrono::milliseconds removalTimeout = std::chrono::milliseconds(15000);
 
-    struct Color {
-        int r = 255;
-        int g = 255;
-        int b = 255;
-    };
     /// The colors that are used for coloring the tags in the side selection widget
     std::vector<Color> tagColors = {
         // Colors taken from https://en.wikipedia.org/wiki/Help:Distinguishable_colors

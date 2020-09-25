@@ -34,14 +34,65 @@
 
 #include "configurationwidget.h"
 
+#include <QColorDialog>
+#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSpinbox>
 #include <QVBoxLayout>
+#include <fmt/format.h>
 #include <json/json.hpp>
 #include <fstream>
+
+ColorWidget::ColorWidget(Color color) {
+    QBoxLayout* layout = new QHBoxLayout;
+
+    _colorButton = new QPushButton;
+    setColor(std::move(color));
+
+    connect(
+        _colorButton, &QPushButton::clicked,
+        [this]() {
+            QColor initial = QColor(_color.r, _color.g, _color.b);
+            QColor selected = QColorDialog::getColor(initial);
+            if (selected.isValid()) {
+                Color res;
+                res.r = selected.red();
+                res.g = selected.green();
+                res.b = selected.blue();
+                emit colorChanged(res);
+            }
+        }
+    );
+    layout->addWidget(_colorButton);
+
+    QPushButton* remove = new QPushButton("X");
+    connect(
+        remove, &QPushButton::clicked,
+        [this]() { emit removed(this); }
+    );
+    layout->addWidget(remove);
+
+    setLayout(layout);
+}
+
+void ColorWidget::setColor(Color color) {
+    _colorButton->setStyleSheet(
+        QString::fromStdString(
+            fmt::format(
+                "background-color: #{0:02x}{1:02x}{2:02x};", color.r, color.g, color.b
+            )
+        )
+    );
+    _color = std::move(color);
+}
+
+Color ColorWidget::color() const {
+    return _color;
+}
+
 
 ConfigurationWidget::ConfigurationWidget(Configuration configuration,
                                          std::string configurationFilePath)
@@ -122,6 +173,49 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         layout->addWidget(line);
     }
 
+    // Colors
+    {
+        QWidget* w = new QWidget;
+        QGridLayout* colorLayout = new QGridLayout;
+        constexpr const int nColumns = 5;
+        for (size_t i = 0; i < _configuration.tagColors.size(); ++i) {
+            const Color& c = _configuration.tagColors[i];
+
+            const int rowIdx = i / nColumns;
+            const int columnIdx = i % nColumns;
+
+            ColorWidget* cw = new ColorWidget(c);
+            connect(
+                cw, &ColorWidget::colorChanged,
+                [this, cw](Color c) {
+                    cw->setColor(c);
+                    valuesChanged();
+                }
+            );
+            connect(
+                cw, &ColorWidget::removed,
+                [cw, colorLayout, this](ColorWidget* sender) {
+                    colorLayout->removeWidget(sender);
+
+                    const auto it = std::find(_colors.begin(), _colors.end(), sender);
+                    assert(it != _colors.end());
+                    _colors.erase(it);
+
+                    // @TODO compactify table
+
+                    sender->deleteLater();
+                    valuesChanged();
+                }
+            );
+
+            _colors.push_back(cw);
+            colorLayout->addWidget(cw, rowIdx, columnIdx);
+        }
+        w->setLayout(colorLayout);
+
+        layout->addWidget(w);
+    }
+
     layout->addStretch();
 
     _changesLabel = new QLabel("Changes are only used after a restart of C-Troll");
@@ -159,7 +253,8 @@ void ConfigurationWidget::valuesChanged() {
         (_configuration.applicationPath != _applicationPath->text().toStdString()) ||
         (_configuration.clusterPath != _clusterPath->text().toStdString()) ||
         (_configuration.nodePath != _nodePath->text().toStdString()) ||
-        (_configuration.removalTimeout.count() != _removalTimeout->value());
+        (_configuration.removalTimeout.count() != _removalTimeout->value()) ||
+        _configuration.tagColors != tagColors();
 
     _changesLabel->setVisible(hasChanged);
     _restoreButton->setEnabled(hasChanged);
@@ -181,6 +276,8 @@ void ConfigurationWidget::saveValues() {
     config.clusterPath = _clusterPath->text().toStdString();
     config.nodePath = _nodePath->text().toStdString();
     config.removalTimeout = std::chrono::milliseconds(_removalTimeout->value());
+    config.tagColors = tagColors();
+
 
     nlohmann::json j;
     to_json(j, config);
@@ -190,4 +287,13 @@ void ConfigurationWidget::saveValues() {
 
     _configuration = config;
     valuesChanged();
+}
+
+std::vector<Color> ConfigurationWidget::tagColors() const {
+    std::vector<Color> tagColors;
+    tagColors.reserve(_colors.size());
+    for (ColorWidget* w : _colors) {
+        tagColors.push_back(w->color());
+    }
+    return tagColors;
 }

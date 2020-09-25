@@ -71,6 +71,7 @@ qt5_wrap_cpp(
   MOC_FILES
   src/clusterconnectionhandler.h
   src/clusterwidget.h
+  src/configurationwidget.h
   src/mainwindow.h
   src/processwidget.h
   src/programwidget.h

@@ -46,7 +46,11 @@ namespace {
     constexpr const char* KeyBlue = "b";
 } // namespace
 
-void to_json(nlohmann::json& j, const Configuration::Color& c) {
+bool operator==(const Color& lhs, const Color& rhs) {
+    return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b);
+}
+
+void to_json(nlohmann::json& j, const Color& c) {
     j = { { KeyRed, c.r }, { KeyGreen, c.g }, { KeyBlue, c.b } };
 }
 
@@ -60,7 +64,7 @@ void to_json(nlohmann::json& j, const Configuration& c) {
     };
 }
 
-void from_json(const nlohmann::json& j, Configuration::Color& c) {
+void from_json(const nlohmann::json& j, Color& c) {
     j.at(KeyRed).get_to(c.r);
     j.at(KeyGreen).get_to(c.g);
     j.at(KeyBlue).get_to(c.b);

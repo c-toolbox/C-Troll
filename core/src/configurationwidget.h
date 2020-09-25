@@ -45,7 +45,27 @@ class QLineEdit;
 class QPushButton;
 class QSpinBox;
 
+class ColorWidget : public QWidget {
+Q_OBJECT
+
+public:
+    ColorWidget(Color color);
+
+    void setColor(Color color);
+    Color color() const;
+
+signals:
+    void colorChanged(Color color);
+    void removed(ColorWidget* sender);
+
+private:
+    QPushButton* _colorButton = nullptr;
+    Color _color;
+};
+
 class ConfigurationWidget : public QWidget {
+Q_OBJECT
+
 public:
     ConfigurationWidget(Configuration configuration, std::string filePath);
 
@@ -56,10 +76,14 @@ private slots:
     void saveValues();
 
 private:
+    std::vector<Color> tagColors() const;
+
     QLineEdit* _applicationPath = nullptr;
     QLineEdit* _clusterPath = nullptr;
     QLineEdit* _nodePath = nullptr;
     QSpinBox* _removalTimeout = nullptr;
+    std::vector<ColorWidget*> _colors;
+
     QLabel* _changesLabel = nullptr;
 
     QPushButton* _restoreButton = nullptr;

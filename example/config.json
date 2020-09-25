@@ -5,8 +5,8 @@
   "removalTimeout": 15000,
   "tagColors": [
     {
-      "b": 5,
-      "g": 80,
+      "b": 4,
+      "g": 0,
       "r": 255
     },
     {
