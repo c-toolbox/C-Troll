@@ -92,7 +92,7 @@ MainWindow::MainWindow(const std::string& configurationFile) {
     //
     // Load the configuration
     Log("Status", fmt::format("Loading configuration file '{}'", configurationFile));
-    Configuration config = common::loadFromJson<Configuration>(configurationFile, "");
+    Configuration config = common::loadFromJson<Configuration>(configurationFile);
 
     //
     // Load the data
