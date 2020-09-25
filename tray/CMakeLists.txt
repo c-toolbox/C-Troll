@@ -34,6 +34,7 @@
 
 set(HEADER_FILES
   src/centralwidget.h
+  src/configuration.h
   src/mainwindow.h
   src/processhandler.h
   src/sockethandler.h
@@ -42,6 +43,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
   src/centralwidget.cpp
+  src/configuration.cpp
   src/main.cpp
   src/mainwindow.cpp
   src/processhandler.cpp

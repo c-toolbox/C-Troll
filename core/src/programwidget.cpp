@@ -134,7 +134,7 @@ void ProgramButton::updateButton() {
         setMenu(nullptr);
         setObjectName("start"); // used in the QSS sheet to style this button
         // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
-        setText(QString::fromStdString(_cluster->name));
+        setText(QString::fromStdString(_configuration->name));
     }
     else if (hasAllProcessesRunning()) {
         setMenu(nullptr);

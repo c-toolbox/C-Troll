@@ -32,6 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
+#include "configuration.h"
+#include "jsonload.h"
 #include "logging.h"
 #include "mainwindow.h"
 #include "processhandler.h"
@@ -41,6 +43,7 @@
 #include <json/json.hpp>
 #include <filesystem>
 #include <iostream>
+#include <string_view>
 
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
@@ -85,7 +88,7 @@ int main(int argc, char** argv) {
 
 
     MainWindow mw;
-    common::Log::initialize("tray", [&mw](std::string msg) { mw.log(msg); });
+    common::Log::initialize("tray", [&mw](std::string msg) { mw.log(std::move(msg)); });
 
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that
@@ -94,46 +97,34 @@ int main(int argc, char** argv) {
         }
     );
 
-    std::string configurationFile = "config-tray.json";
+    std::string_view configurationFile = "config-tray.json";
     std::string absPath = std::filesystem::absolute(configurationFile).string();
     if (!std::filesystem::exists(configurationFile)) {
-        std::string str = fmt::format("Creating new configuration at {}", absPath);
-        Log("Status", str);
+        Log("Status", fmt::format("Creating new configuration at '{}'", absPath));
 
-        nlohmann::json obj;
-        obj["port"] = 5000;
-        obj["secret"] = "";
-        obj["showWindow"] = false;
+        nlohmann::json obj = Configuration();
         std::string content = obj.dump(2);
         std::ofstream file(absPath);
         file.write(content.data(), content.size());
     }
 
-    Log("Status", fmt::format("Loading configuration file from {}", absPath));
-    std::ifstream file(absPath);
-    std::string content(
-        (std::istreambuf_iterator<char>(file)),
-        (std::istreambuf_iterator<char>())
-    );
-    file.close();
-    nlohmann::json config = nlohmann::json::parse(content);
-    const int port = config["port"];
-    const std::string secret = config["secret"];
+    Log("Status", fmt::format("Loading configuration file from '{}'", absPath));
+    Configuration config = common::loadFromJson<Configuration>(absPath);
 
 #ifdef QT_DEBUG
-    mw.show();
-#else
-    if ((config.find("showWindow") != config.end()) && config["showWindow"]) {
+    config.showWindow = true;
+#endif // QT_DEBUG
+
+    if (config.showWindow) {
         mw.show();
     }
     else {
         mw.hide();
     }
-#endif // QT_DEBUG
 
-    mw.setPort(port);
+    mw.setPort(config.port);
 
-    SocketHandler socketHandler(port, secret);
+    SocketHandler socketHandler(config.port, config.secret);
     ProcessHandler processHandler;
     
     QObject::connect(

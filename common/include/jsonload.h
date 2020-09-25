@@ -54,22 +54,10 @@ namespace common {
  *
  * \tparam T The type of the object that should be constructed from the JSON file
  * \param jsonFile The path to the JSON file that contains the data for the object T
- * \param baseDirectory The part of the path to the \p jsonFile that is removed to
- *        construct an identifier
  * \return A constructed object T that is initialized from the JSON file \p jsonFile
  */
 template <typename T>
-T loadFromJson(std::string_view jsonFile, std::string_view baseDirectory) {
-    std::string id = std::filesystem::relative(jsonFile, baseDirectory).string();
-
-    // Remove the last 5 characters '.json'
-    id = id.substr(0, id.length() - 5);
-
-#ifdef WIN32
-    // Convert the paths into a canonical / form
-    std::replace(id.begin(), id.end(), '\\', '/');
-#endif // WIN32
-
+T loadFromJson(std::string_view jsonFile) {
     std::ifstream f(jsonFile);
     nlohmann::json obj;
     f >> obj;
@@ -105,7 +93,7 @@ std::vector<T> loadJsonFromDirectory(std::string_view directory) {
         const std::string file = p.path().string();
         ::Log("Status", fmt::format("Loading file '{}'", file));
         try {
-            T obj = common::loadFromJson<T>(file, directory);
+            T obj = common::loadFromJson<T>(file);
             res.push_back(std::move(obj));
         }
         catch (const std::runtime_error& e) {
