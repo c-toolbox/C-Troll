@@ -38,7 +38,8 @@
 #include <QWidget>
 
 #include "process.h"
-#include <processoutputmessage.h>
+#include "processoutputmessage.h"
+#include <chrono>
 #include <map>
 
 class QBoxLayout;
@@ -51,7 +52,7 @@ class QTimer;
 class ProcessWidget : public QWidget {
 Q_OBJECT
 public:
-    ProcessWidget(Process::ID processId);
+    ProcessWidget(Process::ID processId, const std::chrono::milliseconds& timeout);
     ~ProcessWidget();
 
     void updateStatus();
@@ -65,6 +66,8 @@ private:
     QWidget* createMessageContainer();
 
     const Process::ID _processId;
+    const std::chrono::milliseconds& _timeout;
+
     QLabel* _status = nullptr;
     QWidget* _messageContainer = nullptr;
     QPlainTextEdit* _messages = nullptr;
@@ -80,7 +83,7 @@ private:
 class ProcessesWidget : public QWidget {
 Q_OBJECT
 public:
-    ProcessesWidget();
+    ProcessesWidget(const std::chrono::milliseconds& processTimeout);
 
     void processAdded(Process::ID processId);
     void processUpdated(Process::ID processId);
@@ -96,6 +99,7 @@ signals:
 private:
     QBoxLayout* _contentLayout = nullptr;
 
+    const std::chrono::milliseconds& _processTimeout;
     std::map<Process::ID, ProcessWidget*> _widgets;
 };
 

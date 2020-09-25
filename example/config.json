@@ -1,5 +1,6 @@
 {
   "applicationPath": "application",
   "clusterPath": "cluster",
-  "nodePath":  "nodes"
+  "nodePath": "nodes",
+  "removalTimeout": 15000
 }

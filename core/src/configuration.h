@@ -36,6 +36,7 @@
 #define __CORE__CONFIGURATION_H__
 
 #include <json/json.hpp>
+#include <chrono>
 #include <string>
 
 /// This structure represents the configuration loaded at startup
@@ -46,8 +47,11 @@ struct Configuration {
     std::string clusterPath;
     /// The path that contains the JSON objects describing the available nodes
     std::string nodePath;
+    /// The timeout after which the information of a successful process is removed
+    std::chrono::milliseconds removalTimeout = std::chrono::milliseconds(15000);
 };
 
+void to_json(nlohmann::json& j, const Configuration& c);
 void from_json(const nlohmann::json& j, Configuration& c);
 
 #endif // __CORE_CONFIGURATION_H__

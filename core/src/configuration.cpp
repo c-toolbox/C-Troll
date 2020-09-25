@@ -38,10 +38,30 @@ namespace {
     constexpr const char* KeyApplicationPath = "applicationPath";
     constexpr const char* KeyClusterPath = "clusterPath";
     constexpr const char* KeyNodePath = "nodePath";
+    constexpr const char* KeyRemovalTimeout = "removalTimeout";
 } // namespace
 
-void from_json(const nlohmann::json& j, Configuration& p) {
-    j.at(KeyApplicationPath).get_to(p.applicationPath);
-    j.at(KeyClusterPath).get_to(p.clusterPath);
-    j.at(KeyNodePath).get_to(p.nodePath);
+void to_json(nlohmann::json& j, const Configuration& c) {
+    j = {
+        { KeyApplicationPath, c.applicationPath },
+        { KeyClusterPath, c.clusterPath },
+        { KeyNodePath, c.nodePath },
+        { KeyRemovalTimeout, static_cast<int>(c.removalTimeout.count()) }
+    };
+}
+
+void from_json(const nlohmann::json& j, Configuration& c) {
+    j.at(KeyApplicationPath).get_to(c.applicationPath);
+    j.at(KeyClusterPath).get_to(c.clusterPath);
+    j.at(KeyNodePath).get_to(c.nodePath);
+
+    if (j.find(KeyRemovalTimeout) != j.end()) {
+        int ms = j.at(KeyRemovalTimeout).get<int>();
+
+        if (ms < 0) {
+            throw std::runtime_error("Negative process removal time is not allowed");
+        }
+
+        c.removalTimeout = std::chrono::milliseconds(ms);
+    }
 }

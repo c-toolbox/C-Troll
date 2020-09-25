@@ -38,6 +38,7 @@ set(HEADER_FILES
   src/clusterwidget.h
   src/color.h
   src/configuration.h
+  src/configurationwidget.h
   src/database.h
   src/mainwindow.h
   src/node.h
@@ -54,6 +55,7 @@ set(SOURCE_FILES
   src/clusterwidget.cpp
   src/color.cpp
   src/configuration.cpp
+  src/configurationwidget.cpp
   src/database.cpp
   src/main.cpp
   src/mainwindow.cpp

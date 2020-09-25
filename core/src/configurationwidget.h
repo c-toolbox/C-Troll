@@ -32,48 +32,41 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__MAINWINDOW_H__
-#define __CORE__MAINWINDOW_H__
+#ifndef __CORE__CONFIGURATIONWIDGET_H__
+#define __CORE__CONFIGURATIONWIDGET_H__
 
-#include <QMainWindow>
+#include <QWidget>
 
-#include "clusterconnectionhandler.h"
 #include "configuration.h"
-#include "process.h"
-#include <QTextEdit>
-#include <memory>
-#include <string_view>
+#include <string>
 
-class ClustersWidget;
-class ProcessesWidget;
+class QLabel;
+class QLineEdit;
+class QPushButton;
+class QSpinBox;
 
-namespace programs { class ProgramsWidget; }
-
-class MainWindow : public QMainWindow {
-Q_OBJECT
+class ConfigurationWidget : public QWidget {
 public:
-    explicit MainWindow(std::string_view configurationFile);
+    ConfigurationWidget(Configuration configuration, std::string filePath);
+
+private slots:
+    void valuesChanged();
+
+    void resetValues();
+    void saveValues();
 
 private:
-    void startProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId);
-    void stopProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId) const;
-    void startProcess(Process::ID processId) const;
-    void stopProcess(Process::ID processId) const;
-    void killAllProcesses(Cluster::ID id) const;
+    QLineEdit* _applicationPath = nullptr;
+    QLineEdit* _clusterPath = nullptr;
+    QLineEdit* _nodePath = nullptr;
+    QSpinBox* _removalTimeout = nullptr;
+    QLabel* _changesLabel = nullptr;
 
+    QPushButton* _restoreButton = nullptr;
+    QPushButton* _saveButton = nullptr;
 
-    void log(std::string msg);
-
-    programs::ProgramsWidget* _programWidget;
-    ClustersWidget* _clustersWidget;
-    ProcessesWidget* _processesWidget;
-
-    ClusterConnectionHandler _clusterConnectionHandler;
-    Configuration _config;
-
-    QTextEdit _messageBox;
+    Configuration _configuration;
+    const std::string _configurationFilePath;
 };
 
-#endif // __CORE__MAINWINDOW_H__
+#endif // __CORE__CONFIGURATIONWIDGET_H__

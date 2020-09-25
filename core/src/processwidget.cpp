@@ -63,8 +63,10 @@ namespace {
     }
 } // namespace
 
-ProcessWidget::ProcessWidget(Process::ID processId)
+ProcessWidget::ProcessWidget(Process::ID processId,
+                             const std::chrono::milliseconds& timeout)
     : _processId(processId)
+    , _timeout(timeout)
 {
     Process* process = data::findProcess(_processId);
     assert(process);
@@ -130,7 +132,7 @@ ProcessWidget::ProcessWidget(Process::ID processId)
         _removalTimer, &QTimer::timeout,
         [this, messageContainer = _messageContainer]() {
             if (messageContainer->isVisible()) {
-                _removalTimer->start(15000);
+                _removalTimer->start(_timeout);
             }
             else {
                 emit remove(_processId);
@@ -180,7 +182,7 @@ QWidget* ProcessWidget::createMessageContainer() {
 
 void ProcessWidget::updateStatus() {
     Process* p = data::findProcess(_processId);
-    _status->setText(QString::fromStdString("Status: " + statusToString(p->status)));
+    _status->setText(QString::fromStdString(statusToString(p->status)));
 
     if (p->status == common::ProcessStatusMessage::Status::NormalExit) {
         // Start a timer to automatically remove a process if it exited normally
@@ -213,7 +215,9 @@ void ProcessWidget::addMessage(common::ProcessOutputMessage message) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ProcessesWidget::ProcessesWidget() {
+ProcessesWidget::ProcessesWidget(const std::chrono::milliseconds& processTimeout)
+    : _processTimeout(processTimeout)
+{
     QBoxLayout* layout = new QVBoxLayout(this);
     
     QScrollArea* area = new QScrollArea;
@@ -227,6 +231,7 @@ ProcessesWidget::ProcessesWidget() {
     area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
     layout->addWidget(area);
 
+    _contentLayout->setAlignment(Qt::AlignTop);
     _contentLayout->addStretch();
 
     QPushButton* killAll = new QPushButton("Kill all processses");
@@ -243,7 +248,7 @@ void ProcessesWidget::receivedProcessMessage(Node::ID, common::ProcessOutputMess
 
 void ProcessesWidget::processAdded(Process::ID processId) {
     // The process has been created, but the widget did not exist yet
-    ProcessWidget* w = new ProcessWidget(processId);
+    ProcessWidget* w = new ProcessWidget(processId, _processTimeout);
     w->setMinimumWidth(width());
     connect(w, &ProcessWidget::remove, this, &ProcessesWidget::processRemoved);
     connect(w, &ProcessWidget::kill, this, &ProcessesWidget::killProcess);

@@ -32,48 +32,19 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__MAINWINDOW_H__
-#define __CORE__MAINWINDOW_H__
+#ifndef __TRAY__CONFIGURATION_H__
+#define __TRAY__CONFIGURATION_H__
 
-#include <QMainWindow>
+#include <json/json.hpp>
+#include <string>
 
-#include "clusterconnectionhandler.h"
-#include "configuration.h"
-#include "process.h"
-#include <QTextEdit>
-#include <memory>
-#include <string_view>
-
-class ClustersWidget;
-class ProcessesWidget;
-
-namespace programs { class ProgramsWidget; }
-
-class MainWindow : public QMainWindow {
-Q_OBJECT
-public:
-    explicit MainWindow(std::string_view configurationFile);
-
-private:
-    void startProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId);
-    void stopProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId) const;
-    void startProcess(Process::ID processId) const;
-    void stopProcess(Process::ID processId) const;
-    void killAllProcesses(Cluster::ID id) const;
-
-
-    void log(std::string msg);
-
-    programs::ProgramsWidget* _programWidget;
-    ClustersWidget* _clustersWidget;
-    ProcessesWidget* _processesWidget;
-
-    ClusterConnectionHandler _clusterConnectionHandler;
-    Configuration _config;
-
-    QTextEdit _messageBox;
+struct Configuration {
+    int port = 5000;
+    std::string secret;
+    bool showWindow = false;
 };
 
-#endif // __CORE__MAINWINDOW_H__
+void to_json(nlohmann::json& j, const Configuration& c);
+void from_json(const nlohmann::json& j, Configuration& c);
+
+#endif // __TRAY__CONFIGURATION_H__

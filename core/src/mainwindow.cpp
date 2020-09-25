@@ -34,10 +34,13 @@
 
 #include "mainwindow.h"
 
-#include "configuration.h"
+#include "clusterwidget.h"
+#include "configurationwidget.h"
 #include "database.h"
 #include "jsonload.h"
 #include "killallmessage.h"
+#include "processwidget.h"
+#include "programwidget.h"
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMessageBox>
@@ -56,7 +59,7 @@ namespace {
     constexpr const float TabHeightRatio = 0.24f;
 } // namespace
 
-MainWindow::MainWindow(const std::string& configurationFile) {
+MainWindow::MainWindow(std::string_view configurationFile) {
     // We calculate the size of the window based on the screen resolution to be somewhat
     // safe against high and low DPI monitors
     const int screenWidth = QApplication::desktop()->screenGeometry().width();
@@ -92,52 +95,52 @@ MainWindow::MainWindow(const std::string& configurationFile) {
     //
     // Load the configuration
     Log("Status", fmt::format("Loading configuration file '{}'", configurationFile));
-    Configuration config = common::loadFromJson<Configuration>(configurationFile);
+    _config = common::loadFromJson<Configuration>(configurationFile);
 
     //
     // Load the data
-    Log("Status", fmt::format("Loading programs from '{}'", config.applicationPath));
-    Log("Status", fmt::format("Loading nodes from '{}'", config.nodePath));
-    Log("Status", fmt::format("Loading clusters from '{}'", config.clusterPath));
-    data::loadData(config.applicationPath, config.clusterPath, config.nodePath);
+    Log("Status", fmt::format("Loading programs from '{}'", _config.applicationPath));
+    Log("Status", fmt::format("Loading nodes from '{}'", _config.nodePath));
+    Log("Status", fmt::format("Loading clusters from '{}'", _config.clusterPath));
+    data::loadData(_config.applicationPath, _config.clusterPath, _config.nodePath);
 
     //
     // Create the widgets
     // Programs
-    _programWidget = std::make_unique<programs::ProgramsWidget>();
+    _programWidget = new programs::ProgramsWidget;
     connect(
-        _programWidget.get(), &programs::ProgramsWidget::startProgram,
+        _programWidget, &programs::ProgramsWidget::startProgram,
         this, &MainWindow::startProgram
     );
     connect(
-        _programWidget.get(), &programs::ProgramsWidget::stopProgram,
+        _programWidget, &programs::ProgramsWidget::stopProgram,
         this, &MainWindow::stopProgram
     );
     connect(
-        _programWidget.get(), &programs::ProgramsWidget::restartProcess,
+        _programWidget, &programs::ProgramsWidget::restartProcess,
         this, &MainWindow::startProcess
     );
     connect(
-        _programWidget.get(), &programs::ProgramsWidget::stopProcess,
+        _programWidget, &programs::ProgramsWidget::stopProcess,
         this, &MainWindow::stopProcess
     );
 
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
-        _programWidget.get(), &programs::ProgramsWidget::connectedStatusChanged
+        _programWidget, &programs::ProgramsWidget::connectedStatusChanged
     );
 
 
     // Clusters
-    _clustersWidget = std::make_unique<ClustersWidget>();
+    _clustersWidget = new ClustersWidget;
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
-        _clustersWidget.get(), &ClustersWidget::connectedStatusChanged
+        _clustersWidget, &ClustersWidget::connectedStatusChanged
     );
 
 
     // Processes
-    _processesWidget = std::make_unique<ProcessesWidget>();
+    _processesWidget = new ProcessesWidget(_config.removalTimeout);
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
         [this](common::ProcessStatusMessage status) {
@@ -228,22 +231,26 @@ MainWindow::MainWindow(const std::string& configurationFile) {
     );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedProcessMessage,
-        _processesWidget.get(), &ProcessesWidget::receivedProcessMessage
+        _processesWidget, &ProcessesWidget::receivedProcessMessage
     );
     connect(
-        _processesWidget.get(), &ProcessesWidget::killProcess,
+        _processesWidget, &ProcessesWidget::killProcess,
         [this](Process::ID processId) { stopProcess(processId); }
     );
     connect(
-        _processesWidget.get(), &ProcessesWidget::killAllProcesses,
+        _processesWidget, &ProcessesWidget::killAllProcesses,
         [this]() { killAllProcesses(Cluster::ID(-1)); }
     );
 
     // Set up the tab widget
-    tabWidget->addTab(_programWidget.get(), "Programs");
-    tabWidget->addTab(_clustersWidget.get(), "Clusters");
-    tabWidget->addTab(_processesWidget.get(), "Processes");
+    tabWidget->addTab(_programWidget, "Programs");
+    tabWidget->addTab(_clustersWidget, "Clusters");
+    tabWidget->addTab(_processesWidget, "Processes");
     tabWidget->addTab(&_messageBox, "Log");
+    tabWidget->addTab(
+        new ConfigurationWidget(_config, std::string(configurationFile)),
+        "Settings"
+    );
 
     std::string style = fmt::format(
         "QTabBar::tab {{ height: {}px; width: {}px; }}",
