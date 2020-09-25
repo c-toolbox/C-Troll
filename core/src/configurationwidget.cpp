@@ -45,8 +45,11 @@
 #include <fmt/format.h>
 #include <json/json.hpp>
 #include <fstream>
+#include <random>
 
 ColorWidget::ColorWidget(Color color) {
+    setObjectName("color");
+
     QBoxLayout* layout = new QHBoxLayout;
 
     _colorButton = new QPushButton;
@@ -68,7 +71,8 @@ ColorWidget::ColorWidget(Color color) {
     );
     layout->addWidget(_colorButton);
 
-    QPushButton* remove = new QPushButton("X");
+    QPushButton* remove = new QPushButton;
+    remove->setIcon(QIcon(":/images/x.png"));
     connect(
         remove, &QPushButton::clicked,
         [this]() { emit removed(this); }
@@ -176,55 +180,50 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
     // Colors
     {
         QWidget* w = new QWidget;
-        QGridLayout* colorLayout = new QGridLayout;
-        constexpr const int nColumns = 5;
-        for (size_t i = 0; i < _configuration.tagColors.size(); ++i) {
-            const Color& c = _configuration.tagColors[i];
-
-            const int rowIdx = i / nColumns;
-            const int columnIdx = i % nColumns;
-
-            ColorWidget* cw = new ColorWidget(c);
-            connect(
-                cw, &ColorWidget::colorChanged,
-                [this, cw](Color c) {
-                    cw->setColor(c);
-                    valuesChanged();
-                }
-            );
-            connect(
-                cw, &ColorWidget::removed,
-                [cw, colorLayout, this](ColorWidget* sender) {
-                    colorLayout->removeWidget(sender);
-
-                    const auto it = std::find(_colors.begin(), _colors.end(), sender);
-                    assert(it != _colors.end());
-                    _colors.erase(it);
-
-                    // @TODO compactify table
-
-                    sender->deleteLater();
-                    valuesChanged();
-                }
-            );
-
-            _colors.push_back(cw);
-            colorLayout->addWidget(cw, rowIdx, columnIdx);
-        }
-        w->setLayout(colorLayout);
+        _colorLayout = new QGridLayout;
+        createColorWidgets();
+        w->setLayout(_colorLayout);
 
         layout->addWidget(w);
     }
 
-    layout->addStretch();
+    QPushButton* addColor = new QPushButton("Add new color");
+    connect(
+        addColor, &QPushButton::clicked,
+        [this]() {
+            std::random_device rd;
+            std::uniform_int_distribution<int> dist(0, 255);
 
-    _changesLabel = new QLabel("Changes are only used after a restart of C-Troll");
-    layout->addWidget(_changesLabel);
+            Color c;
+            c.r = dist(rd);
+            c.g = dist(rd);
+            c.b = dist(rd);
+            createColorWidget(c);
+            layoutColorWidgets();
+            valuesChanged();
+        }
+    );
+    layout->addWidget(addColor);
+
+    layout->addStretch();
+    
+    // Separator
+    {
+        
+        QFrame* separator = new QFrame;
+        separator->setObjectName("line");
+        separator->setFrameShape(QFrame::HLine);
+        separator->setFrameShadow(QFrame::Sunken);
+        layout->addWidget(separator);
+    }
 
     // Buttons
     {
         QWidget* line = new QWidget;
         QBoxLayout* l = new QHBoxLayout(line);
+
+        _changesLabel = new QLabel("Changes are only used after a restart of C-Troll");
+        l->addWidget(_changesLabel);
 
         l->addStretch();
         _restoreButton = new QPushButton("Restore");
@@ -248,6 +247,19 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
     resetValues();
 }
 
+void ConfigurationWidget::removedColor(ColorWidget* sender) {
+    _colorLayout->removeWidget(sender);
+
+    const auto it = std::find(_colors.begin(), _colors.end(), sender);
+    assert(it != _colors.end());
+    _colors.erase(it);
+
+    layoutColorWidgets();
+
+    sender->deleteLater();
+    valuesChanged();
+}
+
 void ConfigurationWidget::valuesChanged() {
     const bool hasChanged =
         (_configuration.applicationPath != _applicationPath->text().toStdString()) ||
@@ -266,6 +278,13 @@ void ConfigurationWidget::resetValues() {
     _clusterPath->setText(QString::fromStdString(_configuration.clusterPath));
     _nodePath->setText(QString::fromStdString(_configuration.nodePath));
     _removalTimeout->setValue(static_cast<int>(_configuration.removalTimeout.count()));
+
+    for (ColorWidget* cw : _colors) {
+        _colorLayout->removeWidget(cw);
+        cw->deleteLater();
+    }
+    _colors.clear();
+    createColorWidgets();
 
     valuesChanged();
 }
@@ -287,6 +306,47 @@ void ConfigurationWidget::saveValues() {
 
     _configuration = config;
     valuesChanged();
+}
+
+void ConfigurationWidget::layoutColorWidgets() {
+    constexpr const int Columns = 5;
+
+    // First remove all widgets from the layout
+    for (ColorWidget* w : _colors) {
+        _colorLayout->removeWidget(w);
+    }
+
+    // Then readd them
+    for (size_t i = 0; i < _colors.size(); ++i) {
+        const int rowIdx = static_cast<int>(i / Columns);
+        const int columnIdx = static_cast<int>(i % Columns);
+
+        _colorLayout->addWidget(_colors[i], rowIdx, columnIdx);
+    }
+}
+
+void ConfigurationWidget::createColorWidget(const Color& color) {
+    ColorWidget* cw = new ColorWidget(color);
+    connect(
+        cw, &ColorWidget::colorChanged,
+        [this, cw](Color c) {
+        cw->setColor(c);
+        valuesChanged();
+    }
+    );
+    connect(
+        cw, &ColorWidget::removed,
+        this, &ConfigurationWidget::removedColor
+    );
+
+    _colors.push_back(cw);
+}
+
+void ConfigurationWidget::createColorWidgets() {
+    for (const Color& c : _configuration.tagColors) {
+        createColorWidget(c);
+    }
+    layoutColorWidgets();
 }
 
 std::vector<Color> ConfigurationWidget::tagColors() const {

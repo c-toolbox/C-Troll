@@ -40,6 +40,7 @@
 #include "configuration.h"
 #include <string>
 
+class QGridLayout;
 class QLabel;
 class QLineEdit;
 class QPushButton;
@@ -70,18 +71,24 @@ public:
     ConfigurationWidget(Configuration configuration, std::string filePath);
 
 private slots:
-    void valuesChanged();
+    void removedColor(ColorWidget* sender);
 
+    void valuesChanged();
     void resetValues();
     void saveValues();
 
 private:
+    void layoutColorWidgets();
+    void createColorWidget(const Color& color);
+    void createColorWidgets();
+
     std::vector<Color> tagColors() const;
 
     QLineEdit* _applicationPath = nullptr;
     QLineEdit* _clusterPath = nullptr;
     QLineEdit* _nodePath = nullptr;
     QSpinBox* _removalTimeout = nullptr;
+    QGridLayout* _colorLayout = nullptr;
     std::vector<ColorWidget*> _colors;
 
     QLabel* _changesLabel = nullptr;

@@ -51,8 +51,8 @@ QTabBar::tab {
   border: 1px solid #efefef;
 
   font-size: 14pt;
-  padding-top: 7px;
-  padding-bottom: 7px;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
 
   /*min-width: 40%;*/
   /*min-height: 150%;*/
@@ -79,4 +79,13 @@ QPushButton#removeprocess {
 
 QPushButton#removeprocess:disabled {
   background-color: #555555;
+}
+
+QFrame#line {
+  border: 1px solid #dddddd;
+}
+
+QWidget#color > QPushButton {
+  height: 1em;
+  width: 1em;
 }
