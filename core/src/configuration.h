@@ -44,6 +44,7 @@ struct Color {
     int r = 255;
     int g = 255;
     int b = 255;
+    std::string tag;
 };
 bool operator==(const Color& lhs, const Color& rhs);
 

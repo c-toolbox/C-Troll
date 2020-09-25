@@ -67,9 +67,6 @@ QTabBar::tab:selected {
   border-color: #acacac;
 }
 
-QWidget#clusterwidget QGroupBox#cluster {
-}
-
 QPushButton#removeprocess {
   background-color: #801512;
   color: #dddddd;
@@ -82,10 +79,20 @@ QPushButton#removeprocess:disabled {
 }
 
 QFrame#line {
+  background-color: #dddddd;
   border: 1px solid #dddddd;
 }
 
 QWidget#color > QPushButton {
   height: 1em;
   width: 1em;
+}
+
+ConfigurationWidget  QLineEdit, QSpinBox {
+  font-size: 10pt;
+}
+
+ConfigurationWidget  QLabel#important {
+  color: #ff3b34;
+  font-size: 16pt;
 }

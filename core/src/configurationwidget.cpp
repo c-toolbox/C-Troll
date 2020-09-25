@@ -40,6 +40,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QScrollArea>
 #include <QSpinbox>
 #include <QVBoxLayout>
 #include <fmt/format.h>
@@ -47,13 +48,15 @@
 #include <fstream>
 #include <random>
 
-ColorWidget::ColorWidget(Color color) {
+ColorWidget::ColorWidget(Color color)
+    : _color(std::move(color))
+{
     setObjectName("color");
 
-    QBoxLayout* layout = new QHBoxLayout;
+    QGridLayout* layout = new QGridLayout;
 
     _colorButton = new QPushButton;
-    setColor(std::move(color));
+    applyColor();
 
     connect(
         _colorButton, &QPushButton::clicked,
@@ -65,11 +68,12 @@ ColorWidget::ColorWidget(Color color) {
                 res.r = selected.red();
                 res.g = selected.green();
                 res.b = selected.blue();
+                res.tag = _tagLine->text().toStdString();
                 emit colorChanged(res);
             }
         }
     );
-    layout->addWidget(_colorButton);
+    layout->addWidget(_colorButton, 0, 0);
 
     QPushButton* remove = new QPushButton;
     remove->setIcon(QIcon(":/images/x.png"));
@@ -77,24 +81,42 @@ ColorWidget::ColorWidget(Color color) {
         remove, &QPushButton::clicked,
         [this]() { emit removed(this); }
     );
-    layout->addWidget(remove);
+    layout->addWidget(remove, 0, 1);
+
+
+    _tagLine = new QLineEdit;
+    _tagLine->setText(QString::fromStdString(_color.tag));
+    _tagLine->setPlaceholderText("Tag this color applies to");
+    connect(
+        _tagLine, &QLineEdit::textEdited,
+        [this]() {
+        Color res = _color;
+        res.tag = _tagLine->text().toStdString();
+        emit colorChanged(res);
+    }
+    );
+    layout->addWidget(_tagLine, 1, 0, 1, 2);
 
     setLayout(layout);
 }
 
 void ColorWidget::setColor(Color color) {
-    _colorButton->setStyleSheet(
-        QString::fromStdString(
-            fmt::format(
-                "background-color: #{0:02x}{1:02x}{2:02x};", color.r, color.g, color.b
-            )
-        )
-    );
     _color = std::move(color);
+    applyColor();
 }
 
 Color ColorWidget::color() const {
     return _color;
+}
+
+void ColorWidget::applyColor() {
+    _colorButton->setStyleSheet(
+        QString::fromStdString(
+            fmt::format(
+                "background-color: #{0:02x}{1:02x}{2:02x};", _color.r, _color.g, _color.b
+            )
+        )
+    );
 }
 
 
@@ -179,12 +201,18 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
 
     // Colors
     {
-        QWidget* w = new QWidget;
+        QScrollArea* area = new QScrollArea;
+        area->setWidgetResizable(true);
+        area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+        QWidget* content = new QWidget;
+        area->setWidget(content);
+        area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
         _colorLayout = new QGridLayout;
         createColorWidgets();
-        w->setLayout(_colorLayout);
+        content->setLayout(_colorLayout);
 
-        layout->addWidget(w);
+        layout->addWidget(area);
     }
 
     QPushButton* addColor = new QPushButton("Add new color");
@@ -205,8 +233,6 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
     );
     layout->addWidget(addColor);
 
-    layout->addStretch();
-    
     // Separator
     {
         
@@ -223,6 +249,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         QBoxLayout* l = new QHBoxLayout(line);
 
         _changesLabel = new QLabel("Changes are only used after a restart of C-Troll");
+        _changesLabel->setObjectName("important");
         l->addWidget(_changesLabel);
 
         l->addStretch();
@@ -325,14 +352,14 @@ void ConfigurationWidget::layoutColorWidgets() {
     }
 }
 
-void ConfigurationWidget::createColorWidget(const Color& color) {
-    ColorWidget* cw = new ColorWidget(color);
+void ConfigurationWidget::createColorWidget(Color color) {
+    ColorWidget* cw = new ColorWidget(std::move(color));
     connect(
         cw, &ColorWidget::colorChanged,
         [this, cw](Color c) {
-        cw->setColor(c);
-        valuesChanged();
-    }
+            cw->setColor(c);
+            valuesChanged();
+        }
     );
     connect(
         cw, &ColorWidget::removed,

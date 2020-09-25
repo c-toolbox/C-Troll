@@ -44,14 +44,21 @@ namespace {
     constexpr const char* KeyRed = "r";
     constexpr const char* KeyGreen = "g";
     constexpr const char* KeyBlue = "b";
+    constexpr const char* KeyTag = "tag";
 } // namespace
 
 bool operator==(const Color& lhs, const Color& rhs) {
-    return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b);
+    return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b) &&
+           (lhs.tag == rhs.tag);
 }
 
 void to_json(nlohmann::json& j, const Color& c) {
-    j = { { KeyRed, c.r }, { KeyGreen, c.g }, { KeyBlue, c.b } };
+    j[KeyRed] = c.r;
+    j[KeyGreen] = c.g;
+    j[KeyBlue] = c.b;
+    if (!c.tag.empty()) {
+        j[KeyTag] = c.tag;
+    }
 }
 
 void to_json(nlohmann::json& j, const Configuration& c) {
@@ -68,6 +75,10 @@ void from_json(const nlohmann::json& j, Color& c) {
     j.at(KeyRed).get_to(c.r);
     j.at(KeyGreen).get_to(c.g);
     j.at(KeyBlue).get_to(c.b);
+
+    if (j.find(KeyTag) != j.end()) {
+        j.at(KeyTag).get_to(c.tag);
+    }
 
     if (c.r < 0 || c.r > 255 || c.g < 0 || c.g > 255 || c.b < 0 || c.b > 255) {
         throw std::runtime_error("All color components must be in [0, 255]");

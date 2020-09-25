@@ -34,6 +34,9 @@
 
 #include "database.h"
 
+#include <QObject>
+#include <random>
+
 namespace {
 
 std::vector<std::unique_ptr<Cluster>> gClusters;
@@ -202,22 +205,48 @@ void addProcess(std::unique_ptr<Process> process) {
 }
 
 Color colorForTag(const std::string& tag) {
-    static int LastColor = -1;
-    static std::map<std::string, Color> Colors;
+    //static int LastColor = -1;
+    //static std::map<std::string, Color> Colors;
 
-    if (Colors.find(tag) != Colors.end()) {
-        // Someone already requested the color for this tag
-        return Colors[tag];
+    // It doesn't make sense if someone requests the color for an empty tag
+    assert(!tag.empty());
+
+    // First check if we have a dedicated color for this tag
+    auto it = std::find_if(
+        gTagColors.cbegin(), gTagColors.cend(),
+        [tag](const Color& c) { return c.tag == tag; }
+    );
+
+    if (it != gTagColors.end()) {
+        // If we do, great, and we return it
+        return *it;
     }
     else {
-        // Color not yet requested
-        ++LastColor;
-        Color c = LastColor < gTagColors.size() ?
-            gTagColors[LastColor] :
-            Color{ 255, 255, 255 };
+        // Otherwise we pick the first without a tag
+        for (Color& c : gTagColors) {
+            if (c.tag.empty()) {
+                c.tag = tag;
+                return c;
+            }
+        }
 
-        Colors[tag] = c;
-        return c;
+        // If we got this far, there was no tag specified;  if we are debugging, we make
+        // the colors white, otherwise we pick a random color
+#ifdef QT_DEBUG
+        Color res;
+        res.r = 255;
+        res.g = 255;
+        res.b = 255;
+        return res;
+#else // QT_DEBUG
+        std::random_device rd;
+        std::uniform_int_distribution<int> dist(0, 255);
+        Color res;
+        res.r = dist(rd);
+        res.g = dist(rd);
+        res.b = dist(rd);
+        return res;
+#endif // QT_DEBUG
     }
 }
 

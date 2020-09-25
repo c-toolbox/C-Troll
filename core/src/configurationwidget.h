@@ -60,7 +60,10 @@ signals:
     void removed(ColorWidget* sender);
 
 private:
+    void applyColor();
+
     QPushButton* _colorButton = nullptr;
+    QLineEdit* _tagLine = nullptr;
     Color _color;
 };
 
@@ -79,7 +82,7 @@ private slots:
 
 private:
     void layoutColorWidgets();
-    void createColorWidget(const Color& color);
+    void createColorWidget(Color color);
     void createColorWidgets();
 
     std::vector<Color> tagColors() const;
