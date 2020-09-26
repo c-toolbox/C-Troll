@@ -126,78 +126,56 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
     , _configurationFilePath(std::move(configurationFilePath))
 {
     QBoxLayout* layout = new QVBoxLayout;
+    layout->setSpacing(0);
     layout->setAlignment(Qt::AlignTop);
 
+    QWidget* controls = new QWidget;
+    QGridLayout* controlsLayout = new QGridLayout;
+    controls->setLayout(controlsLayout);
+    layout->addWidget(controls);
+
     // Application path
-    {
-        QWidget* line = new QWidget;
-        QVBoxLayout* l = new QVBoxLayout(line);
+    controlsLayout->addWidget(new QLabel("Application Path:"), 0, 0);
 
-        l->addWidget(new QLabel("Application Path:"));
-
-        _applicationPath = new QLineEdit;
-        connect(
-            _applicationPath, &QLineEdit::textEdited,
-            this, &ConfigurationWidget::valuesChanged
-        );
-        l->addWidget(_applicationPath);
-
-        layout->addWidget(line);
-    }
+    _applicationPath = new QLineEdit;
+    connect(
+        _applicationPath, &QLineEdit::textEdited,
+        this, &ConfigurationWidget::valuesChanged
+    );
+    controlsLayout->addWidget(_applicationPath, 0, 1);
 
     // Cluster path
-    {
-        QWidget* line = new QWidget;
-        QVBoxLayout* l = new QVBoxLayout(line);
+    controlsLayout->addWidget(new QLabel("Cluster Path:"), 1, 0);
 
-        l->addWidget(new QLabel("Cluster Path:"));
+    _clusterPath = new QLineEdit;
+    connect(
+        _clusterPath, &QLineEdit::textEdited,
+        this, &ConfigurationWidget::valuesChanged
+    );
+    controlsLayout->addWidget(_clusterPath, 1, 1);
 
-        _clusterPath = new QLineEdit;
-        connect(
-            _clusterPath, &QLineEdit::textEdited,
-            this, &ConfigurationWidget::valuesChanged
-        );
-        l->addWidget(_clusterPath);
+// Node path
+    controlsLayout->addWidget(new QLabel("Node Path:"), 2, 0);
 
-        layout->addWidget(line);
-    }
-
-    // Node path
-    {
-        QWidget* line = new QWidget;
-        QVBoxLayout* l = new QVBoxLayout(line);
-
-        l->addWidget(new QLabel("Node Path:"));
-
-        _nodePath = new QLineEdit;
-        connect(
-            _nodePath, &QLineEdit::textEdited,
-            this, &ConfigurationWidget::valuesChanged
-        );
-        l->addWidget(_nodePath);
-
-        layout->addWidget(line);
-    }
+    _nodePath = new QLineEdit;
+    connect(
+        _nodePath, &QLineEdit::textEdited,
+        this, &ConfigurationWidget::valuesChanged
+    );
+    controlsLayout->addWidget(_nodePath, 2, 1);
 
     // Process removal time
-    {
-        QWidget* line = new QWidget;
-        QVBoxLayout* l = new QVBoxLayout(line);
+    controlsLayout->addWidget(new QLabel("Process Removal Time:"), 3, 0);
 
-        l->addWidget(new QLabel("Process Removal Time:"));
-
-        _removalTimeout = new QSpinBox;
-        _removalTimeout->setSuffix(" ms");
-        _removalTimeout->setMinimum(0);
-        _removalTimeout->setMaximum(std::numeric_limits<int>::max());
-        connect(
-            _removalTimeout, QOverload<int>::of(&QSpinBox::valueChanged),
-            this, &ConfigurationWidget::valuesChanged
-        );
-        l->addWidget(_removalTimeout);
-
-        layout->addWidget(line);
-    }
+    _removalTimeout = new QSpinBox;
+    _removalTimeout->setSuffix(" ms");
+    _removalTimeout->setMinimum(0);
+    _removalTimeout->setMaximum(std::numeric_limits<int>::max());
+    connect(
+        _removalTimeout, QOverload<int>::of(&QSpinBox::valueChanged),
+        this, &ConfigurationWidget::valuesChanged
+    );
+    controlsLayout->addWidget(_removalTimeout, 3, 1);
 
     // Colors
     {
@@ -213,7 +191,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         createColorWidgets();
         content->setLayout(_colorLayout);
 
-        layout->addWidget(area);
+        layout->addWidget(area, 1);
     }
 
     QPushButton* addColor = new QPushButton("Add new color");
@@ -255,6 +233,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
 
         l->addStretch();
         _restoreButton = new QPushButton("Restore");
+        _restoreButton->setObjectName("control");
         connect(
             _restoreButton, &QPushButton::clicked,
             this, &ConfigurationWidget::resetValues
@@ -262,6 +241,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         l->addWidget(_restoreButton);
 
         _saveButton = new QPushButton("Save File");
+        _saveButton->setObjectName("control");
         connect(
             _saveButton, &QPushButton::clicked,
             this, &ConfigurationWidget::saveValues
