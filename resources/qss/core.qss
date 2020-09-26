@@ -21,9 +21,8 @@ QPushButton {
   border-color: #acacac;
   min-height: 1.25em;
   font-size: 11pt;
-
-  padding-left: 25%;
-  padding-right: 25%;
+  /* padding-left: 25%;
+  padding-right: 25%; */
 }
 
 QPushButton:hover {
@@ -48,14 +47,14 @@ QTabBar::tab {
   background: #303030;
   color: #efefef;
 
+  height: 3.5em;
+  width: 1.25em;
+
   border: 1px solid #efefef;
 
   font-size: 14pt;
   padding-top: 0.25em;
   padding-bottom: 0.25em;
-
-  /*min-width: 40%;*/
-  /*min-height: 150%;*/
 }
 
 QTabBar::tab:hover {
@@ -87,6 +86,25 @@ QWidget#color > QPushButton {
   height: 1em;
   width: 1em;
 }
+
+QWidget#tags  QPushButton {
+  color: #202020;
+  border-color: #303030;
+  border-style: outset;
+}
+
+QWidget#tags  QPushButton:hover {
+  color: #202020;
+}
+
+QWidget#tags  QPushButton:pressed {
+  border-style: inset;
+}
+
+QWidget#tags  QPushButton:open {
+  border-style: inset;
+}
+
 
 ConfigurationWidget  QLineEdit, QSpinBox {
   font-size: 10pt;

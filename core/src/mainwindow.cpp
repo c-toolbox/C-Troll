@@ -263,12 +263,6 @@ MainWindow::MainWindow() {
     tabWidget->addTab(&_messageBox, "Log");
     tabWidget->addTab(new ConfigurationWidget(_config, ConfigurationFile), "Settings");
 
-    std::string style = fmt::format(
-        "QTabBar::tab {{ height: {}px; width: {}px; }}",
-        widgetHeight * TabHeightRatio, widgetWidth * TabWidthRatio
-    );
-    tabWidget->setStyleSheet(QString::fromStdString(style));
-
     _clusterConnectionHandler.initialize();
 }
 

@@ -209,6 +209,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         area->setWidget(content);
         area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
         _colorLayout = new QGridLayout;
+        _colorLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
         createColorWidgets();
         content->setLayout(_colorLayout);
 

@@ -413,23 +413,19 @@ TagsWidget::TagsWidget()
         std::string colorText = fmt::format(
             R"(
                 QPushButton {{
-                    background-color: #{0:02x}{1:02x}{2:02x}; color: #202020;
-                    border-color: #303030;
-                    border-style: outset;
+                    background-color: #{0:02x}{1:02x}{2:02x};
                 }}
 
                 QPushButton:hover {{
-                    background-color: #{3:02x}{4:02x}{5:02x}; color: #202020;
+                    background-color: #{3:02x}{4:02x}{5:02x};
                 }}
 
                 QPushButton:pressed {{
                     background-color: #{6:02x}{7:02x}{8:02x};
-                    border-style: inset;
                 }}
 
                 QPushButton:open {{
                     background-color: #{6:02x}{7:02x}{8:02x};
-                    border-style: inset;
                 }}
             )",
             color.r, color.g, color.b,

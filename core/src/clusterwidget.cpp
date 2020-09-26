@@ -60,6 +60,8 @@ ConnectionWidget::ConnectionWidget() {
     setMinimumHeight(screenHeight * ConnectionWidgetHeightRatio);
     setMaximumWidth(screenWidth * ConnectionWidgetWidthRatio);
 
+    setAutoFillBackground(true);
+
     QLayout* layout = new QHBoxLayout(this);
     layout->setMargin(0);
 
@@ -70,7 +72,7 @@ ConnectionWidget::ConnectionWidget() {
 }
 
 void ConnectionWidget::setStatus(ConnectionStatus status) {
-    std::string_view color = [](ConnectionStatus s) {
+    std::string color = [](ConnectionStatus s) {
         switch (s) {
             case ConnectionStatus::Connected: return ColorConnected;
             case ConnectionStatus::PartiallyConnected: return ColorPartiallyConnected;
