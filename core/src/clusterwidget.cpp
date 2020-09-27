@@ -36,12 +36,14 @@
 
 #include "database.h"
 #include "node.h"
-#include <fmt/format.h>
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QLabel>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QScrollArea>
 #include <QVBoxLayout>
+#include <fmt/format.h>
 
 namespace {
     constexpr const char* ColorConnected = "#33cc33";
@@ -55,10 +57,10 @@ namespace {
 ConnectionWidget::ConnectionWidget() {
     // We calculate the size of the window based on the screen resolution to be somewhat
     // safe against high and low DPI monitors
-    const int screenWidth = QApplication::desktop()->screenGeometry().width();
-    const int screenHeight = QApplication::desktop()->screenGeometry().height();
-    setMinimumHeight(screenHeight * ConnectionWidgetHeightRatio);
-    setMaximumWidth(screenWidth * ConnectionWidgetWidthRatio);
+    //const int screenWidth = QApplication::desktop()->screenGeometry().width();
+    //const int screenHeight = QApplication::desktop()->screenGeometry().height();
+    //setMinimumHeight(screenHeight * ConnectionWidgetHeightRatio);
+    //setMaximumWidth(screenWidth * ConnectionWidgetWidthRatio);
 
     setAutoFillBackground(true);
 
@@ -117,6 +119,29 @@ NodeWidget::NodeWidget(const Node& node)
 
     QLabel* ip = new QLabel(QString::fromStdString(node.ipAddress));
     layout->addWidget(ip);
+
+    layout->addStretch();
+    QPushButton* kill = new QPushButton("Kill processes");
+    connect(
+        kill, &QPushButton::clicked,
+        [this, node]() {
+            std::string text = fmt::format(
+                "Are you sure you want to kill all processes on '{}'?", node.name
+            );
+
+            QMessageBox box;
+            box.setText("Kill all processes on single node");
+            box.setInformativeText(QString::fromStdString(text));
+            box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            box.setDefaultButton(QMessageBox::Ok);
+            const int res = box.exec();
+
+            if (res == QMessageBox::Ok) {
+                emit killProcesses(node.id);
+            }
+        }
+    );
+    layout->addWidget(kill);
 }
 
 void NodeWidget::updateConnectionStatus() {
@@ -148,10 +173,37 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
     std::vector<Node*> nodes = data::findNodesForCluster(cluster);
     for (Node* n : nodes) {
         NodeWidget* node = new NodeWidget(*n);
+        connect(
+            node, &NodeWidget::killProcesses,
+            this, QOverload<Node::ID>::of(&ClusterWidget::killProcesses)
+        );
         layout->addWidget(node);
         _nodeWidgets[n->id] = node;
         updateConnectionStatus(n->id);
     }
+
+    QPushButton* kill = new QPushButton("Kill all processes");
+    connect(
+        kill, &QPushButton::clicked,
+        [this, cluster]() {
+            std::string text = fmt::format(
+                "Are you sure you want to kill all processes on cluster '{}'?",
+                cluster.name
+            );
+
+            QMessageBox box;
+            box.setText("Kill process");
+            box.setInformativeText(QString::fromStdString(text));
+            box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            box.setDefaultButton(QMessageBox::Ok);
+            const int res = box.exec();
+
+            if (res == QMessageBox::Ok) {
+                emit killProcesses(cluster.id);
+            }
+        }
+    );
+    layout->addWidget(kill);
 }
 
 void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
@@ -197,6 +249,14 @@ ClustersWidget::ClustersWidget() {
 
     for (Cluster* c : data::clusters()) {
         ClusterWidget* widget = new ClusterWidget(*c);
+        connect(
+            widget, QOverload<Node::ID>::of(&ClusterWidget::killProcesses),
+            this, QOverload<Node::ID>::of(&ClustersWidget::killProcesses)
+        );
+        connect(
+            widget, QOverload<Cluster::ID>::of(&ClusterWidget::killProcesses),
+            this, QOverload<Cluster::ID>::of(&ClustersWidget::killProcesses)
+        );
         _clusterWidgets[c->id] = widget;
         contentLayout->addWidget(widget);
     }

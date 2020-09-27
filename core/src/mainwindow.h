@@ -61,6 +61,7 @@ private:
         Program::Configuration::ID configurationId) const;
     void startProcess(Process::ID processId) const;
     void stopProcess(Process::ID processId) const;
+    void killAllProcesses(Node::ID id) const;
     void killAllProcesses(Cluster::ID id) const;
 
     void log(std::string msg);

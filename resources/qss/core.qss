@@ -18,6 +18,11 @@ QToolTip {
   border-radius: 3px;
 }
 
+QMessageBox  QPushButton {
+  padding-left: 25%;
+  padding-right: 25%;
+}
+
 QPushButton {
   background-color: #454545;
   border-style: outset;
@@ -25,6 +30,9 @@ QPushButton {
   border-color: #acacac;
   min-height: 1.25em;
   font-size: 11pt;
+
+  padding-left: 10%;
+  padding-right: 10%;
 }
 
 QPushButton:hover {
@@ -114,9 +122,10 @@ QWidget#tags  QPushButton:open {
   border-style: inset;
 }
 
-/*
- * General settings
- */
+ConnectionWidget {
+  min-width: 0.75em;
+  min-height: 2em;
+}
 
 ConfigurationWidget  QLineEdit, QSpinBox {
   font-size: 10pt;

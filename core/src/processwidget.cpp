@@ -112,13 +112,12 @@ ProcessWidget::ProcessWidget(Process::ID processId,
                     program->name, configuration.name, cluster->name
                 );
 
-                const int res = QMessageBox::question(
-                    this,
-                    "Are you sure",
-                    QString::fromStdString(text),
-                    QMessageBox::Ok,
-                    QMessageBox::Cancel
-                );
+                QMessageBox box;
+                box.setText("Kill process");
+                box.setInformativeText(QString::fromStdString(text));
+                box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+                box.setDefaultButton(QMessageBox::Ok);
+                const int res = box.exec();
 
                 if (res == QMessageBox::Ok) {
                     _killProcess->setEnabled(false);

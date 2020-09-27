@@ -56,7 +56,7 @@ namespace {
     constexpr const char* ConfigurationFile = "config.json";
 
     constexpr const float MainWindowWidthRatio = 0.35f;
-    constexpr const float MainWindowHeightRatio = 0.25f;
+    constexpr const float MainWindowHeightRatio = 0.35f;
 
     constexpr const float TabWidthRatio = 0.0333f;
     constexpr const float TabHeightRatio = 0.24f;
@@ -151,7 +151,14 @@ MainWindow::MainWindow() {
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
         _clustersWidget, &ClustersWidget::connectedStatusChanged
     );
-
+    connect(
+        _clustersWidget, QOverload<Node::ID>::of(&ClustersWidget::killProcesses),
+        [this](Node::ID id) { killAllProcesses(id); }
+    );
+    connect(
+        _clustersWidget, QOverload<Cluster::ID>::of(&ClustersWidget::killProcesses),
+        this, QOverload<Cluster::ID>::of(&MainWindow::killAllProcesses)
+    );
 
     // Processes
     _processesWidget = new ProcessesWidget(_config.removalTimeout);
@@ -357,7 +364,7 @@ void MainWindow::killAllProcesses(Cluster::ID id) const {
     Log("Sending", "Send message to stop all programs");
 
     std::vector<Node*> nodes;
-    if (id.v == -1 ) {
+    if (id.v == -1) {
         // Send kill command to all clusters
         for (Cluster* cluster : data::clusters()) {
             std::vector<Node*> ns = data::findNodesForCluster(*cluster);
@@ -388,4 +395,21 @@ void MainWindow::killAllProcesses(Cluster::ID id) const {
         );
         _clusterConnectionHandler.sendMessage(*node, j);
     }
+}
+
+void MainWindow::killAllProcesses(Node::ID id) const {
+    Node* node = data::findNode(id);
+    assert(node);
+
+    common::KillAllMessage command;
+    if (!node->secret.empty()) {
+        command.secret = node->secret;
+    }
+    nlohmann::json j = command;
+
+    Log(
+        fmt::format("Sending [{}:{} ({})]", node->ipAddress, node->port, node->name),
+        j.dump()
+    );
+    _clusterConnectionHandler.sendMessage(*node, j);
 }

@@ -68,6 +68,9 @@ public:
 
     void updateConnectionStatus();
 
+signals:
+    void killProcesses(Node::ID id);
+
 private:
     const Node::ID _nodeId;
 
@@ -85,6 +88,10 @@ public:
 
     void updateConnectionStatus(Node::ID nodeId);
 
+signals:
+    void killProcesses(Node::ID id);
+    void killProcesses(Cluster::ID id);
+
 private:
     const Cluster::ID _clusterId;
 
@@ -97,12 +104,16 @@ private:
 
 
 class ClustersWidget : public QWidget {
-    Q_OBJECT
+Q_OBJECT
 public:
     ClustersWidget();
 
 public slots:
     void connectedStatusChanged(Cluster::ID clusterId, Node::ID nodeId);
+
+signals:
+    void killProcesses(Node::ID id);
+    void killProcesses(Cluster::ID id);
 
 private:
     std::map<Cluster::ID, ClusterWidget*> _clusterWidgets;
