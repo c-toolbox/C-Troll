@@ -91,7 +91,7 @@ void from_json(const nlohmann::json& j, Program& p) {
     for (const std::string& cluster : clusters) {
         Cluster* c = data::findCluster(cluster);
         if (!c) {
-            std::string message = fmt::format("Could not find cluster {}", cluster);
+            std::string message = fmt::format("Could not find cluster '{}'", cluster);
             Log("Error", message);
             throw std::runtime_error(message);
         }

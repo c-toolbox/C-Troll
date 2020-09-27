@@ -34,9 +34,7 @@
 
 cmake_minimum_required (VERSION 3.14 FATAL_ERROR)
 
-project (C-Troll
-  VERSION 0.1
-)
+project (C-Troll VERSION 0.1)
 
 # Generate compile_commands.json to make it easier to work with clang based tools
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
