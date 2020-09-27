@@ -80,7 +80,10 @@ void ClusterConnectionHandler::initialize() {
             }
         );
 
-        auto jsonSocket = std::make_unique<common::JsonSocket>(std::move(socket));
+        auto jsonSocket = std::make_unique<common::JsonSocket>(
+            std::move(socket),
+            node->secret
+        );
         connect(
             jsonSocket.get(), &common::JsonSocket::messageReceived,
             [this, id = node->id](nlohmann::json message) { handleMessage(message, id); }

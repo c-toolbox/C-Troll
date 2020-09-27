@@ -102,7 +102,8 @@ void SocketHandler::disconnected(common::JsonSocket* socket) {
 void SocketHandler::newConnectionEstablished() {
     while (_server.hasPendingConnections()) {
         common::JsonSocket* socket = new common::JsonSocket(
-            std::unique_ptr<QTcpSocket>(_server.nextPendingConnection())
+            std::unique_ptr<QTcpSocket>(_server.nextPendingConnection()),
+            _secret
         );
         
         QObject::connect(

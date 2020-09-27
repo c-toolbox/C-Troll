@@ -39,7 +39,9 @@
 
 #include <QTcpSocket>
 #include <json/json.hpp>
+#include <simplecrypt/simplecrypt.h>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace common {
@@ -53,7 +55,7 @@ namespace common {
 class JsonSocket : public QObject {
 Q_OBJECT
 public:
-    JsonSocket(std::unique_ptr<QTcpSocket> socket);
+    JsonSocket(std::unique_ptr<QTcpSocket> socket, std::string secret);
     virtual ~JsonSocket() = default;
 
     void connectToHost(const std::string& host, int port);
@@ -73,6 +75,7 @@ private:
     void parseBuffer();
 
     std::unique_ptr<QTcpSocket> _socket;
+    std::optional<SimpleCrypt> _crypto;
     std::vector<char> _buffer;
     int _payloadSize = -1;
 };

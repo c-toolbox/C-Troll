@@ -32,50 +32,9 @@
 #                                                                                        #
 ##########################################################################################
 
-set(HEADER_FILES
-  include/apiversion.h
-  include/exitcommandmessage.h
-  include/invalidauthmessage.h
-  include/jsonload.h
-  include/jsonsocket.h
-  include/killallmessage.h
-  include/logging.h
-  include/message.h
-  include/processoutputmessage.h
-  include/processstatusmessage.h
-  include/startcommandmessage.h
-  include/traystatusmessage.h
-)
+find_package(Qt5 COMPONENTS Core REQUIRED)
 
-set(SOURCE_FILES
-  src/exitcommandmessage.cpp
-  src/invalidauthmessage.cpp
-  src/jsonsocket.cpp
-  src/killallmessage.cpp
-  src/logging.cpp
-  src/message.cpp
-  src/processoutputmessage.cpp
-  src/processstatusmessage.cpp
-  src/startcommandmessage.cpp
-  src/traystatusmessage.cpp
-)
-
-find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
-
-set(MOC_FILES "")
-qt5_wrap_cpp(
-  MOC_FILES
-  include/jsonsocket.h
-)
-
-add_library(common
-  ${SOURCE_FILES}
-  ${HEADER_FILES}
-  ${MOC_FILES}
-  ${RESOURCE_FILES}
-)
-
-add_subdirectory(ext/fmt)
-
-target_include_directories(common PUBLIC "include" "ext" "ext/fmt/include")
-target_link_libraries(common PUBLIC project_options fmt Qt5::Core Qt5::Widgets Qt5::Network simplecrypt)
+add_library(simplecrypt simplecrypt.cpp)
+target_include_directories(simplecrypt PUBLIC "include")
+target_include_directories(simplecrypt PRIVATE "include/simplecrypt")
+target_link_libraries(simplecrypt PUBLIC Qt5::Core)

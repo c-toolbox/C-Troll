@@ -35,15 +35,26 @@
 #include "jsonsocket.h"
 
 #include "logging.h"
+#include <QCryptographicHash>
 #include <QNetworkProxy>
 #include <fmt/format.h>
 
 namespace common {
 
-JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket)
+JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, std::string secret)
     : QObject()
     , _socket(std::move(socket))
 {
+    if (!secret.empty()) {
+        QByteArray secretHash = QCryptographicHash::hash(
+            QString::fromStdString(secret).toUtf8(),
+            QCryptographicHash::Sha1
+        );
+        
+        quint64 key = secretHash.toULongLong();
+        _crypto = SimpleCrypt(key);
+    }
+
     connect(_socket.get(), &QTcpSocket::readyRead, this, &JsonSocket::readToBuffer);
     connect(_socket.get(), &QTcpSocket::disconnected, this, &JsonSocket::disconnected);
     _socket->setProxy(QNetworkProxy::NoProxy);
@@ -61,12 +72,22 @@ void JsonSocket::write(nlohmann::json jsonDocument) {
     std::string length = std::to_string(jsonText.size());
     std::string msg = length + '#' + jsonText;
 
-    const size_t messageSize = msg.size();
-    qint64 res = _socket->write(msg.c_str());
-    if (static_cast<qint64>(messageSize) != res) {
+    bool success;
+    if (_crypto.has_value()) {
+        QByteArray data = _crypto->encryptToByteArray(QString::fromStdString(msg));
+        qint64 res = _socket->write(data);
+        success = (data.size() == res);
+
+    }
+    else {
+        const size_t messageSize = msg.size();
+        qint64 res = _socket->write(msg.c_str());
+        success = static_cast<qint64>(messageSize) == res;
+    }
+    if (!success) {
         ::Log(
             "JsonSocket",
-            fmt::format("Error writing message: {} ({} != {})", msg, res, messageSize)
+            fmt::format("Error writing message: {})", msg)
         );
     }
     _socket->flush();
@@ -74,6 +95,12 @@ void JsonSocket::write(nlohmann::json jsonDocument) {
 
 void JsonSocket::readToBuffer() {
     QByteArray incomingData = _socket->readAll();
+
+    if (_crypto.has_value()) {
+        QByteArray payload = _crypto->decryptToByteArray(incomingData);
+        incomingData = payload;
+    }
+
     _buffer.resize(incomingData.size());
     std::copy(incomingData.begin(), incomingData.end(), _buffer.begin());
 
