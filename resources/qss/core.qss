@@ -68,11 +68,18 @@ QTabBar::tab:selected {
   border-color: #acacac;
 }
 
+QPushButton#kill {
+  background-color: #7e771c;
+  color: #dddddd;
+}
+
+QPushButton#kill:disabled {
+  background-color: #555555;
+}
+
 QPushButton#removeprocess {
   background-color: #801512;
   color: #dddddd;
-
-  font-size: 8pt;
 }
 
 QPushButton#removeprocess:disabled {

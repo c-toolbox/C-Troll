@@ -44,6 +44,7 @@
 
 class QBoxLayout;
 class QLabel;
+class QGridLayout;
 class QPlainTextEdit;
 class QPushButton;
 class QScrollArea;
@@ -52,8 +53,12 @@ class QTimer;
 class ProcessWidget : public QWidget {
 Q_OBJECT
 public:
-    ProcessWidget(Process::ID processId, const std::chrono::milliseconds& timeout);
+    ProcessWidget(Process::ID processId,
+        const std::chrono::milliseconds& timeout);
     ~ProcessWidget();
+
+    void addToLayout(QGridLayout* layout, int row);
+    void removeFromLayout(QGridLayout* layout);
 
     void updateStatus();
     void addMessage(common::ProcessOutputMessage message);
@@ -68,11 +73,21 @@ private:
     const Process::ID _processId;
     const std::chrono::milliseconds& _timeout;
 
+    QLabel* _programInfo = nullptr;
+    QLabel* _configurationInfo = nullptr;
+    QLabel* _clusterInfo = nullptr;
+    QLabel* _processIdInfo = nullptr;
+
     QLabel* _status = nullptr;
+    QPushButton* _showOutput = nullptr;
+    QPushButton* _killProcess = nullptr;
+    QPushButton* _remove = nullptr;
+
+
     QWidget* _messageContainer = nullptr;
     QPlainTextEdit* _messages = nullptr;
     QPlainTextEdit* _errorMessages = nullptr;
-    QPushButton* _remove = nullptr;
+
     QTimer* _removalTimer = nullptr;
 };
 
@@ -97,7 +112,7 @@ signals:
     void killAllProcesses();
 
 private:
-    QBoxLayout* _contentLayout = nullptr;
+    QGridLayout* _contentLayout = nullptr;
 
     const std::chrono::milliseconds& _processTimeout;
     std::map<Process::ID, ProcessWidget*> _widgets;
