@@ -38,3 +38,27 @@ add_library(simplecrypt simplecrypt.cpp)
 target_include_directories(simplecrypt PUBLIC "include")
 target_include_directories(simplecrypt PRIVATE "include/simplecrypt")
 target_link_libraries(simplecrypt PUBLIC Qt5::Core)
+
+set(MSVC_WARNINGS
+  /MP
+  /ZI
+  /std:c++latest
+  /permissive-
+  /W0
+)
+
+set(CLANG_WARNINGS
+  -Wno-everything
+)
+
+set(GCC_WARNINGS
+  -w
+)
+
+if (MSVC)
+  target_compile_options(simplecrypt PRIVATE ${MSVC_WARNINGS})
+elif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  target_compile_options(simplecrypt PRIVATE ${CLANG_WARNINGS})
+else ()
+  target_compile_options(simplecrypt PRIVATE ${GCC_WARNINGS})
+endif ()
