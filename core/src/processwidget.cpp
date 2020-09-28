@@ -43,6 +43,7 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QStyle>
 #include <QTimer>
 #include <QVBoxLayout>
 #include <fmt/format.h>
@@ -81,18 +82,23 @@ ProcessWidget::ProcessWidget(Process::ID processId,
     Cluster* cluster = data::findCluster(process->clusterId);
     assert(cluster);
 
+    Node* node = data::findNode(process->nodeId);
+    assert(node);
+
+
     _programInfo = new QLabel(QString::fromStdString(program->name));
     _configurationInfo = new QLabel(QString::fromStdString(configuration.name));
     _clusterInfo = new QLabel(QString::fromStdString(cluster->name));
+    _nodeInfo = new QLabel(QString::fromStdString(node->name));
     _processIdInfo = new QLabel(QString::number(process->id.v));
     _status = new QLabel(QString::fromStdString(statusToString(process->status)));
+    _status->setObjectName("status");
 
     _messageContainer = createMessageContainer();
 
     {
         _showOutput = new QPushButton("Output");
         _showOutput->setCheckable(true);
-        _showOutput->setObjectName("output");
         _showOutput->setEnabled(program->shouldForwardMessages);
         connect(
             _showOutput, &QPushButton::clicked,
@@ -155,20 +161,22 @@ ProcessWidget::ProcessWidget(Process::ID processId,
 }
 
 void ProcessWidget::addToLayout(QGridLayout* layout, int row) {
-    layout->addWidget(_programInfo, row, 0);
-    layout->addWidget(_configurationInfo, row, 1);
-    layout->addWidget(_clusterInfo, row, 2);
-    layout->addWidget(_processIdInfo, row, 3);
-    layout->addWidget(_status, row, 4);
-    layout->addWidget(_showOutput, row, 5);
-    layout->addWidget(_killProcess, row, 6);
-    layout->addWidget(_remove, row, 7);
+    layout->addWidget(_programInfo, row, 0, Qt::AlignCenter);
+    layout->addWidget(_configurationInfo, row, 1, Qt::AlignCenter);
+    layout->addWidget(_clusterInfo, row, 2, Qt::AlignCenter);
+    layout->addWidget(_nodeInfo, row, 3, Qt::AlignCenter);
+    layout->addWidget(_processIdInfo, row, 4, Qt::AlignCenter);
+    layout->addWidget(_status, row, 6, Qt::AlignCenter);
+    layout->addWidget(_showOutput, row, 7);
+    layout->addWidget(_killProcess, row, 8);
+    layout->addWidget(_remove, row, 9);
 }
 
 ProcessWidget::~ProcessWidget() {
     delete _programInfo;
     delete _configurationInfo;
     delete _clusterInfo;
+    delete _nodeInfo;
     delete _processIdInfo;
     delete _status;
     delete _showOutput;
@@ -224,6 +232,9 @@ QWidget* ProcessWidget::createMessageContainer() {
 void ProcessWidget::updateStatus() {
     Process* p = data::findProcess(_processId);
     _status->setText(QString::fromStdString(statusToString(p->status)));
+    _status->setProperty("state", QString::fromStdString(statusToString(p->status)));
+    _status->style()->unpolish(_status);
+    _status->style()->polish(_status);
 
     if (p->status == common::ProcessStatusMessage::Status::NormalExit) {
         // Start a timer to automatically remove a process if it exited normally
@@ -274,11 +285,16 @@ ProcessesWidget::ProcessesWidget(const std::chrono::milliseconds& processTimeout
     _contentLayout->addWidget(new QLabel("Program"), 0, 0, Qt::AlignCenter);
     _contentLayout->addWidget(new QLabel("Configuration"), 0, 1, Qt::AlignCenter);
     _contentLayout->addWidget(new QLabel("Cluster"), 0, 2, Qt::AlignCenter);
-    _contentLayout->addWidget(new QLabel("Process ID"), 0, 3, Qt::AlignCenter);
-    _contentLayout->addWidget(new QLabel("Status"), 0, 4, Qt::AlignCenter);
-    _contentLayout->addWidget(new QLabel("Show Output"), 0, 5, Qt::AlignCenter);
-    _contentLayout->addWidget(new QLabel("Kill Process"), 0, 6, Qt::AlignCenter);
-    _contentLayout->addWidget(new QLabel("Remove"), 0, 7, Qt::AlignCenter);
+    _contentLayout->addWidget(new QLabel("Node"), 0, 3, Qt::AlignCenter);
+    _contentLayout->addWidget(new QLabel("Process ID"), 0, 4, Qt::AlignCenter);
+    // column 5 is the spacer used for separating the static info from the current info
+    QWidget* spacer = new QWidget;
+    spacer->setObjectName("spacer");
+    _contentLayout->addWidget(spacer, 0, 5, Qt::AlignCenter);
+    _contentLayout->addWidget(new QLabel("Status"), 0, 6, Qt::AlignCenter);
+    _contentLayout->addWidget(new QLabel("Show Output"), 0, 7, Qt::AlignCenter);
+    _contentLayout->addWidget(new QLabel("Kill Process"), 0, 8, Qt::AlignCenter);
+    _contentLayout->addWidget(new QLabel("Remove"), 0, 9, Qt::AlignCenter);
     _contentLayout->setRowStretch(1, 1);
 
     QPushButton* killAll = new QPushButton("Kill all processses");

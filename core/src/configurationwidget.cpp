@@ -51,8 +51,6 @@
 ColorWidget::ColorWidget(Color color)
     : _color(std::move(color))
 {
-    setObjectName("color");
-
     QGridLayout* layout = new QGridLayout;
 
     _colorButton = new QPushButton;
@@ -258,8 +256,8 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
 void ConfigurationWidget::removedColor(ColorWidget* sender) {
     _colorLayout->removeWidget(sender);
 
-    const auto it = std::find(_colors.begin(), _colors.end(), sender);
-    assert(it != _colors.end());
+    const auto it = std::find(_colors.cbegin(), _colors.cend(), sender);
+    assert(it != _colors.cend());
     _colors.erase(it);
 
     layoutColorWidgets();

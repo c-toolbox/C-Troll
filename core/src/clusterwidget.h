@@ -36,6 +36,7 @@
 #define __CORE__CLUSTERWIDGET_H__
 
 #include <QGroupBox>
+#include <QScrollArea>
 #include <QWidget>
 
 #include "cluster.h"
@@ -52,9 +53,8 @@ public:
         Disconnected
     };
 
-    ConnectionWidget();
-
     void setStatus(ConnectionStatus status);
+    void paintEvent(QPaintEvent*);
 };
 
 
@@ -103,7 +103,7 @@ private:
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-class ClustersWidget : public QWidget {
+class ClustersWidget : public QScrollArea {
 Q_OBJECT
 public:
     ClustersWidget();

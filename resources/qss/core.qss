@@ -7,9 +7,6 @@
   color: #efefef;
 }
 
-QLineEdit {
-  font-size: 14pt;
-}
 
 QToolTip {
   color: #151515;
@@ -49,11 +46,19 @@ QPushButton:disabled {
   color: #a0a0a0;
 }
 
-QTabWidget::pane {
+/*
+ * MainWindow
+ */
+MainWindow {
+  min-width: 75em;
+  min-height: 30em;
+}
+
+MainWindow  QTabWidget::pane {
   border-left: 2px solid #acacac;
 }
 
-QTabBar::tab {
+MainWindow  QTabBar::tab {
   background: #303030;
   color: #efefef;
 
@@ -67,66 +72,130 @@ QTabBar::tab {
   padding-bottom: 0.25em;
 }
 
-QTabBar::tab:hover {
+MainWindow  QTabBar::tab:hover {
   background-color: #353535;
 }
 
-QTabBar::tab:selected {
+MainWindow  QTabBar::tab:selected {
   background-color: #505055;
   border-color: #acacac;
 }
 
-QPushButton#kill {
+
+/*
+ * ProgramsWidget
+ */
+
+programs--ProgramsWidget  QLineEdit {
+  font-size: 14pt;
+}
+
+ programs--ProgramsWidget  programs--TagsWidget  QPushButton {
+  color: #202020;
+  border-color: #303030;
+  border-style: outset;
+
+  /* background-color is specified in the C++ source code */
+}
+
+programs--ProgramsWidget  programs--TagsWidget  QPushButton:hover {
+  color: #202020;
+
+  /* background-color is specified in the C++ source code */
+}
+
+programs--ProgramsWidget  programs--TagsWidget  QPushButton:pressed {
+  border-style: inset;
+
+  /* background-color is specified in the C++ source code */
+}
+
+programs--ProgramsWidget  programs--TagsWidget  QPushButton:open {
+  border-style: inset;
+
+  /* background-color is specified in the C++ source code */
+}
+
+programs--ProgramWidget  programs--TagInfoWidget {
+  min-width: 0.5em;
+  max-width: 1.25em;
+}
+
+/*
+ * ClusterWidget
+ */
+
+ClusterWidget  QPushButton {
+  font-size: 8pt;
+}
+
+NodeWidget  ConnectionWidget {
+  min-width: 0.75em;
+  max-width: 0.75em;
+  min-height: 2em;
+}
+
+NodeWidget  ConnectionWidget[state="connected"] {
+  background: #33cc33;
+}
+
+ConnectionWidget[state="partially connected"] {
+  background: #aaaa33;
+}
+
+ConnectionWidget[state="disconnected"] {
+  background: #dd3333;
+}
+
+
+/*
+ * ProcessesWidget
+ * 'ProcessWidget' doesn't work since they belong to the layout that is owned
+ * by the ProcessesWidget directly
+ */
+ProcessesWidget  QWidget#spacer {
+  min-width: 1em;
+}
+
+ProcessesWidget  QLabel#status {
+  font-weight: bold;
+  font-size: 12pt;
+}
+
+ProcessesWidget  QLabel#status[state="Running"] {
+  color: #138d13;
+}
+
+ProcessesWidget  QLabel#status[state="Normal Exit"], QLabel#status[state="Crash Exit"] {
+  color: #a01c1c;
+}
+
+ProcessesWidget  QLabel#status[state="Failed To Start"] {
+  color: #3636c0;
+}
+
+ProcessesWidget  QPushButton#kill {
   background-color: #7e771c;
   color: #dddddd;
 }
 
-QPushButton#kill:disabled {
+ProcessesWidget  QPushButton#kill:disabled {
   background-color: #555555;
 }
 
-QPushButton#removeprocess {
+ProcessesWidget  QPushButton#removeprocess {
   background-color: #801512;
   color: #dddddd;
 }
 
-QPushButton#removeprocess:disabled {
+ProcessesWidget  QPushButton#removeprocess:disabled {
   background-color: #555555;
 }
 
-QFrame#line {
-  background-color: #dddddd;
-  border: 1px solid #dddddd;
-}
 
-QWidget#color > QPushButton {
-  height: 1em;
-  width: 1em;
-}
-
-QWidget#tags  QPushButton {
-  color: #202020;
-  border-color: #303030;
-  border-style: outset;
-}
-
-QWidget#tags  QPushButton:hover {
-  color: #202020;
-}
-
-QWidget#tags  QPushButton:pressed {
-  border-style: inset;
-}
-
-QWidget#tags  QPushButton:open {
-  border-style: inset;
-}
-
-ConnectionWidget {
-  min-width: 0.75em;
-  min-height: 2em;
-}
-
+/*
+ * ConfigurationWidget
+ */
 ConfigurationWidget  QLineEdit, QSpinBox {
   font-size: 10pt;
 }
@@ -139,4 +208,16 @@ ConfigurationWidget  QLabel#important {
 ConfigurationWidget  QPushButton#control {
   padding-left: 25%;
   padding-right: 25%;
+}
+
+ConfigurationWidget  ColorWidget > QPushButton {
+  height: 1em;
+  width: 1em;
+
+  /* background-color is specified in the C++ source code */
+}
+
+ConfigurationWidget  QFrame#line {
+  background-color: #dddddd;
+  border: 1px solid #dddddd;
 }

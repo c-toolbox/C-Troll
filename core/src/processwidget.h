@@ -76,6 +76,7 @@ private:
     QLabel* _programInfo = nullptr;
     QLabel* _configurationInfo = nullptr;
     QLabel* _clusterInfo = nullptr;
+    QLabel* _nodeInfo = nullptr;
     QLabel* _processIdInfo = nullptr;
 
     QLabel* _status = nullptr;

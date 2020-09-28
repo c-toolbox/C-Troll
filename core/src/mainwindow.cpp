@@ -63,16 +63,7 @@ namespace {
 } // namespace
 
 MainWindow::MainWindow() {
-    // We calculate the size of the window based on the screen resolution to be somewhat
-    // safe against high and low DPI monitors
-    const int screenWidth = QApplication::desktop()->screenGeometry().width();
-    const int screenHeight = QApplication::desktop()->screenGeometry().height();
-
-    const int widgetWidth = screenWidth * MainWindowWidthRatio;
-    const int widgetHeight = screenHeight * MainWindowHeightRatio;
-
     setWindowTitle(Title);
-    resize(widgetWidth, widgetHeight);
 
     //
     // Set up the logging
@@ -138,7 +129,6 @@ MainWindow::MainWindow() {
         _programWidget, &programs::ProgramsWidget::stopProcess,
         this, &MainWindow::stopProcess
     );
-
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
         _programWidget, &programs::ProgramsWidget::connectedStatusChanged

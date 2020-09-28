@@ -38,52 +38,18 @@
 #include "node.h"
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QGridLayout>
 #include <QLabel>
 #include <QMessageBox>
+#include <QPainter>
 #include <QPushButton>
-#include <QScrollArea>
+#include <QStyle>
+#include <QStyleOption>
 #include <QVBoxLayout>
 #include <fmt/format.h>
 
-namespace {
-    constexpr const char* ColorConnected = "#33cc33";
-    constexpr const char* ColorPartiallyConnected = "#aaaa33";
-    constexpr const char* ColorDisconnected = "#dd3333";
-
-    constexpr const float ConnectionWidgetWidthRatio = 0.005f;
-    constexpr const float ConnectionWidgetHeightRatio = 0.015f;
-} // namespace
-
-ConnectionWidget::ConnectionWidget() {
-    // We calculate the size of the window based on the screen resolution to be somewhat
-    // safe against high and low DPI monitors
-    //const int screenWidth = QApplication::desktop()->screenGeometry().width();
-    //const int screenHeight = QApplication::desktop()->screenGeometry().height();
-    //setMinimumHeight(screenHeight * ConnectionWidgetHeightRatio);
-    //setMaximumWidth(screenWidth * ConnectionWidgetWidthRatio);
-
-    setAutoFillBackground(true);
-
-    QLayout* layout = new QHBoxLayout(this);
-    layout->setMargin(0);
-
-    QWidget* w = new QWidget;
-    layout->addWidget(w);
-
-    setStatus(ConnectionStatus::Disconnected);
-}
-
 void ConnectionWidget::setStatus(ConnectionStatus status) {
-    std::string color = [](ConnectionStatus s) {
-        switch (s) {
-            case ConnectionStatus::Connected: return ColorConnected;
-            case ConnectionStatus::PartiallyConnected: return ColorPartiallyConnected;
-            case ConnectionStatus::Disconnected: return ColorDisconnected;
-            default: throw std::logic_error("Missing case label");
-        }
-    }(status);
-
-    const char* string = [](ConnectionStatus s) {
+    std::string string = [](ConnectionStatus s) {
         switch (s) {
             case ConnectionStatus::Connected: return "connected";
             case ConnectionStatus::PartiallyConnected: return "partially connected";
@@ -91,9 +57,20 @@ void ConnectionWidget::setStatus(ConnectionStatus status) {
             default: throw std::logic_error("Missing case label");
         }
     }(status);
-    setToolTip(string);
+    setToolTip(QString::fromStdString(string));
 
-    setStyleSheet(QString::fromStdString(fmt::format(R"(background: {})", color)));
+    setProperty("state", QString::fromStdString(string));
+    style()->unpolish(this);
+    style()->polish(this);
+}
+
+void ConnectionWidget::paintEvent(QPaintEvent*) {
+    // Since this is a pretty empty widget, we need to overwrite this function:
+    // https://doc.qt.io/qt-5/stylesheet-reference.html
+    QStyleOption opt;
+    opt.init(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
 
 
@@ -104,8 +81,8 @@ NodeWidget::NodeWidget(const Node& node)
     : QGroupBox(QString::fromStdString(node.name))
     , _nodeId(node.id)
 {
-    setObjectName("node");
-
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+    
     QBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
 
@@ -120,7 +97,7 @@ NodeWidget::NodeWidget(const Node& node)
     QLabel* ip = new QLabel(QString::fromStdString(node.ipAddress));
     layout->addWidget(ip);
 
-    layout->addStretch();
+    //layout->addStretch();
     QPushButton* kill = new QPushButton("Kill processes");
     connect(
         kill, &QPushButton::clicked,
@@ -141,7 +118,7 @@ NodeWidget::NodeWidget(const Node& node)
             }
         }
     );
-    layout->addWidget(kill);
+    //layout->addWidget(kill);
 }
 
 void NodeWidget::updateConnectionStatus() {
@@ -162,8 +139,9 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
     : QGroupBox(QString::fromStdString(cluster.name))
     , _clusterId(cluster.id)
 {
-    setObjectName("cluster");
-    QBoxLayout* layout = new QHBoxLayout(this);
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+
+    QGridLayout* layout = new QGridLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
 
     _connectionLabel = new ConnectionWidget;
@@ -171,18 +149,21 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
     layout->addWidget(_connectionLabel);
 
     std::vector<Node*> nodes = data::findNodesForCluster(cluster);
-    for (Node* n : nodes) {
+    static constexpr const int Columns = 5;
+    for (size_t i = 0; i < nodes.size(); ++i) {
+        Node* n = nodes[i];
         NodeWidget* node = new NodeWidget(*n);
         connect(
             node, &NodeWidget::killProcesses,
             this, QOverload<Node::ID>::of(&ClusterWidget::killProcesses)
         );
-        layout->addWidget(node);
+        layout->addWidget(node, i / Columns, i % Columns);
         _nodeWidgets[n->id] = node;
         updateConnectionStatus(n->id);
     }
 
     QPushButton* kill = new QPushButton("Kill all processes");
+    kill->setObjectName("killall");
     connect(
         kill, &QPushButton::clicked,
         [this, cluster]() {
@@ -203,7 +184,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
             }
         }
     );
-    layout->addWidget(kill);
+    layout->addWidget(kill, nodes.size() / Columns + 1, 0, 1, Columns);
 }
 
 void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
@@ -235,17 +216,11 @@ void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
 
 
 ClustersWidget::ClustersWidget() {
-    setObjectName("clusterwidget");
-
-    QBoxLayout* layout = new QVBoxLayout(this);
-    QScrollArea* area = new QScrollArea;
-    area->setWidgetResizable(true);
-    area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setWidgetResizable(true);
     QWidget* content = new QWidget;
-    area->setWidget(content);
+    setWidget(content);
     QBoxLayout* contentLayout = new QVBoxLayout(content);
-    area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
-    layout->addWidget(area);
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     for (Cluster* c : data::clusters()) {
         ClusterWidget* widget = new ClusterWidget(*c);
@@ -260,7 +235,6 @@ ClustersWidget::ClustersWidget() {
         _clusterWidgets[c->id] = widget;
         contentLayout->addWidget(widget);
     }
-    contentLayout->addStretch();
 }
 
 void ClustersWidget::connectedStatusChanged(Cluster::ID clusterId, Node::ID nodeId) {

@@ -42,7 +42,7 @@ target_link_libraries(simplecrypt PUBLIC Qt5::Core)
 set(MSVC_WARNINGS
   /MP
   /ZI
-  /std:c++latest
+  /std:c++17
   /permissive-
   /W0
 )

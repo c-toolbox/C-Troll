@@ -296,22 +296,8 @@ void ClusterWidget::processUpdated(Process::ID processId) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-namespace {
-    constexpr const float TabInfoWidgetWidthRatio = 0.01f;
-    constexpr const float TabInfoWidgetHeightRatio = 0.015f;
-} // namespace
-
 TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
-    // We calculate the size of the window based on the screen resolution to be somewhat
-    // safe against high and low DPI monitors
-    const int screenWidth = QApplication::desktop()->screenGeometry().width();
-    const int screenHeight = QApplication::desktop()->screenGeometry().height();
-    setFixedSize(
-        screenWidth * TabInfoWidgetWidthRatio,
-        screenHeight * TabInfoWidgetHeightRatio
-    );
-
-    QBoxLayout* layout = new QHBoxLayout(this);
+    QBoxLayout* layout = new QVBoxLayout(this);
     layout->setMargin(0);
 
     for (const std::string& tag : tags) {
@@ -336,6 +322,7 @@ ProgramWidget::ProgramWidget(const Program& program)
 {
     QBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
+    layout->setSpacing(10);
 
     layout->addWidget(new TagInfoWidget(program.tags));
 
@@ -388,8 +375,6 @@ void ProgramWidget::processUpdated(Process::ID processId) {
 TagsWidget::TagsWidget() 
     : QGroupBox("Tags")
 {
-    setObjectName("tags");
-
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
 
@@ -433,6 +418,10 @@ TagsWidget::TagsWidget()
             darkColor.r, darkColor.g, darkColor.b
         );
         button->setStyleSheet(QString::fromStdString(colorText));
+
+        // @TODO (abock, 2020-09-29):  Calculate the value of the background color and
+        // set a dynamic property to set the text color to either bright or dark to make
+        // the text legible regardless of what the user chose for the background color
 
         button->setCheckable(true);
         connect(button, &QPushButton::clicked, this, &TagsWidget::buttonPressed);
