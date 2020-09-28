@@ -57,7 +57,7 @@ set(GCC_WARNINGS
 
 if (MSVC)
   target_compile_options(simplecrypt PRIVATE ${MSVC_WARNINGS})
-elif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   target_compile_options(simplecrypt PRIVATE ${CLANG_WARNINGS})
 else ()
   target_compile_options(simplecrypt PRIVATE ${GCC_WARNINGS})
