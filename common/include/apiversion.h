@@ -36,7 +36,7 @@
 #define __COMMON__APIVERSION_H__
 
 namespace api {
-    constexpr const char* Version = "0.9.1";
+    constexpr const char* Version = "0.9.2";
 } // namespace api
 
 #endif // __COMMON__APIVERSION_H__

@@ -60,9 +60,9 @@ struct ProcessStatusMessage : public Message {
     };
     
     /// The unique identifier for the process that will be created
-    int processId;
+    int processId = -1;
     /// The process status
-    Status status;
+    Status status = Status::Unknown;
 };
   
 void to_json(nlohmann::json& j, const ProcessStatusMessage& p);

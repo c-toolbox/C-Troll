@@ -5,7 +5,7 @@
 
 MainWindow {
   min-width: 60em;
-  min-height: 10em;
+  min-height: 25em;
 }
 
 QWidget#info  QLabel {

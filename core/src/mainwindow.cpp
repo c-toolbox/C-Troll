@@ -257,14 +257,14 @@ MainWindow::MainWindow() {
     tabWidget->addTab(_programWidget, "Programs");
     tabWidget->addTab(_clustersWidget, "Clusters");
     tabWidget->addTab(_processesWidget, "Processes");
-    tabWidget->addTab(&_messageBox, "Log");
+    tabWidget->addTab(&_logWidget, "Log");
     tabWidget->addTab(new ConfigurationWidget(_config, ConfigurationFile), "Settings");
 
     _clusterConnectionHandler.initialize();
 }
 
 void MainWindow::log(std::string msg) {
-    _messageBox.append(QString::fromStdString(msg));
+    _logWidget.appendMessage(std::move(msg));
 }
 
 void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,

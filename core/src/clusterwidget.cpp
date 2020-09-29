@@ -150,7 +150,8 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
 
     std::vector<Node*> nodes = data::findNodesForCluster(cluster);
     static constexpr const int Columns = 5;
-    for (size_t i = 0; i < nodes.size(); ++i) {
+    const int nNodes = static_cast<int>(nodes.size());
+    for (int i = 0; i < nNodes; ++i) {
         Node* n = nodes[i];
         NodeWidget* node = new NodeWidget(*n);
         connect(
@@ -184,7 +185,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
             }
         }
     );
-    layout->addWidget(kill, nodes.size() / Columns + 1, 0, 1, Columns);
+    layout->addWidget(kill, nNodes / Columns + 1, 0, 1, Columns);
 }
 
 void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {

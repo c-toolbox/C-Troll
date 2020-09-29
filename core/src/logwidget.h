@@ -32,50 +32,22 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__MAINWINDOW_H__
-#define __CORE__MAINWINDOW_H__
+#ifndef __CORE__LOGWIDGET_H__
+#define __CORE__LOGWIDGET_H__
 
-#include <QMainWindow>
+#include <QWidget>
 
-#include "clusterconnectionhandler.h"
-#include "configuration.h"
-#include "logwidget.h"
-#include "process.h"
 #include <QTextEdit>
-#include <memory>
 #include <string>
 
-class ClustersWidget;
-class ProcessesWidget;
-
-namespace programs { class ProgramsWidget; }
-
-class MainWindow : public QMainWindow {
-Q_OBJECT
+class LogWidget : public QWidget {
 public:
-    MainWindow();
+    LogWidget();
+
+    void appendMessage(std::string msg);
 
 private:
-    void startProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId);
-    void stopProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId) const;
-    void startProcess(Process::ID processId) const;
-    void stopProcess(Process::ID processId) const;
-    void killAllProcesses(Node::ID id) const;
-    void killAllProcesses(Cluster::ID id) const;
-
-    void log(std::string msg);
-
-    programs::ProgramsWidget* _programWidget = nullptr;
-    ClustersWidget* _clustersWidget = nullptr;
-    ProcessesWidget* _processesWidget = nullptr;
-    LogWidget _logWidget;
-
-    ClusterConnectionHandler _clusterConnectionHandler;
-    Configuration _config;
-
-    QTextEdit _messageBox;
+    QTextEdit _message;
 };
 
-#endif // __CORE__MAINWINDOW_H__
+#endif // __CORE__LOGWIDGET_H__

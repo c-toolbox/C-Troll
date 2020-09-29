@@ -32,50 +32,41 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__MAINWINDOW_H__
-#define __CORE__MAINWINDOW_H__
-
-#include <QMainWindow>
-
-#include "clusterconnectionhandler.h"
-#include "configuration.h"
 #include "logwidget.h"
-#include "process.h"
-#include <QTextEdit>
-#include <memory>
-#include <string>
 
-class ClustersWidget;
-class ProcessesWidget;
+#include "apiversion.h"
+#include "version.h"
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <fmt/format.h>
 
-namespace programs { class ProgramsWidget; }
+LogWidget::LogWidget() {
+    QBoxLayout* layout = new QVBoxLayout(this);
+    layout->addWidget(&_message, 1);
+    layout->setContentsMargins(0, 0, 0, 0);
 
-class MainWindow : public QMainWindow {
-Q_OBJECT
-public:
-    MainWindow();
+    {
+        QWidget* container = new QWidget;
+        container->setObjectName("info");
+        QBoxLayout* versionLayout = new QHBoxLayout(container);
+        QMargins m = versionLayout->contentsMargins();
+        m.setTop(0);
+        m.setBottom(10);
+        versionLayout->setContentsMargins(m);
 
-private:
-    void startProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId);
-    void stopProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId) const;
-    void startProcess(Process::ID processId) const;
-    void stopProcess(Process::ID processId) const;
-    void killAllProcesses(Node::ID id) const;
-    void killAllProcesses(Cluster::ID id) const;
+        std::string coreVer = fmt::format("Core Version: {}", Version);
+        versionLayout->addWidget(new QLabel(QString::fromStdString(coreVer)));
 
-    void log(std::string msg);
+        versionLayout->addStretch();
 
-    programs::ProgramsWidget* _programWidget = nullptr;
-    ClustersWidget* _clustersWidget = nullptr;
-    ProcessesWidget* _processesWidget = nullptr;
-    LogWidget _logWidget;
+        std::string apiVer = fmt::format("API Version: {}", api::Version);
+        versionLayout->addWidget(new QLabel(QString::fromStdString(apiVer)));
 
-    ClusterConnectionHandler _clusterConnectionHandler;
-    Configuration _config;
+        layout->addWidget(container);
+    }
+}
 
-    QTextEdit _messageBox;
-};
-
-#endif // __CORE__MAINWINDOW_H__
+void LogWidget::appendMessage(std::string msg) {
+    _message.append(QString::fromStdString(msg));
+}

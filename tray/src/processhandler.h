@@ -56,11 +56,11 @@ public:
         // Additional information that was sent to us from the C-Troll application so that
         // we can mirror it back if a new instance connects. We don't do anything with
         // this information directly
-        int programId;
-        int configurationId;
-        int clusterId;
-        int nodeId;
-        std::size_t dataHash;
+        int programId = -1;
+        int configurationId = -1;
+        int clusterId = -1;
+        int nodeId = -1;
+        std::size_t dataHash = 0;
     };
 
 public slots:

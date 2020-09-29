@@ -192,7 +192,6 @@ ProcessesWidget  QPushButton#removeprocess:disabled {
   background-color: #555555;
 }
 
-
 /*
  * ConfigurationWidget
  */

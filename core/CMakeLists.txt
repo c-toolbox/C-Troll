@@ -39,6 +39,7 @@ set(HEADER_FILES
   src/configuration.h
   src/configurationwidget.h
   src/database.h
+  src/logwidget.h
   src/mainwindow.h
   src/node.h
   src/process.h
@@ -55,6 +56,7 @@ set(SOURCE_FILES
   src/configuration.cpp
   src/configurationwidget.cpp
   src/database.cpp
+  src/logwidget.cpp
   src/main.cpp
   src/mainwindow.cpp
   src/node.cpp
