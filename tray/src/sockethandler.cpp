@@ -60,7 +60,7 @@ SocketHandler::SocketHandler(int port, std::string secret)
 
 void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* socket) {
 #ifdef QT_DEBUG
-    ::Log(fmt::format("Received [{}]", socket->peerAddress()), message.dump());
+    Log(fmt::format("Received [{}]", socket->peerAddress()), message.dump());
 #endif // QT_DEBUG
 
     common::Message msg = message;
@@ -68,7 +68,7 @@ void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* so
         emit messageReceived(std::move(message), socket->peerAddress());
     }
     else {
-        ::Log(fmt::format("Received [{}]", socket->peerAddress()), "Invalid message");
+        Log(fmt::format("Received [{}]", socket->peerAddress()), "Invalid message");
         common::InvalidAuthMessage invalidAuthMsg;
         nlohmann::json j = invalidAuthMsg;
         socket->write(j);

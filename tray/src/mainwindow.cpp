@@ -48,21 +48,10 @@
 
 namespace {
     constexpr const char* Title = "C-Troll Tray";
-
-    constexpr const float MainWindowWidthRatio = 0.3f;
-    constexpr const float MainWindowHeightRatio = 0.25f;
 } // namespace
 
 MainWindow::MainWindow() {
-    // We calculate the size of the window based on the screen resolution to be somewhat
-    // safe against high and low DPI monitors
-    const int screenWidth = QApplication::desktop()->screenGeometry().width();
-    const int screenHeight = QApplication::desktop()->screenGeometry().height();
-
     setWindowTitle(Title);
-    setFixedSize(
-        screenWidth * MainWindowWidthRatio, screenHeight * MainWindowHeightRatio
-    );
 
     _centralWidget = new CentralWidget;
     setCentralWidget(_centralWidget);

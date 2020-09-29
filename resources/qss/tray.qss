@@ -3,7 +3,12 @@
   color: #efefef;
 }
 
-QWidget#info QLabel {
+MainWindow {
+  min-width: 60em;
+  min-height: 10em;
+}
+
+QWidget#info  QLabel {
   font-size: 8pt;
 }
 

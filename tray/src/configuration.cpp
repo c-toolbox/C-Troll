@@ -49,9 +49,8 @@ void to_json(nlohmann::json& j, const Configuration& c) {
 }
 
 void from_json(const nlohmann::json& j, Configuration& c) {
-    if (j.find(KeyPort) != j.end()) {
-        j.at(KeyPort).get_to(c.port);
-    }
+    j.at(KeyPort).get_to(c.port);
+
     if (j.find(KeySecret) != j.end()) {
         j.at(KeySecret).get_to(c.secret);
     }

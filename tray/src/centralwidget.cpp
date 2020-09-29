@@ -38,12 +38,13 @@
 #include "version.h"
 #include <QGroupBox>
 #include <QVBoxLayout>
+#include <fmt/format.h>
 
 CentralWidget::CentralWidget() {
     QLayout* layout = new QVBoxLayout(this);
     layout->setMargin(0);
 
-    _messageBox = new QTextEdit();
+    _messageBox = new QTextEdit;
     layout->addWidget(_messageBox);
 
     QGroupBox* connectionsWidget = new QGroupBox("Connected controllers");
@@ -54,13 +55,12 @@ CentralWidget::CentralWidget() {
     _processesLayout = new QVBoxLayout(processesWidget);
     layout->addWidget(processesWidget);
 
-    QWidget* info = createInfoWidget();
-    layout->addWidget(info);
+    layout->addWidget(createInfoWidget());
 }
 
 void CentralWidget::setPort(int port) {
-    QString p = "Port: " + QString::number(port);
-    _portLabel->setText(p);
+    std::string p = fmt::format("Port: {}", port);
+    _portLabel->setText(QString::fromStdString(p));
 }
 
 void CentralWidget::log(std::string msg) {
@@ -84,7 +84,7 @@ void CentralWidget::closedConnection(const std::string& peerAddress) {
 }
 
 void CentralWidget::newProcess(ProcessHandler::ProcessInfo process) {
-    std::string text = std::to_string(process.processId) + ": " + process.executable;
+    std::string text = fmt::format("{}: {}", process.processId, process.executable);
     QLabel* label = new QLabel(QString::fromStdString(text));
     _processesLayout->addWidget(label);
     _processes[process.processId] = label;
@@ -108,18 +108,16 @@ QWidget* CentralWidget::createInfoWidget() {
     infoLayout->setContentsMargins(5, 1, 5, 5);
     info->setLayout(infoLayout);
 
-    QLabel* trayVersion = new QLabel(QString::fromStdString("Tray Version: "s + Version));
-    infoLayout->addWidget(trayVersion);
+    std::string trayVer = fmt::format("Tray Version: {}", Version);
+    infoLayout->addWidget(new QLabel(QString::fromStdString(trayVer)));
 
     infoLayout->addStretch();
     _portLabel = new QLabel;
     infoLayout->addWidget(_portLabel);
     infoLayout->addStretch();
 
-    QLabel* apiVersion = new QLabel(
-        QString::fromStdString("API Version: "s + api::Version)
-    );
-    infoLayout->addWidget(apiVersion);
+    std::string apiVer = fmt::format("API Version: {}", api::Version);
+    infoLayout->addWidget(new QLabel(QString::fromStdString(apiVer)));
 
     return info;
 }
