@@ -79,5 +79,6 @@ add_library(common
 
 add_subdirectory(ext/fmt)
 
-target_include_directories(common PUBLIC "include" "ext" "ext/fmt/include")
+target_include_directories(common PUBLIC "include")
+target_include_directories(common SYSTEM PUBLIC "ext" "ext/fmt/include")
 target_link_libraries(common PUBLIC project_options fmt Qt5::Core Qt5::Widgets Qt5::Network simplecrypt)

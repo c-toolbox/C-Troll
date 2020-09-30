@@ -64,16 +64,16 @@ struct Configuration {
     /// The colors that are used for coloring the tags in the side selection widget
     std::vector<Color> tagColors = {
         // Colors taken from https://en.wikipedia.org/wiki/Help:Distinguishable_colors
-        Color{ 255, 80, 5 }, // Zinnia
-        Color{ 157, 204, 0 }, // Lime
-        Color{ 94, 241, 242 }, // Sky
-        Color{ 43, 206, 72 }, // Green
-        Color{ 240, 163, 255 }, // Amethyst
-        Color{ 0, 117, 220 },   // Blue
-        Color{ 255, 164, 5 }, // Orpiment
-        Color{ 194, 0, 136 }, // Mallow
-        Color{ 148, 255, 181 }, // Jade
-        Color{ 76, 0, 92 } // Damson
+        Color{ 255, 80, 5, "" }, // Zinnia
+        Color{ 157, 204, 0, "" }, // Lime
+        Color{ 94, 241, 242, "" }, // Sky
+        Color{ 43, 206, 72, "" }, // Green
+        Color{ 240, 163, 255, "" }, // Amethyst
+        Color{ 0, 117, 220, "" },   // Blue
+        Color{ 255, 164, 5, "" }, // Orpiment
+        Color{ 194, 0, 136, "" }, // Mallow
+        Color{ 148, 255, 181, "" }, // Jade
+        Color{ 76, 0, 92, "" } // Damson
     };
 
     /// Determines whether a log file should be created or not
