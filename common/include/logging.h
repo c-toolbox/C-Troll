@@ -57,11 +57,13 @@ public:
      *
      * \param application The name of the application. This is used for creating
      *        unique(ish) names for the log.
+     * \param createLogFile Determines whether all log messages should also be printed
+     *        to file
      * \param loggingFunction This callback function is called whenever a message is
      *        logged
      */
     static void initialize(std::string application,
-        std::function<void(std::string)> loggingFunction);
+        bool createLogFile, std::function<void(std::string)> loggingFunction);
     
     /**
      * Returns the static reference to the Log instance.
@@ -93,8 +95,10 @@ private:
      * was in the file previously.
      *
      * \param application The name of the application that requested the log file
+     * \param createLogFile Determines whether all log messages should also be printed
+     *        to file
      */
-    Log(std::string application);
+    Log(std::string application, bool createLogFile);
     
     /// Destructor the will close the file.
     ~Log();

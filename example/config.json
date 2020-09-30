@@ -1,9 +1,5 @@
 {
   "applicationPath": "application",
   "clusterPath": "cluster",
-  "nodePath": "nodes",
-  "logRotation": {
-    "frequency": 1,
-    "keepPrevious": true
-  }  
+  "nodePath": "nodes"
 }

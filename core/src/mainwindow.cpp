@@ -48,6 +48,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 #include <filesystem>
+#include <iostream>
 #include <set>
 #include <thread>
 
@@ -61,7 +62,6 @@ MainWindow::MainWindow() {
 
     //
     // Set up the logging
-    common::Log::initialize("core", [this](std::string msg) { log(std::move(msg)); });
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that
         [](QtMsgType, const QMessageLogContext&, const QString& msg) {
@@ -83,17 +83,21 @@ MainWindow::MainWindow() {
     //
     // Load the configuration
     if (!std::filesystem::exists(ConfigurationFile)) {
-        Log(
-            "Status",
-            fmt::format("Creating new configuration at '{}'", ConfigurationFile)
-        );
+        std::cout <<
+            fmt::format("Creating new configuration at '{}'", ConfigurationFile) << '\n';
 
         nlohmann::json obj = Configuration();
         std::ofstream file(ConfigurationFile);
         file << obj.dump(2);
     }
-    Log("Status", fmt::format("Loading configuration file '{}'", ConfigurationFile));
+    std::cout << fmt::format("Loading configuration '{}'", ConfigurationFile) << '\n';
     _config = common::loadFromJson<Configuration>(ConfigurationFile);
+    common::Log::initialize(
+        "core",
+        _config.logFile,
+        [this](std::string msg) { log(std::move(msg)); }
+    );
+
 
     //
     // Load the data

@@ -220,6 +220,23 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
     }
 
     {
+        // Use Log File
+        QString toolTip = "Determines whether a log file should be created or not";
+
+        QLabel* label = new QLabel("Use Log File:");
+        label->setToolTip(toolTip);
+        controlsLayout->addWidget(label, 4, 0);
+
+        _logFile = new QCheckBox;
+        _logFile->setToolTip(toolTip);
+        connect(
+            _logFile, &QCheckBox::clicked,
+            this, &ConfigurationWidget::valuesChanged
+        );
+        controlsLayout->addWidget(_logFile, 4, 1);
+    }
+
+    {
         // Log Rotation
         QString toolTip = "Controls whether there will be a log rotation or not. Each "
             "'Frequency' hours a rotation is performed if it is enabled and if "
@@ -366,7 +383,8 @@ void ConfigurationWidget::valuesChanged() {
         (_configuration.applicationPath != _applicationPath->text().toStdString()) ||
         (_configuration.clusterPath != _clusterPath->text().toStdString()) ||
         (_configuration.nodePath != _nodePath->text().toStdString()) ||
-        (_configuration.removalTimeout.count() != _removalTimeout->value());
+        (_configuration.removalTimeout.count() != _removalTimeout->value()) ||
+        (_configuration.logFile != _logFile->isChecked());
 
     std::optional<common::LogRotation> lr = _configuration.logRotation;
     bool hasLogRotationChanged = (lr.has_value() != _logRotation->isChecked());
@@ -388,6 +406,7 @@ void ConfigurationWidget::resetValues() {
     _clusterPath->setText(QString::fromStdString(_configuration.clusterPath));
     _nodePath->setText(QString::fromStdString(_configuration.nodePath));
     _removalTimeout->setValue(static_cast<int>(_configuration.removalTimeout.count()));
+    _logFile->setChecked(_configuration.logFile);
 
     if (_configuration.logRotation.has_value()) {
         _logRotation->setChecked(true);
@@ -417,6 +436,7 @@ void ConfigurationWidget::saveValues() {
     config.clusterPath = _clusterPath->text().toStdString();
     config.nodePath = _nodePath->text().toStdString();
     config.removalTimeout = std::chrono::milliseconds(_removalTimeout->value());
+    config.logFile = _logFile->isChecked();
 
     if (_logRotation->isChecked()) {
         common::LogRotation lr;

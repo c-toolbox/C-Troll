@@ -89,7 +89,6 @@ int main(int argc, char** argv) {
 
 
     MainWindow mw;
-    common::Log::initialize("tray", [&mw](std::string msg) { mw.log(std::move(msg)); });
 
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that
@@ -101,15 +100,20 @@ int main(int argc, char** argv) {
     std::string_view configurationFile = "config-tray.json";
     std::string absPath = std::filesystem::absolute(configurationFile).string();
     if (!std::filesystem::exists(configurationFile)) {
-        Log("Status", fmt::format("Creating new configuration at '{}'", absPath));
+        std::cout << fmt::format("Creating new configuration at '{}'", absPath) << '\n';
 
         nlohmann::json obj = Configuration();
         std::ofstream file(absPath);
         file << obj.dump(2);
     }
 
-    Log("Status", fmt::format("Loading configuration file from '{}'", absPath));
+    std::cout << fmt::format("Loading configuration file from '{}'", absPath) << '\n';
     Configuration config = common::loadFromJson<Configuration>(absPath);
+    common::Log::initialize(
+        "tray",
+        config.logFile,
+        [&mw](std::string msg) { mw.log(std::move(msg)); }
+    );
 
 #ifdef QT_DEBUG
     config.showWindow = true;

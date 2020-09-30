@@ -107,11 +107,11 @@ namespace common {
 
 Log* Log::_log;
     
-void Log::initialize(std::string application,
+void Log::initialize(std::string application, bool createLogFile,
                      std::function<void(std::string)> loggingFunction)
 {
     assert(!application.empty());
-    _log = new Log(std::move(application));
+    _log = new Log(std::move(application), createLogFile);
     _log->_loggingFunction = std::move(loggingFunction);
 }
     
@@ -120,11 +120,12 @@ Log& Log::ref() {
     return *_log;
 }
     
-Log::Log(std::string componentName)
-    : _filePath(fmt::format("{}{}{}", LogPrefix, componentName, LogPostfix))
-    , _file(_filePath)
-{
+Log::Log(std::string componentName, bool createLogFile) {
     assert(!componentName.empty());
+    if (createLogFile) {
+        _filePath = fmt::format("{}{}{}", LogPrefix, componentName, LogPostfix);
+        _file = std::ofstream(_filePath);
+    }
 }
     
 Log::~Log() {
@@ -135,7 +136,7 @@ void Log::logMessage(std::string category, std::string message) {
     message = fmt::format("{}  ({}): {}", currentTime(), category, message);
 
     // First the file
-    {
+    if (!_filePath.empty()) {
         std::unique_lock lock(_access);
         _file << message << '\n';
         _file.flush();
@@ -150,6 +151,10 @@ void Log::logMessage(std::string category, std::string message) {
 }
 
 void Log::performLogRotation(bool keepLog) {
+    if (_filePath.empty()) {
+        return;
+    }
+
     std::unique_lock lock(_access);
 
     // First close the old file

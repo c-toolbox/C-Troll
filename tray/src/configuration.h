@@ -42,10 +42,19 @@
 #include <string>
 
 struct Configuration {
+    /// The port on which this Tray should listen to incoming connections
     int port = 5000;
+
+    /// The secret that is used to encrypt messages and be used as a validation token
     std::string secret;
+
+    /// If this is set to true, the centralwindow will be shown on startup
     bool showWindow = false;
 
+    /// Determines whether a log file should be created or not
+    bool logFile = true;
+
+    /// Contains configuration about log rotations
     std::optional<common::LogRotation> logRotation;
 };
 

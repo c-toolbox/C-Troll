@@ -46,6 +46,7 @@ namespace {
     constexpr const char* KeyTagColorsBlue = "b";
     constexpr const char* KeyTagColorsTag = "tag";
 
+    constexpr const char* KeyLogFile = "logFile";
     constexpr const char* KeyLogRotation = "logRotation";
 } // namespace
 
@@ -79,6 +80,10 @@ void to_json(nlohmann::json& j, const Configuration& c) {
         j[KeyTagColors] = c.tagColors;
     }
 
+    if (c.logFile != Configuration().logFile) {
+        j[KeyLogFile] = c.logFile;
+    }
+
     if (c.logRotation.has_value()) {
         j[KeyLogRotation] = *c.logRotation;
     }
@@ -90,7 +95,7 @@ void from_json(const nlohmann::json& j, Color& c) {
     j.at(KeyTagColorsBlue).get_to(c.b);
 
     if (j.find(KeyTagColorsTag) != j.end()) {
-        j.at(KeyTagColorsTag).get_to(c.tag);
+        j[KeyTagColorsTag].get_to(c.tag);
     }
 
     if (c.r < 0 || c.r > 255 || c.g < 0 || c.g > 255 || c.b < 0 || c.b > 255) {
@@ -104,7 +109,7 @@ void from_json(const nlohmann::json& j, Configuration& c) {
     j.at(KeyNodePath).get_to(c.nodePath);
 
     if (j.find(KeyRemovalTimeout) != j.end()) {
-        int ms = j.at(KeyRemovalTimeout).get<int>();
+        int ms = j[KeyRemovalTimeout].get<int>();
 
         if (ms < 0) {
             throw std::runtime_error("Negative process removal time is not allowed");
@@ -116,10 +121,14 @@ void from_json(const nlohmann::json& j, Configuration& c) {
     if (j.find(KeyTagColors) != j.end()) {
         // get_to adds the values to the end of the vector, so we have to clear it first
         c.tagColors.clear();
-        j.at(KeyTagColors).get_to(c.tagColors);
+        j[KeyTagColors].get_to(c.tagColors);
+    }
+
+    if (j.find(KeyLogFile) != j.end()) {
+        j[KeyLogFile].get_to(c.logFile);
     }
 
     if (j.find(KeyLogRotation) != j.end()) {
-        c.logRotation = j.at(KeyLogRotation).get<common::LogRotation>();
+        c.logRotation = j[KeyLogRotation].get<common::LogRotation>();
     }
 }

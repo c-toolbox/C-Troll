@@ -76,6 +76,10 @@ struct Configuration {
         Color{ 76, 0, 92 } // Damson
     };
 
+    /// Determines whether a log file should be created or not
+    bool logFile = true;
+
+    /// Contains configuration about log rotations
     std::optional<common::LogRotation> logRotation;
 };
 
