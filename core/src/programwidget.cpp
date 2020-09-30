@@ -385,12 +385,14 @@ TagsWidget::TagsWidget()
         Color lightColor = Color {
             std::min(255, color.r + Delta),
             std::min(255, color.g + Delta),
-            std::min(255, color.b + Delta)
+            std::min(255, color.b + Delta),
+            ""
         };
         Color darkColor = Color {
             std::max(0, color.r - Delta),
             std::max(0, color.g - Delta),
-            std::max(0, color.b - Delta)
+            std::max(0, color.b - Delta),
+            ""
         };
 
         std::string colorText = fmt::format(

@@ -46,7 +46,7 @@ namespace {
 namespace common {
     
 void to_json(nlohmann::json& j, const ProcessOutputMessage& p) {
-    std::string type = [](ProcessOutputMessage::OutputType type) {
+    std::string t = [](ProcessOutputMessage::OutputType type) {
         switch (type) {
             case ProcessOutputMessage::OutputType::StdOut: return "stdout";
             case ProcessOutputMessage::OutputType::StdErr: return "stderr";
@@ -58,7 +58,7 @@ void to_json(nlohmann::json& j, const ProcessOutputMessage& p) {
     j[Message::KeyVersion] = p.CurrentVersion;
     j[KeyIdentifier] = p.processId;
     j[KeyMessage] = p.message;
-    j[KeyOutputType] = type;
+    j[KeyOutputType] = t;
 }
 
 void from_json(const nlohmann::json& j, ProcessOutputMessage& p) {

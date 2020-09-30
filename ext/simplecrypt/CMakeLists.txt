@@ -35,8 +35,8 @@
 find_package(Qt5 COMPONENTS Core REQUIRED)
 
 add_library(simplecrypt simplecrypt.cpp)
-target_include_directories(simplecrypt PUBLIC "include")
-target_include_directories(simplecrypt PRIVATE "include/simplecrypt")
+target_include_directories(simplecrypt SYSTEM PUBLIC "include")
+target_include_directories(simplecrypt SYSTEM PRIVATE "include/simplecrypt")
 target_link_libraries(simplecrypt PUBLIC Qt5::Core)
 
 set(MSVC_WARNINGS

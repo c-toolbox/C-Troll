@@ -86,23 +86,24 @@ common::ExitCommandMessage exitProcessCommand(const Process& process) {
 
 int Process::nextId = 0;
 
-Process::Process(Program::ID programId, Program::Configuration::ID configurationId,
-                 Cluster::ID clusterId, Node::ID nodeId)
+Process::Process(Program::ID programId_, Program::Configuration::ID configurationId_,
+                 Cluster::ID clusterId_, Node::ID nodeId_)
     : id(nextId++)
-    , programId(programId)
-    , configurationId(configurationId)
-    , clusterId(clusterId)
-    , nodeId(nodeId)
+    , programId(programId_)
+    , configurationId(configurationId_)
+    , clusterId(clusterId_)
+    , nodeId(nodeId_)
     , status(common::ProcessStatusMessage::Status::Unknown)
 {}
 
-Process::Process(ID id, Program::ID programId, Program::Configuration::ID configurationId,
-                 Cluster::ID clusterId, Node::ID nodeId)
-    : id(id)
-    , programId(programId)
-    , configurationId(configurationId)
-    , clusterId(clusterId)
-    , nodeId(nodeId)
+Process::Process(ID id_, Program::ID programId_,
+                 Program::Configuration::ID configurationId_, Cluster::ID clusterId_,
+                 Node::ID nodeId_)
+    : id(id_)
+    , programId(programId_)
+    , configurationId(configurationId_)
+    , clusterId(clusterId_)
+    , nodeId(nodeId_)
     , status(common::ProcessStatusMessage::Status::Unknown)
 {}
 
