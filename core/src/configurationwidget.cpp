@@ -34,7 +34,7 @@
 
 #include "configurationwidget.h"
 
-#include <QCheckbox>
+#include <QCheckBox>
 #include <QColorDialog>
 #include <QGridLayout>
 #include <QGroupBox>
@@ -43,7 +43,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QScrollArea>
-#include <QSpinbox>
+#include <QSpinBox>
 #include <QVBoxLayout>
 #include <fmt/format.h>
 #include <json/json.hpp>
