@@ -39,6 +39,7 @@ set(HEADER_FILES
   include/jsonload.h
   include/jsonsocket.h
   include/killallmessage.h
+  include/logconfiguration.h
   include/logging.h
   include/message.h
   include/processoutputmessage.h
@@ -52,6 +53,7 @@ set(SOURCE_FILES
   src/invalidauthmessage.cpp
   src/jsonsocket.cpp
   src/killallmessage.cpp
+  src/logconfiguration.cpp
   src/logging.cpp
   src/message.cpp
   src/processoutputmessage.cpp

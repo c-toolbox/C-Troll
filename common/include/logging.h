@@ -37,6 +37,7 @@
 
 #include <fstream>
 #include <functional>
+#include <mutex>
 #include <string>
 
 namespace common {
@@ -78,6 +79,13 @@ public:
      * \param message The message that is to be logged
      */
     void logMessage(std::string category, std::string message);
+
+    /**
+     * Performs a log rotation action. If \p keepLog is \c true, the old log file is saved
+     * to a new filename by adding the current date. If the parameter is \c false, the old
+     * log file is discarded.
+     */
+    void performLogRotation(bool keepLog);
   
 private:
     /**
@@ -94,7 +102,11 @@ private:
     // The static Log that is returned in the Log::ref method.
     static Log* _log;
     
+    /// Mutex that protects the access to the log file
+    std::mutex _access;
+
     /// The log file to which all messages from the logMessage method get logged
+    std::string _filePath;
     std::ofstream _file;
 
     std::function<void(std::string)> _loggingFunction;

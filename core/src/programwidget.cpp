@@ -87,6 +87,7 @@ void ProgramButton::processUpdated(Process::ID processId) {
         ProcessInfo info;
         info.processId = processId;
         Node* node = data::findNode(process->nodeId);
+        assert(node);
         info.menuAction = new QAction(QString::fromStdString(node->name));
         // We store the name of the node as the user data in order to sort them later
         info.menuAction->setData(QString::fromStdString(node->name));
@@ -160,13 +161,10 @@ void ProgramButton::updateMenu() {
     _actionMenu->clear();
 
     std::vector<QAction*> actions;
-    std::transform(
-        _processes.cbegin(), _processes.cend(),
-        std::back_inserter(actions),
-        [](const std::pair<const Node::ID, ProcessInfo>& p) {
-            return p.second.menuAction;
-        }
-    );
+    actions.reserve(_processes.size());
+    for (const std::pair<const Node::ID, ProcessInfo>& p : _processes) {
+        actions.push_back(p.second.menuAction);
+    }
     std::sort(
         actions.begin(), actions.end(),
         [](QAction* lhs, QAction* rhs) {
@@ -178,14 +176,14 @@ void ProgramButton::updateMenu() {
         QString actName = action->data().toString();
         const std::string nodeName = actName.toLocal8Bit().constData();
         const auto it = std::find_if(
-            _processes.begin(), _processes.end(),
+            _processes.cbegin(), _processes.cend(),
             [nodeName](const std::pair<const Node::ID, ProcessInfo>& p) {
                 Node* node = data::findNode(p.first);
                 return node->name == nodeName;
             }
         );
         // If we are getting this far, the node for this action has to exist in the map
-        assert(it != _processes.end());
+        assert(it != _processes.cend());
 
         // We only going to update the actions if some of the nodes are not running but
         // some others are. So we basically have to provide the ability to start the nodes
@@ -218,7 +216,7 @@ void ProgramButton::updateMenu() {
 bool ProgramButton::isProcessRunning(Node::ID nodeId) const {
     using Status = common::ProcessStatusMessage::Status;
     const auto it = _processes.find(nodeId);
-    return (it != _processes.end()) &&
+    return (it != _processes.cend()) &&
         data::findProcess(it->second.processId)->status == Status::Running;
 }
 
@@ -397,21 +395,10 @@ TagsWidget::TagsWidget()
 
         std::string colorText = fmt::format(
             R"(
-                QPushButton {{
-                    background-color: #{0:02x}{1:02x}{2:02x};
-                }}
-
-                QPushButton:hover {{
-                    background-color: #{3:02x}{4:02x}{5:02x};
-                }}
-
-                QPushButton:pressed {{
-                    background-color: #{6:02x}{7:02x}{8:02x};
-                }}
-
-                QPushButton:open {{
-                    background-color: #{6:02x}{7:02x}{8:02x};
-                }}
+                QPushButton {{ background-color: #{0:02x}{1:02x}{2:02x}; }}
+                QPushButton:hover {{ background-color: #{3:02x}{4:02x}{5:02x}; }}
+                QPushButton:pressed {{ background-color: #{6:02x}{7:02x}{8:02x}; }}
+                QPushButton:open {{ background-color: #{6:02x}{7:02x}{8:02x}; }}
             )",
             color.r, color.g, color.b,
             lightColor.r, lightColor.g, lightColor.b,
@@ -449,8 +436,6 @@ void TagsWidget::buttonPressed() {
 
 
 ProgramsWidget::ProgramsWidget() {
-    setObjectName("programs");
-
     QBoxLayout* layout = new QHBoxLayout(this);
     layout->addWidget(createControls());
     layout->addWidget(createPrograms());
@@ -527,7 +512,7 @@ void ProgramsWidget::processUpdated(Process::ID processId) {
     Process* process = data::findProcess(processId);
 
     const auto it = _widgets.find(process->programId);
-    if (it != _widgets.end()) {
+    if (it != _widgets.cend()) {
         it->second->processUpdated(processId);
     }
 }

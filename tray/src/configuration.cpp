@@ -38,14 +38,14 @@ namespace {
     constexpr const char* KeyPort = "port";
     constexpr const char* KeySecret = "secret";
     constexpr const char* KeyShowWindow = "showWindow";
+
+    constexpr const char* KeyLogRotation = "logRotation";
 } // namespace
 
 void to_json(nlohmann::json& j, const Configuration& c) {
-    j = {
-        { KeyPort, c.port },
-        { KeySecret, c.secret },
-        { KeyShowWindow, c.showWindow }
-    };
+    j[KeyPort] = c.port;
+    j[KeySecret] = c.secret;
+    j[KeyShowWindow] = c.showWindow;
 }
 
 void from_json(const nlohmann::json& j, Configuration& c) {
@@ -56,5 +56,8 @@ void from_json(const nlohmann::json& j, Configuration& c) {
     }
     if (j.find(KeyShowWindow) != j.end()) {
         j.at(KeyShowWindow).get_to(c.showWindow);
+    }
+    if (j.find(KeyLogRotation) != j.end()) {
+        c.logRotation = j.at(KeyLogRotation).get<common::LogRotation>();
     }
 }

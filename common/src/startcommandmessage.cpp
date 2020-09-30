@@ -51,21 +51,19 @@ namespace {
 namespace common {
 
 void to_json(nlohmann::json& j, const StartCommandMessage& p) {
-    j = {
-        { Message::KeyType, StartCommandMessage::Type },
-        { Message::KeyVersion, p.CurrentVersion },
-        { Message::KeySecret, p.secret },
-        { KeyId, p.id },
-        { KeyForwardOutErr, p.forwardStdOutStdErr },
-        { KeyExecutable, p.executable },
-        { KeyWorkingDirectory, p.workingDirectory },
-        { KeyCommandlineArguments, p.commandlineParameters },
-        { KeyProgramId, p.programId },
-        { KeyConfigurationId, p.configurationId },
-        { KeyClusterId, p.clusterId },
-        { KeyNodeId, p.nodeId },
-        { KeyDataHash, p.dataHash }
-    };
+    j[Message::KeyType] = StartCommandMessage::Type;
+    j[Message::KeyVersion] = p.CurrentVersion;
+    j[Message::KeySecret] = p.secret;
+    j[KeyId] = p.id;
+    j[KeyForwardOutErr] = p.forwardStdOutStdErr;
+    j[KeyExecutable] = p.executable;
+    j[KeyWorkingDirectory] = p.workingDirectory;
+    j[KeyCommandlineArguments] = p.commandlineParameters;
+    j[KeyProgramId] = p.programId;
+    j[KeyConfigurationId] = p.configurationId;
+    j[KeyClusterId] = p.clusterId;
+    j[KeyNodeId] = p.nodeId;
+    j[KeyDataHash] = p.dataHash;
 }
 
 void from_json(const nlohmann::json& j, StartCommandMessage& p) {

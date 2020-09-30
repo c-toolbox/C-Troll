@@ -39,6 +39,7 @@
 #include "processhandler.h"
 #include "sockethandler.h"
 #include <QApplication>
+#include <QTimer>
 #include <fmt/format.h>
 #include <json/json.hpp>
 #include <filesystem>
@@ -122,6 +123,19 @@ int main(int argc, char** argv) {
     }
 
     mw.setPort(config.port);
+
+    if (config.logRotation.has_value()) {
+        const bool keepLog = config.logRotation->keepPrevious;
+        const std::chrono::hours freq = config.logRotation->frequency;
+
+        QTimer* timer = new QTimer(&mw);
+        timer->setTimerType(Qt::VeryCoarseTimer);
+        QObject::connect(
+            timer, &QTimer::timeout,
+            [keepLog]() { common::Log::ref().performLogRotation(keepLog); }
+        );
+        timer->start(std::chrono::duration_cast<std::chrono::milliseconds>(freq));
+    }
 
     SocketHandler socketHandler(config.port, config.secret);
     ProcessHandler processHandler;

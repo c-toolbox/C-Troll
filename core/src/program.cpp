@@ -102,7 +102,7 @@ void from_json(const nlohmann::json& j, Program& p) {
 std::vector<Program> loadProgramsFromDirectory(std::string_view directory) {
     std::vector<Program> programs = common::loadJsonFromDirectory<Program>(directory);
 
-    for (const Program& program : programs) {
+    auto validate = [](const Program& program) {
         if (program.name.empty()) {
             throw std::runtime_error("No name specified for program");
         }
@@ -126,7 +126,9 @@ std::vector<Program> loadProgramsFromDirectory(std::string_view directory) {
                 "At least one tag of the program {} has an empty tag", program.name
             ));
         }
-    }
+    };
+
+    std::for_each(programs.cbegin(), programs.cend(), validate);
 
     // Inject the unique identifiers into the nodes
     int programId = 0;

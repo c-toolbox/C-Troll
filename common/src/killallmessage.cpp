@@ -37,11 +37,9 @@
 namespace common {
 
 void to_json(nlohmann::json& j, const KillAllMessage& p) {
-    j = {
-        { Message::KeyType, KillAllMessage::Type },
-        { Message::KeyVersion, p.CurrentVersion },
-        { Message::KeySecret, p.secret }
-    };
+    j[Message::KeyType] = KillAllMessage::Type;
+    j[Message::KeyVersion] = p.CurrentVersion;
+    j[Message::KeySecret] = p.secret;
 }
 
 void from_json(const nlohmann::json& j, KillAllMessage&) {

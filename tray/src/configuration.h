@@ -35,13 +35,18 @@
 #ifndef __TRAY__CONFIGURATION_H__
 #define __TRAY__CONFIGURATION_H__
 
+#include "logconfiguration.h"
 #include <json/json.hpp>
+#include <chrono>
+#include <optional>
 #include <string>
 
 struct Configuration {
     int port = 5000;
     std::string secret;
     bool showWindow = false;
+
+    std::optional<common::LogRotation> logRotation;
 };
 
 void to_json(nlohmann::json& j, const Configuration& c);

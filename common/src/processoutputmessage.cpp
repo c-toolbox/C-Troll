@@ -54,13 +54,11 @@ void to_json(nlohmann::json& j, const ProcessOutputMessage& p) {
         }
     }(p.outputType);
 
-    j = {
-        { Message::KeyType, ProcessOutputMessage::Type },
-        { Message::KeyVersion, p.CurrentVersion },
-        { KeyIdentifier, p.processId },
-        { KeyMessage, p.message },
-        { KeyOutputType, type }
-    };
+    j[Message::KeyType] = ProcessOutputMessage::Type;
+    j[Message::KeyVersion] = p.CurrentVersion;
+    j[KeyIdentifier] = p.processId;
+    j[KeyMessage] = p.message;
+    j[KeyOutputType] = type;
 }
 
 void from_json(const nlohmann::json& j, ProcessOutputMessage& p) {

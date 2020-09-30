@@ -55,6 +55,7 @@ namespace data {
 std::vector<Cluster*> clusters() {
     std::vector<Cluster*> clusters;
     for (const std::unique_ptr<Cluster>& c : gClusters) {
+        assert(c.get());
         clusters.push_back(c.get());
     }
     return clusters;
@@ -63,6 +64,7 @@ std::vector<Cluster*> clusters() {
 std::vector<Node*> nodes() {
     std::vector<Node*> nodes;
     for (const std::unique_ptr<Node>& n : gNodes) {
+        assert(n.get());
         nodes.push_back(n.get());
     }
     return nodes;
@@ -70,16 +72,18 @@ std::vector<Node*> nodes() {
 
 std::vector<Program*> programs() {
     std::vector<Program*> programs;
-    for (const std::unique_ptr<Program>& c : gPrograms) {
-        programs.push_back(c.get());
+    for (const std::unique_ptr<Program>& p : gPrograms) {
+        assert(p.get());
+        programs.push_back(p.get());
     }
     return programs;
 }
 
 std::vector<Process*> processes() {
     std::vector<Process*> processes;
-    for (const std::unique_ptr<Process>& c : gProcesses) {
-        processes.push_back(c.get());
+    for (const std::unique_ptr<Process>& p : gProcesses) {
+        assert(p.get());
+        processes.push_back(p.get());
     }
     return processes;
 }
@@ -205,9 +209,6 @@ void addProcess(std::unique_ptr<Process> process) {
 }
 
 Color colorForTag(const std::string& tag) {
-    //static int LastColor = -1;
-    //static std::map<std::string, Color> Colors;
-
     // It doesn't make sense if someone requests the color for an empty tag
     assert(!tag.empty());
 

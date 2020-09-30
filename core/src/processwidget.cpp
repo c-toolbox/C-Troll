@@ -77,7 +77,8 @@ ProcessWidget::ProcessWidget(Process::ID processId,
     Program* program = data::findProgram(process->programId);
     assert(program);
     const Program::Configuration& configuration = data::findConfigurationForProgram(
-        *program, process->configurationId
+        *program,
+        process->configurationId
     );
     Cluster* cluster = data::findCluster(process->clusterId);
     assert(cluster);
@@ -139,9 +140,9 @@ ProcessWidget::ProcessWidget(Process::ID processId,
         connect(
             _remove, &QPushButton::clicked,
             [this]() {
-            _removalTimer->stop();
-            emit remove(_processId);
-        }
+                _removalTimer->stop();
+                emit remove(_processId);
+            }
         );
     }
     

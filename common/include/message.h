@@ -58,7 +58,7 @@ struct Message {
 };
 
 template <typename T>
-bool isValidMessage(const nlohmann::json& message) {
+[[ nodiscard ]] bool isValidMessage(const nlohmann::json& message) {
     const std::string type = message.at(Message::KeyType).get<std::string>();
     const int version = message.at(Message::KeyVersion).get<int>();
 

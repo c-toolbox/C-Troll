@@ -35,8 +35,10 @@
 #ifndef __CORE__CONFIGURATION_H__
 #define __CORE__CONFIGURATION_H__
 
+#include "logconfiguration.h"
 #include <json/json.hpp>
 #include <chrono>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -73,6 +75,8 @@ struct Configuration {
         Color{ 148, 255, 181 }, // Jade
         Color{ 76, 0, 92 } // Damson
     };
+
+    std::optional<common::LogRotation> logRotation;
 };
 
 void to_json(nlohmann::json& j, const Configuration& c);

@@ -34,8 +34,10 @@
 
 #include "configurationwidget.h"
 
+#include <QCheckbox>
 #include <QColorDialog>
 #include <QGridLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -118,6 +120,9 @@ void ColorWidget::applyColor() {
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
 ConfigurationWidget::ConfigurationWidget(Configuration configuration,
                                          std::string configurationFilePath)
     : _configuration(std::move(configuration))
@@ -132,83 +137,173 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
     controls->setLayout(controlsLayout);
     layout->addWidget(controls);
 
-    // Application path
-    controlsLayout->addWidget(new QLabel("Application Path:"), 0, 0);
-
-    _applicationPath = new QLineEdit;
-    connect(
-        _applicationPath, &QLineEdit::textEdited,
-        this, &ConfigurationWidget::valuesChanged
-    );
-    controlsLayout->addWidget(_applicationPath, 0, 1);
-
-    // Cluster path
-    controlsLayout->addWidget(new QLabel("Cluster Path:"), 1, 0);
-
-    _clusterPath = new QLineEdit;
-    connect(
-        _clusterPath, &QLineEdit::textEdited,
-        this, &ConfigurationWidget::valuesChanged
-    );
-    controlsLayout->addWidget(_clusterPath, 1, 1);
-
-// Node path
-    controlsLayout->addWidget(new QLabel("Node Path:"), 2, 0);
-
-    _nodePath = new QLineEdit;
-    connect(
-        _nodePath, &QLineEdit::textEdited,
-        this, &ConfigurationWidget::valuesChanged
-    );
-    controlsLayout->addWidget(_nodePath, 2, 1);
-
-    // Process removal time
-    controlsLayout->addWidget(new QLabel("Process Removal Time:"), 3, 0);
-
-    _removalTimeout = new QSpinBox;
-    _removalTimeout->setSuffix(" ms");
-    _removalTimeout->setMinimum(0);
-    _removalTimeout->setMaximum(std::numeric_limits<int>::max());
-    connect(
-        _removalTimeout, QOverload<int>::of(&QSpinBox::valueChanged),
-        this, &ConfigurationWidget::valuesChanged
-    );
-    controlsLayout->addWidget(_removalTimeout, 3, 1);
-
-    // Colors
     {
-        QScrollArea* area = new QScrollArea;
-        area->setWidgetResizable(true);
-        area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        // Application path
 
-        QWidget* content = new QWidget;
-        area->setWidget(content);
-        area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
-        _colorLayout = new QGridLayout;
-        _colorLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-        createColorWidgets();
-        content->setLayout(_colorLayout);
+        QString toolTip = "Specifies the location relative to the current working "
+            "directory from which application configurations are loaded. Every file with "
+            "the '.json' extension will be automatically added, even if they are in "
+            "subdirectories.";
 
-        layout->addWidget(area, 1);
+        QLabel* label = new QLabel("Application Path:");
+        label->setToolTip(toolTip);
+        controlsLayout->addWidget(label, 0, 0);
+
+        _applicationPath = new QLineEdit;
+        _applicationPath->setToolTip(toolTip);
+        connect(
+            _applicationPath, &QLineEdit::textEdited,
+            this, &ConfigurationWidget::valuesChanged
+        );
+        controlsLayout->addWidget(_applicationPath, 0, 1);
     }
 
-    QPushButton* addColor = new QPushButton("Add new color");
-    connect(
-        addColor, &QPushButton::clicked,
-        [this]() {
-            std::random_device rd;
-            std::uniform_int_distribution<int> dist(0, 255);
+    {
+        // Cluster path
+        QString toolTip = "Specifies the location relative to the current working "
+            "directory from which the cluster information are loaded. Every file with "
+            "the '.json' extension will be automatically added, even if they are in "
+            "subdirectories.";
 
-            Color c;
-            c.r = dist(rd);
-            c.g = dist(rd);
-            c.b = dist(rd);
-            createColorWidget(c);
-            layoutColorWidgets();
-            valuesChanged();
+        QLabel* label = new QLabel("Cluster Path:");
+        label->setToolTip(toolTip);
+        controlsLayout->addWidget(label, 1, 0);
+
+        _clusterPath = new QLineEdit;
+        _clusterPath->setToolTip(toolTip);
+        connect(
+            _clusterPath, &QLineEdit::textEdited,
+            this, &ConfigurationWidget::valuesChanged
+        );
+        controlsLayout->addWidget(_clusterPath, 1, 1);
+    }
+
+    {
+        // Node path
+        QString toolTip = "Specifies the location relative to the current working "
+            "directory from which the information about nodes are loaded. Every file "
+            "with the '.json' extension will be automatically added, even if they are in "
+            "subdirectories.";
+
+        QLabel* label = new QLabel("Node Path:");
+        label->setToolTip(toolTip);
+        controlsLayout->addWidget(label, 2, 0);
+
+        _nodePath = new QLineEdit;
+        _nodePath->setToolTip(toolTip);
+        connect(
+            _nodePath, &QLineEdit::textEdited,
+            this, &ConfigurationWidget::valuesChanged
+        );
+        controlsLayout->addWidget(_nodePath, 2, 1);
+    }
+
+    {
+        // Process removal time
+        QString toolTip = "Specifies the timeout (in milliseconds) after which a "
+            "successfully finished process is removed from the process list.";
+
+        QLabel* label = new QLabel("Process Removal Time:");
+        label->setToolTip(toolTip);
+        controlsLayout->addWidget(label, 3, 0);
+
+        _removalTimeout = new QSpinBox;
+        _removalTimeout->setToolTip(toolTip);
+        _removalTimeout->setSuffix(" ms");
+        _removalTimeout->setMinimum(0);
+        _removalTimeout->setMaximum(std::numeric_limits<int>::max());
+        connect(
+            _removalTimeout, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &ConfigurationWidget::valuesChanged
+        );
+        controlsLayout->addWidget(_removalTimeout, 3, 1);
+    }
+
+    {
+        // Log Rotation
+        QString toolTip = "Controls whether there will be a log rotation or not. Each "
+            "'Frequency' hours a rotation is performed if it is enabled and if "
+            "'Keep old logs' is enabled, the old log file is backed up. Otherwise, it is "
+            "overwritten.";
+
+        _logRotation = new QGroupBox("Log Rotation");
+        _logRotation->setToolTip(toolTip);
+        _logRotation->setCheckable(true);
+        connect(
+            _logRotation, &QGroupBox::clicked,
+            this, &ConfigurationWidget::valuesChanged
+        );
+
+        QGridLayout* contentLayout = new QGridLayout(_logRotation);
+
+        contentLayout->addWidget(new QLabel("Frequency:"), 0, 0);
+        _frequency = new QSpinBox;
+        _frequency->setSuffix(" h");
+        _frequency->setMinimum(0);
+        _frequency->setMaximum(std::numeric_limits<int>::max());
+        connect(
+            _frequency, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &ConfigurationWidget::valuesChanged
+        );
+        contentLayout->addWidget(_frequency, 0, 1);
+
+        contentLayout->addWidget(new QLabel("Keep old logs:"), 1, 0);
+        _keepOldLog = new QCheckBox;
+        connect(
+            _keepOldLog, &QCheckBox::clicked,
+            this, &ConfigurationWidget::valuesChanged
+        );
+        contentLayout->addWidget(_keepOldLog, 1, 1);
+
+        layout->addWidget(_logRotation);
+    }
+
+    {
+        // Colors
+        QString toolTip = "Provides the ability to select the colors for the individual "
+            "tags. Specifying a name for a tag is optional; if it is set, that color is "
+            "used for that specific color. All colors that don't have a specific tag "
+            "assigned are used for the tags that are not explicitly specified.";
+
+        QGroupBox* colorBox = new QGroupBox("Tag Color");
+        colorBox->setToolTip(toolTip);
+        QBoxLayout* colorLayout = new QVBoxLayout(colorBox);
+        colorLayout->setContentsMargins(5, 5, 5, 5);
+        layout->addWidget(colorBox);
+        {
+            QScrollArea* area = new QScrollArea;
+            area->setWidgetResizable(true);
+            area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+            QWidget* content = new QWidget;
+            area->setWidget(content);
+            area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+            _colorLayout = new QGridLayout;
+            _colorLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+            createColorWidgets();
+            content->setLayout(_colorLayout);
+
+            colorLayout->addWidget(area, 1);
         }
-    );
-    layout->addWidget(addColor);
+
+        QPushButton* addColor = new QPushButton("Add new color");
+        connect(
+            addColor, &QPushButton::clicked,
+            [this]() {
+                std::random_device rd;
+                std::uniform_int_distribution<int> dist(0, 255);
+
+                Color c;
+                c.r = dist(rd);
+                c.g = dist(rd);
+                c.b = dist(rd);
+                createColorWidget(c);
+                layoutColorWidgets();
+                valuesChanged();
+            }
+        );
+        colorLayout->addWidget(addColor);
+    }
 
     // Separator
     {
@@ -267,12 +362,21 @@ void ConfigurationWidget::removedColor(ColorWidget* sender) {
 }
 
 void ConfigurationWidget::valuesChanged() {
-    const bool hasChanged =
+    const bool hasValueChanged =
         (_configuration.applicationPath != _applicationPath->text().toStdString()) ||
         (_configuration.clusterPath != _clusterPath->text().toStdString()) ||
         (_configuration.nodePath != _nodePath->text().toStdString()) ||
-        (_configuration.removalTimeout.count() != _removalTimeout->value()) ||
-        _configuration.tagColors != tagColors();
+        (_configuration.removalTimeout.count() != _removalTimeout->value());
+
+    std::optional<common::LogRotation> lr = _configuration.logRotation;
+    bool hasLogRotationChanged = (lr.has_value() != _logRotation->isChecked());
+    if (lr.has_value() && _logRotation->isChecked()) {
+        hasLogRotationChanged = (lr->frequency.count() != _frequency->value()) ||
+            (lr->keepPrevious != _keepOldLog->isChecked());
+    }
+
+    const bool hasColorChanged = (_configuration.tagColors != tagColors());
+    const bool hasChanged = hasValueChanged || hasLogRotationChanged || hasColorChanged;
 
     _changesLabel->setVisible(hasChanged);
     _restoreButton->setEnabled(hasChanged);
@@ -284,6 +388,18 @@ void ConfigurationWidget::resetValues() {
     _clusterPath->setText(QString::fromStdString(_configuration.clusterPath));
     _nodePath->setText(QString::fromStdString(_configuration.nodePath));
     _removalTimeout->setValue(static_cast<int>(_configuration.removalTimeout.count()));
+
+    if (_configuration.logRotation.has_value()) {
+        _logRotation->setChecked(true);
+        _frequency->setValue(_configuration.logRotation->frequency.count());
+        _keepOldLog->setChecked(_configuration.logRotation->keepPrevious);
+    }
+    else {
+        common::LogRotation lr;
+        _logRotation->setChecked(false);
+        _frequency->setValue(lr.frequency.count());
+        _keepOldLog->setChecked(lr.keepPrevious);
+    }
 
     for (ColorWidget* cw : _colors) {
         _colorLayout->removeWidget(cw);
@@ -301,6 +417,14 @@ void ConfigurationWidget::saveValues() {
     config.clusterPath = _clusterPath->text().toStdString();
     config.nodePath = _nodePath->text().toStdString();
     config.removalTimeout = std::chrono::milliseconds(_removalTimeout->value());
+
+    if (_logRotation->isChecked()) {
+        common::LogRotation lr;
+        lr.frequency = std::chrono::hours(_frequency->value());
+        lr.keepPrevious = _keepOldLog->isChecked();
+        config.logRotation = lr;
+    }
+
     config.tagColors = tagColors();
 
 

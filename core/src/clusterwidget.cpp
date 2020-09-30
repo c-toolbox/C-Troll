@@ -51,10 +51,10 @@
 void ConnectionWidget::setStatus(ConnectionStatus status) {
     std::string string = [](ConnectionStatus s) {
         switch (s) {
-            case ConnectionStatus::Connected: return "connected";
+            case ConnectionStatus::Connected:          return "connected";
             case ConnectionStatus::PartiallyConnected: return "partially connected";
-            case ConnectionStatus::Disconnected: return "disconnected";
-            default: throw std::logic_error("Missing case label");
+            case ConnectionStatus::Disconnected:       return "disconnected";
+            default:                         throw std::logic_error("Missing case label");
         }
     }(status);
     setToolTip(QString::fromStdString(string));

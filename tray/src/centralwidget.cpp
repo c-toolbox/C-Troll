@@ -100,8 +100,6 @@ void CentralWidget::endedProcess(ProcessHandler::ProcessInfo process) {
 }
 
 QWidget* CentralWidget::createInfoWidget() {
-    using namespace std::string_literals;
-
     QWidget* info = new QWidget;
     info->setObjectName("info");
     QBoxLayout* infoLayout = new QHBoxLayout;

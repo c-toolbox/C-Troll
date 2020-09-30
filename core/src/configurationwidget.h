@@ -40,7 +40,9 @@
 #include "configuration.h"
 #include <string>
 
+class QCheckBox;
 class QGridLayout;
+class QGroupBox;
 class QLabel;
 class QLineEdit;
 class QPushButton;
@@ -91,6 +93,12 @@ private:
     QLineEdit* _clusterPath = nullptr;
     QLineEdit* _nodePath = nullptr;
     QSpinBox* _removalTimeout = nullptr;
+    
+    // Log Rotation
+    QGroupBox* _logRotation = nullptr;
+    QSpinBox* _frequency = nullptr;
+    QCheckBox* _keepOldLog = nullptr;
+
     QGridLayout* _colorLayout = nullptr;
     std::vector<ColorWidget*> _colors;
 

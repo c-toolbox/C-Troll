@@ -41,12 +41,10 @@ namespace {
 namespace common {
 
 void to_json(nlohmann::json& j, const ExitCommandMessage& p) {
-    j = {
-        { Message::KeyType, ExitCommandMessage::Type },
-        { Message::KeyVersion, p.CurrentVersion },
-        { Message::KeySecret, p.secret },
-        { KeyId, p.id }
-    };
+    j[Message::KeyType] = ExitCommandMessage::Type;
+    j[Message::KeyVersion] = p.CurrentVersion;
+    j[Message::KeySecret] = p.secret;
+    j[KeyId] = p.id;
 }
 
 void from_json(const nlohmann::json& j, ExitCommandMessage& p) {

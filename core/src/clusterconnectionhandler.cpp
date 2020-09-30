@@ -42,7 +42,7 @@
 #include <assert.h>
 
 namespace {
-    std::string stateToString(QAbstractSocket::SocketState state) {
+    std::string_view stateToString(QAbstractSocket::SocketState state) {
         switch (state) {
             case QAbstractSocket::SocketState::UnconnectedState: return "Unconnected";
             case QAbstractSocket::SocketState::HostLookupState: return "Host Lookup";
@@ -120,7 +120,7 @@ void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
     if (node->isConnected != isConnected) {
         Log(
             fmt::format("Socket State Change [{}:{}]", node->ipAddress, node->port),
-            stateToString(state)
+            std::string(stateToString(state))
         );
         node->isConnected = isConnected;
     }

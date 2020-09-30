@@ -48,14 +48,12 @@ namespace {
 namespace common {
 
 void to_json(nlohmann::json& j, const TrayStatusMessage::ProcessInfo& p) {
-    j = {
-        { KeyProcessId, p.processId },
-        { KeyProgramId, p.programId },
-        { KeyConfigurationId, p.configurationId },
-        { KeyClusterId, p.clusterId },
-        { KeyNodeId, p.nodeId },
-        { KeyDataHash, p.dataHash }
-    };
+    j[KeyProcessId] = p.processId;
+    j[KeyProgramId] = p.programId;
+    j[KeyConfigurationId] = p.configurationId;
+    j[KeyClusterId] = p.clusterId;
+    j[KeyNodeId] = p.nodeId;
+    j[KeyDataHash] = p.dataHash;
 }
 
 void from_json(const nlohmann::json & j, TrayStatusMessage::ProcessInfo& p) {
@@ -68,11 +66,9 @@ void from_json(const nlohmann::json & j, TrayStatusMessage::ProcessInfo& p) {
 }
 
 void to_json(nlohmann::json& j, const TrayStatusMessage& p) {
-    j = {
-        { Message::KeyType, TrayStatusMessage::Type },
-        { Message::KeyVersion, p.CurrentVersion },
-        { KeyProcesses, p.processes }
-    };
+    j[Message::KeyType] = TrayStatusMessage::Type;
+    j[Message::KeyVersion] = p.CurrentVersion;
+    j[KeyProcesses] = p.processes;
 }
 
 void from_json(const nlohmann::json& j, TrayStatusMessage& p) {

@@ -43,7 +43,8 @@ common::StartCommandMessage startProcessCommand(const Process& process) {
     Program* program = data::findProgram(process.programId);
     assert(program);
     const Program::Configuration& configuration = data::findConfigurationForProgram(
-        *program, process.configurationId
+        *program,
+        process.configurationId
     );
 
     common::StartCommandMessage t;
@@ -69,11 +70,19 @@ common::StartCommandMessage startProcessCommand(const Process& process) {
     return t;
 }
 
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
 common::ExitCommandMessage exitProcessCommand(const Process& process) {
     common::ExitCommandMessage t;
     t.id = process.id.v;
     return t;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
 
 int Process::nextId = 0;
 

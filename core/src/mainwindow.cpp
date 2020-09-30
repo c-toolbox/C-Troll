@@ -45,6 +45,7 @@
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QTabBar>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <filesystem>
 #include <set>
@@ -52,14 +53,7 @@
 
 namespace {
     constexpr const char* Title = "C-Troll";
-
     constexpr const char* ConfigurationFile = "config.json";
-
-    constexpr const float MainWindowWidthRatio = 0.35f;
-    constexpr const float MainWindowHeightRatio = 0.35f;
-
-    constexpr const float TabWidthRatio = 0.0333f;
-    constexpr const float TabHeightRatio = 0.24f;
 } // namespace
 
 MainWindow::MainWindow() {
@@ -109,6 +103,19 @@ MainWindow::MainWindow() {
     data::loadData(_config.applicationPath, _config.clusterPath, _config.nodePath);
     data::setTagColors(_config.tagColors);
 
+    if (_config.logRotation.has_value()) {
+        const bool keepLog = _config.logRotation->keepPrevious;
+        const std::chrono::hours freq = _config.logRotation->frequency;
+
+        QTimer* timer = new QTimer(this);
+        timer->setTimerType(Qt::VeryCoarseTimer);
+        connect(
+            timer, &QTimer::timeout,
+            [keepLog]() { common::Log::ref().performLogRotation(keepLog); }
+        );
+        timer->start(std::chrono::duration_cast<std::chrono::milliseconds>(freq));
+    }
+
     //
     // Create the widgets
     // Programs
@@ -154,91 +161,15 @@ MainWindow::MainWindow() {
     _processesWidget = new ProcessesWidget(_config.removalTimeout);
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
-        [this](common::ProcessStatusMessage status) {
-            Process* process = data::findProcess(Process::ID(status.processId));
-            if (!process) {
-                // This state might happen if C-Troll was restarted while programs were
-                // still running on the trays, if we than issue a killall command, we are
-                // handed back a process id that we don't know
-                return;
-            }
-
-            process->status = status.status;
-
-            // The process was already known to us, which should always be the case
-            _processesWidget->processUpdated(process->id);
-            _programWidget->processUpdated(process->id);
-        }
+        this, &MainWindow::handleTrayProcess
     );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayStatus,
-        [this](Node::ID, common::TrayStatusMessage status) {
-            if (status.processes.empty()) {
-                // Nothing to do here
-                return;
-            }
-
-            // We need to sort the incoming status messages as we need to figure out which
-            // id values for new processes we should use
-            std::sort(
-                status.processes.begin(), status.processes.end(),
-                [](const common::TrayStatusMessage::ProcessInfo& lhs,
-                   const common::TrayStatusMessage::ProcessInfo& rhs)
-                {
-                    return lhs.processId < rhs.processId;
-                }
-            );
-            const int hightestId = status.processes.back().processId;
-            Process::setNextIdIfHigher(hightestId + 1);
-
-            for (const common::TrayStatusMessage::ProcessInfo& pi : status.processes) {
-                const Process::ID pid = Process::ID(pi.processId);
-
-                // We need to check if a process with this ID already exists as we might
-                // have made two connections to the node under two different IP addresses
-                Process* proc = data::findProcess(pid);
-                if (proc) {
-                    Log(
-                        "Status",
-                        fmt::format("Ignoring process with duplicate id {}", pi.processId)
-                    );
-                    continue;
-                }
-
-                if (pi.dataHash != data::dataHash()) {
-                    constexpr const char* Text = "Received information from a tray about "
-                        "a running process that was started from a controller with a "
-                        "different set of configurations. Depending on what was changed "
-                        "this might lead to very strange behavior";
-                    QMessageBox::warning(this, "Different Data", Text);
-                    Log("Warning", Text);
-                }
-
-
-                std::unique_ptr<Process> process = std::make_unique<Process>(
-                    pid,
-                    Program::ID(pi.programId),
-                    Program::Configuration::ID(pi.configurationId), 
-                    Cluster::ID(pi.clusterId),
-                    Node::ID(pi.nodeId)
-                );
-                process->status = common::ProcessStatusMessage::Status::Running;
-                data::addProcess(std::move(process));
-                _processesWidget->processAdded(pid);
-                _programWidget->processUpdated(pid);
-            }
-        }
+        this, &MainWindow::handleTrayStatus
     );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedInvalidAuthStatus,
-        [this](Node::ID id, common::InvalidAuthMessage) {
-            Node* node = data::findNode(id);
-         
-            std::string m = fmt::format(
-                "Send invalid authentication token to node {}", node->name
-            );
-            QMessageBox::critical(this, "Error in Connection", QString::fromStdString(m));
-        }
+        this, &MainWindow::handleInvalidAuth
     );
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedProcessMessage,
@@ -246,7 +177,7 @@ MainWindow::MainWindow() {
     );
     connect(
         _processesWidget, &ProcessesWidget::killProcess,
-        [this](Process::ID processId) { stopProcess(processId); }
+        this, &MainWindow::stopProcess
     );
     connect(
         _processesWidget, &ProcessesWidget::killAllProcesses,
@@ -265,6 +196,86 @@ MainWindow::MainWindow() {
 
 void MainWindow::log(std::string msg) {
     _logWidget.appendMessage(std::move(msg));
+}
+
+void MainWindow::handleTrayProcess(common::ProcessStatusMessage status) {
+    Process* process = data::findProcess(Process::ID(status.processId));
+    if (!process) {
+        // This state might happen if C-Troll was restarted while programs were
+        // still running on the trays, if we than issue a killall command, we are
+        // handed back a process id that we don't know
+        return;
+    }
+
+    process->status = status.status;
+
+    // The process was already known to us, which should always be the case
+    _processesWidget->processUpdated(process->id);
+    _programWidget->processUpdated(process->id);
+}
+
+void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
+    if (status.processes.empty()) {
+        // Nothing to do here
+        return;
+    }
+
+    // We need to sort the incoming status messages as we need to figure out which
+    // id values for new processes we should use
+    std::sort(
+        status.processes.begin(), status.processes.end(),
+        [](const common::TrayStatusMessage::ProcessInfo& lhs,
+            const common::TrayStatusMessage::ProcessInfo& rhs)
+    {
+        return lhs.processId < rhs.processId;
+    }
+    );
+    const int hightestId = status.processes.back().processId;
+    Process::setNextIdIfHigher(hightestId + 1);
+
+    for (const common::TrayStatusMessage::ProcessInfo& pi : status.processes) {
+        const Process::ID pid = Process::ID(pi.processId);
+
+        // We need to check if a process with this ID already exists as we might
+        // have made two connections to the node under two different IP addresses
+        Process* proc = data::findProcess(pid);
+        if (proc) {
+            Log(
+                "Status",
+                fmt::format("Ignoring process with duplicate id {}", pi.processId)
+            );
+            continue;
+        }
+
+        if (pi.dataHash != data::dataHash()) {
+            constexpr const char* Text = "Received information from a tray about a "
+                "running process that was started from a controller with a different set "
+                "of configurations. Depending on what was changed this might lead to "
+                "very strange behavior";
+            QMessageBox::warning(this, "Different Data", Text);
+            Log("Warning", Text);
+        }
+
+
+        std::unique_ptr<Process> process = std::make_unique<Process>(
+            pid,
+            Program::ID(pi.programId),
+            Program::Configuration::ID(pi.configurationId),
+            Cluster::ID(pi.clusterId),
+            Node::ID(pi.nodeId)
+        );
+        process->status = common::ProcessStatusMessage::Status::Running;
+        data::addProcess(std::move(process));
+        _processesWidget->processAdded(pid);
+        _programWidget->processUpdated(pid);
+    }
+}
+
+void MainWindow::handleInvalidAuth(Node::ID id, common::InvalidAuthMessage) {
+    Node* node = data::findNode(id);
+
+    std::string m = fmt::format("Send invalid auth token to node {}", node->name);
+    QMessageBox::critical(this, "Error in Connection", QString::fromStdString(m));
 }
 
 void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
@@ -321,7 +332,9 @@ void MainWindow::stopProgram(Cluster::ID clusterId, Program::ID programId,
 
 void MainWindow::startProcess(Process::ID processId) const {
     Process* process = data::findProcess(processId);
+    assert(process);
     Node* node = data::findNode(process->nodeId);
+    assert(node);
 
     common::StartCommandMessage command = startProcessCommand(*process);
     if (!node->secret.empty()) {
@@ -338,7 +351,9 @@ void MainWindow::startProcess(Process::ID processId) const {
 
 void MainWindow::stopProcess(Process::ID processId) const {
     Process* process = data::findProcess(processId);
+    assert(process);
     Node* node = data::findNode(process->nodeId);
+    assert(node);
 
     common::ExitCommandMessage command = exitProcessCommand(*process);
     if (!node->secret.empty()) {

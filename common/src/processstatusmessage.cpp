@@ -40,7 +40,7 @@ namespace {
     constexpr const char* KeyProcessId = "processId";
     constexpr const char* KeyStatus = "status";
 
-    std::string fromStatus(common::ProcessStatusMessage::Status status) {
+    std::string_view fromStatus(common::ProcessStatusMessage::Status status) {
         switch (status) {
             case common::ProcessStatusMessage::Status::Starting: return "Starting";
             case common::ProcessStatusMessage::Status::Running: return "Running";
@@ -55,7 +55,7 @@ namespace {
         }
     }
 
-    common::ProcessStatusMessage::Status toStatus(const std::string& status) {
+    common::ProcessStatusMessage::Status toStatus(std::string_view status) {
         if (status == "Starting") {
             return common::ProcessStatusMessage::Status::Starting;
         }
@@ -89,13 +89,10 @@ namespace {
 namespace common {
 
 void to_json(nlohmann::json& j, const ProcessStatusMessage& p) {
-    std::string status = fromStatus(p.status);
-    j = {
-        { Message::KeyType, ProcessStatusMessage::Type },
-        { Message::KeyVersion, p.CurrentVersion },
-        { KeyProcessId, p.processId },
-        { KeyStatus, status }
-    };
+    j[Message::KeyType] = ProcessStatusMessage::Type;
+    j[Message::KeyVersion] = p.CurrentVersion;
+    j[KeyProcessId] = p.processId;
+    j[KeyStatus] = fromStatus(p.status);
 }
 
 void from_json(const nlohmann::json& j, ProcessStatusMessage& p) {

@@ -36,6 +36,7 @@
 
 #include <fmt/format.h>
 #include <assert.h>
+#include <filesystem>
 
 #ifdef WIN32
 #include <Windows.h>
@@ -44,8 +45,8 @@
 #endif
 
 namespace {
-    constexpr const char* LogPrefix = "log_";
-    constexpr const char* LogPostfix = ".txt";
+    constexpr std::string_view LogPrefix = "log_";
+    constexpr std::string_view LogPostfix = ".txt";
 
     std::string currentTime() {
 #ifdef WIN32
@@ -66,6 +67,40 @@ namespace {
         );
 #endif
     }
+
+    std::string currentDate() {
+#ifdef WIN32
+        SYSTEMTIME t = {};
+        GetLocalTime(&t);
+
+        return fmt::format("{:0>4}-{:0>2}-{:0>2}", t.wYear, t.wMonth, t.wDay);
+#else
+        struct timeval t;
+        gettimeofday(&t, nullptr);
+        tm* m = gmtime(&t.tv_sec);
+
+        return fmt::format("{:0>4}-{:0>2}-{:0>2}", m->tm_year, m->tm_mon, m->tm_mday);
+#endif
+    }
+
+    std::string nextFreeFilename(std::string_view path) {
+        std::string_view fileBegin = path.substr(0, path.size() - LogPostfix.size());
+        std::string date = currentDate();
+
+        int i = 0;
+        while (true) {
+            std::string versionPostFix = (i == 0) ? "" : fmt::format("-{}", i);
+            std::string newFile = fmt::format(
+                "{}_{}{}{}", fileBegin, date, versionPostFix, LogPostfix
+            );
+
+            if (!std::filesystem::exists(newFile)) {
+                return newFile;
+            }
+
+            ++i;
+        }
+    }
 } // namespace
 
 namespace common {
@@ -85,7 +120,10 @@ Log& Log::ref() {
     return *_log;
 }
     
-Log::Log(std::string componentName) : _file(LogPrefix + componentName + LogPostfix) {
+Log::Log(std::string componentName)
+    : _filePath(fmt::format("{}{}{}", LogPrefix, componentName, LogPostfix))
+    , _file(_filePath)
+{
     assert(!componentName.empty());
 }
     
@@ -97,8 +135,11 @@ void Log::logMessage(std::string category, std::string message) {
     message = fmt::format("{}  ({}): {}", currentTime(), category, message);
 
     // First the file
-    _file << message << '\n';
-    _file.flush();
+    {
+        std::unique_lock lock(_access);
+        _file << message << '\n';
+        _file.flush();
+    }
 
     _loggingFunction(message);
 
@@ -107,7 +148,21 @@ void Log::logMessage(std::string category, std::string message) {
     OutputDebugString((message + '\n').c_str());
 #endif
 }
-    
+
+void Log::performLogRotation(bool keepLog) {
+    std::unique_lock lock(_access);
+
+    // First close the old file
+    _file.close();
+
+    if (keepLog) {
+        std::string newFile = nextFreeFilename(_filePath);
+        std::filesystem::copy_file(_filePath, newFile);
+    }
+
+    _file = std::ofstream(_filePath, std::ofstream::trunc);
+}
+
 } // namespace common
 
 void Log(std::string category, std::string msg) {
