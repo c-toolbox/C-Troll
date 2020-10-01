@@ -122,7 +122,7 @@ NodeWidget::NodeWidget(const Node& node)
 }
 
 void NodeWidget::updateConnectionStatus() {
-    Node* n = data::findNode(_nodeId);
+    const Node* n = data::findNode(_nodeId);
     assert(n);
     _connectionLabel->setStatus(
         n->isConnected ?
@@ -148,10 +148,10 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
     _connectionLabel->setStatus(ConnectionWidget::ConnectionStatus::Disconnected);
     layout->addWidget(_connectionLabel);
 
-    std::vector<Node*> nodes = data::findNodesForCluster(cluster);
+    std::vector<const Node*> nodes = data::findNodesForCluster(cluster);
     static constexpr const int Columns = 5;
     for (size_t i = 0; i < nodes.size(); ++i) {
-        Node* n = nodes[i];
+        const Node* n = nodes[i];
         NodeWidget* node = new NodeWidget(*n);
         connect(
             node, &NodeWidget::killProcesses,
@@ -200,9 +200,9 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
 void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
     _nodeWidgets[nodeId]->updateConnectionStatus();
 
-    Cluster* cluster = data::findCluster(_clusterId);
+    const Cluster* cluster = data::findCluster(_clusterId);
     assert(cluster);
-    std::vector<Node*> nodes = data::findNodesForCluster(*cluster);
+    std::vector<const Node*> nodes = data::findNodesForCluster(*cluster);
 
     const bool allConnected = std::all_of(
         nodes.cbegin(), nodes.cend(), std::mem_fn(&Node::isConnected)
@@ -232,7 +232,7 @@ ClustersWidget::ClustersWidget() {
     QBoxLayout* contentLayout = new QVBoxLayout(content);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-    for (Cluster* c : data::clusters()) {
+    for (const Cluster* c : data::clusters()) {
         ClusterWidget* widget = new ClusterWidget(*c);
         connect(
             widget, QOverload<Node::ID>::of(&ClusterWidget::killProcesses),

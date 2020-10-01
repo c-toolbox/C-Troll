@@ -40,12 +40,13 @@
 #include <assert.h>
 
 common::StartCommandMessage startProcessCommand(const Process& process) {
-    Program* program = data::findProgram(process.programId);
+    const Program* program = data::findProgram(process.programId);
     assert(program);
-    const Program::Configuration& configuration = data::findConfigurationForProgram(
+    const Program::Configuration* configuration = data::findConfigurationForProgram(
         *program,
         process.configurationId
     );
+    assert(configuration);
 
     common::StartCommandMessage t;
     t.id = process.id.v;
@@ -55,9 +56,9 @@ common::StartCommandMessage startProcessCommand(const Process& process) {
     if (!program->commandlineParameters.empty()) {
         t.commandlineParameters = program->commandlineParameters;
     }
-    if (!configuration.parameters.empty()) {
+    if (!configuration->parameters.empty()) {
         t.commandlineParameters += ' ';
-        t.commandlineParameters += configuration.parameters;
+        t.commandlineParameters += configuration->parameters;
     }
 
     t.programId = process.programId.v;

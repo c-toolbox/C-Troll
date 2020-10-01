@@ -152,7 +152,7 @@ void RestConnectionHandler::handleNewConnection() {
     }
 
     std::string clusterName = params["cluster"];
-    Cluster* cluster = data::findCluster(clusterName);
+    const Cluster* cluster = data::findCluster(clusterName);
     if (cluster == nullptr) {
         qDebug() << "5";
         socket->close();
@@ -160,7 +160,7 @@ void RestConnectionHandler::handleNewConnection() {
     }
 
     std::string programName = params["program"];
-    Program* program = data::findProgram(programName);
+    const Program* program = data::findProgram(programName);
     if (program == nullptr) {
         qDebug() << "6";
         socket->close();
@@ -168,35 +168,35 @@ void RestConnectionHandler::handleNewConnection() {
     }
 
     std::string configurationName = params["configuration"];
-    const Program::Configuration& configuration = data::findConfigurationForProgram(
+    const Program::Configuration* configuration = data::findConfigurationForProgram(
         *program,
         configurationName
     );
-    //if (configuration == nullptr) {
-    //    qDebug() << "7";
-    //    socket->close();
-    //    return;
-    //}
+    if (configuration == nullptr) {
+        qDebug() << "7";
+        socket->close();
+        return;
+    }
 
     if (endpointValue == "/start") {
         Log(
             "REST",
             fmt::format(
                 "Received command to start {} ({}) on {}",
-                program->name, configuration.name, cluster->name
+                program->name, configuration->name, cluster->name
             )
         );
-        emit startProgram(cluster->id, program->id, configuration.id);
+        emit startProgram(cluster->id, program->id, configuration->id);
     }
     else if (endpointValue == "/stop") {
         Log(
             "REST",
             fmt::format(
                 "Received command to stop {} ({}) on {}",
-                program->name, configuration.name, cluster->name
+                program->name, configuration->name, cluster->name
             )
         );
-        emit stopProgram(cluster->id, program->id, configuration.id);
+        emit stopProgram(cluster->id, program->id, configuration->id);
     }
     else {
         qDebug() << "7";

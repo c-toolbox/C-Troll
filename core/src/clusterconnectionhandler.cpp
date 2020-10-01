@@ -69,7 +69,7 @@ ClusterConnectionHandler::~ClusterConnectionHandler() {
 }
 
 void ClusterConnectionHandler::initialize() {
-    for (Node* node : data::nodes()) {
+    for (const Node* node : data::nodes()) {
         // This handler keeps the sockets to the tray applications open
         std::unique_ptr<QTcpSocket> socket = std::make_unique<QTcpSocket>();
 
@@ -101,7 +101,7 @@ void ClusterConnectionHandler::initialize() {
             for (const std::pair<const K, V>& p : _sockets) {
                 // Try to reconnect all sockets that are currently unconnected
                 if (p.second->state() == QAbstractSocket::SocketState::UnconnectedState) {
-                    Node* node = data::findNode(p.first);
+                    const Node* node = data::findNode(p.first);
                     p.second->connectToHost(node->ipAddress, node->port);
                 }
             }
@@ -113,7 +113,7 @@ void ClusterConnectionHandler::initialize() {
 void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
                                                        QAbstractSocket::SocketState state)
 {
-    Node* node = data::findNode(nodeId);
+    const Node* node = data::findNode(nodeId);
     assert(node);
 
     const bool isConnected = state == QAbstractSocket::SocketState::ConnectedState;
@@ -122,11 +122,11 @@ void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
             fmt::format("Socket State Change [{}:{}]", node->ipAddress, node->port),
             std::string(stateToString(state))
         );
-        node->isConnected = isConnected;
+        data::setNodeConnected(nodeId, isConnected);
     }
 
-    std::vector<Cluster*> clusters = data::findClusterForNode(*node);
-    for (Cluster* cluster : clusters) {
+    std::vector<const Cluster*> clusters = data::findClusterForNode(*node);
+    for (const Cluster* cluster : clusters) {
         emit connectedStatusChanged(cluster->id, node->id);
     }
 }
@@ -135,7 +135,7 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
     const auto it = _sockets.find(nodeId);
     assert(it != _sockets.end());
 #ifdef QT_DEBUG
-    Node* node = data::findNode(nodeId);
+    const Node* node = data::findNode(nodeId);
     assert(node);
     std::string content = common::isValidMessage<common::ProcessOutputMessage>(message) ?
         common::ProcessOutputMessage::Type :
@@ -164,11 +164,11 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
         emit receivedProcessMessage(nodeId, msg);
     }
     else {
-        Node* n = data::findNode(nodeId);
+        const Node* n = data::findNode(nodeId);
         assert(n);
-        std::vector<Cluster*> clusters = data::findClusterForNode(*n);
+        std::vector<const Cluster*> clusters = data::findClusterForNode(*n);
 
-        for (Cluster* c : clusters) {
+        for (const Cluster* c : clusters) {
             assert(c);
             Log(fmt::format("Received [{} / {}]", c->name, n->name), message.dump());
         }

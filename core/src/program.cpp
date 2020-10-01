@@ -89,7 +89,7 @@ void from_json(const nlohmann::json& j, Program& p) {
 
     std::vector<std::string> clusters = j.at(KeyClusters).get<std::vector<std::string>>();
     for (const std::string& cluster : clusters) {
-        Cluster* c = data::findCluster(cluster);
+        const Cluster* c = data::findCluster(cluster);
         if (!c) {
             std::string message = fmt::format("Could not find cluster '{}'", cluster);
             Log("Error", message);

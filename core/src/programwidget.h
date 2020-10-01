@@ -92,7 +92,7 @@ private:
 class ClusterWidget : public QGroupBox {
 Q_OBJECT
 public:
-    ClusterWidget(Cluster* cluster,
+    ClusterWidget(const Cluster* cluster,
         const std::vector<Program::Configuration>& configurations);
 
     void updateStatus();

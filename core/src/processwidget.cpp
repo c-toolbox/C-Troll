@@ -72,23 +72,24 @@ ProcessWidget::ProcessWidget(Process::ID processId,
     : _processId(processId)
     , _timeout(timeout)
 {
-    Process* process = data::findProcess(_processId);
+    const Process* process = data::findProcess(_processId);
     assert(process);
-    Program* program = data::findProgram(process->programId);
+    const Program* program = data::findProgram(process->programId);
     assert(program);
-    const Program::Configuration& configuration = data::findConfigurationForProgram(
+    const Program::Configuration* configuration = data::findConfigurationForProgram(
         *program,
         process->configurationId
     );
-    Cluster* cluster = data::findCluster(process->clusterId);
+    assert(configuration);
+    const Cluster* cluster = data::findCluster(process->clusterId);
     assert(cluster);
 
-    Node* node = data::findNode(process->nodeId);
+    const Node* node = data::findNode(process->nodeId);
     assert(node);
 
 
     _programInfo = new QLabel(QString::fromStdString(program->name));
-    _configurationInfo = new QLabel(QString::fromStdString(configuration.name));
+    _configurationInfo = new QLabel(QString::fromStdString(configuration->name));
     _clusterInfo = new QLabel(QString::fromStdString(cluster->name));
     _nodeInfo = new QLabel(QString::fromStdString(node->name));
     _processIdInfo = new QLabel(QString::number(process->id.v));
@@ -116,7 +117,7 @@ ProcessWidget::ProcessWidget(Process::ID processId,
             [this, program, configuration, cluster]() {
                 std::string text = fmt::format(
                     "Are you sure you want to kill '{}/{}' running on cluster '{}'?",
-                    program->name, configuration.name, cluster->name
+                    program->name, configuration->name, cluster->name
                 );
 
                 QMessageBox box;
@@ -231,7 +232,7 @@ QWidget* ProcessWidget::createMessageContainer() {
 }
 
 void ProcessWidget::updateStatus() {
-    Process* p = data::findProcess(_processId);
+    const Process* p = data::findProcess(_processId);
     _status->setText(QString::fromStdString(statusToString(p->status)));
     _status->setProperty("state", QString::fromStdString(statusToString(p->status)));
     _status->style()->unpolish(_status);
@@ -335,7 +336,7 @@ void ProcessesWidget::processUpdated(Process::ID processId) {
         // 3. The QTimer above ran out and the widget was destroyed
         // 4. We are restarting the process
 
-        Process* p = data::findProcess(processId);
+        const Process* p = data::findProcess(processId);
         assert(p->status == common::ProcessStatusMessage::Status::Starting);
         processAdded(processId);
     }

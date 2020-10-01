@@ -63,7 +63,7 @@ ProgramButton::ProgramButton(const Cluster* cluster,
 }
 
 void ProgramButton::updateStatus() {
-    std::vector<Node*> nodes = data::findNodesForCluster(*_cluster);
+    std::vector<const Node*> nodes = data::findNodesForCluster(*_cluster);
 
     const bool allConnected = std::all_of(
         nodes.cbegin(), nodes.cend(),
@@ -73,7 +73,7 @@ void ProgramButton::updateStatus() {
 }
 
 void ProgramButton::processUpdated(Process::ID processId) {
-    Process* process = data::findProcess(processId);
+    const Process* process = data::findProcess(processId);
 
     auto it = std::find_if(
         _processes.cbegin(), _processes.cend(),
@@ -86,7 +86,7 @@ void ProgramButton::processUpdated(Process::ID processId) {
 
         ProcessInfo info;
         info.processId = processId;
-        Node* node = data::findNode(process->nodeId);
+        const Node* node = data::findNode(process->nodeId);
         assert(node);
         info.menuAction = new QAction(QString::fromStdString(node->name));
         // We store the name of the node as the user data in order to sort them later
@@ -178,7 +178,7 @@ void ProgramButton::updateMenu() {
         const auto it = std::find_if(
             _processes.cbegin(), _processes.cend(),
             [nodeName](const std::pair<const Node::ID, ProcessInfo>& p) {
-                Node* node = data::findNode(p.first);
+            const Node* node = data::findNode(p.first);
                 return node->name == nodeName;
             }
         );
@@ -238,7 +238,7 @@ bool ProgramButton::hasAllProcessesRunning() const {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ClusterWidget::ClusterWidget(Cluster* cluster,
+ClusterWidget::ClusterWidget(const Cluster* cluster,
                              const std::vector<Program::Configuration>& configurations)
 {
     assert(cluster);
@@ -283,7 +283,7 @@ void ClusterWidget::updateStatus() {
 }
 
 void ClusterWidget::processUpdated(Process::ID processId) {
-    Process* process = data::findProcess(processId);
+    const Process* process = data::findProcess(processId);
     const auto it = _startButtons.find(process->configurationId);
     if (it != _startButtons.end()) {
         it->second->processUpdated(processId);
@@ -324,8 +324,8 @@ ProgramWidget::ProgramWidget(const Program& program)
 
     layout->addWidget(new TagInfoWidget(program.tags));
 
-    std::vector<Cluster*> clusters = data::findClustersForProgram(program);
-    for (Cluster* cluster : clusters) {
+    std::vector<const Cluster*> clusters = data::findClustersForProgram(program);
+    for (const Cluster* cluster : clusters) {
         assert(cluster);
         ClusterWidget* w = new ClusterWidget(cluster, program.configurations);
 
@@ -360,7 +360,7 @@ void ProgramWidget::updateStatus(Cluster::ID clusterId) {
 }
 
 void ProgramWidget::processUpdated(Process::ID processId) {
-    Process* process = data::findProcess(processId);
+    const Process* process = data::findProcess(processId);
     const auto it = _widgets.find(process->clusterId);
     assert(it != _widgets.end());
     it->second->processUpdated(processId);
@@ -474,7 +474,7 @@ QWidget* ProgramsWidget::createPrograms() {
     QBoxLayout* contentLayout = new QVBoxLayout(content);
     area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-    for (Program* p : data::programs()) {
+    for (const Program* p : data::programs()) {
         ProgramWidget* w = new ProgramWidget(*p);
 
         connect(
@@ -511,7 +511,7 @@ QWidget* ProgramsWidget::createPrograms() {
 }
 
 void ProgramsWidget::processUpdated(Process::ID processId) {
-    Process* process = data::findProcess(processId);
+    const Process* process = data::findProcess(processId);
 
     const auto it = _widgets.find(process->programId);
     if (it != _widgets.cend()) {
@@ -549,7 +549,7 @@ void ProgramsWidget::searchUpdated(std::string text) {
     }
     else {
         for (std::pair<const Program::ID, VisibilityInfo>& p : _visibilities) {
-            Program* program = data::findProgram(p.first);
+            const Program* program = data::findProgram(p.first);
             if (text.size() > program->name.size()) {
                 p.second.bySearch = false;
             }

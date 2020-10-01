@@ -47,34 +47,35 @@
 
 namespace data {
     
-std::vector<Cluster*> clusters();
-std::vector<Node*> nodes();
-std::vector<Program*> programs();
-std::vector<Process*> processes();
+std::vector<const Cluster*> clusters();
+std::vector<const Node*> nodes();
+std::vector<const Program*> programs();
+std::vector<const Process*> processes();
 
-Cluster* findCluster(Cluster::ID id);
-Cluster* findCluster(const std::string& name);
-std::vector<Cluster*> findClustersForProgram(const Program& program);
-std::vector<Cluster*> findClusterForNode(const Node& node);
+const Cluster* findCluster(Cluster::ID id);
+const Cluster* findCluster(const std::string& name);
+std::vector<const Cluster*> findClustersForProgram(const Program& program);
+std::vector<const Cluster*> findClusterForNode(const Node& node);
 
-Node* findNode(Node::ID id);
-Node* findNode(const std::string& name);
-std::vector<Node*> findNodesForCluster(const Cluster& cluster);
+const Node* findNode(Node::ID id);
+const Node* findNode(const std::string& name);
+std::vector<const Node*> findNodesForCluster(const Cluster& cluster);
+void setNodeConnected(Node::ID id, bool connected);
 
-Program* findProgram(Program::ID id);
-Program* findProgram(const std::string& name);
+const Program* findProgram(Program::ID id);
+const Program* findProgram(const std::string& name);
 
-// @TODO (abock, 2020-10-01) These should be converted to Configuration*
-const Program::Configuration& findConfigurationForProgram(const Program& program,
+const Program::Configuration* findConfigurationForProgram(const Program& program,
     Program::Configuration::ID id);
-const Program::Configuration& findConfigurationForProgram(const Program& program,
+const Program::Configuration* findConfigurationForProgram(const Program& program,
     const std::string& name);
 
 bool hasTag(Program::ID id, const std::vector<std::string>& tags);
 std::set<std::string> findTags();
 
-Process* findProcess(Process::ID id);
+const Process* findProcess(Process::ID id);
 void addProcess(std::unique_ptr<Process> process);
+void setProcessStatus(Process::ID id, common::ProcessStatusMessage::Status status);
 
 Color colorForTag(const std::string& tag);
 void setTagColors(std::vector<Color> colors);

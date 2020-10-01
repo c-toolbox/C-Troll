@@ -59,7 +59,7 @@ void from_json(const nlohmann::json& j, Cluster& p) {
     
     std::vector<std::string> nodes = j.at(KeyNodes).get<std::vector<std::string>>();
     for (const std::string& node : nodes) {
-        Node* n = data::findNode(node);
+        const Node* n = data::findNode(node);
         if (!n) {
             throw std::runtime_error(
                 fmt::format("Could not find node with name {}", node)

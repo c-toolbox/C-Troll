@@ -222,7 +222,7 @@ void MainWindow::log(std::string msg) {
 }
 
 void MainWindow::handleTrayProcess(common::ProcessStatusMessage status) {
-    Process* process = data::findProcess(Process::ID(status.processId));
+    const Process* process = data::findProcess(Process::ID(status.processId));
     if (!process) {
         // This state might happen if C-Troll was restarted while programs were
         // still running on the trays, if we than issue a killall command, we are
@@ -230,7 +230,7 @@ void MainWindow::handleTrayProcess(common::ProcessStatusMessage status) {
         return;
     }
 
-    process->status = status.status;
+    data::setProcessStatus(process->id, status.status);
 
     // The process was already known to us, which should always be the case
     _processesWidget->processUpdated(process->id);
@@ -261,7 +261,7 @@ void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
 
         // We need to check if a process with this ID already exists as we might
         // have made two connections to the node under two different IP addresses
-        Process* proc = data::findProcess(pid);
+        const Process* proc = data::findProcess(pid);
         if (proc) {
             Log(
                 "Status",
@@ -295,7 +295,7 @@ void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
 }
 
 void MainWindow::handleInvalidAuth(Node::ID id, common::InvalidAuthMessage) {
-    Node* node = data::findNode(id);
+    const Node* node = data::findNode(id);
 
     std::string m = fmt::format("Send invalid auth token to node {}", node->name);
     QMessageBox::critical(this, "Error in Connection", QString::fromStdString(m));
@@ -307,10 +307,10 @@ void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
     // We don't want to make sure that the program isn't already running as it might be
     // perfectly valid to start the program multiple times
 
-    Cluster* cluster = data::findCluster(clusterId);
+    const Cluster* cluster = data::findCluster(clusterId);
     assert(cluster);
 
-    Program* p = data::findProgram(programId);
+    const Program* p = data::findProgram(programId);
     assert(p);
     for (Node::ID node : cluster->nodes) {
         auto process = std::make_unique<Process>(programId, configId, clusterId, node);
@@ -332,8 +332,8 @@ void MainWindow::stopProgram(Cluster::ID clusterId, Program::ID programId,
                              Program::Configuration::ID configurationId) const
 {
     // First, collect all the processes that belong to this program combination
-    std::vector<Process*> processes;
-    for (Process* process : data::processes()) {
+    std::vector<const Process*> processes;
+    for (const Process* process : data::processes()) {
         const bool clusterMatch = (process->clusterId == clusterId);
         const bool programMatch = (process->programId == programId);
         const bool configurationMatch = (process->configurationId == configurationId);
@@ -348,15 +348,15 @@ void MainWindow::stopProgram(Cluster::ID clusterId, Program::ID programId,
     // we manage to set off the stopProgram function in the first place?
     assert(!processes.empty());
 
-    for (Process* process : processes) {
+    for (const Process* process : processes) {
         stopProcess(process->id);
     }
 }
 
 void MainWindow::startProcess(Process::ID processId) const {
-    Process* process = data::findProcess(processId);
+    const Process* process = data::findProcess(processId);
     assert(process);
-    Node* node = data::findNode(process->nodeId);
+    const Node* node = data::findNode(process->nodeId);
     assert(node);
 
     common::StartCommandMessage command = startProcessCommand(*process);
@@ -373,9 +373,9 @@ void MainWindow::startProcess(Process::ID processId) const {
 }
 
 void MainWindow::stopProcess(Process::ID processId) const {
-    Process* process = data::findProcess(processId);
+    const Process* process = data::findProcess(processId);
     assert(process);
-    Node* node = data::findNode(process->nodeId);
+    const Node* node = data::findNode(process->nodeId);
     assert(node);
 
     common::ExitCommandMessage command = exitProcessCommand(*process);
@@ -391,11 +391,11 @@ void MainWindow::stopProcess(Process::ID processId) const {
 void MainWindow::killAllProcesses(Cluster::ID id) const {
     Log("Sending", "Send message to stop all programs");
 
-    std::vector<Node*> nodes;
+    std::vector<const Node*> nodes;
     if (id.v == -1) {
         // Send kill command to all clusters
-        for (Cluster* cluster : data::clusters()) {
-            std::vector<Node*> ns = data::findNodesForCluster(*cluster);
+        for (const Cluster* cluster : data::clusters()) {
+            std::vector<const Node*> ns = data::findNodesForCluster(*cluster);
             std::copy(ns.begin(), ns.end(), std::back_inserter(nodes));
         }
 
@@ -406,11 +406,11 @@ void MainWindow::killAllProcesses(Cluster::ID id) const {
     }
     else {
         // We want to send the kill command only to the nodes of a specific cluster
-        Cluster* cluster = data::findCluster(id);
+        const Cluster* cluster = data::findCluster(id);
         nodes = data::findNodesForCluster(*cluster);
     }
 
-    for (Node* node : nodes) {
+    for (const Node* node : nodes) {
         common::KillAllMessage command;
         if (!node->secret.empty()) {
             command.secret = node->secret;
@@ -426,7 +426,7 @@ void MainWindow::killAllProcesses(Cluster::ID id) const {
 }
 
 void MainWindow::killAllProcesses(Node::ID id) const {
-    Node* node = data::findNode(id);
+    const Node* node = data::findNode(id);
     assert(node);
 
     common::KillAllMessage command;
