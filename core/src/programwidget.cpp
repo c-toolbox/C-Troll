@@ -424,7 +424,7 @@ TagsWidget::TagsWidget()
 
 void TagsWidget::buttonPressed() {
     std::vector<std::string> selectedTags;
-    for (const std::pair<const QPushButton*, std::string>& p : _buttons) {
+    for (std::pair<const QPushButton*, std::string> p : _buttons) {
         if (p.first->isChecked()) {
             selectedTags.push_back(p.second);
         }

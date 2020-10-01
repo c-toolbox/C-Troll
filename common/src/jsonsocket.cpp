@@ -120,7 +120,7 @@ void JsonSocket::parseBuffer() {
 
     if (_payloadSize > 0 && (_payloadSize <= static_cast<int>(_buffer.size()))) {
         std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
-        std::string json(data.data(), _payloadSize);
+        std::string json(data.data(), static_cast<size_t>(_payloadSize));
         _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
         _payloadSize = -1;
 
