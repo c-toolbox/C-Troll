@@ -51,8 +51,9 @@ SocketHandler::SocketHandler(int port, std::string secret)
     const bool success = _server.listen(QHostAddress::Any, static_cast<quint16>(port));
     if (!success) {
         Log("Error", fmt::format("Creating socket to listen on port {} failed", port));
+        return;
     }
-    QObject::connect(
+    connect(
         &_server, &QTcpServer::newConnection,
         this, &SocketHandler::newConnectionEstablished
     );
@@ -72,7 +73,7 @@ void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* so
         common::InvalidAuthMessage invalidAuthMsg;
         nlohmann::json j = invalidAuthMsg;
         socket->write(j);
-    }
+    //}
 }
 
 void SocketHandler::sendMessage(const nlohmann::json& message, bool printMessage) {
@@ -105,7 +106,7 @@ void SocketHandler::newConnectionEstablished() {
             std::unique_ptr<QTcpSocket>(_server.nextPendingConnection()),
             _secret
         );
-        
+        []
         QObject::connect(
             socket, &common::JsonSocket::disconnected,
             [this, socket]() { disconnected(socket); }

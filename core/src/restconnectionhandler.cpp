@@ -32,58 +32,62 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__MAINWINDOW_H__
-#define __CORE__MAINWINDOW_H__
+#include "restconnectionhandler.h"
 
-#include <QMainWindow>
+#include "logging.h"
+#include <QTcpSocket>
+#include <fmt/format.h>
 
-#include "clusterconnectionhandler.h"
-#include "configuration.h"
-#include "logwidget.h"
-#include "process.h"
-#include <QTextEdit>
-#include <memory>
-#include <string>
+RestConnectionHandler::RestConnectionHandler(QObject* parent, int port,
+                                             std::string secret)
+    : QObject(parent)
+    , _secret(std::move(secret))
+{
+    Log("Status", fmt::format("REST API listening on port: {}", port));
 
-class ClustersWidget;
-class ProcessesWidget;
-class RestConnectionHandler;
+    const bool success = _server.listen(QHostAddress::Any, static_cast<quint16>(port));
+    if (!success) {
+        Log("Error", fmt::format("Listening to REST API on port {} failed", port));
+        return;
+    }
 
-namespace programs { class ProgramsWidget; }
+    connect(
+        &_server, &QTcpServer::newConnection,
+        this, &RestConnectionHandler::newConnectionEstablished
+    );
+}
 
-class MainWindow : public QMainWindow {
-Q_OBJECT
-public:
-    MainWindow();
+void RestConnectionHandler::newConnectionEstablished() {
+    while (_server.hasPendingConnections()) {
+        QTcpSocket* socket = _server.nextPendingConnection();
 
-private slots:
-    void handleTrayProcess(common::ProcessStatusMessage status);
-    void handleTrayStatus(Node::ID, common::TrayStatusMessage status);
-    void handleInvalidAuth(Node::ID id, common::InvalidAuthMessage);
+        connect(
+            socket, &QTcpSocket::disconnected,
+            socket, &QTcpSocket::deleteLater
+        );
 
-    void stopProcess(Process::ID processId) const;
+        connect(
+            socket, &QTcpSocket::readyRead,
+            this, &RestConnectionHandler::handleNewConnection
+        );
 
-private:
-    void startProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId);
-    void stopProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId) const;
-    void startProcess(Process::ID processId) const;
-    void killAllProcesses(Cluster::ID id) const;
-    void killAllProcesses(Node::ID id) const;
+        _sockets.push_back(socket);
+    }
+}
 
-    void log(std::string msg);
+void RestConnectionHandler::handleNewConnection() {
+    QTcpSocket* socket = dynamic_cast<QTcpSocket*>(QObject::sender());
+    assert(socket);
+    assert(std::find(_sockets.begin(), _sockets.end(), socket) != _sockets.end());
 
-    programs::ProgramsWidget* _programWidget = nullptr;
-    ClustersWidget* _clustersWidget = nullptr;
-    ProcessesWidget* _processesWidget = nullptr;
-    LogWidget _logWidget;
+    //QString a = socket->readAll();
+    QStringList tokens = QString(socket->readAll()).split(QRegExp("[ \r\n][ \r\n]*"));
+    qDebug() << tokens;
 
-    ClusterConnectionHandler _clusterConnectionHandler;
-    RestConnectionHandler* _restHandler = nullptr;
-    Configuration _config;
 
-    QTextEdit _messageBox;
-};
+    //char* d = a.data();
+    //d = d;
 
-#endif // __CORE__MAINWINDOW_H__
+    socket->write("blabla\n");
+    socket->close();
+}

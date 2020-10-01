@@ -45,6 +45,7 @@ set(HEADER_FILES
   src/processwidget.h
   src/program.h
   src/programwidget.h
+  src/restconnectionhandler.h
   src/settingswidget.h
   src/version.h
 )
@@ -63,6 +64,7 @@ set(SOURCE_FILES
   src/processwidget.cpp
   src/program.cpp
   src/programwidget.cpp
+  src/restconnectionhandler.cpp
   src/settingswidget.cpp
 )
 
@@ -76,6 +78,7 @@ qt5_wrap_cpp(
   src/mainwindow.h
   src/processwidget.h
   src/programwidget.h
+  src/restconnectionhandler.h
   src/settingswidget.h
 )
 
@@ -98,5 +101,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set_source_files_properties("${CMAKE_BINARY_DIR}/core/src/moc_clusterwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
   set_source_files_properties("${CMAKE_BINARY_DIR}/core/src/moc_processwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
   set_source_files_properties("${CMAKE_BINARY_DIR}/core/src/moc_programwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
+  set_source_files_properties("${CMAKE_BINARY_DIR}/core/src/moc_restconnectionhandler.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
   set_source_files_properties("${CMAKE_BINARY_DIR}/core/src/moc_settingswidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
 endif ()

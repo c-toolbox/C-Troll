@@ -32,58 +32,27 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__MAINWINDOW_H__
-#define __CORE__MAINWINDOW_H__
+#ifndef __CORE__RESTCONNECTIONHANDLER_H__
+#define __CORE__RESTCONNECTIONHANDLER_H__
 
-#include <QMainWindow>
+#include <QObject>
+#include <QTcpServer>
+#include <QTcpSocket>
 
-#include "clusterconnectionhandler.h"
-#include "configuration.h"
-#include "logwidget.h"
-#include "process.h"
-#include <QTextEdit>
-#include <memory>
-#include <string>
-
-class ClustersWidget;
-class ProcessesWidget;
-class RestConnectionHandler;
-
-namespace programs { class ProgramsWidget; }
-
-class MainWindow : public QMainWindow {
+class RestConnectionHandler : public QObject {
 Q_OBJECT
 public:
-    MainWindow();
+    RestConnectionHandler(QObject* parent, int port, std::string secret);
 
 private slots:
-    void handleTrayProcess(common::ProcessStatusMessage status);
-    void handleTrayStatus(Node::ID, common::TrayStatusMessage status);
-    void handleInvalidAuth(Node::ID id, common::InvalidAuthMessage);
-
-    void stopProcess(Process::ID processId) const;
+    void newConnectionEstablished();
+    void handleNewConnection();
 
 private:
-    void startProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId);
-    void stopProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId) const;
-    void startProcess(Process::ID processId) const;
-    void killAllProcesses(Cluster::ID id) const;
-    void killAllProcesses(Node::ID id) const;
+    QTcpServer _server;
 
-    void log(std::string msg);
-
-    programs::ProgramsWidget* _programWidget = nullptr;
-    ClustersWidget* _clustersWidget = nullptr;
-    ProcessesWidget* _processesWidget = nullptr;
-    LogWidget _logWidget;
-
-    ClusterConnectionHandler _clusterConnectionHandler;
-    RestConnectionHandler* _restHandler = nullptr;
-    Configuration _config;
-
-    QTextEdit _messageBox;
+    std::vector<QTcpSocket*> _sockets;
+    std::string _secret;
 };
 
-#endif // __CORE__MAINWINDOW_H__
+#endif // __CORE_RESTCONNECTIONHANDLER_H__

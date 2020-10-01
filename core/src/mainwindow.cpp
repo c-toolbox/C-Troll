@@ -40,6 +40,7 @@
 #include "killallmessage.h"
 #include "processwidget.h"
 #include "programwidget.h"
+#include "restconnectionhandler.h"
 #include "settingswidget.h"
 #include <QApplication>
 #include <QDesktopWidget>
@@ -196,6 +197,8 @@ MainWindow::MainWindow() {
     tabWidget->addTab(new SettingsWidget(_config, ConfigurationFile), "Settings");
 
     _clusterConnectionHandler.initialize();
+
+    _restHandler = new RestConnectionHandler(this, 8080, "");
 }
 
 void MainWindow::log(std::string msg) {
