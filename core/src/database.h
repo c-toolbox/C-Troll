@@ -62,8 +62,14 @@ Node* findNode(const std::string& name);
 std::vector<Node*> findNodesForCluster(const Cluster& cluster);
 
 Program* findProgram(Program::ID id);
-const Program::Configuration& findConfigurationForProgram(const Program& program, 
+Program* findProgram(const std::string& name);
+
+// @TODO (abock, 2020-10-01) These should be converted to Configuration*
+const Program::Configuration& findConfigurationForProgram(const Program& program,
     Program::Configuration::ID id);
+const Program::Configuration& findConfigurationForProgram(const Program& program,
+    const std::string& name);
+
 bool hasTag(Program::ID id, const std::vector<std::string>& tags);
 std::set<std::string> findTags();
 

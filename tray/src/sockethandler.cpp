@@ -73,7 +73,7 @@ void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* so
         common::InvalidAuthMessage invalidAuthMsg;
         nlohmann::json j = invalidAuthMsg;
         socket->write(j);
-    //}
+    }
 }
 
 void SocketHandler::sendMessage(const nlohmann::json& message, bool printMessage) {
@@ -106,7 +106,7 @@ void SocketHandler::newConnectionEstablished() {
             std::unique_ptr<QTcpSocket>(_server.nextPendingConnection()),
             _secret
         );
-        []
+
         QObject::connect(
             socket, &common::JsonSocket::disconnected,
             [this, socket]() { disconnected(socket); }

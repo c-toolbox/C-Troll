@@ -163,12 +163,30 @@ Program* findProgram(Program::ID id) {
     return it != gPrograms.cend() ? it->get() : nullptr;
 }
 
+Program* findProgram(const std::string& name) {
+    const auto it = std::find_if(
+        gPrograms.cbegin(), gPrograms.cend(),
+        [name](const std::unique_ptr<Program>& p) { return p->name == name; }
+    );
+    return it != gPrograms.cend() ? it->get() : nullptr;
+}
+
 const Program::Configuration& findConfigurationForProgram(const Program& program,
                                                           Program::Configuration::ID id)
 {
     const auto it = std::find_if(
         program.configurations.cbegin(), program.configurations.cend(),
         [id](const Program::Configuration& c) { return c.id == id; }
+    );
+    return *it;
+}
+
+const Program::Configuration& findConfigurationForProgram(const Program& program,
+                                                          const std::string& name)
+{
+    const auto it = std::find_if(
+        program.configurations.cbegin(), program.configurations.cend(),
+        [name](const Program::Configuration& c) { return c.name == name; }
     );
     return *it;
 }

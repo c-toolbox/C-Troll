@@ -198,7 +198,15 @@ MainWindow::MainWindow() {
 
     _clusterConnectionHandler.initialize();
 
-    _restHandler = new RestConnectionHandler(this, 8080, "");
+    _restHandler = new RestConnectionHandler(this, 8080, "ff", "gg");
+    connect(
+        _restHandler, &RestConnectionHandler::startProgram,
+        this, &MainWindow::startProgram
+    );
+    connect(
+        _restHandler, &RestConnectionHandler::stopProgram,
+        this, &MainWindow::stopProgram
+    );
 }
 
 void MainWindow::log(std::string msg) {

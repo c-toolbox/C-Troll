@@ -36,13 +36,23 @@
 #define __CORE__RESTCONNECTIONHANDLER_H__
 
 #include <QObject>
+
+#include "cluster.h"
+#include "program.h"
 #include <QTcpServer>
 #include <QTcpSocket>
 
 class RestConnectionHandler : public QObject {
 Q_OBJECT
 public:
-    RestConnectionHandler(QObject* parent, int port, std::string secret);
+    RestConnectionHandler(QObject* parent, int port, std::string user,
+        std::string password);
+
+signals:
+    void startProgram(Cluster::ID clusterId, Program::ID programId,
+        Program::Configuration::ID configurationId);
+    void stopProgram(Cluster::ID clusterId, Program::ID programId,
+        Program::Configuration::ID configurationId);
 
 private slots:
     void newConnectionEstablished();
