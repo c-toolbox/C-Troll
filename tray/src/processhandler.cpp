@@ -45,24 +45,6 @@
 #include <functional>
 
 namespace {
-    std::vector<std::string> tokenizeString(const std::string& input, char separator) {
-        size_t separatorPos = input.find(separator);
-        if (separatorPos == std::string::npos) {
-            return { input };
-        }
-        else {
-            std::vector<std::string> res;
-            size_t prevSeparator = 0;
-            while (separatorPos != std::string::npos) {
-                res.push_back(input.substr(prevSeparator, separatorPos - prevSeparator));
-                prevSeparator = separatorPos + 1;
-                separatorPos = input.find(separator, separatorPos + 1);
-            }
-            res.push_back(input.substr(prevSeparator));
-            return res;
-        }
-    }
-
     common::ProcessStatusMessage::Status toTrayStatus(QProcess::ProcessError error) {
         using PSM = common::ProcessStatusMessage;
         switch (error) {
@@ -339,7 +321,7 @@ std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::process
     const auto p = std::find_if(
         _processes.cbegin(),
         _processes.cend(),
-        [process](const ProcessInfo& p) { return p.process == process; }
+        [process](const ProcessInfo& proc) { return proc.process == process; }
     );
     return p;
 }
@@ -349,7 +331,7 @@ std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::process
     const auto p = std::find_if(
         _processes.cbegin(),
         _processes.cend(),
-        [id](const ProcessInfo& p) { return p.processId == id; }
+        [id](const ProcessInfo& proc) { return proc.processId == id; }
     );
     return p;
 }

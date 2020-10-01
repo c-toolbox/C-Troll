@@ -55,18 +55,21 @@ int main(int argc, char** argv) {
         [](QtMsgType type, const QMessageLogContext& context, const QString& msg) {
             QByteArray localMsg = msg.toLocal8Bit();
             switch (type) {
-            case QtDebugMsg:
-                std::cerr << "Debug: ";
-                break;
-            case QtWarningMsg:
-                std::cerr << "Warning: ";
-                break;
-            case QtCriticalMsg:
-                std::cerr << "Critical: ";
-                break;
-            case QtFatalMsg:
-                std::cerr << "Fatal: ";
-                break;
+                case QtDebugMsg:
+                    std::cerr << "Debug: ";
+                    break;
+                case QtInfoMsg:
+                    std::cerr << "Info: ";
+                    break;
+                case QtWarningMsg:
+                    std::cerr << "Warning: ";
+                    break;
+                case QtCriticalMsg:
+                    std::cerr << "Critical: ";
+                    break;
+                case QtFatalMsg:
+                    std::cerr << "Fatal: ";
+                    break;
             }
 
             std::cerr << fmt::format(

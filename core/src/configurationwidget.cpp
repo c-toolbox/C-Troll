@@ -410,13 +410,15 @@ void ConfigurationWidget::resetValues() {
 
     if (_configuration.logRotation.has_value()) {
         _logRotation->setChecked(true);
-        _frequency->setValue(_configuration.logRotation->frequency.count());
+        _frequency->setValue(
+            static_cast<int>(_configuration.logRotation->frequency.count())
+        );
         _keepOldLog->setChecked(_configuration.logRotation->keepPrevious);
     }
     else {
         common::LogRotation lr;
         _logRotation->setChecked(false);
-        _frequency->setValue(lr.frequency.count());
+        _frequency->setValue(static_cast<int>(lr.frequency.count()));
         _keepOldLog->setChecked(lr.keepPrevious);
     }
 

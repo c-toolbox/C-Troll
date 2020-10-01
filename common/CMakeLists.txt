@@ -85,5 +85,5 @@ target_link_libraries(common PUBLIC project_options fmt Qt5::Core Qt5::Widgets Q
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # These warnings are in Qt 5.12.2 and raised on GCC 9.3.0
-  set_source_files_properties("${CMAKE_BINARY_DIR}/common/src/moc_jsonsocket.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
+  set_source_files_properties("${CMAKE_BINARY_DIR}/common/include/moc_jsonsocket.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
 endif ()

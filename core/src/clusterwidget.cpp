@@ -150,15 +150,18 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
 
     std::vector<Node*> nodes = data::findNodesForCluster(cluster);
     static constexpr const int Columns = 5;
-    const int nNodes = static_cast<int>(nodes.size());
-    for (int i = 0; i < nNodes; ++i) {
+    for (size_t i = 0; i < nodes.size(); ++i) {
         Node* n = nodes[i];
         NodeWidget* node = new NodeWidget(*n);
         connect(
             node, &NodeWidget::killProcesses,
             this, QOverload<Node::ID>::of(&ClusterWidget::killProcesses)
         );
-        layout->addWidget(node, i / Columns, i % Columns);
+        layout->addWidget(
+            node,
+            static_cast<int>(i) / Columns,
+            static_cast<int>(i) % Columns
+        );
         _nodeWidgets[n->id] = node;
         updateConnectionStatus(n->id);
     }
@@ -185,7 +188,13 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
             }
         }
     );
-    layout->addWidget(kill, nNodes / Columns + 1, 0, 1, Columns);
+    layout->addWidget(
+        kill,
+        static_cast<int>(nodes.size()) / Columns + 1,
+        0,
+        1,
+        Columns
+    );
 }
 
 void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {

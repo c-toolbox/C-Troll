@@ -101,7 +101,7 @@ void JsonSocket::readToBuffer() {
         incomingData = payload;
     }
 
-    _buffer.resize(incomingData.size());
+    _buffer.resize(static_cast<size_t>(incomingData.size()));
     std::copy(incomingData.begin(), incomingData.end(), _buffer.begin());
 
     parseBuffer();
@@ -118,7 +118,7 @@ void JsonSocket::parseBuffer() {
         }
     }
 
-    if (_payloadSize > 0 && (_payloadSize <= _buffer.size())) {
+    if (_payloadSize > 0 && (_payloadSize <= static_cast<int>(_buffer.size()))) {
         std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
         std::string json(data.data(), _payloadSize);
         _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
