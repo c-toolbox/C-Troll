@@ -32,7 +32,7 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "configurationwidget.h"
+#include "settingswidget.h"
 
 #include <QCheckBox>
 #include <QColorDialog>
@@ -123,8 +123,8 @@ void ColorWidget::applyColor() {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ConfigurationWidget::ConfigurationWidget(Configuration configuration,
-                                         std::string configurationFilePath)
+SettingsWidget::SettingsWidget(Configuration configuration,
+                               std::string configurationFilePath)
     : _configuration(std::move(configuration))
     , _configurationFilePath(std::move(configurationFilePath))
 {
@@ -153,7 +153,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         _applicationPath->setToolTip(toolTip);
         connect(
             _applicationPath, &QLineEdit::textEdited,
-            this, &ConfigurationWidget::valuesChanged
+            this, &SettingsWidget::valuesChanged
         );
         controlsLayout->addWidget(_applicationPath, 0, 1);
     }
@@ -173,7 +173,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         _clusterPath->setToolTip(toolTip);
         connect(
             _clusterPath, &QLineEdit::textEdited,
-            this, &ConfigurationWidget::valuesChanged
+            this, &SettingsWidget::valuesChanged
         );
         controlsLayout->addWidget(_clusterPath, 1, 1);
     }
@@ -193,7 +193,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         _nodePath->setToolTip(toolTip);
         connect(
             _nodePath, &QLineEdit::textEdited,
-            this, &ConfigurationWidget::valuesChanged
+            this, &SettingsWidget::valuesChanged
         );
         controlsLayout->addWidget(_nodePath, 2, 1);
     }
@@ -214,7 +214,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         _removalTimeout->setMaximum(std::numeric_limits<int>::max());
         connect(
             _removalTimeout, QOverload<int>::of(&QSpinBox::valueChanged),
-            this, &ConfigurationWidget::valuesChanged
+            this, &SettingsWidget::valuesChanged
         );
         controlsLayout->addWidget(_removalTimeout, 3, 1);
     }
@@ -231,7 +231,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         _logFile->setToolTip(toolTip);
         connect(
             _logFile, &QCheckBox::clicked,
-            this, &ConfigurationWidget::valuesChanged
+            this, &SettingsWidget::valuesChanged
         );
         controlsLayout->addWidget(_logFile, 4, 1);
     }
@@ -248,7 +248,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         _logRotation->setCheckable(true);
         connect(
             _logRotation, &QGroupBox::clicked,
-            this, &ConfigurationWidget::valuesChanged
+            this, &SettingsWidget::valuesChanged
         );
 
         QGridLayout* contentLayout = new QGridLayout(_logRotation);
@@ -260,7 +260,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         _frequency->setMaximum(std::numeric_limits<int>::max());
         connect(
             _frequency, QOverload<int>::of(&QSpinBox::valueChanged),
-            this, &ConfigurationWidget::valuesChanged
+            this, &SettingsWidget::valuesChanged
         );
         contentLayout->addWidget(_frequency, 0, 1);
 
@@ -268,7 +268,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         _keepOldLog = new QCheckBox;
         connect(
             _keepOldLog, &QCheckBox::clicked,
-            this, &ConfigurationWidget::valuesChanged
+            this, &SettingsWidget::valuesChanged
         );
         contentLayout->addWidget(_keepOldLog, 1, 1);
 
@@ -346,7 +346,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         _restoreButton->setObjectName("control");
         connect(
             _restoreButton, &QPushButton::clicked,
-            this, &ConfigurationWidget::resetValues
+            this, &SettingsWidget::resetValues
         );
         l->addWidget(_restoreButton);
 
@@ -354,7 +354,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
         _saveButton->setObjectName("control");
         connect(
             _saveButton, &QPushButton::clicked,
-            this, &ConfigurationWidget::saveValues
+            this, &SettingsWidget::saveValues
         );
         l->addWidget(_saveButton);
 
@@ -365,7 +365,7 @@ ConfigurationWidget::ConfigurationWidget(Configuration configuration,
     resetValues();
 }
 
-void ConfigurationWidget::removedColor(ColorWidget* sender) {
+void SettingsWidget::removedColor(ColorWidget* sender) {
     _colorLayout->removeWidget(sender);
 
     const auto it = std::find(_colors.cbegin(), _colors.cend(), sender);
@@ -378,7 +378,7 @@ void ConfigurationWidget::removedColor(ColorWidget* sender) {
     valuesChanged();
 }
 
-void ConfigurationWidget::valuesChanged() {
+void SettingsWidget::valuesChanged() {
     const bool hasValueChanged =
         (_configuration.applicationPath != _applicationPath->text().toStdString()) ||
         (_configuration.clusterPath != _clusterPath->text().toStdString()) ||
@@ -401,7 +401,7 @@ void ConfigurationWidget::valuesChanged() {
     _saveButton->setEnabled(hasChanged);
 }
 
-void ConfigurationWidget::resetValues() {
+void SettingsWidget::resetValues() {
     _applicationPath->setText(QString::fromStdString(_configuration.applicationPath));
     _clusterPath->setText(QString::fromStdString(_configuration.clusterPath));
     _nodePath->setText(QString::fromStdString(_configuration.nodePath));
@@ -432,7 +432,7 @@ void ConfigurationWidget::resetValues() {
     valuesChanged();
 }
 
-void ConfigurationWidget::saveValues() {
+void SettingsWidget::saveValues() {
     Configuration config;
     config.applicationPath = _applicationPath->text().toStdString();
     config.clusterPath = _clusterPath->text().toStdString();
@@ -460,7 +460,7 @@ void ConfigurationWidget::saveValues() {
     valuesChanged();
 }
 
-void ConfigurationWidget::layoutColorWidgets() {
+void SettingsWidget::layoutColorWidgets() {
     constexpr const int Columns = 5;
 
     // First remove all widgets from the layout
@@ -477,7 +477,7 @@ void ConfigurationWidget::layoutColorWidgets() {
     }
 }
 
-void ConfigurationWidget::createColorWidget(Color color) {
+void SettingsWidget::createColorWidget(Color color) {
     ColorWidget* cw = new ColorWidget(std::move(color));
     connect(
         cw, &ColorWidget::colorChanged,
@@ -488,20 +488,20 @@ void ConfigurationWidget::createColorWidget(Color color) {
     );
     connect(
         cw, &ColorWidget::removed,
-        this, &ConfigurationWidget::removedColor
+        this, &SettingsWidget::removedColor
     );
 
     _colors.push_back(cw);
 }
 
-void ConfigurationWidget::createColorWidgets() {
+void SettingsWidget::createColorWidgets() {
     for (const Color& c : _configuration.tagColors) {
         createColorWidget(c);
     }
     layoutColorWidgets();
 }
 
-std::vector<Color> ConfigurationWidget::tagColors() const {
+std::vector<Color> SettingsWidget::tagColors() const {
     std::vector<Color> tagColors;
     tagColors.reserve(_colors.size());
     for (ColorWidget* w : _colors) {

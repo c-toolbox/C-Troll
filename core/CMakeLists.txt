@@ -37,7 +37,6 @@ set(HEADER_FILES
   src/clusterconnectionhandler.h
   src/clusterwidget.h
   src/configuration.h
-  src/configurationwidget.h
   src/database.h
   src/logwidget.h
   src/mainwindow.h
@@ -46,6 +45,7 @@ set(HEADER_FILES
   src/processwidget.h
   src/program.h
   src/programwidget.h
+  src/settingswidget.h
   src/version.h
 )
 
@@ -54,7 +54,6 @@ set(SOURCE_FILES
   src/clusterconnectionhandler.cpp
   src/clusterwidget.cpp
   src/configuration.cpp
-  src/configurationwidget.cpp
   src/database.cpp
   src/logwidget.cpp
   src/main.cpp
@@ -64,6 +63,7 @@ set(SOURCE_FILES
   src/processwidget.cpp
   src/program.cpp
   src/programwidget.cpp
+  src/settingswidget.cpp
 )
 
 find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
@@ -73,10 +73,10 @@ qt5_wrap_cpp(
   MOC_FILES
   src/clusterconnectionhandler.h
   src/clusterwidget.h
-  src/configurationwidget.h
   src/mainwindow.h
   src/processwidget.h
   src/programwidget.h
+  src/settingswidget.h
 )
 
 set(RESOURCE_FILES "")
@@ -96,7 +96,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # These warnings are in Qt 5.12.2 and raised on GCC 9.3.0
   set_source_files_properties("${CMAKE_BINARY_DIR}/core/src/moc_clusterconnectionhandler.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
   set_source_files_properties("${CMAKE_BINARY_DIR}/core/src/moc_clusterwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/src/moc_configurationwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
   set_source_files_properties("${CMAKE_BINARY_DIR}/core/src/moc_processwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
   set_source_files_properties("${CMAKE_BINARY_DIR}/core/src/moc_programwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
+  set_source_files_properties("${CMAKE_BINARY_DIR}/core/src/moc_settingswidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
 endif ()

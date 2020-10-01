@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__CONFIGURATIONWIDGET_H__
-#define __CORE__CONFIGURATIONWIDGET_H__
+#ifndef __CORE__SETTINGSWIDGET_H__
+#define __CORE__SETTINGSWIDGET_H__
 
 #include <QWidget>
 
@@ -69,11 +69,15 @@ private:
     Color _color;
 };
 
-class ConfigurationWidget : public QWidget {
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+class SettingsWidget : public QWidget {
 Q_OBJECT
 
 public:
-    ConfigurationWidget(Configuration configuration, std::string filePath);
+    SettingsWidget(Configuration configuration, std::string filePath);
 
 private slots:
     void removedColor(ColorWidget* sender);
@@ -112,4 +116,4 @@ private:
     const std::string _configurationFilePath;
 };
 
-#endif // __CORE__CONFIGURATIONWIDGET_H__
+#endif // __CORE__SETTINGSWIDGET_H__

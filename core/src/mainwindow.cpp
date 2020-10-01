@@ -35,12 +35,12 @@
 #include "mainwindow.h"
 
 #include "clusterwidget.h"
-#include "configurationwidget.h"
 #include "database.h"
 #include "jsonload.h"
 #include "killallmessage.h"
 #include "processwidget.h"
 #include "programwidget.h"
+#include "settingswidget.h"
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMessageBox>
@@ -193,7 +193,7 @@ MainWindow::MainWindow() {
     tabWidget->addTab(_clustersWidget, "Clusters");
     tabWidget->addTab(_processesWidget, "Processes");
     tabWidget->addTab(&_logWidget, "Log");
-    tabWidget->addTab(new ConfigurationWidget(_config, ConfigurationFile), "Settings");
+    tabWidget->addTab(new SettingsWidget(_config, ConfigurationFile), "Settings");
 
     _clusterConnectionHandler.initialize();
 }
