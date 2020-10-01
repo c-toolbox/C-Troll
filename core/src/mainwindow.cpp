@@ -198,15 +198,23 @@ MainWindow::MainWindow() {
 
     _clusterConnectionHandler.initialize();
 
-    _restHandler = new RestConnectionHandler(this, 8080, "ff", "gg");
-    connect(
-        _restHandler, &RestConnectionHandler::startProgram,
-        this, &MainWindow::startProgram
-    );
-    connect(
-        _restHandler, &RestConnectionHandler::stopProgram,
-        this, &MainWindow::stopProgram
-    );
+
+    if (_config.rest.has_value()) {
+        _restHandler = new RestConnectionHandler(
+            this,
+            _config.rest->port,
+            _config.rest->username,
+            _config.rest->password
+        );
+        connect(
+            _restHandler, &RestConnectionHandler::startProgram,
+            this, &MainWindow::startProgram
+        );
+        connect(
+            _restHandler, &RestConnectionHandler::stopProgram,
+            this, &MainWindow::stopProgram
+        );
+    }
 }
 
 void MainWindow::log(std::string msg) {

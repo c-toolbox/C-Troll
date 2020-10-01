@@ -48,6 +48,11 @@ namespace {
 
     constexpr const char* KeyLogFile = "logFile";
     constexpr const char* KeyLogRotation = "logRotation";
+
+    constexpr const char* KeyRest = "rest";
+    constexpr const char* KeyRestUsername = "username";
+    constexpr const char* KeyRestPassword = "password";
+    constexpr const char* KeyRestPort = "port";
 } // namespace
 
 bool operator==(const Color& lhs, const Color& rhs) {
@@ -65,6 +70,14 @@ void to_json(nlohmann::json& j, const Color& c) {
 
     if (c.r < 0 || c.r > 255 || c.g < 0 || c.g > 255 || c.b < 0 || c.b > 255) {
         throw std::runtime_error("Color components must be in the range [0, 255]");
+    }
+}
+
+void to_json(nlohmann::json& j, const Configuration::Rest& r) {
+    j[KeyRestUsername] = r.username;
+    j[KeyRestPassword] = r.password;
+    if (r.port != Configuration::Rest().port) {
+        j[KeyRestPort] = r.port;
     }
 }
 
@@ -87,6 +100,10 @@ void to_json(nlohmann::json& j, const Configuration& c) {
     if (c.logRotation.has_value()) {
         j[KeyLogRotation] = *c.logRotation;
     }
+
+    if (c.rest.has_value()) {
+        j[KeyRest] = *c.rest;
+    }
 }
 
 void from_json(const nlohmann::json& j, Color& c) {
@@ -100,6 +117,14 @@ void from_json(const nlohmann::json& j, Color& c) {
 
     if (c.r < 0 || c.r > 255 || c.g < 0 || c.g > 255 || c.b < 0 || c.b > 255) {
         throw std::runtime_error("All color components must be in [0, 255]");
+    }
+}
+
+void from_json(const nlohmann::json& j, Configuration::Rest& r) {
+    j.at(KeyRestUsername).get_to(r.username);
+    j.at(KeyRestPassword).get_to(r.password);
+    if (j.find(KeyRestPort) != j.end()) {
+        j[KeyRestPort].get_to(r.port);
     }
 }
 
@@ -130,5 +155,9 @@ void from_json(const nlohmann::json& j, Configuration& c) {
 
     if (j.find(KeyLogRotation) != j.end()) {
         c.logRotation = j[KeyLogRotation].get<common::LogRotation>();
+    }
+    
+    if (j.find(KeyRest) != j.end()) {
+        c.rest = j[KeyRest].get<Configuration::Rest>();
     }
 }

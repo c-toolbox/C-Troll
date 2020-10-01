@@ -236,6 +236,8 @@ SettingsWidget::SettingsWidget(Configuration configuration,
         controlsLayout->addWidget(_logFile, 4, 1);
     }
 
+    QWidget* groupGroup = new QWidget;
+    QBoxLayout* groupLayouts = new QHBoxLayout(groupGroup);
     {
         // Log Rotation
         QString toolTip = "Controls whether there will be a log rotation or not. Each "
@@ -272,8 +274,54 @@ SettingsWidget::SettingsWidget(Configuration configuration,
         );
         contentLayout->addWidget(_keepOldLog, 1, 1);
 
-        layout->addWidget(_logRotation);
+        groupLayouts->addWidget(_logRotation);
     }
+
+    {
+        // REST
+        QString toolTip = "Controls the REST parameters. These values are used to "
+            "determine where, and who, can start applications via the REST interface";
+
+        _rest = new QGroupBox("Rest API");
+        _rest->setToolTip(toolTip);
+        _rest->setCheckable(true);
+        connect(
+            _rest, &QGroupBox::clicked,
+            this, &SettingsWidget::valuesChanged
+        );
+
+        QGridLayout* contentLayout = new QGridLayout(_rest);
+
+        contentLayout->addWidget(new QLabel("Username:"), 0, 0);
+        _username = new QLineEdit;
+        connect(
+            _username, &QLineEdit::textEdited,
+            this, &SettingsWidget::valuesChanged
+        );
+        contentLayout->addWidget(_username, 0, 1);
+
+        contentLayout->addWidget(new QLabel("Password:"), 1, 0);
+        _password = new QLineEdit;
+        connect(
+            _password, &QLineEdit::textEdited,
+            this, &SettingsWidget::valuesChanged
+        );
+        contentLayout->addWidget(_password, 1, 1);
+
+        contentLayout->addWidget(new QLabel("Port:"), 2, 0);
+        _port = new QSpinBox;
+        _port->setMinimum(0);
+        _port->setMaximum(std::numeric_limits<uint16_t>::max());
+        connect(
+            _port, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &SettingsWidget::valuesChanged
+        );
+        contentLayout->addWidget(_port, 2, 1);
+
+        groupLayouts->addWidget(_rest);
+    }
+
+    layout->addWidget(groupGroup);
 
     {
         // Colors
@@ -393,8 +441,18 @@ void SettingsWidget::valuesChanged() {
             (lr->keepPrevious != _keepOldLog->isChecked());
     }
 
+    std::optional<Configuration::Rest> re = _configuration.rest;
+    bool hasRestChanged = (re.has_value() != _rest->isChecked());
+    if (re.has_value() && _rest->isChecked()) {
+        hasRestChanged =
+            (_configuration.rest->username != _username->text().toStdString()) ||
+            (_configuration.rest->password != _password->text().toStdString()) ||
+            (_configuration.rest->port != _port->value());
+    }
+
     const bool hasColorChanged = (_configuration.tagColors != tagColors());
-    const bool hasChanged = hasValueChanged || hasLogRotationChanged || hasColorChanged;
+    const bool hasChanged = hasValueChanged || hasLogRotationChanged ||
+        hasRestChanged || hasColorChanged;
 
     _changesLabel->setVisible(hasChanged);
     _restoreButton->setEnabled(hasChanged);
@@ -422,6 +480,20 @@ void SettingsWidget::resetValues() {
         _keepOldLog->setChecked(lr.keepPrevious);
     }
 
+    if (_configuration.rest.has_value()) {
+        _rest->setChecked(true);
+        _username->setText(QString::fromStdString(_configuration.rest->username));
+        _password->setText(QString::fromStdString(_configuration.rest->password));
+        _port->setValue(_configuration.rest->port);
+    }
+    else {
+        Configuration::Rest re;
+        _rest->setChecked(false);
+        _username->setText(QString::fromStdString(re.username));
+        _password->setText(QString::fromStdString(re.password));
+        _port->setValue(re.port);
+    }
+
     for (ColorWidget* cw : _colors) {
         _colorLayout->removeWidget(cw);
         cw->deleteLater();
@@ -445,6 +517,14 @@ void SettingsWidget::saveValues() {
         lr.frequency = std::chrono::hours(_frequency->value());
         lr.keepPrevious = _keepOldLog->isChecked();
         config.logRotation = lr;
+    }
+
+    if (_rest->isChecked()) {
+        Configuration::Rest re;
+        re.username = _username->text().toStdString();
+        re.password = _password->text().toStdString();
+        re.port = _port->value();
+        config.rest = re;
     }
 
     config.tagColors = tagColors();

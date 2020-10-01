@@ -104,6 +104,12 @@ private:
     QSpinBox* _frequency = nullptr;
     QCheckBox* _keepOldLog = nullptr;
 
+    // REST controls
+    QGroupBox* _rest;
+    QLineEdit* _username;
+    QLineEdit* _password;
+    QSpinBox* _port;
+
     QGridLayout* _colorLayout = nullptr;
     std::vector<ColorWidget*> _colors;
 

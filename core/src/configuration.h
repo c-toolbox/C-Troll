@@ -81,6 +81,13 @@ struct Configuration {
 
     /// Contains configuration about log rotations
     std::optional<common::LogRotation> logRotation;
+
+    struct Rest {
+        std::string username;
+        std::string password;
+        int port = 8080;
+    };
+    std::optional<Rest> rest;
 };
 
 void to_json(nlohmann::json& j, const Configuration& c);
