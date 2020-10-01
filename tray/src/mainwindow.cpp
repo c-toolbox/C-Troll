@@ -69,12 +69,12 @@ MainWindow::MainWindow() {
     // After that create a context menu of two items
     QMenu* menu = new QMenu(this);
     // The first menu item expands the application from the tray,
-    QAction* viewWindow = new QAction(trUtf8("Show"), this);
+    QAction* viewWindow = new QAction("Show", this);
     connect(viewWindow, &QAction::triggered, this, &MainWindow::show);
     menu->addAction(viewWindow);
 
     // The second menu item terminates the application
-    QAction* quitAction = new QAction(trUtf8("Quit"), this);
+    QAction* quitAction = new QAction("Quit", this);
     connect(
         quitAction, &QAction::triggered,
         QApplication::instance(), &QApplication::quit
