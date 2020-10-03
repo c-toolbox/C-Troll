@@ -32,36 +32,60 @@
  *                                                                                       *
  ****************************************************************************************/
 
-//#include "mainwindow.h"
-//#include <QApplication>
-//#include <QFile>
-//#include <QIcon>
-//#include <QMessageBox>
+#ifndef __CORE__DATABASE_H__
+#define __CORE__DATABASE_H__
 
-int main(int argc, char** argv) {
-    //Q_INIT_RESOURCE(resources);
+#include "cluster.h"
+#include "color.h"
+#include "node.h"
+#include "process.h"
+#include "program.h"
+#include <memory>
+#include <set>
+#include <string>
+#include <string_view>
+#include <vector>
 
-    //QApplication app(argc, argv);
-    //app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+namespace data {
+    
+std::vector<const Cluster*> clusters();
+std::vector<const Node*> nodes();
+std::vector<const Program*> programs();
+std::vector<const Process*> processes();
 
-    //{
-    //    QFile file(":/qss/core.qss");
-    //    file.open(QFile::ReadOnly);
-    //    QString styleSheet = QLatin1String(file.readAll());
-    //    app.setStyleSheet(styleSheet);
-    //}
+const Cluster* findCluster(Cluster::ID id);
+const Cluster* findCluster(std::string_view name);
+std::vector<const Cluster*> findClustersForProgram(const Program& program);
+std::vector<const Cluster*> findClusterForNode(const Node& node);
 
-    //MainWindow mw;
-    //mw.show();
-    //try {
-    //    app.exec();
-    //}
-    //catch (const std::exception& e) {
-    //    QMessageBox::critical(nullptr, "Exception", e.what());
-    //}
-    //catch (...) {
-    //    QMessageBox::critical(nullptr, "Exception", "Unknown error");
-    //}
+const Node* findNode(Node::ID id);
+const Node* findNode(std::string_view name);
+std::vector<const Node*> findNodesForCluster(const Cluster& cluster);
+void setNodeConnected(Node::ID id, bool connected);
 
-    //Q_CLEANUP_RESOURCE(resources);
-}
+const Program* findProgram(Program::ID id);
+const Program* findProgram(std::string_view name);
+
+const Program::Configuration* findConfigurationForProgram(const Program& program,
+    Program::Configuration::ID id);
+const Program::Configuration* findConfigurationForProgram(const Program& program,
+    std::string_view name);
+
+bool hasTag(Program::ID id, const std::vector<std::string>& tags);
+std::set<std::string> findTags();
+
+const Process* findProcess(Process::ID id);
+void addProcess(std::unique_ptr<Process> process);
+void setProcessStatus(Process::ID id, common::ProcessStatusMessage::Status status);
+
+Color colorForTag(std::string_view tag);
+void setTagColors(std::vector<Color> colors);
+
+void loadData(std::string_view programPath, std::string_view clusterPath,
+    std::string_view nodePath);
+
+std::size_t dataHash();
+
+} // namespace data
+
+#endif // __CORE__DATABASE_H__

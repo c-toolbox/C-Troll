@@ -32,6 +32,34 @@
 #                                                                                        #
 ##########################################################################################
 
-add_subdirectory(shared)
-add_subdirectory(ctroll)
-add_subdirectory(editor)
+set(HEADER_FILES
+)
+
+set(SOURCE_FILES
+  main.cpp
+)
+
+find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
+
+set(MOC_FILES "")
+qt5_wrap_cpp(
+  MOC_FILES
+)
+
+set(RESOURCE_FILES "")
+qt5_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
+
+add_executable(Editor WIN32 MACOSX_BUNDLE
+  ${SOURCE_FILES}
+  ${HEADER_FILES}
+  ${MOC_FILES}
+  ${RESOURCE_FILES}
+  ${CMAKE_SOURCE_DIR}/resources/icon.rc
+)
+target_include_directories(Editor PUBLIC "src")
+target_link_libraries(Editor PUBLIC core-shared Qt5::Core Qt5::Widgets Qt5::Network)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # These warnings are in Qt 5.12.2 and raised on GCC 9.3.0
+  # set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_clusterconnectionhandler.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
+endif ()

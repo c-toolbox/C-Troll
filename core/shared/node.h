@@ -32,60 +32,45 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__DATABASE_H__
-#define __CORE__DATABASE_H__
+#ifndef __CORE__NODE_H__
+#define __CORE__NODE_H__
 
-#include "cluster.h"
-#include "configuration.h"
-#include "node.h"
-#include "process.h"
-#include "program.h"
-#include <memory>
-#include <set>
-#include <string>
-#include <string_view>
-#include <vector>
+#include "typedid.h"
+#include <json/json.hpp>
 
-namespace data {
-    
-std::vector<const Cluster*> clusters();
-std::vector<const Node*> nodes();
-std::vector<const Program*> programs();
-std::vector<const Process*> processes();
+/**
+ * This struct contains information about individual computer nodes of the cluster.
+ * Each node has a human-readable \m name, an \m ipAddress, and a \m port on which the
+ * Tray application is listening.
+ */
+struct Node {
+    using ID = TypedId<int, struct NodeTag>;
 
-const Cluster* findCluster(Cluster::ID id);
-const Cluster* findCluster(std::string_view name);
-std::vector<const Cluster*> findClustersForProgram(const Program& program);
-std::vector<const Cluster*> findClusterForNode(const Node& node);
+    /// Unique identifier for the cluster node
+    ID id{ -1 };
 
-const Node* findNode(Node::ID id);
-const Node* findNode(std::string_view name);
-std::vector<const Node*> findNodesForCluster(const Cluster& cluster);
-void setNodeConnected(Node::ID id, bool connected);
+    /// The human readable name of the computer node
+    std::string name;
+    /// The IP address at which the computer is reachable; this can also be a hostname
+    std::string ipAddress;
+    /// The port on which the Tray application on that computer is listening
+    int port = -1;
+    /// The secret that is sent to the tray application for authentication
+    std::string secret;
+    /// A flag representing whether the node is connected or not
+    bool isConnected = false;
+};
 
-const Program* findProgram(Program::ID id);
-const Program* findProgram(std::string_view name);
+void from_json(const nlohmann::json& j, Node& p);
 
-const Program::Configuration* findConfigurationForProgram(const Program& program,
-    Program::Configuration::ID id);
-const Program::Configuration* findConfigurationForProgram(const Program& program,
-    std::string_view name);
+/**
+ * This method walks the passed \p directory and looks for all <code>*.json</code>
+ * files in it. Any \c JSON file in it will be interpreted as a node configuration and
+ * returned.
+ *
+ * \param directory The directory that is walked in search for <code>*.json</code> files
+ * \return A list of all Nodes%s that were found by walking the \p directory
+ */
+std::vector<Node> loadNodesFromDirectory(std::string_view directory);
 
-bool hasTag(Program::ID id, const std::vector<std::string>& tags);
-std::set<std::string> findTags();
-
-const Process* findProcess(Process::ID id);
-void addProcess(std::unique_ptr<Process> process);
-void setProcessStatus(Process::ID id, common::ProcessStatusMessage::Status status);
-
-Color colorForTag(std::string_view tag);
-void setTagColors(std::vector<Color> colors);
-
-void loadData(std::string_view programPath, std::string_view clusterPath,
-    std::string_view nodePath);
-
-std::size_t dataHash();
-
-} // namespace data
-
-#endif // __CORE__DATABASE_H__
+#endif // __CORE__CLUSTER_H__

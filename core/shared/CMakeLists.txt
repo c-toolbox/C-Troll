@@ -32,6 +32,20 @@
 #                                                                                        #
 ##########################################################################################
 
-add_subdirectory(shared)
-add_subdirectory(ctroll)
-add_subdirectory(editor)
+add_library(core-shared
+  cluster.h
+  color.h
+  database.h
+  node.h
+  process.h
+  program.h
+  typedid.h
+  cluster.cpp
+  color.cpp
+  database.cpp
+  node.cpp
+  process.cpp
+  program.cpp
+)
+target_include_directories(core-shared PUBLIC ".")
+target_link_libraries(core-shared PUBLIC common)
