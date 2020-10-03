@@ -32,58 +32,43 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__CONFIGURATION_H__
-#define __CORE__CONFIGURATION_H__
-
 #include "color.h"
-#include "logconfiguration.h"
-#include <json/json.hpp>
-#include <chrono>
-#include <optional>
-#include <string>
-#include <vector>
 
-/// This structure represents the configuration loaded at startup
-struct Configuration {
-    /// The path that contains the JSON objects describing the available applications
-    std::string applicationPath = "application";
-    /// The path that contains the JSON objects describing the available clusters
-    std::string clusterPath = "cluster";
-    /// The path that contains the JSON objects describing the available nodes
-    std::string nodePath = "nodes";
-    /// The timeout after which the information of a successful process is removed
-    std::chrono::milliseconds removalTimeout = std::chrono::milliseconds(15000);
+namespace {
+    constexpr const char* KeyTagColorsRed = "r";
+    constexpr const char* KeyTagColorsGreen = "g";
+    constexpr const char* KeyTagColorsBlue = "b";
+    constexpr const char* KeyTagColorsTag = "tag";
+} // namespace
 
-    /// The colors that are used for coloring the tags in the side selection widget
-    std::vector<Color> tagColors = {
-        // Colors taken from https://en.wikipedia.org/wiki/Help:Distinguishable_colors
-        Color{ 255, 80, 5, "" }, // Zinnia
-        Color{ 157, 204, 0, "" }, // Lime
-        Color{ 94, 241, 242, "" }, // Sky
-        Color{ 43, 206, 72, "" }, // Green
-        Color{ 240, 163, 255, "" }, // Amethyst
-        Color{ 0, 117, 220, "" },   // Blue
-        Color{ 255, 164, 5, "" }, // Orpiment
-        Color{ 194, 0, 136, "" }, // Mallow
-        Color{ 148, 255, 181, "" }, // Jade
-        Color{ 76, 0, 92, "" } // Damson
-    };
+bool operator==(const Color& lhs, const Color& rhs) {
+    return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b) &&
+        (lhs.tag == rhs.tag);
+}
 
-    /// Determines whether a log file should be created or not
-    bool logFile = true;
+void to_json(nlohmann::json& j, const Color& c) {
+    j[KeyTagColorsRed] = c.r;
+    j[KeyTagColorsGreen] = c.g;
+    j[KeyTagColorsBlue] = c.b;
+    if (!c.tag.empty()) {
+        j[KeyTagColorsTag] = c.tag;
+    }
 
-    /// Contains configuration about log rotations
-    std::optional<common::LogRotation> logRotation;
+    if (c.r < 0 || c.r > 255 || c.g < 0 || c.g > 255 || c.b < 0 || c.b > 255) {
+        throw std::runtime_error("Color components must be in the range [0, 255]");
+    }
+}
 
-    struct Rest {
-        std::string username;
-        std::string password;
-        int port = 7000;
-    };
-    std::optional<Rest> rest;
-};
+void from_json(const nlohmann::json& j, Color& c) {
+    j.at(KeyTagColorsRed).get_to(c.r);
+    j.at(KeyTagColorsGreen).get_to(c.g);
+    j.at(KeyTagColorsBlue).get_to(c.b);
 
-void to_json(nlohmann::json& j, const Configuration& c);
-void from_json(const nlohmann::json& j, Configuration& c);
+    if (j.find(KeyTagColorsTag) != j.end()) {
+        j[KeyTagColorsTag].get_to(c.tag);
+    }
 
-#endif // __CORE_CONFIGURATION_H__
+    if (c.r < 0 || c.r > 255 || c.g < 0 || c.g > 255 || c.b < 0 || c.b > 255) {
+        throw std::runtime_error("All color components must be in [0, 255]");
+    }
+}

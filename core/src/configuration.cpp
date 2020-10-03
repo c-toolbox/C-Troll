@@ -40,38 +40,16 @@ namespace {
     constexpr const char* KeyNodePath = "nodePath";
     constexpr const char* KeyRemovalTimeout = "removalTimeout";
 
-    constexpr const char* KeyTagColors = "tagColors";
-    constexpr const char* KeyTagColorsRed = "r";
-    constexpr const char* KeyTagColorsGreen = "g";
-    constexpr const char* KeyTagColorsBlue = "b";
-    constexpr const char* KeyTagColorsTag = "tag";
-
     constexpr const char* KeyLogFile = "logFile";
     constexpr const char* KeyLogRotation = "logRotation";
+    
+    constexpr const char* KeyTagColors = "tagColors";
 
     constexpr const char* KeyRest = "rest";
     constexpr const char* KeyRestUsername = "username";
     constexpr const char* KeyRestPassword = "password";
     constexpr const char* KeyRestPort = "port";
 } // namespace
-
-bool operator==(const Color& lhs, const Color& rhs) {
-    return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b) &&
-           (lhs.tag == rhs.tag);
-}
-
-void to_json(nlohmann::json& j, const Color& c) {
-    j[KeyTagColorsRed] = c.r;
-    j[KeyTagColorsGreen] = c.g;
-    j[KeyTagColorsBlue] = c.b;
-    if (!c.tag.empty()) {
-        j[KeyTagColorsTag] = c.tag;
-    }
-
-    if (c.r < 0 || c.r > 255 || c.g < 0 || c.g > 255 || c.b < 0 || c.b > 255) {
-        throw std::runtime_error("Color components must be in the range [0, 255]");
-    }
-}
 
 void to_json(nlohmann::json& j, const Configuration::Rest& r) {
     if (!r.username.empty()) {
@@ -107,20 +85,6 @@ void to_json(nlohmann::json& j, const Configuration& c) {
 
     if (c.rest.has_value()) {
         j[KeyRest] = *c.rest;
-    }
-}
-
-void from_json(const nlohmann::json& j, Color& c) {
-    j.at(KeyTagColorsRed).get_to(c.r);
-    j.at(KeyTagColorsGreen).get_to(c.g);
-    j.at(KeyTagColorsBlue).get_to(c.b);
-
-    if (j.find(KeyTagColorsTag) != j.end()) {
-        j[KeyTagColorsTag].get_to(c.tag);
-    }
-
-    if (c.r < 0 || c.r > 255 || c.g < 0 || c.g > 255 || c.b < 0 || c.b > 255) {
-        throw std::runtime_error("All color components must be in [0, 255]");
     }
 }
 

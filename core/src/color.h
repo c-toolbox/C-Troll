@@ -32,58 +32,20 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__CONFIGURATION_H__
-#define __CORE__CONFIGURATION_H__
+#ifndef __CORE__COLOR_H__
+#define __CORE__COLOR_H__
 
-#include "color.h"
-#include "logconfiguration.h"
 #include <json/json.hpp>
-#include <chrono>
-#include <optional>
-#include <string>
-#include <vector>
 
-/// This structure represents the configuration loaded at startup
-struct Configuration {
-    /// The path that contains the JSON objects describing the available applications
-    std::string applicationPath = "application";
-    /// The path that contains the JSON objects describing the available clusters
-    std::string clusterPath = "cluster";
-    /// The path that contains the JSON objects describing the available nodes
-    std::string nodePath = "nodes";
-    /// The timeout after which the information of a successful process is removed
-    std::chrono::milliseconds removalTimeout = std::chrono::milliseconds(15000);
-
-    /// The colors that are used for coloring the tags in the side selection widget
-    std::vector<Color> tagColors = {
-        // Colors taken from https://en.wikipedia.org/wiki/Help:Distinguishable_colors
-        Color{ 255, 80, 5, "" }, // Zinnia
-        Color{ 157, 204, 0, "" }, // Lime
-        Color{ 94, 241, 242, "" }, // Sky
-        Color{ 43, 206, 72, "" }, // Green
-        Color{ 240, 163, 255, "" }, // Amethyst
-        Color{ 0, 117, 220, "" },   // Blue
-        Color{ 255, 164, 5, "" }, // Orpiment
-        Color{ 194, 0, 136, "" }, // Mallow
-        Color{ 148, 255, 181, "" }, // Jade
-        Color{ 76, 0, 92, "" } // Damson
-    };
-
-    /// Determines whether a log file should be created or not
-    bool logFile = true;
-
-    /// Contains configuration about log rotations
-    std::optional<common::LogRotation> logRotation;
-
-    struct Rest {
-        std::string username;
-        std::string password;
-        int port = 7000;
-    };
-    std::optional<Rest> rest;
+struct Color {
+    int r = 255;
+    int g = 255;
+    int b = 255;
+    std::string tag;
 };
+bool operator==(const Color& lhs, const Color& rhs);
 
-void to_json(nlohmann::json& j, const Configuration& c);
-void from_json(const nlohmann::json& j, Configuration& c);
+void to_json(nlohmann::json& j, const Color& c);
+void from_json(const nlohmann::json& j, Color& c);
 
-#endif // __CORE_CONFIGURATION_H__
+#endif // __COLOR__COLOR_H__
