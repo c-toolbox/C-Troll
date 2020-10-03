@@ -45,30 +45,35 @@
 
 namespace {
     enum class Response {
-        Ok = 0,
         BadRequest,
-        Unauthorized,
-        NotFound
+        NotFound,
+        Ok,
+        Unauthorized
     };
 
     enum class HttpMethod {
-        Get = 0,
+        Get,
         Post,
         Unknown
     };
 
     enum class Endpoint {
-        StartProgram = 0,
+        StartProgram,
         StopProgram,
+        InfoCluster,
         InfoProgram,
+        InfoNode,
         Unknown
     };
 
-    void sendResponse(QTcpSocket& socket, Response response, std::string payload = "") {
+    void sendResponse(QTcpSocket& socket, Response response,
+                      nlohmann::json payload = nlohmann::json())
+    {
         std::string_view code = [](Response response) {
             switch (response) {
-                case Response::Ok: return "200 OK";
                 case Response::BadRequest: return "400 Bad Request";
+                case Response::NotFound: return "404 Not Found";
+                case Response::Ok: return "200 OK";
                 case Response::Unauthorized: return "401 Unauthorized";
                 default: throw std::logic_error("Unhandled case label");
             }
@@ -79,7 +84,11 @@ namespace {
             socket.write(status.data(), status.size());
         }
         else {
-            std::string message = fmt::format("{}\n\n{}", status, payload);
+            std::string content = payload.dump();
+            std::string message = fmt::format(
+                "{}Content-Type: application/json\nContent-Length: {}\n\n{}",
+                status, content.size(), content
+            );
             socket.write(message.data(), message.size());
         }
         socket.close();
@@ -99,14 +108,20 @@ namespace {
     }
 
     Endpoint parseEndpoint(std::string_view value) {
-        if (value == "/program/start") {
+        if ((value == "/program/start") || (value == "/program/start/")) {
             return Endpoint::StartProgram;
         }
-        else if (value == "/program/stop") {
+        else if ((value == "/program/stop") || (value == "/program/stop/")) {
             return Endpoint::StopProgram;
         }
-        else if (value == "/program") {
+        else if ((value == "/program") || (value == "/program/")) {
             return Endpoint::InfoProgram;
+        }
+        else if ((value == "/cluster") || (value == "/cluster/")) {
+            return Endpoint::InfoCluster;
+        }
+        else if ((value == "/node") || (value == "/node/")) {
+            return Endpoint::InfoNode;
         }
         else {
             return Endpoint::Unknown;
@@ -259,11 +274,6 @@ void RestConnectionHandler::handleNewConnection() {
 
     const bool hasMethod = method != HttpMethod::Unknown;
     const bool hasEndpoint = endpoint != Endpoint::Unknown;
-    if (!hasMethod || !hasEndpoint) {
-        sendResponse(*socket, Response::BadRequest);
-        return;
-    }
-
     if (method == HttpMethod::Unknown) {
         sendResponse(*socket, Response::BadRequest);
         return;
@@ -298,8 +308,12 @@ void RestConnectionHandler::handleNewConnection() {
     }
     else if (method == HttpMethod::Get && endpoint == Endpoint::InfoProgram) {
         handleProgramInfoMessage(*socket);
-
-
+    }
+    else if (method == HttpMethod::Get && endpoint == Endpoint::InfoCluster) {
+        handleClusterInfoMessage(*socket);
+    }
+    else if (method == HttpMethod::Get && endpoint == Endpoint::InfoNode) {
+        handleNodeInfoMessage(*socket);
     }
     else {
         sendResponse(*socket, Response::BadRequest);
@@ -357,5 +371,40 @@ void RestConnectionHandler::handleProgramInfoMessage(QTcpSocket& socket) {
         result.push_back(p);
     }
 
-    sendResponse(socket, Response::Ok, result.dump());
+    sendResponse(socket, Response::Ok, result);
+}
+
+void RestConnectionHandler::handleClusterInfoMessage(QTcpSocket& socket) {
+    std::vector<const Cluster*> clusters = data::clusters();
+    nlohmann::json result = nlohmann::json::array();
+    for (const Cluster* cluster : clusters) {
+        if (cluster->isEnabled) {
+            nlohmann::json c;
+            c["name"] = cluster->name;
+            c["nodes"] = nlohmann::json::array();
+            bool allConnected = true;
+            for (Node::ID nid : cluster->nodes) {
+                const Node* node = data::findNode(nid);
+                c["nodes"].push_back(node->name);
+                allConnected &= node->isConnected;
+            }
+            c["allConnected"] = allConnected;
+            result.push_back(c);
+        }
+    }
+
+    sendResponse(socket, Response::Ok, result);
+}
+
+void RestConnectionHandler::handleNodeInfoMessage(QTcpSocket& socket) {
+    std::vector<const Node*> nodes = data::nodes();
+    nlohmann::json result = nlohmann::json::array();
+    for (const Node* node : nodes) {
+        nlohmann::json n;
+        n["name"] = node->name;
+        n["isConnected"] = node->isConnected;
+        result.push_back(n);
+    }
+
+    sendResponse(socket, Response::Ok, result);
 }
