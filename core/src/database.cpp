@@ -100,7 +100,7 @@ const Cluster* findCluster(Cluster::ID id) {
     return it != gClusters.cend() ? it->get() : nullptr;
 }
 
-const Cluster* findCluster(const std::string& name) {
+const Cluster* findCluster(std::string_view name) {
     const auto it = std::find_if(
         gClusters.cbegin(), gClusters.cend(),
         [name](const std::unique_ptr<Cluster>& c) { return c->name == name; }
@@ -137,7 +137,7 @@ const Node* findNode(Node::ID id) {
     return it != gNodes.cend() ? it->get() : nullptr;
 }
 
-const Node* findNode(const std::string& name) {
+const Node* findNode(std::string_view name) {
     const auto it = std::find_if(
         gNodes.cbegin(), gNodes.cend(),
         [name](const std::unique_ptr<Node>& n) { return n->name == name; }
@@ -173,7 +173,7 @@ const Program* findProgram(Program::ID id) {
     return it != gPrograms.cend() ? it->get() : nullptr;
 }
 
-const Program* findProgram(const std::string& name) {
+const Program* findProgram(std::string_view name) {
     const auto it = std::find_if(
         gPrograms.cbegin(), gPrograms.cend(),
         [name](const std::unique_ptr<Program>& p) { return p->name == name; }
@@ -192,7 +192,7 @@ const Program::Configuration* findConfigurationForProgram(const Program& program
 }
 
 const Program::Configuration* findConfigurationForProgram(const Program& program,
-                                                          const std::string& name)
+                                                          std::string_view name)
 {
     const auto it = std::find_if(
         program.configurations.cbegin(), program.configurations.cend(),
@@ -246,7 +246,7 @@ void setProcessStatus(Process::ID id, common::ProcessStatusMessage::Status statu
     }
 }
 
-Color colorForTag(const std::string& tag) {
+Color colorForTag(std::string_view tag) {
     // It doesn't make sense if someone requests the color for an empty tag
     assert(!tag.empty());
 
@@ -300,8 +300,8 @@ void setTagColors(std::vector<Color> colors) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-void loadData(const std::string& programPath, const std::string& clusterPath,
-              const std::string& nodePath)
+void loadData(std::string_view programPath, std::string_view clusterPath,
+              std::string_view nodePath)
 {
     gNodes.clear();
     std::vector<Node> nodes = loadNodesFromDirectory(nodePath);

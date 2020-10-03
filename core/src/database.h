@@ -43,6 +43,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace data {
@@ -53,22 +54,22 @@ std::vector<const Program*> programs();
 std::vector<const Process*> processes();
 
 const Cluster* findCluster(Cluster::ID id);
-const Cluster* findCluster(const std::string& name);
+const Cluster* findCluster(std::string_view name);
 std::vector<const Cluster*> findClustersForProgram(const Program& program);
 std::vector<const Cluster*> findClusterForNode(const Node& node);
 
 const Node* findNode(Node::ID id);
-const Node* findNode(const std::string& name);
+const Node* findNode(std::string_view name);
 std::vector<const Node*> findNodesForCluster(const Cluster& cluster);
 void setNodeConnected(Node::ID id, bool connected);
 
 const Program* findProgram(Program::ID id);
-const Program* findProgram(const std::string& name);
+const Program* findProgram(std::string_view name);
 
 const Program::Configuration* findConfigurationForProgram(const Program& program,
     Program::Configuration::ID id);
 const Program::Configuration* findConfigurationForProgram(const Program& program,
-    const std::string& name);
+    std::string_view name);
 
 bool hasTag(Program::ID id, const std::vector<std::string>& tags);
 std::set<std::string> findTags();
@@ -77,11 +78,11 @@ const Process* findProcess(Process::ID id);
 void addProcess(std::unique_ptr<Process> process);
 void setProcessStatus(Process::ID id, common::ProcessStatusMessage::Status status);
 
-Color colorForTag(const std::string& tag);
+Color colorForTag(std::string_view tag);
 void setTagColors(std::vector<Color> colors);
 
-void loadData(const std::string& programPath, const std::string& clusterPath,
-    const std::string& nodePath);
+void loadData(std::string_view programPath, std::string_view clusterPath,
+    std::string_view nodePath);
 
 std::size_t dataHash();
 

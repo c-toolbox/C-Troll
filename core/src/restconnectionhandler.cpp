@@ -39,7 +39,21 @@
 #include <QTcpSocket>
 #include <fmt/format.h>
 #include <optional>
+#include <string_view>
 
+namespace {
+    void sendResponse(QTcpSocket& socket, std::string error, std::string payload = "") {
+        std::string status = fmt::format("HTTP/1.1 {}\n", error);
+        if (payload.empty()) {
+            socket.write(status.data(), status.size());
+        }
+        else {
+            std::string message = fmt::format("{}\n\n{}", status, payload);
+            socket.write(message.data(), message.size());
+        }
+        socket.close();
+    }
+} // namespace
 
 RestConnectionHandler::RestConnectionHandler(QObject* parent, int port,
                                              std::string user, std::string password)
@@ -120,90 +134,162 @@ void RestConnectionHandler::handleNewConnection() {
     assert(std::find(_sockets.begin(), _sockets.end(), socket) != _sockets.end());
 
     QStringList tokens = QString(socket->readAll()).split(QRegExp("[ \r\n][ \r\n]*"));
-    qDebug() << tokens;
-    if (tokens.size() < 5 || tokens[0] != "POST") {
-        qDebug() << "1";
-        socket->close();
+    if (tokens.empty()) {
+        sendResponse(*socket, "400 Bad Request");
         return;
     }
 
     std::optional<std::string> authValue = authorization(tokens);
     std::optional<std::string> endpointValue = endpoint(tokens);
     if (!authValue.has_value() || !endpointValue.has_value()) {
-        qDebug() << "2" << authValue.has_value() << ' ' << endpointValue.has_value();
-        socket->close();
+        sendResponse(*socket, "400 Bad Request");
+        return;
+    }
+    if (*authValue != _secret) {
+        sendResponse(*socket, "401 Unauthorized");
         return;
     }
 
-    if (*authValue != _secret) {
-        qDebug() << "3";
-        socket->close();
+    HttpMethod method = parseMethod(tokens[0].toStdString());
+    if (method == HttpMethod::Unknown) {
+        sendResponse(*socket, "400 Bad Request");
+        return;
+    }
+
+    Endpoint endpoint = parseEndpoint(*endpointValue);
+    if (endpoint == Endpoint::Unknown) {
+        sendResponse(*socket, "404 Not Found");
         return;
     }
 
     std::map<std::string, std::string> params = parameters(tokens);
-    if (params.find("program") == params.end() ||
-        params.find("configuration") == params.end() ||
-        params.find("cluster") == params.end())
-    {
-        qDebug() << "4";
-        socket->close();
-        return;
-    }
+    handleMessage(*socket, method, endpoint, params);
+}
 
-    std::string clusterName = params["cluster"];
-    const Cluster* cluster = data::findCluster(clusterName);
-    if (cluster == nullptr) {
-        qDebug() << "5";
-        socket->close();
-        return;
-    }
 
-    std::string programName = params["program"];
-    const Program* program = data::findProgram(programName);
-    if (program == nullptr) {
-        qDebug() << "6";
-        socket->close();
-        return;
+RestConnectionHandler::HttpMethod RestConnectionHandler::parseMethod(
+                                                                   std::string_view value)
+{
+    if (value == "POST") {
+        return HttpMethod::Post;
     }
-
-    std::string configurationName = params["configuration"];
-    const Program::Configuration* configuration = data::findConfigurationForProgram(
-        *program,
-        configurationName
-    );
-    if (configuration == nullptr) {
-        qDebug() << "7";
-        socket->close();
-        return;
-    }
-
-    if (endpointValue == "/start") {
-        Log(
-            "REST",
-            fmt::format(
-                "Received command to start {} ({}) on {}",
-                program->name, configuration->name, cluster->name
-            )
-        );
-        emit startProgram(cluster->id, program->id, configuration->id);
-    }
-    else if (endpointValue == "/stop") {
-        Log(
-            "REST",
-            fmt::format(
-                "Received command to stop {} ({}) on {}",
-                program->name, configuration->name, cluster->name
-            )
-        );
-        emit stopProgram(cluster->id, program->id, configuration->id);
+    else if (value == "GET") {
+        return HttpMethod::Get;
     }
     else {
-        qDebug() << "7";
-        socket->close();
+        return HttpMethod::Unknown;
+    }
+}
+
+RestConnectionHandler::Endpoint RestConnectionHandler::parseEndpoint(
+                                                                   std::string_view value)
+{
+    if (value == "/start") {
+        return Endpoint::Start;
+    }
+    else if (value == "/stop") {
+        return Endpoint::Stop;
+    }
+    else {
+        return Endpoint::Unknown;
+    }
+}
+
+
+void RestConnectionHandler::handleMessage(QTcpSocket& socket, HttpMethod method,
+                                          Endpoint endpoint,
+                                         const std::map<std::string, std::string>& params)
+{
+    if (method == HttpMethod::Post && endpoint == Endpoint::Start) {
+        if (params.find("program") == params.end() ||
+            params.find("configuration") == params.end() ||
+            params.find("cluster") == params.end())
+        {
+            sendResponse(socket, "400 Bad Request");
+            return;
+        }
+
+        std::string cluster = params.at("cluster");
+        std::string program = params.at("program");
+        std::string configuration = params.at("configuration");
+        handleStartMessage(socket, cluster, program, configuration);
+    }
+    else if (method == HttpMethod::Post && endpoint == Endpoint::Stop) {
+        if (params.find("program") == params.end() ||
+            params.find("configuration") == params.end() ||
+            params.find("cluster") == params.end())
+        {
+            sendResponse(socket, "400 Bad Request");
+            return;
+        }
+
+        std::string cluster = params.at("cluster");
+        std::string program = params.at("program");
+        std::string configuration = params.at("configuration");
+        handleStopMessage(socket, cluster, program, configuration);
+    }
+    else {
+        sendResponse(socket, "400 Bad Request");
+    }
+}
+
+void RestConnectionHandler::handleStartMessage(QTcpSocket& socket,
+                                               std::string_view cluster,
+                                               std::string_view program,
+                                               std::string_view configuration)
+{
+    const Cluster* c = data::findCluster(cluster);
+    const Program* p = data::findProgram(program);
+    if ((c == nullptr) || (p == nullptr)) {
+        sendResponse(socket, "400 Bad Request");
+        return;
+    }
+    const Program::Configuration* conf = data::findConfigurationForProgram(
+        *p,
+        configuration
+    );
+    if (conf == nullptr) {
+        sendResponse(socket, "400 Bad Request");
         return;
     }
 
-    //socket->write(res.c_str());
-    socket->close();
+    Log(
+        "REST",
+        fmt::format(
+            "Received command to start {} ({}) on {}", p->name, conf->name, c->name
+        )
+    );
+    emit startProgram(c->id, p->id, conf->id);
+    sendResponse(socket, "200 OK");
+}
+
+void RestConnectionHandler::handleStopMessage(QTcpSocket& socket,
+                                              std::string_view cluster,
+                                              std::string_view program,
+                                              std::string_view configuration)
+{
+    const Cluster* c = data::findCluster(cluster);
+    const Program* p = data::findProgram(program);
+    if ((c == nullptr) || (p == nullptr)) {
+        sendResponse(socket, "400 Bad Request");
+        return;
+    }
+    const Program::Configuration* conf = data::findConfigurationForProgram(
+        *p,
+        configuration
+    );
+    if (conf == nullptr) {
+        sendResponse(socket, "400 Bad Request");
+        return;
+    }
+
+    Log(
+        "REST",
+        fmt::format(
+            "Received command to stop {} ({}) on {}",
+            p->name, conf->name, c->name
+        )
+    );
+    emit stopProgram(c->id, p->id, conf->id);
+    sendResponse(socket, "200 OK");
 }

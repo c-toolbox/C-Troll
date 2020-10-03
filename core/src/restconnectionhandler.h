@@ -59,6 +59,29 @@ private slots:
     void handleNewConnection();
 
 private:
+    enum class HttpMethod {
+        Get = 0,
+        Post,
+        Unknown
+    };
+
+    enum class Endpoint {
+        Start = 0,
+        Stop,
+        Unknown
+    };
+
+    HttpMethod parseMethod(std::string_view value);
+    Endpoint parseEndpoint(std::string_view value);
+
+    void handleMessage(QTcpSocket& socket, HttpMethod method, Endpoint endpoint,
+        const std::map<std::string, std::string>& params);
+
+    void handleStartMessage(QTcpSocket& socket, std::string_view cluster,
+        std::string_view program, std::string_view configuration);
+    void handleStopMessage(QTcpSocket& socket, std::string_view cluster,
+        std::string_view program, std::string_view configuration);
+
     QTcpServer _server;
 
     std::vector<QTcpSocket*> _sockets;
