@@ -57,7 +57,6 @@ set(SOURCE_FILES
   src/configuration.cpp
   src/database.cpp
   src/logwidget.cpp
-  src/main.cpp
   src/mainwindow.cpp
   src/node.cpp
   src/process.cpp
@@ -86,15 +85,26 @@ set(RESOURCE_FILES "")
 qt5_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
 
 add_executable(C-Troll WIN32 MACOSX_BUNDLE
+  src/main-ctroll.cpp
   ${SOURCE_FILES}
   ${HEADER_FILES}
   ${MOC_FILES}
   ${RESOURCE_FILES}
   ${CMAKE_SOURCE_DIR}/resources/icon.rc
 )
-
 target_include_directories(C-Troll PUBLIC "src")
 target_link_libraries(C-Troll PUBLIC common Qt5::Core Qt5::Widgets Qt5::Network)
+
+add_executable(Editor WIN32 MACOSX_BUNDLE
+  src/main-editor.cpp
+  ${SOURCE_FILES}
+  ${HEADER_FILES}
+  ${MOC_FILES}
+  ${RESOURCE_FILES}
+  ${CMAKE_SOURCE_DIR}/resources/icon.rc
+)
+target_include_directories(Editor PUBLIC "src")
+target_link_libraries(Editor PUBLIC common Qt5::Core Qt5::Widgets Qt5::Network)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # These warnings are in Qt 5.12.2 and raised on GCC 9.3.0
