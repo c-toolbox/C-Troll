@@ -38,6 +38,7 @@
 #include "logging.h"
 #include <QTcpSocket>
 #include <fmt/format.h>
+#include <json/json.hpp>
 #include <optional>
 #include <string_view>
 #include <tuple>
@@ -48,6 +49,19 @@ namespace {
         BadRequest,
         Unauthorized,
         NotFound
+    };
+
+    enum class HttpMethod {
+        Get = 0,
+        Post,
+        Unknown
+    };
+
+    enum class Endpoint {
+        StartProgram = 0,
+        StopProgram,
+        InfoProgram,
+        Unknown
     };
 
     void sendResponse(QTcpSocket& socket, Response response, std::string payload = "") {
@@ -72,27 +86,30 @@ namespace {
     }
 
 
-    RestConnectionHandler::HttpMethod parseMethod(std::string_view value) {
+    HttpMethod parseMethod(std::string_view value) {
         if (value == "POST") {
-            return RestConnectionHandler::HttpMethod::Post;
+            return HttpMethod::Post;
         }
         else if (value == "GET") {
-            return RestConnectionHandler::HttpMethod::Get;
+            return HttpMethod::Get;
         }
         else {
-            return RestConnectionHandler::HttpMethod::Unknown;
+            return HttpMethod::Unknown;
         }
     }
 
-    RestConnectionHandler::Endpoint parseEndpoint( std::string_view value) {
-        if (value == "/start") {
-            return RestConnectionHandler::Endpoint::Start;
+    Endpoint parseEndpoint(std::string_view value) {
+        if (value == "/program/start") {
+            return Endpoint::StartProgram;
         }
-        else if (value == "/stop") {
-            return RestConnectionHandler::Endpoint::Stop;
+        else if (value == "/program/stop") {
+            return Endpoint::StopProgram;
+        }
+        else if (value == "/program") {
+            return Endpoint::InfoProgram;
         }
         else {
-            return RestConnectionHandler::Endpoint::Unknown;
+            return Endpoint::Unknown;
         }
     }
 
@@ -236,12 +253,13 @@ void RestConnectionHandler::handleNewConnection() {
 
     std::optional<std::string> endpointValue = endpoint(tokens);
     HttpMethod method = parseMethod(tokens[0].toStdString());
-    Endpoint endpoint = parseEndpoint(*endpointValue);
+    Endpoint endpoint = endpointValue.has_value() ?
+        parseEndpoint(*endpointValue) :
+        Endpoint::Unknown;
 
-    const bool hasEndpoint = endpointValue.has_value();
     const bool hasMethod = method != HttpMethod::Unknown;
     const bool hasEndpoint = endpoint != Endpoint::Unknown;
-    if (!hasEndpoint || !hasMethod || !hasEndpoint) {
+    if (!hasMethod || !hasEndpoint) {
         sendResponse(*socket, Response::BadRequest);
         return;
     }
@@ -257,38 +275,40 @@ void RestConnectionHandler::handleNewConnection() {
     }
 
     std::map<std::string, std::string> params = parameters(tokens);
-    handleMessage(*socket, method, endpoint, params);
-}
 
-void RestConnectionHandler::handleMessage(QTcpSocket& socket, HttpMethod method,
-                                          Endpoint endpoint,
-                                         const std::map<std::string, std::string>& params)
-{
-    if (method == HttpMethod::Post && endpoint == Endpoint::Start) {
+    //
+    // Handle message
+    if (method == HttpMethod::Post && endpoint == Endpoint::StartProgram) {
         ProgramInfo pi = extractProgramInfo(params);
         if (!pi) {
-            sendResponse(socket, Response::BadRequest);
+            sendResponse(*socket, Response::BadRequest);
             return;
         }
 
-        handleStartMessage(socket, *pi.cluster, *pi.program, *pi.configuration);
+        handleStartProgramMessage(*socket, *pi.cluster, *pi.program, *pi.configuration);
     }
-    else if (method == HttpMethod::Post && endpoint == Endpoint::Stop) {
+    else if (method == HttpMethod::Post && endpoint == Endpoint::StopProgram) {
         ProgramInfo pi = extractProgramInfo(params);
         if (!pi) {
-            sendResponse(socket, Response::BadRequest);
+            sendResponse(*socket, Response::BadRequest);
             return;
         }
 
-        handleStopMessage(socket, *pi.cluster, *pi.program, *pi.configuration);
+        handleStopProgramMessage(*socket, *pi.cluster, *pi.program, *pi.configuration);
+    }
+    else if (method == HttpMethod::Get && endpoint == Endpoint::InfoProgram) {
+        handleProgramInfoMessage(*socket);
+
+
     }
     else {
-        sendResponse(socket, Response::BadRequest);
+        sendResponse(*socket, Response::BadRequest);
     }
 }
 
-void RestConnectionHandler::handleStartMessage(QTcpSocket& socket, const Cluster& cluster,
-                                               const Program& program,
+void RestConnectionHandler::handleStartProgramMessage(QTcpSocket& socket,
+                                                      const Cluster& cluster,
+                                                      const Program& program,
                                               const Program::Configuration& configuration)
 {
     Log(
@@ -302,8 +322,9 @@ void RestConnectionHandler::handleStartMessage(QTcpSocket& socket, const Cluster
     sendResponse(socket, Response::Ok);
 }
 
-void RestConnectionHandler::handleStopMessage(QTcpSocket& socket, const Cluster& cluster,
-                                              const Program& program,
+void RestConnectionHandler::handleStopProgramMessage(QTcpSocket& socket,
+                                                     const Cluster& cluster,
+                                                     const Program& program,
                                               const Program::Configuration& configuration)
 {
     Log(
@@ -315,4 +336,26 @@ void RestConnectionHandler::handleStopMessage(QTcpSocket& socket, const Cluster&
     );
     emit stopProgram(cluster.id, program.id, configuration.id);
     sendResponse(socket, Response::Ok);
+}
+
+void RestConnectionHandler::handleProgramInfoMessage(QTcpSocket& socket) {
+    std::vector<const Program*> programs = data::programs();
+    nlohmann::json result = nlohmann::json::array();
+    for (const Program* program : programs) {
+        nlohmann::json p;
+        p["name"] = program->name;
+        p["tags"] = program->tags;
+        p["configurations"] = nlohmann::json::array();
+        for (const Program::Configuration& conf : program->configurations) {
+            p["configurations"].push_back(conf.name);
+        }
+        p["clusters"] = nlohmann::json::array();
+        for (Cluster::ID id : program->clusters) {
+            const Cluster* cluster = data::findCluster(id);
+            p["clusters"].push_back(cluster->name);
+        }
+        result.push_back(p);
+    }
+
+    sendResponse(socket, Response::Ok, result.dump());
 }

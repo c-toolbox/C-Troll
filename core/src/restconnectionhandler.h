@@ -45,18 +45,6 @@
 class RestConnectionHandler : public QObject {
 Q_OBJECT
 public:
-    enum class HttpMethod {
-        Get = 0,
-        Post,
-        Unknown
-    };
-
-    enum class Endpoint {
-        Start = 0,
-        Stop,
-        Unknown
-    };
-
     RestConnectionHandler(QObject* parent, int port, std::string user,
         std::string password);
 
@@ -71,13 +59,11 @@ private slots:
     void handleNewConnection();
 
 private:
-    void handleMessage(QTcpSocket& socket, HttpMethod method, Endpoint endpoint,
-        const std::map<std::string, std::string>& params);
-
-    void handleStartMessage(QTcpSocket& socket, const Cluster& cluster,
+    void handleStartProgramMessage(QTcpSocket& socket, const Cluster& cluster,
         const Program& program, const Program::Configuration& configuration);
-    void handleStopMessage(QTcpSocket& socket, const Cluster& cluster,
+    void handleStopProgramMessage(QTcpSocket& socket, const Cluster& cluster,
         const Program& program, const Program::Configuration& configuration);
+    void handleProgramInfoMessage(QTcpSocket& socket);
 
     QTcpServer _server;
     std::vector<QTcpSocket*> _sockets;
