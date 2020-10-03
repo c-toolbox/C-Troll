@@ -90,6 +90,7 @@ add_executable(C-Troll WIN32 MACOSX_BUNDLE
   ${HEADER_FILES}
   ${MOC_FILES}
   ${RESOURCE_FILES}
+  ${CMAKE_SOURCE_DIR}/resources/icon.rc
 )
 
 target_include_directories(C-Troll PUBLIC "src")

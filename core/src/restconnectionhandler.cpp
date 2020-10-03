@@ -60,6 +60,7 @@ namespace {
     enum class Endpoint {
         StartProgram,
         StopProgram,
+        InfoApi,
         InfoCluster,
         InfoProgram,
         InfoNode,
@@ -122,6 +123,9 @@ namespace {
         }
         else if ((value == "/node") || (value == "/node/")) {
             return Endpoint::InfoNode;
+        }
+        else if ((value == "/api") || (value == "/api/")) {
+            return Endpoint::InfoApi;
         }
         else {
             return Endpoint::Unknown;
@@ -315,6 +319,9 @@ void RestConnectionHandler::handleNewConnection() {
     else if (method == HttpMethod::Get && endpoint == Endpoint::InfoNode) {
         handleNodeInfoMessage(*socket);
     }
+    else if (method == HttpMethod::Get && endpoint == Endpoint::InfoApi) {
+        handleApiInfoMessage(*socket);
+    }
     else {
         sendResponse(*socket, Response::BadRequest);
     }
@@ -405,6 +412,38 @@ void RestConnectionHandler::handleNodeInfoMessage(QTcpSocket& socket) {
         n["isConnected"] = node->isConnected;
         result.push_back(n);
     }
+
+    sendResponse(socket, Response::Ok, result);
+}
+
+void RestConnectionHandler::handleApiInfoMessage(QTcpSocket& socket) {
+    nlohmann::json result;
+    result["endpoints"] = nlohmann::json::array();
+
+    result["endpoints"].push_back({
+        { "url", "/program/start" },
+        { "description", "Starts already registered programs" }
+    });
+
+    result["endpoints"].push_back({
+        { "url", "/program/stop" },
+        { "description", "Stops already registered programs" }
+    });
+
+    result["endpoints"].push_back({
+        { "url", "/program" },
+        { "description", "Gets information about the available programs" }
+    });
+
+    result["endpoints"].push_back({
+        { "url", "/cluster" },
+        { "description", "Gets information about the available clusters" }
+    });
+
+    result["endpoints"].push_back({
+        { "url", "/node" },
+        { "description", "Gets information about the available nodes" }
+    });
 
     sendResponse(socket, Response::Ok, result);
 }

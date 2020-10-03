@@ -66,6 +66,7 @@ private:
     void handleProgramInfoMessage(QTcpSocket& socket);
     void handleClusterInfoMessage(QTcpSocket& socket);
     void handleNodeInfoMessage(QTcpSocket& socket);
+    void handleApiInfoMessage(QTcpSocket& socket);
 
     QTcpServer _server;
     std::vector<QTcpSocket*> _sockets;

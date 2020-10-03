@@ -68,6 +68,7 @@ add_executable(Tray WIN32 MACOSX_BUNDLE
   ${HEADER_FILES}
   ${MOC_FILES}
   ${RESOURCE_FILES}
+  ${CMAKE_SOURCE_DIR}/resources/icon.rc
 )
 
 target_link_libraries(Tray PUBLIC common Qt5::Core Qt5::Widgets Qt5::Network)

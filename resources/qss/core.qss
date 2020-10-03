@@ -9,7 +9,8 @@
 
 
 QToolTip {
-  color: #151515;
+  background-color: #454545;
+  color: #efefef;
   border: 2px solid #202020;
   padding: 5px;
   border-radius: 3px;
@@ -195,28 +196,28 @@ ProcessesWidget  QPushButton#removeprocess:disabled {
 /*
  * ConfigurationWidget
  */
-ConfigurationWidget  QLineEdit, QSpinBox {
+SettingsWidget  QLineEdit, QSpinBox {
   font-size: 10pt;
 }
 
-ConfigurationWidget  QLabel#important {
+SettingsWidget  QLabel#important {
   color: #ff3b34;
   font-size: 16pt;
 }
 
-ConfigurationWidget  QPushButton#control {
+SettingsWidget  QPushButton#control {
   padding-left: 25%;
   padding-right: 25%;
 }
 
-ConfigurationWidget  ColorWidget > QPushButton {
+SettingsWidget  ColorWidget > QPushButton {
   height: 1em;
   width: 1em;
 
   /* background-color is specified in the C++ source code */
 }
 
-ConfigurationWidget  QFrame#line {
+SettingsWidget  QFrame#line {
   background-color: #dddddd;
   border: 1px solid #dddddd;
 }

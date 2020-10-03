@@ -2,8 +2,5 @@
   "applicationPath": "application",
   "clusterPath": "cluster",
   "nodePath": "nodes",
-  "rest": {
-    "password": "gg",
-    "username": "ff"
-  }
+  "rest": {}
 }

@@ -74,8 +74,12 @@ void to_json(nlohmann::json& j, const Color& c) {
 }
 
 void to_json(nlohmann::json& j, const Configuration::Rest& r) {
-    j[KeyRestUsername] = r.username;
-    j[KeyRestPassword] = r.password;
+    if (!r.username.empty()) {
+        j[KeyRestUsername] = r.username;
+    }
+    if (!r.password.empty()) {
+        j[KeyRestPassword] = r.password;
+    }
     if (r.port != Configuration::Rest().port) {
         j[KeyRestPort] = r.port;
     }
@@ -121,8 +125,12 @@ void from_json(const nlohmann::json& j, Color& c) {
 }
 
 void from_json(const nlohmann::json& j, Configuration::Rest& r) {
-    j.at(KeyRestUsername).get_to(r.username);
-    j.at(KeyRestPassword).get_to(r.password);
+    if (j.find(KeyRestUsername) != j.end()) {
+        j[KeyRestUsername].get_to(r.username);
+    }
+    if (j.find(KeyRestPassword) != j.end()) {
+        j[KeyRestPassword].get_to(r.username);
+    }
     if (j.find(KeyRestPort) != j.end()) {
         j[KeyRestPort].get_to(r.port);
     }

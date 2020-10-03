@@ -85,7 +85,7 @@ struct Configuration {
     struct Rest {
         std::string username;
         std::string password;
-        int port = 8080;
+        int port = 7000;
     };
     std::optional<Rest> rest;
 };
