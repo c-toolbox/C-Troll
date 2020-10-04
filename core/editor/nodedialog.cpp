@@ -32,37 +32,105 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "mainwindow.h"
-#include <QApplication>
-#include <QFile>
-#include <QIcon>
+#include "nodedialog.h"
+
+#include "jsonload.h"
+#include "node.h"
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QVBoxLayout>
+#include <filesystem>
 
-int main(int argc, char** argv) {
-    Q_INIT_RESOURCE(resources);
+NodeDialog::NodeDialog(QWidget* parent, std::string path)
+    : QDialog(parent)
+    , _path(std::move(path))
+{
+    assert(!_path.empty());
 
-    QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+    setWindowTitle(QString::fromStdString("Node: " + _path));
+
+    QBoxLayout* layout = new QVBoxLayout(this);
 
     {
-        QFile file(":/qss/core.qss");
-        file.open(QFile::ReadOnly);
-        QString styleSheet = QLatin1String(file.readAll());
-        app.setStyleSheet(styleSheet);
+        QWidget* edit = new QWidget;
+        QGridLayout* editLayout = new QGridLayout(edit);
+        editLayout->setMargin(0);
+
+        editLayout->addWidget(new QLabel("Name:"), 0, 0);
+        _name = new QLineEdit;
+        editLayout->addWidget(_name, 0, 1);
+
+        editLayout->addWidget(new QLabel("IP:"), 1, 0);
+        _ip = new QLineEdit;
+        editLayout->addWidget(_ip, 1, 1);
+
+        editLayout->addWidget(new QLabel("Port:"), 2, 0);
+        _port = new QSpinBox;
+        _port->setMinimum(0);
+        _port->setMaximum(std::numeric_limits<int>::max());
+        editLayout->addWidget(_port, 2, 1);
+
+        editLayout->addWidget(new QLabel("Secret"), 3, 0);
+        _secret = new QLineEdit;
+        editLayout->addWidget(_secret, 3, 1);
+
+        layout->addWidget(edit);
     }
 
-    MainWindow mw;
-    mw.show();
-    try {
-        app.exec();
-    }
-    catch (const std::exception& e) {
-        QMessageBox::critical(nullptr, "Exception", e.what());
-    }
-    catch (...) {
-        QMessageBox::critical(nullptr, "Exception", "Unknown error");
+    {
+        QWidget* control = new QWidget;
+        QBoxLayout* controlLayout = new QHBoxLayout(control);
+
+        QPushButton* save = new QPushButton("Save");
+        connect(save, &QPushButton::clicked, this, &NodeDialog::save);
+        controlLayout->addWidget(save);
+
+        QPushButton* cancel = new QPushButton("Cancel");
+        connect(cancel, &QPushButton::clicked, this, &QDialog::reject);
+        controlLayout->addWidget(cancel);
+
+
+        layout->addWidget(control, 0, Qt::AlignRight);
     }
 
-    Q_CLEANUP_RESOURCE(resources);
-    return 0;
+    if (std::filesystem::exists(_path)) {
+        Node node = common::loadFromJson<Node>(_path);
+
+        _name->setText(QString::fromStdString(node.name));
+        _ip->setText(QString::fromStdString(node.ipAddress));
+        _port->setValue(node.port);
+        _secret->setText(QString::fromStdString(node.secret));
+    }
+}
+
+void NodeDialog::save() {
+    if (_name->text().isEmpty()) {
+        QMessageBox::critical(this, "Error", "Name must not be empty");
+        return;
+    }
+
+    if (_ip->text().isEmpty()) {
+        QMessageBox::critical(this, "Error", "IP must not be empty");
+        return;
+    }
+
+    Node node;
+    node.name = _name->text().toStdString();
+    node.ipAddress = _ip->text().toStdString();
+    node.port = _port->value();
+    node.secret = _secret->text().toStdString();
+
+    if (std::filesystem::path(_path).extension().empty()) {
+        common::saveToJson(_path + ".json", node);
+    }
+    else {
+        common::saveToJson(_path, node);
+    }
+
+    accept();
 }

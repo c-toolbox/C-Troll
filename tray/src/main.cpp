@@ -39,6 +39,7 @@
 #include "processhandler.h"
 #include "sockethandler.h"
 #include <QApplication>
+#include <QMessageBox>
 #include <QTimer>
 #include <fmt/format.h>
 #include <json/json.hpp>
@@ -176,6 +177,16 @@ int main(int argc, char** argv) {
         &mw, &MainWindow::endedProcess
     );
 
-    app.exec();
-    Log("Status", "Application finished");
+    try {
+        app.exec();
+    }
+    catch (const std::exception& e) {
+        QMessageBox::critical(nullptr, "Exception", e.what());
+    }
+    catch (...) {
+        QMessageBox::critical(nullptr, "Exception", "Unknown error");
+    }
+
+    Q_CLEANUP_RESOURCE(resources);
+    return 0;
 }

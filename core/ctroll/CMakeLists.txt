@@ -35,9 +35,12 @@
 set(HEADER_FILES
   clusterconnectionhandler.h
   clusterwidget.h
+  color.h
   configuration.h
+  database.h
   logwidget.h
   mainwindow.h
+  process.h
   processwidget.h
   programwidget.h
   restconnectionhandler.h
@@ -48,9 +51,12 @@ set(HEADER_FILES
 set(SOURCE_FILES
   clusterconnectionhandler.cpp
   clusterwidget.cpp
+  color.cpp
   configuration.cpp
+  database.cpp
   logwidget.cpp
   mainwindow.cpp
+  process.cpp
   processwidget.cpp
   programwidget.cpp
   restconnectionhandler.cpp

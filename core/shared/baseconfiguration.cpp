@@ -32,37 +32,23 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "mainwindow.h"
-#include <QApplication>
-#include <QFile>
-#include <QIcon>
-#include <QMessageBox>
+#include "baseconfiguration.h"
 
-int main(int argc, char** argv) {
-    Q_INIT_RESOURCE(resources);
+namespace {
+    constexpr const char* KeyApplicationPath = "applicationPath";
+    constexpr const char* KeyClusterPath = "clusterPath";
+    constexpr const char* KeyNodePath = "nodePath";
+} // namespace
 
-    QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+void to_json(nlohmann::json& j, const BaseConfiguration& c) {
+    j[KeyApplicationPath] = c.applicationPath;
+    j[KeyClusterPath] = c.clusterPath;
+    j[KeyNodePath] = c.nodePath;
 
-    {
-        QFile file(":/qss/core.qss");
-        file.open(QFile::ReadOnly);
-        QString styleSheet = QLatin1String(file.readAll());
-        app.setStyleSheet(styleSheet);
-    }
+}
 
-    MainWindow mw;
-    mw.show();
-    try {
-        app.exec();
-    }
-    catch (const std::exception& e) {
-        QMessageBox::critical(nullptr, "Exception", e.what());
-    }
-    catch (...) {
-        QMessageBox::critical(nullptr, "Exception", "Unknown error");
-    }
-
-    Q_CLEANUP_RESOURCE(resources);
-    return 0;
+void from_json(const nlohmann::json& j, BaseConfiguration& c) {
+    j.at(KeyApplicationPath).get_to(c.applicationPath);
+    j.at(KeyClusterPath).get_to(c.clusterPath);
+    j.at(KeyNodePath).get_to(c.nodePath);
 }

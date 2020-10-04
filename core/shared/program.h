@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__PROGRAM_H__
-#define __CORE__PROGRAM_H__
+#ifndef __SHARED__PROGRAM_H__
+#define __SHARED__PROGRAM_H__
 
 #include "cluster.h"
 #include "typedid.h"
@@ -78,11 +78,12 @@ struct Program {
     /// List of all configurations
     std::vector<Configuration> configurations;
     /// List of all clusters
-    std::vector<Cluster::ID> clusters;
+    std::vector<std::string> clusters;
 };
 
 std::vector<Program> loadProgramsFromDirectory(std::string_view directory);
 
 void from_json(const nlohmann::json& j, Program& p);
+void to_json(nlohmann::json& j, const Program& p);
 
-#endif // __CORE__PROGRAM_H__
+#endif // __SHARED__PROGRAM_H__

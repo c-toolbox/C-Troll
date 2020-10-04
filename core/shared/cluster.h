@@ -32,10 +32,9 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__CLUSTER_H__
-#define __CORE__CLUSTER_H__
+#ifndef __SHARED__CLUSTER_H__
+#define __SHARED__CLUSTER_H__
 
-#include "node.h"
 #include "typedid.h"
 #include <json/json.hpp>
 
@@ -53,13 +52,14 @@ struct Cluster {
     std::string name;
 
     /// A flag whether this Cluster is enabled or disabled
-    bool isEnabled = false;
+    bool isEnabled = true;
 
     /// A list of all nodes belonging to this cluster
-    std::vector<Node::ID> nodes;
+    std::vector<std::string> nodes;
 };
 
-void from_json(const nlohmann::json& j, Cluster& p);
+void from_json(const nlohmann::json& j, Cluster& c);
+void to_json(nlohmann::json& j, const Cluster& c);
 
 /**
  * This method walks the passed \p directory and looks for all <code>*.json</code>
@@ -71,4 +71,4 @@ void from_json(const nlohmann::json& j, Cluster& p);
  */
 std::vector<Cluster> loadClustersFromDirectory(std::string_view directory);
 
-#endif // __CORE__CLUSTER_H__
+#endif // __SHARED__CLUSTER_H__

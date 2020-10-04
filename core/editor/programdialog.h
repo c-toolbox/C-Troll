@@ -32,37 +32,60 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "mainwindow.h"
-#include <QApplication>
-#include <QFile>
-#include <QIcon>
-#include <QMessageBox>
+#ifndef __EDITOR__PROGRAMDIALOG_H__
+#define __EDITOR__PROGRAMDIALOG_H__
 
-int main(int argc, char** argv) {
-    Q_INIT_RESOURCE(resources);
+#include <QDialog>
+#include <QWidget>
+#include <string>
+#include <vector>
 
-    QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+class QBoxLayout;
+class QCheckBox;
+class QLineEdit;
+class QSpinBox;
 
-    {
-        QFile file(":/qss/core.qss");
-        file.open(QFile::ReadOnly);
-        QString styleSheet = QLatin1String(file.readAll());
-        app.setStyleSheet(styleSheet);
-    }
+class ProgramDialog : public QDialog {
+Q_OBJECT
+public:
+    ProgramDialog(QWidget* parent, std::string path);
 
-    MainWindow mw;
-    mw.show();
-    try {
-        app.exec();
-    }
-    catch (const std::exception& e) {
-        QMessageBox::critical(nullptr, "Exception", e.what());
-    }
-    catch (...) {
-        QMessageBox::critical(nullptr, "Exception", "Unknown error");
-    }
+private:
+    struct Configuration {
+        QLineEdit* name = nullptr;
+        QLineEdit* parameters = nullptr;
+    };
 
-    Q_CLEANUP_RESOURCE(resources);
-    return 0;
-}
+private slots:
+    void save();
+    QLineEdit* addTag();
+    Configuration* addConfiguration();
+    QLineEdit* addCluster();
+
+private:
+    void removeTag(QLineEdit* sender);
+    void removeConfiguration(const Configuration& configuration);
+    void removeCluster(QLineEdit* configuration);
+    
+    const std::string _path;
+
+    QLineEdit* _name = nullptr;
+    QLineEdit* _executable = nullptr;
+    QLineEdit* _commandLineParameters = nullptr;
+    QLineEdit* _workingDirectory = nullptr;
+    QCheckBox* _shouldForwardMessages = nullptr;
+
+    QCheckBox* _hasDelay = nullptr;
+    QSpinBox* _delay = nullptr;
+
+    QBoxLayout* _tagLayout = nullptr;
+    std::vector<QLineEdit*> _tags;
+
+    QBoxLayout* _configurationLayout = nullptr;
+    std::vector<Configuration> _configurations;
+
+    QBoxLayout* _clusterLayout = nullptr;
+    std::vector<QLineEdit*> _clusters;
+};
+
+#endif // __EDITOR__PROGRAMDIALOG_H__

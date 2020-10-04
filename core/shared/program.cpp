@@ -34,7 +34,6 @@
 
 #include "program.h"
 
-#include "database.h"
 #include "jsonload.h"
 #include "logging.h"
 #include <fmt/format.h>
@@ -58,6 +57,11 @@ namespace {
 void from_json(const nlohmann::json& j, Program::Configuration& p) {
     j.at(KeyConfigurationName).get_to(p.name);
     j.at(KeyConfigurationParameters).get_to(p.parameters);
+}
+
+void to_json(nlohmann::json& j, const Program::Configuration& p) {
+    j[KeyConfigurationName] = p.name;
+    j[KeyConfigurationParameters] = p.parameters;
 }
 
 void from_json(const nlohmann::json& j, Program& p) {
@@ -87,48 +91,33 @@ void from_json(const nlohmann::json& j, Program& p) {
         p.configurations.push_back({ Program::Configuration::ID(0), "Default", "" });
     }
 
-    std::vector<std::string> clusters = j.at(KeyClusters).get<std::vector<std::string>>();
-    for (const std::string& cluster : clusters) {
-        const Cluster* c = data::findCluster(cluster);
-        if (!c) {
-            std::string message = fmt::format("Could not find cluster '{}'", cluster);
-            Log("Error", message);
-            throw std::runtime_error(message);
-        }
-        p.clusters.push_back(c->id);
+    j.at(KeyClusters).get_to(p.clusters);
+}
+
+void to_json(nlohmann::json& j, const Program& p) {
+    j[KeyName] = p.name;
+    j[KeyExecutable] = p.executable;
+    if (!p.commandlineParameters.empty()) {
+        j[KeyCommandlineParameters] = p.commandlineParameters;
     }
+    if (!p.workingDirectory.empty()) {
+        j[KeyWorkingDirectory] = p.workingDirectory;
+    }
+    if (!p.tags.empty()) {
+        j[KeyTags] = p.tags;
+    }
+    if (p.shouldForwardMessages) {
+        j[KeySendConsole] = p.shouldForwardMessages;
+    }
+    if (p.delay.has_value()) {
+        j[KeyDelay] = p.delay->count();
+    }
+    j[KeyConfigurations] = p.configurations;
+    j[KeyClusters] = p.clusters;
 }
 
 std::vector<Program> loadProgramsFromDirectory(std::string_view directory) {
     std::vector<Program> programs = common::loadJsonFromDirectory<Program>(directory);
-
-    auto validate = [](const Program& program) {
-        if (program.name.empty()) {
-            throw std::runtime_error("No name specified for program");
-        }
-        if (program.executable.empty()) {
-            throw std::runtime_error(fmt::format(
-                "No executable specified for program {}", program.name
-            ));
-        }
-        if (program.clusters.empty()) {
-            throw std::runtime_error(fmt::format(
-                "No clusters specified for program {}", program.name
-            ));
-        }
-
-        const bool hasEmptyTag = std::any_of(
-            program.tags.cbegin(), program.tags.cend(),
-            std::mem_fn(&std::string::empty)
-        );
-        if (hasEmptyTag) {
-            throw std::runtime_error(fmt::format(
-                "At least one tag of the program {} has an empty tag", program.name
-            ));
-        }
-    };
-
-    std::for_each(programs.cbegin(), programs.cend(), validate);
 
     // Inject the unique identifiers into the nodes
     int programId = 0;

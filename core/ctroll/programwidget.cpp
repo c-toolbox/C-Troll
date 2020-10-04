@@ -223,14 +223,20 @@ bool ProgramButton::isProcessRunning(Node::ID nodeId) const {
 bool ProgramButton::hasNoProcessRunning() const {
     return std::none_of(
         _cluster->nodes.cbegin(), _cluster->nodes.cend(),
-        [this](Node::ID n) { return isProcessRunning(n); }
+        [this](const std::string& n) {
+            const Node* node = data::findNode(n);
+            return isProcessRunning(node->id);
+        }
     );
 }
 
 bool ProgramButton::hasAllProcessesRunning() const {
     return std::all_of(
         _cluster->nodes.cbegin(), _cluster->nodes.cend(),
-        [this](Node::ID n) { return isProcessRunning(n); }
+        [this](const std::string& n) {
+            const Node* node = data::findNode(n);
+            return isProcessRunning(node->id);
+        }
     );
 }
 

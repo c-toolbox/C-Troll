@@ -3,7 +3,8 @@
     <file>images/C_transparent.png</file>
     <file>images/C_desaturated.png</file>
     <file>images/x.png</file>
-    <file>qss/tray.qss</file>
     <file>qss/core.qss</file>
+    <file>qss/editor.qss</file>
+    <file>qss/tray.qss</file>
   </qresource>
 </RCC>

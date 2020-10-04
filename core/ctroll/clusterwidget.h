@@ -40,6 +40,7 @@
 #include <QWidget>
 
 #include "cluster.h"
+#include "node.h"
 #include <map>
 
 class QLabel;

@@ -33,10 +33,18 @@
 ##########################################################################################
 
 set(HEADER_FILES
+  clusterdialog.h
+  mainwindow.h
+  nodedialog.h
+  programdialog.h
 )
 
 set(SOURCE_FILES
+  clusterdialog.cpp
   main.cpp
+  mainwindow.cpp
+  nodedialog.cpp
+  programdialog.cpp
 )
 
 find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
@@ -44,6 +52,10 @@ find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
 set(MOC_FILES "")
 qt5_wrap_cpp(
   MOC_FILES
+  clusterdialog.h
+  mainwindow.h
+  nodedialog.h
+  programdialog.h  
 )
 
 set(RESOURCE_FILES "")

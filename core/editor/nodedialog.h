@@ -32,37 +32,31 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "mainwindow.h"
-#include <QApplication>
-#include <QFile>
-#include <QIcon>
-#include <QMessageBox>
+#ifndef __EDITOR__NODEDIALOG_H__
+#define __EDITOR__NODEDIALOG_H__
 
-int main(int argc, char** argv) {
-    Q_INIT_RESOURCE(resources);
+#include <QDialog>
+#include <QWidget>
+#include <string>
 
-    QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+class QLineEdit;
+class QSpinBox;
 
-    {
-        QFile file(":/qss/core.qss");
-        file.open(QFile::ReadOnly);
-        QString styleSheet = QLatin1String(file.readAll());
-        app.setStyleSheet(styleSheet);
-    }
+class NodeDialog : public QDialog {
+Q_OBJECT
+public:
+    NodeDialog(QWidget* parent, std::string path);
 
-    MainWindow mw;
-    mw.show();
-    try {
-        app.exec();
-    }
-    catch (const std::exception& e) {
-        QMessageBox::critical(nullptr, "Exception", e.what());
-    }
-    catch (...) {
-        QMessageBox::critical(nullptr, "Exception", "Unknown error");
-    }
+private slots:
+    void save();
 
-    Q_CLEANUP_RESOURCE(resources);
-    return 0;
-}
+private:
+    const std::string _path;
+
+    QLineEdit* _name = nullptr;
+    QLineEdit* _ip = nullptr;
+    QSpinBox* _port = nullptr;
+    QLineEdit* _secret = nullptr;
+};
+
+#endif // __EDITOR__NODEDIALOG_H__

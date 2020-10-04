@@ -371,8 +371,8 @@ void RestConnectionHandler::handleProgramInfoMessage(QTcpSocket& socket) {
             p["configurations"].push_back(conf.name);
         }
         p["clusters"] = nlohmann::json::array();
-        for (Cluster::ID id : program->clusters) {
-            const Cluster* cluster = data::findCluster(id);
+        for (const std::string& clusterName : program->clusters) {
+            const Cluster* cluster = data::findCluster(clusterName);
             p["clusters"].push_back(cluster->name);
         }
         result.push_back(p);
@@ -390,9 +390,9 @@ void RestConnectionHandler::handleClusterInfoMessage(QTcpSocket& socket) {
             c["name"] = cluster->name;
             c["nodes"] = nlohmann::json::array();
             bool allConnected = true;
-            for (Node::ID nid : cluster->nodes) {
-                const Node* node = data::findNode(nid);
-                c["nodes"].push_back(node->name);
+            for (const std::string& nodeName : cluster->nodes) {
+                const Node* node = data::findNode(nodeName);
+                c["nodes"].push_back(nodeName);
                 allConnected &= node->isConnected;
             }
             c["allConnected"] = allConnected;

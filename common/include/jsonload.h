@@ -38,6 +38,7 @@
 #include "logging.h"
 #include <QDirIterator>
 #include <fmt/format.h>
+#include <json/json.hpp>
 #include <filesystem>
 #include <string>
 #include <string_view>
@@ -62,6 +63,15 @@ T loadFromJson(const std::string& jsonFile) {
     nlohmann::json obj;
     f >> obj;
     return T(obj);
+}
+
+template <typename T>
+void saveToJson(const std::string& filename, const T& value) {
+    nlohmann::json obj;
+    to_json(obj, value);
+
+    std::ofstream j(filename);
+    j << obj.dump(2);
 }
 
 /**

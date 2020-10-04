@@ -35,6 +35,7 @@
 #ifndef __CORE__CONFIGURATION_H__
 #define __CORE__CONFIGURATION_H__
 
+#include "baseconfiguration.h"
 #include "color.h"
 #include "logconfiguration.h"
 #include <json/json.hpp>
@@ -44,13 +45,7 @@
 #include <vector>
 
 /// This structure represents the configuration loaded at startup
-struct Configuration {
-    /// The path that contains the JSON objects describing the available applications
-    std::string applicationPath = "application";
-    /// The path that contains the JSON objects describing the available clusters
-    std::string clusterPath = "cluster";
-    /// The path that contains the JSON objects describing the available nodes
-    std::string nodePath = "nodes";
+struct Configuration : public BaseConfiguration {
     /// The timeout after which the information of a successful process is removed
     std::chrono::milliseconds removalTimeout = std::chrono::milliseconds(15000);
 

@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__TYPED_ID_H__
-#define __CORE__TYPED_ID_H__
+#ifndef __SHARED__TYPED_ID_H__
+#define __SHARED__TYPED_ID_H__
 
 template <typename T, typename Tag>
 struct TypedId {
@@ -48,4 +48,4 @@ struct TypedId {
     T v = T(0);
 };
 
-#endif // __CORE__TYPED_ID_H__
+#endif // __SHARED__TYPED_ID_H__

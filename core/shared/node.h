@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__NODE_H__
-#define __CORE__NODE_H__
+#ifndef __SHARED__NODE_H__
+#define __SHARED__NODE_H__
 
 #include "typedid.h"
 #include <json/json.hpp>
@@ -61,7 +61,8 @@ struct Node {
     bool isConnected = false;
 };
 
-void from_json(const nlohmann::json& j, Node& p);
+void from_json(const nlohmann::json& j, Node& n);
+void to_json(nlohmann::json& j, const Node& n);
 
 /**
  * This method walks the passed \p directory and looks for all <code>*.json</code>
@@ -73,4 +74,4 @@ void from_json(const nlohmann::json& j, Node& p);
  */
 std::vector<Node> loadNodesFromDirectory(std::string_view directory);
 
-#endif // __CORE__CLUSTER_H__
+#endif // __SHARED__NODE_H__

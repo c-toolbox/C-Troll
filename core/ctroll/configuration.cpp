@@ -35,9 +35,6 @@
 #include "configuration.h"
 
 namespace {
-    constexpr const char* KeyApplicationPath = "applicationPath";
-    constexpr const char* KeyClusterPath = "clusterPath";
-    constexpr const char* KeyNodePath = "nodePath";
     constexpr const char* KeyRemovalTimeout = "removalTimeout";
 
     constexpr const char* KeyLogFile = "logFile";
@@ -64,9 +61,8 @@ void to_json(nlohmann::json& j, const Configuration::Rest& r) {
 }
 
 void to_json(nlohmann::json& j, const Configuration& c) {
-    j[KeyApplicationPath] = c.applicationPath;
-    j[KeyClusterPath] = c.clusterPath;
-    j[KeyNodePath] = c.nodePath;
+    to_json(j, static_cast<const BaseConfiguration&>(c));
+
     if (c.removalTimeout != Configuration().removalTimeout) {
         j[KeyRemovalTimeout] = static_cast<int>(c.removalTimeout.count());
     }
@@ -101,9 +97,7 @@ void from_json(const nlohmann::json& j, Configuration::Rest& r) {
 }
 
 void from_json(const nlohmann::json& j, Configuration& c) {
-    j.at(KeyApplicationPath).get_to(c.applicationPath);
-    j.at(KeyClusterPath).get_to(c.clusterPath);
-    j.at(KeyNodePath).get_to(c.nodePath);
+    from_json(j, static_cast<BaseConfiguration&>(c));
 
     if (j.find(KeyRemovalTimeout) != j.end()) {
         int ms = j[KeyRemovalTimeout].get<int>();

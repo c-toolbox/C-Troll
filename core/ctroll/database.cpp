@@ -35,6 +35,7 @@
 #include "database.h"
 
 #include <QObject>
+#include <fmt/format.h>
 #include <random>
 
 namespace {
@@ -110,8 +111,8 @@ const Cluster* findCluster(std::string_view name) {
 
 std::vector<const Cluster*> findClustersForProgram(const Program& program) {
     std::vector<const Cluster*> clusters;
-    for (Cluster::ID clusterId : program.clusters) {
-        const Cluster* cluster = findCluster(clusterId);
+    for (const std::string& clusterName : program.clusters) {
+        const Cluster* cluster = findCluster(clusterName);
         assert(cluster);
         clusters.push_back(cluster);
     }
@@ -121,7 +122,7 @@ std::vector<const Cluster*> findClustersForProgram(const Program& program) {
 std::vector<const Cluster*> findClusterForNode(const Node& node) {
     std::vector<const Cluster*> clusters;
     for (const std::unique_ptr<Cluster>& cluster : gClusters) {
-        const auto i = std::find(cluster->nodes.cbegin(), cluster->nodes.cend(), node.id);
+        auto i = std::find(cluster->nodes.cbegin(), cluster->nodes.cend(), node.name);
         if (i != cluster->nodes.cend()) {
             clusters.push_back(cluster.get());
         }
@@ -147,8 +148,8 @@ const Node* findNode(std::string_view name) {
 
 std::vector<const Node*> findNodesForCluster(const Cluster& cluster) {
     std::vector<const Node*> nodes;
-    for (Node::ID nodeId : cluster.nodes) {
-        const Node* node = findNode(nodeId);
+    for (const std::string& nodeName : cluster.nodes) {
+        const Node* node = findNode(nodeName);
         assert(node);
         nodes.push_back(node);
     }
@@ -303,6 +304,9 @@ void setTagColors(std::vector<Color> colors) {
 void loadData(std::string_view programPath, std::string_view clusterPath,
               std::string_view nodePath)
 {
+    //
+    //  Nodes
+    //
     gNodes.clear();
     std::vector<Node> nodes = loadNodesFromDirectory(nodePath);
     for (Node& node : nodes) {
@@ -312,17 +316,97 @@ void loadData(std::string_view programPath, std::string_view clusterPath,
 
     gClusters.clear();
     std::vector<Cluster> clusters = loadClustersFromDirectory(clusterPath);
+
+    //
+    //  Clusters
+    //
+
+    // Check for duplicates
+    std::sort(
+        clusters.begin(), clusters.end(),
+        [](const Cluster& lhs, const Cluster& rhs) { return lhs.name < rhs.name; }
+    );
+    const auto it = std::adjacent_find(
+        clusters.begin(), clusters.end(),
+        [](const Cluster& lhs, const Cluster& rhs) { return lhs.name == rhs.name; }
+    );
+    if (it != clusters.end()) {
+        throw std::runtime_error(fmt::format(
+            "Duplicate cluster name '{}' found", it->name
+        ));
+    }
+
     for (Cluster& cluster : clusters) {
+        if (cluster.name.empty()) {
+            throw std::runtime_error("Missing name for cluster");
+        }
+
+        if (cluster.nodes.empty()) {
+            throw std::runtime_error(fmt::format(
+                "No nodes specified for cluster {}", cluster.name
+            ));
+        }
+
+        for (const std::string& node : cluster.nodes) {
+            const Node* n = findNode(node);
+            if (!n) {
+                throw std::runtime_error(
+                    fmt::format("Could not find node with name {}", node)
+                );
+            }
+        }
+
         std::unique_ptr<Cluster> c = std::make_unique<Cluster>(std::move(cluster));
         gClusters.push_back(std::move(c));
     }
 
+
+    //
+    //  Programs
+    //
     gPrograms.clear();
     std::vector<Program> programs = loadProgramsFromDirectory(programPath);
+
+
     for (Program& program : programs) {
+        if (program.name.empty()) {
+            throw std::runtime_error("No name specified for program");
+        }
+        if (program.executable.empty()) {
+            throw std::runtime_error(fmt::format(
+                "No executable specified for program {}", program.name
+            ));
+        }
+        if (program.clusters.empty()) {
+            throw std::runtime_error(fmt::format(
+                "No clusters specified for program {}", program.name
+            ));
+        }
+
+        const bool hasEmptyTag = std::any_of(
+            program.tags.cbegin(), program.tags.cend(),
+            std::mem_fn(&std::string::empty)
+        );
+        if (hasEmptyTag) {
+            throw std::runtime_error(fmt::format(
+                "At least one tag of the program {} has an empty tag", program.name
+            ));
+        }
+
+        for (const std::string& cluster : program.clusters) {
+            const Cluster* c = data::findCluster(cluster);
+            if (!c) {
+                std::string message = fmt::format("Could not find cluster '{}'", cluster);
+                throw std::runtime_error(message);
+            }
+        }
+
         std::unique_ptr<Program> p = std::make_unique<Program>(std::move(program));
         gPrograms.push_back(std::move(p));
     }
+
+
+
 
     // Calculate the hash of all the data that was just loaded
     std::size_t hash = 0;
@@ -345,8 +429,9 @@ void loadData(std::string_view programPath, std::string_view clusterPath,
         addHash(std::hash<int>()(cluster->id.v));
         addHash(std::hash<std::string>()(cluster->name));
         addHash(std::hash<bool>()(cluster->isEnabled));
-        for (Node::ID node : cluster->nodes) {
-            addHash(std::hash<int>()(node.v));
+        for (const std::string& nodeName : cluster->nodes) {
+            const Node* node = findNode(nodeName);
+            addHash(std::hash<int>()(node->id.v));
         }
     }
 
@@ -375,8 +460,9 @@ void loadData(std::string_view programPath, std::string_view clusterPath,
             addHash(std::hash<std::string>()(conf.name));
             addHash(std::hash<std::string>()(conf.parameters));
         }
-        for (Cluster::ID cluster : program->clusters) {
-            addHash(std::hash<int>()(cluster.v));
+        for (const std::string& clusterName : program->clusters) {
+            const Cluster* cluster = findCluster(clusterName);
+            addHash(std::hash<int>()(cluster->id.v));
         }
     }
 

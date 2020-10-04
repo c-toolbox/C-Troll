@@ -32,20 +32,22 @@
 #                                                                                        #
 ##########################################################################################
 
-add_library(core-shared
+set(HEADER_FILES
+  baseconfiguration.h
   cluster.h
-  color.h
-  database.h
   node.h
-  process.h
   program.h
   typedid.h
+)
+
+set(SOURCE_FILES
+  baseconfiguration.cpp
   cluster.cpp
-  color.cpp
-  database.cpp
   node.cpp
-  process.cpp
   program.cpp
 )
+
+add_library(core-shared ${HEADER_FILES} ${SOURCE_FILES})
+
 target_include_directories(core-shared PUBLIC ".")
 target_link_libraries(core-shared PUBLIC common)

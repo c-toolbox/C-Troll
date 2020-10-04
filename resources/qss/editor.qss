@@ -1,0 +1,38 @@
+/*
+ * General settings
+ */
+
+* {
+  background: #202020;
+  color: #efefef;
+  font-size: 12pt;
+}
+
+MainWindow {
+    min-width: 40em;
+    min-height: 20em;
+}
+
+QPushButton {
+  border-style: outset;
+  border-width: 1px;
+  border-color: #acacac;
+
+  padding-left: 25%;
+  padding-right: 25%;
+}
+
+QTreeView::branch {
+    border-color: #efefef;
+}
+
+QTreeView {
+    background: #202020;
+}
+
+/*
+ *
+ */
+/* NodeDialog  QGridLayout { */
+
+/* } */

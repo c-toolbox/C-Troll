@@ -55,7 +55,6 @@
 
 namespace {
     constexpr const char* Title = "C-Troll";
-    constexpr const char* ConfigurationFile = "config.json";
 } // namespace
 
 MainWindow::MainWindow() {
@@ -83,16 +82,20 @@ MainWindow::MainWindow() {
 
     //
     // Load the configuration
-    if (!std::filesystem::exists(ConfigurationFile)) {
-        std::cout <<
-            fmt::format("Creating new configuration at '{}'", ConfigurationFile) << '\n';
+    if (!std::filesystem::exists(BaseConfiguration::ConfigurationFile)) {
+        std::cout << fmt::format(
+            "Creating new configuration at '{}'\n",
+            BaseConfiguration::ConfigurationFile
+        );
 
         nlohmann::json obj = Configuration();
-        std::ofstream file(ConfigurationFile);
+        std::ofstream file(BaseConfiguration::ConfigurationFile);
         file << obj.dump(2);
     }
-    std::cout << fmt::format("Loading configuration '{}'", ConfigurationFile) << '\n';
-    _config = common::loadFromJson<Configuration>(ConfigurationFile);
+    std::cout << fmt::format(
+        "Loading configuration '{}'\n", BaseConfiguration::ConfigurationFile
+    );
+    _config = common::loadFromJson<Configuration>(BaseConfiguration::ConfigurationFile);
     common::Log::initialize(
         "core",
         _config.logFile,
@@ -312,8 +315,14 @@ void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
 
     const Program* p = data::findProgram(programId);
     assert(p);
-    for (Node::ID node : cluster->nodes) {
-        auto process = std::make_unique<Process>(programId, configId, clusterId, node);
+    for (const std::string& nodeName : cluster->nodes) {
+        const Node* node = data::findNode(nodeName);
+        auto process = std::make_unique<Process>(
+            programId,
+            configId,
+            clusterId,
+            node->id
+        );
         Process::ID id = process->id;
         data::addProcess(std::move(process));
 

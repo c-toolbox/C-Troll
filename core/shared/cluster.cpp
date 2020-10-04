@@ -34,7 +34,6 @@
 
 #include "cluster.h"
 
-#include "database.h"
 #include "jsonload.h"
 #include "logging.h"
 #include <fmt/format.h>
@@ -48,57 +47,23 @@ namespace {
     constexpr const char* KeyNodes = "nodes";
 } // namespace
 
-void from_json(const nlohmann::json& j, Cluster& p) {
-    j.at(KeyName).get_to(p.name);
+void from_json(const nlohmann::json& j, Cluster& c) {
+    j.at(KeyName).get_to(c.name);
     if (j.find(KeyEnabled) != j.end()) {
-        j.at(KeyEnabled).get_to(p.isEnabled);
-    }
-    else {
-        p.isEnabled = true;
+        j[KeyEnabled].get_to(c.isEnabled);
     }
     
-    std::vector<std::string> nodes = j.at(KeyNodes).get<std::vector<std::string>>();
-    for (const std::string& node : nodes) {
-        const Node* n = data::findNode(node);
-        if (!n) {
-            throw std::runtime_error(
-                fmt::format("Could not find node with name {}", node)
-            );
-        }
+    j.at(KeyNodes).get_to(c.nodes);
+}
 
-        p.nodes.push_back(n->id);
-    }
+void to_json(nlohmann::json& j, const Cluster& c) {
+    j[KeyName] = c.name;
+    j[KeyEnabled] = c.isEnabled;
+    j[KeyNodes] = c.nodes;
 }
 
 std::vector<Cluster> loadClustersFromDirectory(std::string_view directory) {
     std::vector<Cluster> clusters = common::loadJsonFromDirectory<Cluster>(directory);
-
-    for (const Cluster& cluster : clusters) {
-        if (cluster.name.empty()) {
-            throw std::runtime_error("Missing name for cluster");
-        }
-
-        if (cluster.nodes.empty()) {
-            throw std::runtime_error(fmt::format(
-                "No clusters specified for cluster {}", cluster.name
-            ));
-        }
-    }
-
-    // Check for duplicates
-    std::sort(
-        clusters.begin(), clusters.end(),
-        [](const Cluster& lhs, const Cluster& rhs) { return lhs.name < rhs.name; }
-    );
-    const auto it = std::adjacent_find(
-        clusters.begin(), clusters.end(),
-        [](const Cluster& lhs, const Cluster& rhs) { return lhs.name == rhs.name; }
-    );
-    if (it != clusters.end()) {
-        throw std::runtime_error(fmt::format(
-            "Duplicate cluster name '{}' found", it->name
-        ));
-    }
 
     // Inject the unique identifiers into the nodes
     int id = 0;

@@ -40,6 +40,7 @@
 #include "cluster.h"
 #include "invalidauthmessage.h"
 #include "jsonsocket.h"
+#include "node.h"
 #include "processoutputmessage.h"
 #include "processstatusmessage.h"
 #include "traystatusmessage.h"

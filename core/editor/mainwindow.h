@@ -32,37 +32,27 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "mainwindow.h"
-#include <QApplication>
-#include <QFile>
-#include <QIcon>
-#include <QMessageBox>
+#ifndef __EDITOR__MAINWINDOW_H__
+#define __EDITOR__MAINWINDOW_H__
 
-int main(int argc, char** argv) {
-    Q_INIT_RESOURCE(resources);
+#include <QMainWindow>
 
-    QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+#include <string>
 
-    {
-        QFile file(":/qss/core.qss");
-        file.open(QFile::ReadOnly);
-        QString styleSheet = QLatin1String(file.readAll());
-        app.setStyleSheet(styleSheet);
-    }
+class MainWindow : public QMainWindow {
+Q_OBJECT
+public:
+    MainWindow(std::string applicationPath, std::string clusterPath,
+        std::string nodePath);
 
-    MainWindow mw;
-    mw.show();
-    try {
-        app.exec();
-    }
-    catch (const std::exception& e) {
-        QMessageBox::critical(nullptr, "Exception", e.what());
-    }
-    catch (...) {
-        QMessageBox::critical(nullptr, "Exception", "Unknown error");
-    }
+private:
+    void editNode(std::string path);
+    void editCluster(std::string path);
+    void editProgram(std::string path);
 
-    Q_CLEANUP_RESOURCE(resources);
-    return 0;
-}
+    const std::string _applicationPath;
+    const std::string _clusterPath;
+    const std::string _nodePath;
+};
+
+#endif // __EDITOR__MAINWINDOW_H__

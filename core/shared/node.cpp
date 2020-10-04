@@ -65,12 +65,21 @@ struct fmt::formatter<Node> {
     }
 };
 
-void from_json(const nlohmann::json& j, Node& p) {
-    j.at(KeyName).get_to(p.name);
-    j.at(KeyIpAddress).get_to(p.ipAddress);
-    j.at(KeyPort).get_to(p.port);
+void from_json(const nlohmann::json& j, Node& n) {
+    j.at(KeyName).get_to(n.name);
+    j.at(KeyIpAddress).get_to(n.ipAddress);
+    j.at(KeyPort).get_to(n.port);
     if (j.find(KeySecret) != j.end()) {
-        j.at(KeySecret).get_to(p.secret);
+        j.at(KeySecret).get_to(n.secret);
+    }
+}
+
+void to_json(nlohmann::json& j, const Node& n) {
+    j[KeyName] = n.name;
+    j[KeyIpAddress] = n.ipAddress;
+    j[KeyPort] = n.port;
+    if (!n.secret.empty()) {
+        j[KeySecret] = n.secret;
     }
 }
 

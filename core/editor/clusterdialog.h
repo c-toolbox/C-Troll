@@ -32,37 +32,37 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "mainwindow.h"
-#include <QApplication>
-#include <QFile>
-#include <QIcon>
-#include <QMessageBox>
+#ifndef __EDITOR__CLUSTERDIALOG_H__
+#define __EDITOR__CLUSTERDIALOG_H__
 
-int main(int argc, char** argv) {
-    Q_INIT_RESOURCE(resources);
+#include <QDialog>
+#include <QWidget>
+#include <string>
+#include <vector>
 
-    QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+class QBoxLayout;
+class QCheckBox;
+class QLineEdit;
 
-    {
-        QFile file(":/qss/core.qss");
-        file.open(QFile::ReadOnly);
-        QString styleSheet = QLatin1String(file.readAll());
-        app.setStyleSheet(styleSheet);
-    }
+class ClusterDialog : public QDialog {
+Q_OBJECT
+public:
+    ClusterDialog(QWidget* parent, std::string path);
 
-    MainWindow mw;
-    mw.show();
-    try {
-        app.exec();
-    }
-    catch (const std::exception& e) {
-        QMessageBox::critical(nullptr, "Exception", e.what());
-    }
-    catch (...) {
-        QMessageBox::critical(nullptr, "Exception", "Unknown error");
-    }
+private slots:
+    void save();
+    QLineEdit* addNode();
 
-    Q_CLEANUP_RESOURCE(resources);
-    return 0;
-}
+private:
+    void removeNode(QLineEdit* sender);
+
+    const std::string _path;
+
+    QLineEdit* _name = nullptr;
+    QCheckBox* _enabled = nullptr;
+    QBoxLayout* _nodeLayout = nullptr;
+    std::vector<QLineEdit*> _nodes;
+
+};
+
+#endif // __EDITOR__CLUSTERDIALOG_H__

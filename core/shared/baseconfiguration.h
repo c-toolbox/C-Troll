@@ -32,37 +32,23 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "mainwindow.h"
-#include <QApplication>
-#include <QFile>
-#include <QIcon>
-#include <QMessageBox>
+#ifndef __SHARED__BASECONFIGURATION_H__
+#define __SHARED__BASECONFIGURATION_H__
 
-int main(int argc, char** argv) {
-    Q_INIT_RESOURCE(resources);
+#include <json/json.hpp>
 
-    QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+struct BaseConfiguration {
+    static constexpr const char* ConfigurationFile = "config.json";
 
-    {
-        QFile file(":/qss/core.qss");
-        file.open(QFile::ReadOnly);
-        QString styleSheet = QLatin1String(file.readAll());
-        app.setStyleSheet(styleSheet);
-    }
+    /// The path that contains the JSON objects describing the available applications
+    std::string applicationPath = "application";
+    /// The path that contains the JSON objects describing the available clusters
+    std::string clusterPath = "cluster";
+    /// The path that contains the JSON objects describing the available nodes
+    std::string nodePath = "nodes";
+};
 
-    MainWindow mw;
-    mw.show();
-    try {
-        app.exec();
-    }
-    catch (const std::exception& e) {
-        QMessageBox::critical(nullptr, "Exception", e.what());
-    }
-    catch (...) {
-        QMessageBox::critical(nullptr, "Exception", "Unknown error");
-    }
+void to_json(nlohmann::json& j, const BaseConfiguration& c);
+void from_json(const nlohmann::json& j, BaseConfiguration& c);
 
-    Q_CLEANUP_RESOURCE(resources);
-    return 0;
-}
+#endif // __SHARED__BASECONFIGURATION_H__
