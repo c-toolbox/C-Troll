@@ -78,6 +78,7 @@ NodeDialog::NodeDialog(QWidget* parent, std::string path)
 
         editLayout->addWidget(new QLabel("Port:"), 2, 0);
         _port = new QSpinBox;
+        _port->setValue(5000);
         _port->setToolTip("The port at which the Tray of the node is accessible");
         _port->setMinimum(1);
         _port->setMaximum(std::numeric_limits<int>::max());
@@ -119,12 +120,7 @@ void NodeDialog::save() {
     node.port = _port->value();
     node.secret = _secret->text().toStdString();
 
-    if (std::filesystem::path(_path).extension().empty()) {
-        common::saveToJson(_path + ".json", node);
-    }
-    else {
-        common::saveToJson(_path, node);
-    }
+    common::saveToJson(_path, node);
 
     accept();
 }

@@ -88,9 +88,21 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
         connect(
             newNode, &QPushButton::clicked,
             [this]() {
-                std::string name = selectNode();
-                if (!name.empty()) {
-                    addNode(name);
+                std::vector<Node> nodes = common::loadJsonFromDirectory<Node>(_nodePath);
+                QStringList list;
+                for (const Node& node : nodes) {
+                    list.push_back(QString::fromStdString(node.name));
+                }
+
+                QString selected = QInputDialog::getItem(
+                    this,
+                    "Add Node",
+                    "Select the node to add",
+                    list
+                );
+
+                if (!selected.isEmpty()) {
+                    addNode(selected.toStdString());
                     updateSaveButton();
                 }
             }
@@ -155,32 +167,8 @@ void ClusterDialog::save() {
     for (QLabel* node : _nodes) {
         cluster.nodes.push_back(node->text().toStdString());
     }
-
-    if (std::filesystem::path(_clusterPath).extension().empty()) {
-        common::saveToJson(_clusterPath + ".json", cluster);
-    }
-    else {
-        common::saveToJson(_clusterPath, cluster);
-    }
-
+    common::saveToJson(_clusterPath, cluster);
     accept();
-}
-
-std::string ClusterDialog::selectNode() {
-    std::vector<Node> nodes = common::loadJsonFromDirectory<Node>(_nodePath);
-    QStringList list;
-    for (const Node& node : nodes) {
-        list.push_back(QString::fromStdString(node.name));
-    }
-
-    QString selected = QInputDialog::getItem(
-        this,
-        "Add Node",
-        "Select the node to add",
-        list
-    );
-
-    return !selected.isEmpty() ? selected.toStdString() : "";
 }
 
 QLabel* ClusterDialog::addNode(std::string name) {

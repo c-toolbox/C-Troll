@@ -54,7 +54,7 @@ QPushButton:disabled {
 
 QLineEdit:hover  {
   border: 1px outset #acacac;
-  background: #303030;
+  background: #252525;
 }
 
 QSpinBox:hover, QComboBox, QComboBox:hover {

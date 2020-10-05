@@ -57,8 +57,6 @@ private slots:
     QLabel* addNode(std::string name);
 
 private:
-    std::string selectNode();
-
     void removeNode(QLabel* sender);
 
     const std::string _clusterPath;

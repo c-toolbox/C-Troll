@@ -197,7 +197,10 @@ MainWindow::MainWindow() {
     tabWidget->addTab(_clustersWidget, "Clusters");
     tabWidget->addTab(_processesWidget, "Processes");
     tabWidget->addTab(&_logWidget, "Log");
-    tabWidget->addTab(new SettingsWidget(_config, ConfigurationFile), "Settings");
+    tabWidget->addTab(
+        new SettingsWidget(_config, BaseConfiguration::ConfigurationFile),
+        "Settings"
+    );
 
     _clusterConnectionHandler.initialize();
 

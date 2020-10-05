@@ -303,12 +303,7 @@ void ProgramDialog::save() {
         program.clusters.push_back(cluster->text().toStdString());
     }
 
-    if (std::filesystem::path(_programPath).extension().empty()) {
-        common::saveToJson(_programPath + ".json", program);
-    }
-    else {
-        common::saveToJson(_programPath, program);
-    }
+    common::saveToJson(_programPath, program);
 
     accept();
 }

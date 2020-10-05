@@ -105,7 +105,15 @@ MainWindow::MainWindow(std::string applicationPath, std::string clusterPath,
         
         layout->addWidget(nodesTree, 1, 0);
         QPushButton* newNode = new QPushButton("Add new Node");
-        connect(newNode, &QPushButton::clicked, [this]() { editNode(""); });
+        connect(
+            newNode, &QPushButton::clicked,
+            [this]() {
+                std::string path = newFilePath(_nodePath);
+                if (!path.empty()) {
+                    editNode(path);
+                }
+            }
+        );
         layout->addWidget(newNode, 2, 0);
     }
 
@@ -118,7 +126,15 @@ MainWindow::MainWindow(std::string applicationPath, std::string clusterPath,
         );
         layout->addWidget(clusterTree, 1, 1);
         QPushButton* newCluster = new QPushButton("Add new Cluster");
-        connect(newCluster, &QPushButton::clicked, [this]() { editCluster(""); });
+        connect(
+            newCluster, &QPushButton::clicked,
+            [this]() {
+                std::string path = newFilePath(_clusterPath);
+                if (!path.empty()) {
+                    editCluster(path);
+                }
+            }
+        );
         layout->addWidget(newCluster, 2, 1);
     }
 
@@ -131,58 +147,41 @@ MainWindow::MainWindow(std::string applicationPath, std::string clusterPath,
         );
         layout->addWidget(applicationTree, 1, 2);
         QPushButton* newApplication = new QPushButton("Add new Application");
-        connect(newApplication, &QPushButton::clicked, [this]() { editProgram(""); });
+        connect(
+            newApplication, &QPushButton::clicked,
+            [this]() {
+                std::string path = newFilePath(_applicationPath);
+                if (!path.empty()) {
+                    editProgram(path);
+                }
+            }
+        );
         layout->addWidget(newApplication, 2, 2);
     }
 }
 
-void MainWindow::editNode(std::string path) {
-    if (path.empty()) {
-        QString file = QFileDialog::getSaveFileName(
-            this,
-            "Save File",
-            QString::fromStdString(_nodePath)
-        );
-        if (file.isEmpty()) {
-            return;
-        }
-        path = file.toStdString();
+std::string MainWindow::newFilePath(const std::string& path) {
+    QString file = QFileDialog::getSaveFileName(
+        this,
+        "Save File",
+        QString::fromStdString(path),
+        "JSON file (*.json)"
+    );
+    if (file.isEmpty()) {
+        return "";
     }
 
-    NodeDialog dialog(this, path);
-    dialog.exec();
+    return file.toStdString();
+}
+
+void MainWindow::editNode(std::string path) {
+    NodeDialog(this, path).exec();
 }
 
 void MainWindow::editCluster(std::string path) {
-    if (path.empty()) {
-        QString file = QFileDialog::getSaveFileName(
-            this,
-            "Save File",
-            QString::fromStdString(_clusterPath)
-        );
-        if (file.isEmpty()) {
-            return;
-        }
-        path = file.toStdString();
-    }
-
-    ClusterDialog dialog(this, path, _nodePath);
-    dialog.exec();
+    ClusterDialog(this, path, _nodePath).exec();
 }
 
 void MainWindow::editProgram(std::string path) {
-    if (path.empty()) {
-        QString file = QFileDialog::getSaveFileName(
-            this,
-            "Save File",
-            QString::fromStdString(_applicationPath)
-        );
-        if (file.isEmpty()) {
-            return;
-        }
-        path = file.toStdString();
-    }
-
-    ProgramDialog dialog(this, path, _clusterPath);
-    dialog.exec();
+    ProgramDialog(this, path, _clusterPath).exec();
 }

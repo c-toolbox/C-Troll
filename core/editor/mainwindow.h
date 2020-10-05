@@ -46,6 +46,8 @@ public:
         std::string nodePath);
 
 private:
+    std::string newFilePath(const std::string& path);
+
     void editNode(std::string path);
     void editCluster(std::string path);
     void editProgram(std::string path);
