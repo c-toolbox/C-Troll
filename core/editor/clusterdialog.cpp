@@ -34,10 +34,14 @@
 
 #include "clusterdialog.h"
 
+#include "addbutton.h"
 #include "cluster.h"
 #include "jsonload.h"
 #include "node.h"
+#include "removebutton.h"
+#include "spacer.h"
 #include <QCheckBox>
+#include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QInputDialog>
 #include <QLabel>
@@ -67,32 +71,34 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
 
         editLayout->addWidget(new QLabel("Name:"), 0, 0);
         _name = new QLineEdit;
+        _name->setToolTip("The name of the cluster defined in this file");
+        connect(_name, &QLineEdit::textChanged, this, &ClusterDialog::updateSaveButton);
         editLayout->addWidget(_name, 0, 1);
 
         editLayout->addWidget(new QLabel("Enabled:"), 1, 0);
         _enabled = new QCheckBox;
+        _enabled->setToolTip("Determines whether this cluster is currenty used");
         editLayout->addWidget(_enabled, 1, 1);
 
-        QWidget* spacer = new QWidget;
-        spacer->setObjectName("spacer");
-        editLayout->addWidget(spacer, 2, 0);
+        editLayout->addWidget(new Spacer, 2, 0);
 
         editLayout->addWidget(new QLabel("Nodes"), 3, 0);
 
-        QPushButton* newNode = new QPushButton("+");
-        newNode->setObjectName("add");
+        QPushButton* newNode = new AddButton;
         connect(
             newNode, &QPushButton::clicked,
             [this]() {
                 std::string name = selectNode();
                 if (!name.empty()) {
                     addNode(name);
+                    updateSaveButton();
                 }
             }
         );
         editLayout->addWidget(newNode, 3, 1, Qt::AlignRight);
 
         QScrollArea* area = new QScrollArea;
+        area->setToolTip("The nodes that belong to this cluster");
         area->setWidgetResizable(true);
         area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         
@@ -110,53 +116,39 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
         layout->addWidget(edit);
     }
 
-    {
-        QWidget* control = new QWidget;
-        QBoxLayout* controlLayout = new QHBoxLayout(control);
+    QDialogButtonBox* box = new QDialogButtonBox(
+        QDialogButtonBox::Save | QDialogButtonBox::Cancel
+    );
+    _saveButton = box->button(QDialogButtonBox::Save);
+    connect(box, &QDialogButtonBox::accepted, this, &ClusterDialog::save);
+    connect(box, &QDialogButtonBox::rejected, this, &ClusterDialog::reject);
+    layout->addWidget(box, 0, Qt::AlignRight);
 
-        controlLayout->addStretch(5);
-
-        QPushButton* save = new QPushButton("Save");
-        connect(save, &QPushButton::clicked, this, &ClusterDialog::save);
-        controlLayout->addWidget(save);
-
-        QPushButton* cancel = new QPushButton("Cancel");
-        connect(cancel, &QPushButton::clicked, this, &QDialog::reject);
-        controlLayout->addWidget(cancel);
-
-        layout->addWidget(control);
-    }
 
     if (std::filesystem::exists(_clusterPath)) {
         Cluster cluster = common::loadFromJson<Cluster>(_clusterPath);
+        std::vector<Node> nodes = common::loadJsonFromDirectory<Node>(_nodePath);
 
         _name->setText(QString::fromStdString(cluster.name));
         _enabled->setChecked(cluster.isEnabled);
         for (const std::string& node : cluster.nodes) {
-            addNode(node);
+            QLabel* nodeLabel = addNode(node);
+
+            const auto it = std::find_if(
+                nodes.cbegin(), nodes.cend(),
+                [node](const Node& n) { return n.name == node; }
+            );
+            if (it == nodes.cend()) {
+                nodeLabel->setObjectName("invalid");
+                nodeLabel->setToolTip("Could not find node in nodes folder");
+            }
         }
     }
+
+    updateSaveButton();
 }
 
 void ClusterDialog::save() {
-    if (_name->text().isEmpty()) {
-        QMessageBox::critical(this, "Error", "Name must not be empty");
-        return;
-    }
-
-    if (_nodes.empty()) {
-        QMessageBox::critical(this, "Error", "Need at least one node");
-        return;
-    }
-
-    for (QLabel* node : _nodes) {
-        if (node->text().isEmpty()) {
-            QMessageBox::critical(this, "Error", "Node name must not be empty");
-            return;
-        }
-    }
-
-
     Cluster cluster;
     cluster.name = _name->text().toStdString();
     cluster.isEnabled = _enabled->isChecked();
@@ -192,6 +184,8 @@ std::string ClusterDialog::selectNode() {
 }
 
 QLabel* ClusterDialog::addNode(std::string name) {
+    assert(!name.empty());
+
     QWidget* container = new QWidget;
     QBoxLayout* layout = new QHBoxLayout(container);
     layout->setContentsMargins(10, 5, 10, 5);
@@ -201,8 +195,7 @@ QLabel* ClusterDialog::addNode(std::string name) {
     node->setCursor(QCursor(Qt::IBeamCursor));
     layout->addWidget(node);
 
-    QPushButton* remove = new QPushButton("X");
-    remove->setObjectName("remove");
+    QPushButton* remove = new RemoveButton;
     connect(remove, &QPushButton::clicked, [this, node]() { removeNode(node); });
     layout->addWidget(remove);
 
@@ -217,5 +210,11 @@ void ClusterDialog::removeNode(QLabel* sender) {
 
     _nodes.erase(it);
     _nodeLayout->removeWidget(sender->parentWidget());
-    sender->deleteLater();
+    sender->parent()->deleteLater();
+
+    updateSaveButton();
+}
+
+void ClusterDialog::updateSaveButton() {
+    _saveButton->setEnabled(!_name->text().isEmpty() && !_nodes.empty());
 }

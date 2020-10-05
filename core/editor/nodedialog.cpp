@@ -36,6 +36,7 @@
 
 #include "jsonload.h"
 #include "node.h"
+#include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -63,40 +64,41 @@ NodeDialog::NodeDialog(QWidget* parent, std::string path)
 
         editLayout->addWidget(new QLabel("Name:"), 0, 0);
         _name = new QLineEdit;
+        _name->setToolTip("The name of the new node. Can only contain ASCII characters");
+        connect(_name, &QLineEdit::textChanged, this, &NodeDialog::updateSaveButton);
         editLayout->addWidget(_name, 0, 1);
 
         editLayout->addWidget(new QLabel("IP:"), 1, 0);
         _ip = new QLineEdit;
+        _ip->setToolTip(
+            "The IP address of the node. This can be a DNS name, a IPv4, or IPv6 address"
+        );
+        connect(_ip, &QLineEdit::textChanged, this, &NodeDialog::updateSaveButton);
         editLayout->addWidget(_ip, 1, 1);
 
         editLayout->addWidget(new QLabel("Port:"), 2, 0);
         _port = new QSpinBox;
-        _port->setMinimum(0);
+        _port->setToolTip("The port at which the Tray of the node is accessible");
+        _port->setMinimum(1);
         _port->setMaximum(std::numeric_limits<int>::max());
         editLayout->addWidget(_port, 2, 1);
 
         editLayout->addWidget(new QLabel("Secret"), 3, 0);
         _secret = new QLineEdit;
+        _secret->setToolTip("The secret that used to authenticate and encrypt traffic");
+        _secret->setPlaceholderText("optional");
         editLayout->addWidget(_secret, 3, 1);
 
         layout->addWidget(edit);
     }
 
-    {
-        QWidget* control = new QWidget;
-        QBoxLayout* controlLayout = new QHBoxLayout(control);
-
-        QPushButton* save = new QPushButton("Save");
-        connect(save, &QPushButton::clicked, this, &NodeDialog::save);
-        controlLayout->addWidget(save);
-
-        QPushButton* cancel = new QPushButton("Cancel");
-        connect(cancel, &QPushButton::clicked, this, &QDialog::reject);
-        controlLayout->addWidget(cancel);
-
-
-        layout->addWidget(control, 0, Qt::AlignRight);
-    }
+    QDialogButtonBox* box = new QDialogButtonBox(
+        QDialogButtonBox::Save | QDialogButtonBox::Cancel
+    );
+    _saveButton = box->button(QDialogButtonBox::Save);
+    connect(box, &QDialogButtonBox::accepted, this, &NodeDialog::save);
+    connect(box, &QDialogButtonBox::rejected, this, &NodeDialog::reject);
+    layout->addWidget(box, 0, Qt::AlignRight);
 
     if (std::filesystem::exists(_path)) {
         Node node = common::loadFromJson<Node>(_path);
@@ -106,19 +108,11 @@ NodeDialog::NodeDialog(QWidget* parent, std::string path)
         _port->setValue(node.port);
         _secret->setText(QString::fromStdString(node.secret));
     }
+
+    updateSaveButton();
 }
 
 void NodeDialog::save() {
-    if (_name->text().isEmpty()) {
-        QMessageBox::critical(this, "Error", "Name must not be empty");
-        return;
-    }
-
-    if (_ip->text().isEmpty()) {
-        QMessageBox::critical(this, "Error", "IP must not be empty");
-        return;
-    }
-
     Node node;
     node.name = _name->text().toStdString();
     node.ipAddress = _ip->text().toStdString();
@@ -133,4 +127,8 @@ void NodeDialog::save() {
     }
 
     accept();
+}
+
+void NodeDialog::updateSaveButton() {
+    _saveButton->setEnabled(!_name->text().isEmpty() && !_ip->text().isEmpty());
 }

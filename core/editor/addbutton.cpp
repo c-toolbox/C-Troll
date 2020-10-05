@@ -32,44 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __EDITOR__CLUSTERDIALOG_H__
-#define __EDITOR__CLUSTERDIALOG_H__
+#include "addbutton.h"
 
-#include <QDialog>
-#include <QWidget>
-#include <string>
-#include <vector>
-
-class QBoxLayout;
-class QCheckBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
-
-class ClusterDialog : public QDialog {
-Q_OBJECT
-public:
-    ClusterDialog(QWidget* parent, std::string clusterPath, std::string nodePath);
-
-private slots:
-    void save();
-    void updateSaveButton();
-    QLabel* addNode(std::string name);
-
-private:
-    std::string selectNode();
-
-    void removeNode(QLabel* sender);
-
-    const std::string _clusterPath;
-    const std::string _nodePath;
-
-    QLineEdit* _name = nullptr;
-    QCheckBox* _enabled = nullptr;
-    QBoxLayout* _nodeLayout = nullptr;
-    std::vector<QLabel*> _nodes;
-
-    QPushButton* _saveButton = nullptr;
-};
-
-#endif // __EDITOR__CLUSTERDIALOG_H__
+AddButton::AddButton(QWidget* parent)
+    : QPushButton("+", parent)
+{}

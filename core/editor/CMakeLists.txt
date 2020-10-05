@@ -33,18 +33,23 @@
 ##########################################################################################
 
 set(HEADER_FILES
+  addbutton.h
   clusterdialog.h
   mainwindow.h
   nodedialog.h
   programdialog.h
+  removebutton.h
+  spacer.h
 )
 
 set(SOURCE_FILES
+  addbutton.cpp
   clusterdialog.cpp
   main.cpp
   mainwindow.cpp
   nodedialog.cpp
   programdialog.cpp
+  removebutton.cpp
 )
 
 find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
@@ -52,10 +57,13 @@ find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
 set(MOC_FILES "")
 qt5_wrap_cpp(
   MOC_FILES
+  addbutton.h
   clusterdialog.h
   mainwindow.h
   nodedialog.h
   programdialog.h  
+  spacer.h
+  removebutton.h
 )
 
 set(RESOURCE_FILES "")

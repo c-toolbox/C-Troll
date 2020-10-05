@@ -44,6 +44,7 @@ class QBoxLayout;
 class QCheckBox;
 class QLabel;
 class QLineEdit;
+class QPushButton;
 class QSpinBox;
 
 class ProgramDialog : public QDialog {
@@ -62,6 +63,7 @@ private slots:
     QLineEdit* addTag();
     Configuration* addConfiguration();
     QLabel* addCluster(std::string clusterName);
+    void updateSaveButton();
 
 private:
     std::string selectCluster();
@@ -89,6 +91,8 @@ private:
 
     QBoxLayout* _clusterLayout = nullptr;
     std::vector<QLabel*> _clusters;
+
+    QPushButton* _saveButton = nullptr;
 };
 
 #endif // __EDITOR__PROGRAMDIALOG_H__

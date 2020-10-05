@@ -8,9 +8,23 @@
   font-size: 12pt;
 }
 
+QToolTip {
+  background-color: #454545;
+  color: #efefef;
+  border: 2px solid #202020;
+  padding: 5px;
+  border-radius: 3px;
+
+  font-size: 10pt;
+}
+
 MainWindow {
   min-width: 40em;
   min-height: 20em;
+}
+
+Spacer {
+  min-height: 1em;
 }
 
 QInputDialog  QLabel {
@@ -33,6 +47,11 @@ QPushButton {
   padding-bottom: 5%;
 }
 
+QPushButton:disabled {
+  color: #bfbfbf;
+  background-color: #9c9c9c;
+}
+
 QLineEdit:hover  {
   border: 1px outset #acacac;
   background: #303030;
@@ -40,6 +59,15 @@ QLineEdit:hover  {
 
 QSpinBox:hover, QComboBox, QComboBox:hover {
   border: 1px outset #acacac;
+}
+
+QSpinBox:disabled {
+  color: #bfbfbf;
+  background-color: #9c9c9c;
+}
+
+QLabel#invalid {
+  color: #da2a2a;
 }
 
 QComboBox:drop-down {
@@ -72,7 +100,7 @@ QTreeView {
     background: #202020;
 }
 
-QPushButton#add {
+AddButton {
     min-height: 1.5em;
     max-height: 1.5em;
     min-width: 1.5em;
@@ -82,12 +110,12 @@ QPushButton#add {
     padding: 0px 0px 0px 0px;
 }
 
-QPushButton#add:hover {
+AddButton:hover {
     color: #2cdd2c;
     background-color: #124712;
 }
 
-QPushButton#remove {
+RemoveButton {
     min-height: 1.25em;
     max-height: 1.25em;
     min-width: 1.25em;
@@ -97,7 +125,7 @@ QPushButton#remove {
     padding: 0px 0px 0px 0px;
 }
 
-QPushButton#remove:hover {
+RemoveButton:hover {
     color: #ff1717;
     background-color: #440e0e;
 }
@@ -112,10 +140,6 @@ ClusterDialog  QLineEdit {
 
 ClusterDialog  QScrollArea {
     min-height: 15em;
-}
-
-ClusterDialog  QWidget#spacer {
-    min-height: 1em;
 }
 
 /*

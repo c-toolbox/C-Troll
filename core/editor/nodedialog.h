@@ -40,6 +40,7 @@
 #include <string>
 
 class QLineEdit;
+class QPushButton;
 class QSpinBox;
 
 class NodeDialog : public QDialog {
@@ -49,6 +50,7 @@ public:
 
 private slots:
     void save();
+    void updateSaveButton();
 
 private:
     const std::string _path;
@@ -57,6 +59,8 @@ private:
     QLineEdit* _ip = nullptr;
     QSpinBox* _port = nullptr;
     QLineEdit* _secret = nullptr;
+
+    QPushButton* _saveButton = nullptr;
 };
 
 #endif // __EDITOR__NODEDIALOG_H__
