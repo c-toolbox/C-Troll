@@ -41,33 +41,23 @@
 
 class QBoxLayout;
 
-class DynamicListBase : public QScrollArea {
+class DynamicList : public QScrollArea {
 Q_OBJECT
 public:
-    DynamicListBase();
+    DynamicList();
+    void addItem(QWidget* item);
+
+    bool empty() const;
+    std::vector<QWidget*> items() const;
+
 
 signals:
     void updated();
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-template <typename T>
-class DynamicList : public DynamicListBase {
-public:
-    void addItem(T* item);
-
-    bool empty() const;
-    std::vector<T*> items() const;
 
 private:
-    void removeItem(T* sender);
+    void removeItem(QWidget* sender);
 
-    std::vector<T*> _items;
+    std::vector<QWidget*> _items;
 };
-
-#include "dynamiclist.inl"
 
 #endif // __EDITOR__DYNAMICLIST_H__

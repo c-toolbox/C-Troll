@@ -36,7 +36,6 @@ set(HEADER_FILES
   addbutton.h
   clusterdialog.h
   dynamiclist.h
-  dynamiclist.inl
   mainwindow.h
   nodedialog.h
   programdialog.h

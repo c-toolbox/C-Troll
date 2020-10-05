@@ -40,7 +40,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-DynamicListBase::DynamicListBase() {
+DynamicList::DynamicList() {
     setWidgetResizable(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
@@ -52,4 +52,38 @@ DynamicListBase::DynamicListBase() {
     layout->setMargin(0);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
+}
+
+void DynamicList::addItem(QWidget* item) {
+    QWidget* container = new QWidget;
+    QBoxLayout* layout = new QHBoxLayout(container);
+    layout->setContentsMargins(10, 5, 10, 5);
+
+    layout->addWidget(item);
+
+    QPushButton* remove = new RemoveButton;
+    connect(remove, &QPushButton::clicked, [this, item]() { removeItem(item); });
+    layout->addWidget(remove);
+
+    widget()->layout()->addWidget(container);
+    _items.push_back(item);
+}
+
+bool DynamicList::empty()  const {
+    return _items.empty();
+}
+
+std::vector<QWidget*> DynamicList::items() const {
+    return _items;
+}
+
+void DynamicList::removeItem(QWidget* sender) {
+    const auto it = std::find(_items.cbegin(), _items.cend(), sender);
+    assert(it != _items.cend());
+
+    _items.erase(it);
+    widget()->layout()->removeWidget(sender->parentWidget());
+    sender->parent()->deleteLater();
+
+    emit updated();
 }

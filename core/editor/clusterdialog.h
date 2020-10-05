@@ -63,7 +63,7 @@ private:
 
     QLineEdit* _name = nullptr;
     QCheckBox* _enabled = nullptr;
-    DynamicList<QLabel>* _nodes = nullptr;
+    DynamicList* _nodes = nullptr;
 
     QPushButton* _saveButton = nullptr;
 };

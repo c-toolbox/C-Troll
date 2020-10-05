@@ -154,10 +154,10 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             );
             editLayout->addWidget(t, 7, 1, Qt::AlignRight);
 
-            _tags = new DynamicList<QLineEdit>;
+            _tags = new DynamicList;
             _tags->setToolTip("A list of all tags that this program is associated with");
             connect(
-                _tags, &DynamicListBase::updated,
+                _tags, &DynamicList::updated,
                 this, &ProgramDialog::updateSaveButton
             );
          
@@ -185,12 +185,12 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             );
             editLayout->addWidget(newConfiguration, 10, 1, Qt::AlignRight);
 
-            _configurations = new DynamicList<Configuration>;
+            _configurations = new DynamicList;
             _configurations->setToolTip(
                 "A list of all configurations that are available for this program"
             );
             connect(
-                _configurations, &DynamicListBase::updated,
+                _configurations, &DynamicList::updated,
                 this, &ProgramDialog::updateSaveButton
             );
             editLayout->addWidget(_configurations, 11, 0, 1, 2);
@@ -217,10 +217,10 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             );
             editLayout->addWidget(newCluster, 13, 1, Qt::AlignRight);
 
-            _clusters = new DynamicList<QLabel>;
+            _clusters = new DynamicList;
             _clusters->setToolTip("The list of clusters on which the program can be run");
             connect(
-                _clusters, &DynamicListBase::updated,
+                _clusters, &DynamicList::updated,
                 this, &ProgramDialog::updateSaveButton
             );
             editLayout->addWidget(_clusters, 14, 0, 1, 2);
@@ -299,17 +299,23 @@ void ProgramDialog::save() {
     if (_hasDelay->isChecked()) {
         program.delay = std::chrono::milliseconds(_delay->value());
     }
-    for (QLineEdit* tag : _tags->items()) {
-        program.tags.push_back(tag->text().toStdString());
+    for (QWidget* tag : _tags->items()) {
+        QLineEdit* t = dynamic_cast<QLineEdit*>(tag);
+        assert(t);
+        program.tags.push_back(t->text().toStdString());
     }
-    for (Configuration* configuration : _configurations->items()) {
+    for (QWidget* configuration : _configurations->items()) {
+        Configuration* conf = dynamic_cast<Configuration*>(configuration);
+        assert(conf);
         Program::Configuration c;
-        c.name = configuration->name->text().toStdString();
-        c.parameters = configuration->parameters->text().toStdString();
+        c.name = conf->name->text().toStdString();
+        c.parameters = conf->parameters->text().toStdString();
         program.configurations.push_back(c);
     }
-    for (QLabel* cluster : _clusters->items()) {
-        program.clusters.push_back(cluster->text().toStdString());
+    for (QWidget* cluster : _clusters->items()) {
+        QLabel* c = dynamic_cast<QLabel*>(cluster);
+        assert(c);
+        program.clusters.push_back(c->text().toStdString());
     }
 
     common::saveToJson(_programPath, program);
@@ -336,10 +342,14 @@ std::string ProgramDialog::selectCluster() {
 }
 
 void ProgramDialog::updateSaveButton() {
-    const std::vector<Configuration*>& configurations = _configurations->items();
+    std::vector<QWidget*> configurations = _configurations->items();
     const bool confHasName = std::all_of(
         configurations.cbegin(), configurations.cend(),
-        [](Configuration* config) { return !config->name->text().isEmpty(); }
+        [](QWidget* config) {
+            Configuration* conf = dynamic_cast<Configuration*>(config);
+            assert(conf);
+            return !conf->name->text().isEmpty();
+        }
     );
 
     _saveButton->setEnabled(

@@ -112,10 +112,10 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
         );
         editLayout->addWidget(newNode, 3, 1, Qt::AlignRight);
 
-        _nodes = new DynamicList<QLabel>;
+        _nodes = new DynamicList;
         _nodes->setToolTip("The nodes that belong to this cluster");
         connect(
-            _nodes, &DynamicListBase::updated,
+            _nodes, &DynamicList::updated,
             this, &ClusterDialog::updateSaveButton
         );
         editLayout->addWidget(_nodes, 4, 0, 1, 2);
@@ -161,8 +161,10 @@ void ClusterDialog::save() {
     Cluster cluster;
     cluster.name = _name->text().toStdString();
     cluster.isEnabled = _enabled->isChecked();
-    for (QLabel* node : _nodes->items()) {
-        cluster.nodes.push_back(node->text().toStdString());
+    for (QWidget* node : _nodes->items()) {
+        QLabel* l = dynamic_cast<QLabel*>(node);
+        assert(l);
+        cluster.nodes.push_back(l->text().toStdString());
     }
     common::saveToJson(_clusterPath, cluster);
     accept();

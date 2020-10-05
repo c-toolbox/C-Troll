@@ -80,9 +80,9 @@ private:
     QCheckBox* _hasDelay = nullptr;
     QSpinBox* _delay = nullptr;
 
-    DynamicList<QLineEdit>* _tags = nullptr;
-    DynamicList<Configuration>* _configurations = nullptr;
-    DynamicList<QLabel>* _clusters = nullptr;
+    DynamicList* _tags = nullptr;
+    DynamicList* _configurations = nullptr;
+    DynamicList* _clusters = nullptr;
 
     QPushButton* _saveButton = nullptr;
 };
