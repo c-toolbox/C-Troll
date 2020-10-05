@@ -36,8 +36,10 @@
 
 #include "cluster.h"
 #include "jsonload.h"
+#include "node.h"
 #include <QCheckBox>
 #include <QGridLayout>
+#include <QInputDialog>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -46,13 +48,15 @@
 #include <QVBoxLayout>
 #include <filesystem>
 
-ClusterDialog::ClusterDialog(QWidget* parent, std::string path)
+ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
+                             std::string nodePath)
     : QDialog(parent)
-    , _path(std::move(path))
+    , _clusterPath(std::move(clusterPath))
+    , _nodePath(std::move(nodePath))
 {
-    assert(!_path.empty());
+    assert(!_clusterPath.empty());
 
-    setWindowTitle(QString::fromStdString("Cluster: " + _path));
+    setWindowTitle(QString::fromStdString("Cluster: " + _clusterPath));
 
     QBoxLayout* layout = new QVBoxLayout(this);
 
@@ -69,11 +73,24 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string path)
         _enabled = new QCheckBox;
         editLayout->addWidget(_enabled, 1, 1);
 
-        editLayout->addWidget(new QLabel("Nodes"), 2, 0);
+        QWidget* spacer = new QWidget;
+        spacer->setObjectName("spacer");
+        editLayout->addWidget(spacer, 2, 0);
+
+        editLayout->addWidget(new QLabel("Nodes"), 3, 0);
 
         QPushButton* newNode = new QPushButton("+");
-        connect(newNode, &QPushButton::clicked, this, &ClusterDialog::addNode);
-        editLayout->addWidget(newNode, 2, 1);
+        newNode->setObjectName("add");
+        connect(
+            newNode, &QPushButton::clicked,
+            [this]() {
+                std::string name = selectNode();
+                if (!name.empty()) {
+                    addNode(name);
+                }
+            }
+        );
+        editLayout->addWidget(newNode, 3, 1, Qt::AlignRight);
 
         QScrollArea* area = new QScrollArea;
         area->setWidgetResizable(true);
@@ -84,7 +101,11 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string path)
 
         _nodeLayout = new QVBoxLayout(nodeContainer);
         _nodeLayout->setAlignment(Qt::AlignTop);
-        editLayout->addWidget(area, 3, 0, 1, 2);
+        _nodeLayout->setMargin(0);
+        _nodeLayout->setContentsMargins(0, 0, 0, 0);
+        _nodeLayout->setSpacing(0);
+        editLayout->addWidget(area, 4, 0, 1, 2);
+        editLayout->setRowStretch(4, 1);
 
         layout->addWidget(edit);
     }
@@ -103,18 +124,16 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string path)
         connect(cancel, &QPushButton::clicked, this, &QDialog::reject);
         controlLayout->addWidget(cancel);
 
-
         layout->addWidget(control);
     }
 
-    if (std::filesystem::exists(_path)) {
-        Cluster cluster = common::loadFromJson<Cluster>(_path);
+    if (std::filesystem::exists(_clusterPath)) {
+        Cluster cluster = common::loadFromJson<Cluster>(_clusterPath);
 
         _name->setText(QString::fromStdString(cluster.name));
         _enabled->setChecked(cluster.isEnabled);
         for (const std::string& node : cluster.nodes) {
-            QLineEdit* line = addNode();
-            line->setText(QString::fromStdString(node));
+            addNode(node);
         }
     }
 }
@@ -130,7 +149,7 @@ void ClusterDialog::save() {
         return;
     }
 
-    for (QLineEdit* node : _nodes) {
+    for (QLabel* node : _nodes) {
         if (node->text().isEmpty()) {
             QMessageBox::critical(this, "Error", "Node name must not be empty");
             return;
@@ -141,28 +160,49 @@ void ClusterDialog::save() {
     Cluster cluster;
     cluster.name = _name->text().toStdString();
     cluster.isEnabled = _enabled->isChecked();
-    for (QLineEdit* node : _nodes) {
+    for (QLabel* node : _nodes) {
         cluster.nodes.push_back(node->text().toStdString());
     }
 
-    if (std::filesystem::path(_path).extension().empty()) {
-        common::saveToJson(_path + ".json", cluster);
+    if (std::filesystem::path(_clusterPath).extension().empty()) {
+        common::saveToJson(_clusterPath + ".json", cluster);
     }
     else {
-        common::saveToJson(_path, cluster);
+        common::saveToJson(_clusterPath, cluster);
     }
 
     accept();
 }
 
-QLineEdit* ClusterDialog::addNode() {
+std::string ClusterDialog::selectNode() {
+    std::vector<Node> nodes = common::loadJsonFromDirectory<Node>(_nodePath);
+    QStringList list;
+    for (const Node& node : nodes) {
+        list.push_back(QString::fromStdString(node.name));
+    }
+
+    QString selected = QInputDialog::getItem(
+        this,
+        "Add Node",
+        "Select the node to add",
+        list
+    );
+
+    return !selected.isEmpty() ? selected.toStdString() : "";
+}
+
+QLabel* ClusterDialog::addNode(std::string name) {
     QWidget* container = new QWidget;
     QBoxLayout* layout = new QHBoxLayout(container);
+    layout->setContentsMargins(10, 5, 10, 5);
 
-    QLineEdit* node = new QLineEdit;
+    QLabel* node = new QLabel(QString::fromStdString(name));
+    node->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    node->setCursor(QCursor(Qt::IBeamCursor));
     layout->addWidget(node);
 
     QPushButton* remove = new QPushButton("X");
+    remove->setObjectName("remove");
     connect(remove, &QPushButton::clicked, [this, node]() { removeNode(node); });
     layout->addWidget(remove);
 
@@ -171,7 +211,7 @@ QLineEdit* ClusterDialog::addNode() {
     return node;
 }
 
-void ClusterDialog::removeNode(QLineEdit* sender) {
+void ClusterDialog::removeNode(QLabel* sender) {
     const auto it = std::find(_nodes.cbegin(), _nodes.cend(), sender);
     assert(it != _nodes.cend());
 

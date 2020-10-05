@@ -32,6 +32,7 @@
  *                                                                                       *
  ****************************************************************************************/
 
+#include "logging.h"
 #include "mainwindow.h"
 #include <QApplication>
 #include <QFile>
@@ -41,6 +42,13 @@
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
 
+    qInstallMessageHandler(
+        // Now that the log is enabled and available, we can pipe all Qt messages to that
+        [](QtMsgType, const QMessageLogContext&, const QString& msg) {
+            Log("Qt", msg.toLocal8Bit().constData());
+        }
+    );
+    
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 

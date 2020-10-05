@@ -42,13 +42,14 @@
 
 class QBoxLayout;
 class QCheckBox;
+class QLabel;
 class QLineEdit;
 class QSpinBox;
 
 class ProgramDialog : public QDialog {
 Q_OBJECT
 public:
-    ProgramDialog(QWidget* parent, std::string path);
+    ProgramDialog(QWidget* parent, std::string programPath, std::string clusterPath);
 
 private:
     struct Configuration {
@@ -60,14 +61,16 @@ private slots:
     void save();
     QLineEdit* addTag();
     Configuration* addConfiguration();
-    QLineEdit* addCluster();
+    QLabel* addCluster(std::string clusterName);
 
 private:
+    std::string selectCluster();
     void removeTag(QLineEdit* sender);
     void removeConfiguration(const Configuration& configuration);
-    void removeCluster(QLineEdit* configuration);
+    void removeCluster(QLabel* configuration);
     
-    const std::string _path;
+    const std::string _programPath;
+    const std::string _clusterPath;
 
     QLineEdit* _name = nullptr;
     QLineEdit* _executable = nullptr;
@@ -85,7 +88,7 @@ private:
     std::vector<Configuration> _configurations;
 
     QBoxLayout* _clusterLayout = nullptr;
-    std::vector<QLineEdit*> _clusters;
+    std::vector<QLabel*> _clusters;
 };
 
 #endif // __EDITOR__PROGRAMDIALOG_H__

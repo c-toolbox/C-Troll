@@ -42,26 +42,30 @@
 
 class QBoxLayout;
 class QCheckBox;
+class QLabel;
 class QLineEdit;
 
 class ClusterDialog : public QDialog {
 Q_OBJECT
 public:
-    ClusterDialog(QWidget* parent, std::string path);
+    ClusterDialog(QWidget* parent, std::string clusterPath, std::string nodePath);
 
 private slots:
     void save();
-    QLineEdit* addNode();
+    QLabel* addNode(std::string name);
 
 private:
-    void removeNode(QLineEdit* sender);
+    std::string selectNode();
 
-    const std::string _path;
+    void removeNode(QLabel* sender);
+
+    const std::string _clusterPath;
+    const std::string _nodePath;
 
     QLineEdit* _name = nullptr;
     QCheckBox* _enabled = nullptr;
     QBoxLayout* _nodeLayout = nullptr;
-    std::vector<QLineEdit*> _nodes;
+    std::vector<QLabel*> _nodes;
 
 };
 

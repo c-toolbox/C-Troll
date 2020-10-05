@@ -1,5 +1,7 @@
 {
-    "name": "Local",
-    "enabled": true,
-    "nodes": [ "Local" ]
+  "enabled": true,
+  "name": "Local",
+  "nodes": [
+    "Locals"
+  ]
 }

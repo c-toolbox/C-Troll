@@ -166,7 +166,7 @@ void MainWindow::editCluster(std::string path) {
         path = file.toStdString();
     }
 
-    ClusterDialog dialog(this, path);
+    ClusterDialog dialog(this, path, _nodePath);
     dialog.exec();
 }
 
@@ -183,6 +183,6 @@ void MainWindow::editProgram(std::string path) {
         path = file.toStdString();
     }
 
-    ProgramDialog dialog(this, path);
+    ProgramDialog dialog(this, path, _clusterPath);
     dialog.exec();
 }

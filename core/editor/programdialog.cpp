@@ -39,6 +39,7 @@
 #include <QCheckBox>
 #include <QGridLayout>
 #include <QHBoxLayout>
+#include <QInputDialog>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -48,13 +49,13 @@
 #include <QVBoxLayout>
 #include <filesystem>
 
-ProgramDialog::ProgramDialog(QWidget* parent, std::string path)
+ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
+                             std::string clusterPath)
     : QDialog(parent)
-    , _path(std::move(path))
+    , _programPath(std::move(programPath))
+    , _clusterPath(std::move(clusterPath))
 {
-    assert(!_path.empty());
-
-    setWindowTitle(QString::fromStdString("Program: " + _path));
+    setWindowTitle(QString::fromStdString("Program: " + _programPath));
 
     QBoxLayout* layout = new QVBoxLayout(this);
 
@@ -86,7 +87,14 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string path)
         editLayout->addWidget(new QLabel("Delay"), 5, 0);
         QWidget* delayContainer = new QWidget;
         QBoxLayout* delayLayout = new QHBoxLayout(delayContainer);
+        delayLayout->setMargin(0);
+        delayLayout->setContentsMargins(0, 0, 0, 0);
+        delayLayout->setSpacing(0);
         _hasDelay = new QCheckBox("Enabled");
+        connect(
+            _hasDelay, &QCheckBox::clicked,
+            [this]() { _delay->setEnabled(_hasDelay->isChecked()); }
+        );
         delayLayout->addWidget(_hasDelay);
         _delay = new QSpinBox;
         _delay->setMinimum(0);
@@ -100,8 +108,12 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string path)
             editLayout->addWidget(new QLabel("Tags"), 6, 0);
 
             QPushButton* newTag = new QPushButton("+");
-            connect(newTag, &QPushButton::clicked, this, &ProgramDialog::addTag);
-            editLayout->addWidget(newTag, 6, 1);
+            newTag->setObjectName("add");
+            connect(
+                newTag, &QPushButton::clicked,
+                this, &ProgramDialog::addTag
+            );
+            editLayout->addWidget(newTag, 6, 1, Qt::AlignRight);
 
 
             QScrollArea* area = new QScrollArea;
@@ -113,6 +125,9 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string path)
 
             _tagLayout = new QVBoxLayout(tagContainer);
             _tagLayout->setAlignment(Qt::AlignTop);
+            _tagLayout->setMargin(0);
+            _tagLayout->setContentsMargins(0, 0, 0, 0);
+            _tagLayout->setSpacing(0);
             editLayout->addWidget(area, 7, 0, 1, 2);
         }
 
@@ -122,11 +137,12 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string path)
             editLayout->addWidget(new QLabel("Configurations"), 8, 0);
 
             QPushButton* newConfiguration = new QPushButton("+");
+            newConfiguration->setObjectName("add");
             connect(
                 newConfiguration, &QPushButton::clicked,
                 this, &ProgramDialog::addConfiguration
             );
-            editLayout->addWidget(newConfiguration, 8, 1);
+            editLayout->addWidget(newConfiguration, 8, 1, Qt::AlignRight);
 
 
             QScrollArea* area = new QScrollArea;
@@ -138,6 +154,9 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string path)
 
             _configurationLayout = new QVBoxLayout(configurationContainer);
             _configurationLayout->setAlignment(Qt::AlignTop);
+            _configurationLayout->setMargin(0);
+            _configurationLayout->setContentsMargins(0, 0, 0, 0);
+            _configurationLayout->setSpacing(0);
             editLayout->addWidget(area, 9, 0, 1, 2);
         }
 
@@ -147,11 +166,17 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string path)
             editLayout->addWidget(new QLabel("Clusters"), 10, 0);
 
             QPushButton* newCluster = new QPushButton("+");
+            newCluster->setObjectName("add");
             connect(
                 newCluster, &QPushButton::clicked,
-                this, &ProgramDialog::addCluster
+                [this]() {
+                    std::string name = selectCluster();
+                    if (!name.empty()) {
+                        addCluster(name);
+                    }
+                }
             );
-            editLayout->addWidget(newCluster, 10, 1);
+            editLayout->addWidget(newCluster, 10, 1, Qt::AlignRight);
 
 
             QScrollArea* area = new QScrollArea;
@@ -163,6 +188,9 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string path)
 
             _clusterLayout = new QVBoxLayout(clusterContainer);
             _clusterLayout->setAlignment(Qt::AlignTop);
+            _clusterLayout->setMargin(0);
+            _clusterLayout->setContentsMargins(0, 0, 0, 0);
+            _clusterLayout->setSpacing(0);
             editLayout->addWidget(area, 11, 0, 1, 2);
         }
 
@@ -187,8 +215,8 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string path)
         layout->addWidget(control);
     }
 
-    if (std::filesystem::exists(_path)) {
-        Program program = common::loadFromJson<Program>(_path);
+    if (std::filesystem::exists(_programPath)) {
+        Program program = common::loadFromJson<Program>(_programPath);
 
         _name->setText(QString::fromStdString(program.name));
         _executable->setText(QString::fromStdString(program.executable));
@@ -211,8 +239,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string path)
             line->parameters->setText(QString::fromStdString(configuration.parameters));
         }
         for (const std::string& cluster : program.clusters) {
-            QLineEdit* line = addCluster();
-            line->setText(QString::fromStdString(cluster));
+            addCluster(cluster);
         }
     }
 }
@@ -247,15 +274,15 @@ void ProgramDialog::save() {
         c.parameters = configuration.parameters->text().toStdString();
         program.configurations.push_back(c);
     }
-    for (QLineEdit* cluster : _clusters) {
+    for (QLabel* cluster : _clusters) {
         program.clusters.push_back(cluster->text().toStdString());
     }
 
-    if (std::filesystem::path(_path).extension().empty()) {
-        common::saveToJson(_path + ".json", program);
+    if (std::filesystem::path(_programPath).extension().empty()) {
+        common::saveToJson(_programPath + ".json", program);
     }
     else {
-        common::saveToJson(_path, program);
+        common::saveToJson(_programPath, program);
     }
 
     accept();
@@ -264,11 +291,13 @@ void ProgramDialog::save() {
 QLineEdit* ProgramDialog::addTag() {
     QWidget* container = new QWidget;
     QBoxLayout* layout = new QHBoxLayout(container);
+    layout->setContentsMargins(10, 5, 10, 5);
 
-    QLineEdit* tag = new QLineEdit;
+    QLineEdit* tag = new QLineEdit();
     layout->addWidget(tag);
 
     QPushButton* remove = new QPushButton("X");
+    remove->setObjectName("remove");
     connect(remove, &QPushButton::clicked, [this, tag]() { removeTag(tag); });
     layout->addWidget(remove);
 
@@ -289,6 +318,7 @@ void ProgramDialog::removeTag(QLineEdit* sender) {
 ProgramDialog::Configuration* ProgramDialog::addConfiguration() {
     QWidget* container = new QWidget;
     QBoxLayout* layout = new QHBoxLayout(container);
+    layout->setContentsMargins(10, 5, 10, 5);
 
     Configuration config;
     config.name = new QLineEdit;
@@ -298,6 +328,7 @@ ProgramDialog::Configuration* ProgramDialog::addConfiguration() {
     layout->addWidget(config.parameters);
 
     QPushButton* remove = new QPushButton("X");
+    remove->setObjectName("remove");
     connect(
         remove, &QPushButton::clicked,
         [this, config]() { removeConfiguration(config); }
@@ -328,14 +359,36 @@ void ProgramDialog::removeConfiguration(const Configuration& sender) {
     parent->deleteLater();
 }
 
-QLineEdit* ProgramDialog::addCluster() {
+std::string ProgramDialog::selectCluster() {
+    std::vector<Cluster> clusters = common::loadJsonFromDirectory<Cluster>(_clusterPath);
+
+    QStringList list;
+    for (const Cluster& cluster : clusters) {
+        list.push_back(QString::fromStdString(cluster.name));
+    }
+
+    QString selected = QInputDialog::getItem(
+        this,
+        "Add Cluster",
+        "Select the cluster to add",
+        list
+    );
+
+    return !selected.isEmpty() ? selected.toStdString() : "";
+}
+
+QLabel* ProgramDialog::addCluster(std::string clusterName) {
     QWidget* container = new QWidget;
     QBoxLayout* layout = new QHBoxLayout(container);
+    layout->setContentsMargins(10, 5, 10, 5);
 
-    QLineEdit* cluster = new QLineEdit;
+    QLabel* cluster = new QLabel(QString::fromStdString(clusterName));
+    cluster->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    cluster->setCursor(QCursor(Qt::IBeamCursor));
     layout->addWidget(cluster);
 
     QPushButton* remove = new QPushButton("X");
+    remove->setObjectName("remove");
     connect(remove, &QPushButton::clicked, [this, cluster]() { removeCluster(cluster); });
     layout->addWidget(remove);
 
@@ -344,7 +397,7 @@ QLineEdit* ProgramDialog::addCluster() {
     return cluster;
 }
 
-void ProgramDialog::removeCluster(QLineEdit* sender) {
+void ProgramDialog::removeCluster(QLabel* sender) {
     const auto it = std::find(_clusters.cbegin(), _clusters.cend(), sender);
     assert(it != _clusters.cend());
 

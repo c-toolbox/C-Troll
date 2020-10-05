@@ -9,8 +9,17 @@
 }
 
 MainWindow {
-    min-width: 40em;
-    min-height: 20em;
+  min-width: 40em;
+  min-height: 20em;
+}
+
+QInputDialog  QLabel {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+QInputDialog  QComboBox {
+  margin-bottom: 1em;
 }
 
 QPushButton {
@@ -20,6 +29,39 @@ QPushButton {
 
   padding-left: 25%;
   padding-right: 25%;
+  padding-top: 5%;
+  padding-bottom: 5%;
+}
+
+QLineEdit:hover  {
+  border: 1px outset #acacac;
+  background: #303030;
+}
+
+QSpinBox:hover, QComboBox, QComboBox:hover {
+  border: 1px outset #acacac;
+}
+
+QComboBox:drop-down {
+  min-width: 2em;
+  min-height: 0.5em;
+  background: #666666;
+}
+
+QComboBox:drop-down:hover {
+  background: #737373;
+}
+
+QComboBox:down-arrow {
+  image: url(:/images/arrow_down.png);
+  width: 1em;
+  height: 1em;
+  /* width: 50px; */
+  /* height: 50px; */
+} 
+
+QPushButton:hover {
+    background-color: #3f3f3f;
 }
 
 QTreeView::branch {
@@ -30,9 +72,59 @@ QTreeView {
     background: #202020;
 }
 
-/*
- *
- */
-/* NodeDialog  QGridLayout { */
+QPushButton#add {
+    min-height: 1.5em;
+    max-height: 1.5em;
+    min-width: 1.5em;
+    max-width: 1.5em;
+    color: #32c432;
 
-/* } */
+    padding: 0px 0px 0px 0px;
+}
+
+QPushButton#add:hover {
+    color: #2cdd2c;
+    background-color: #124712;
+}
+
+QPushButton#remove {
+    min-height: 1.25em;
+    max-height: 1.25em;
+    min-width: 1.25em;
+    max-width: 1.25em;
+    color: #e22929;
+
+    padding: 0px 0px 0px 0px;
+}
+
+QPushButton#remove:hover {
+    color: #ff1717;
+    background-color: #440e0e;
+}
+
+
+/*
+ * ClusterDialog
+ */
+ClusterDialog  QLineEdit {
+  min-width: 15em;
+}
+
+ClusterDialog  QScrollArea {
+    min-height: 15em;
+}
+
+ClusterDialog  QWidget#spacer {
+    min-height: 1em;
+}
+
+/*
+ * ProgramDialog
+ */
+ProgramDialog > QWidget > QLineEdit {
+  min-width: 30em;
+}
+
+ProgramDialog  QScrollArea {
+  min-height: 10em;
+}
