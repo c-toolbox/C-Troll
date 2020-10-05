@@ -104,16 +104,20 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
                 );
 
                 if (!selected.isEmpty()) {
-                    _nodes->addItem(selected.toStdString());
+                    QLabel* label = new QLabel(selected);
+                    _nodes->addItem(label);
                     updateSaveButton();
                 }
             }
         );
         editLayout->addWidget(newNode, 3, 1, Qt::AlignRight);
 
-        _nodes = new DynamicList;
+        _nodes = new DynamicList<QLabel>;
         _nodes->setToolTip("The nodes that belong to this cluster");
-        connect(_nodes, &DynamicList::updated, this, &ClusterDialog::updateSaveButton);
+        connect(
+            _nodes, &DynamicListBase::updated,
+            this, &ClusterDialog::updateSaveButton
+        );
         editLayout->addWidget(_nodes, 4, 0, 1, 2);
         editLayout->setRowStretch(4, 1);
 
@@ -136,7 +140,8 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
         _name->setText(QString::fromStdString(cluster.name));
         _enabled->setChecked(cluster.isEnabled);
         for (const std::string& node : cluster.nodes) {
-            QLabel* nodeLabel = _nodes->addItem(node);
+            QLabel* nodeLabel = new QLabel(QString::fromStdString(node));
+            _nodes->addItem(nodeLabel);
 
             const auto it = std::find_if(
                 nodes.cbegin(), nodes.cend(),
@@ -156,7 +161,9 @@ void ClusterDialog::save() {
     Cluster cluster;
     cluster.name = _name->text().toStdString();
     cluster.isEnabled = _enabled->isChecked();
-    cluster.nodes = _nodes->items();
+    for (QLabel* node : _nodes->items()) {
+        cluster.nodes.push_back(node->text().toStdString());
+    }
     common::saveToJson(_clusterPath, cluster);
     accept();
 }

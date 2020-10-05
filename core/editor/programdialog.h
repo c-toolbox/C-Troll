@@ -52,22 +52,21 @@ class QSpinBox;
 class ProgramDialog : public QDialog {
 Q_OBJECT
 public:
-    ProgramDialog(QWidget* parent, std::string programPath, std::string clusterPath);
+    struct Configuration : QWidget {
+        Configuration();
 
-private:
-    struct Configuration {
         QLineEdit* name = nullptr;
         QLineEdit* parameters = nullptr;
     };
 
+    ProgramDialog(QWidget* parent, std::string programPath, std::string clusterPath);
+
 private slots:
     void save();
-    Configuration* addConfiguration();
     void updateSaveButton();
 
 private:
     std::string selectCluster();
-    void removeConfiguration(const Configuration& configuration);
     
     const std::string _programPath;
     const std::string _clusterPath;
@@ -81,12 +80,9 @@ private:
     QCheckBox* _hasDelay = nullptr;
     QSpinBox* _delay = nullptr;
 
-    DynamicList* _tags;
-
-    QBoxLayout* _configurationLayout = nullptr;
-    std::vector<Configuration> _configurations;
-
-    DynamicList* _clusters;
+    DynamicList<QLineEdit>* _tags = nullptr;
+    DynamicList<Configuration>* _configurations = nullptr;
+    DynamicList<QLabel>* _clusters = nullptr;
 
     QPushButton* _saveButton = nullptr;
 };

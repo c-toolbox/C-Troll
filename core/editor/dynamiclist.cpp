@@ -36,66 +36,20 @@
 
 #include "removebutton.h"
 #include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
 
-DynamicList::DynamicList() {
+DynamicListBase::DynamicListBase() {
     setWidgetResizable(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     QWidget* container = new QWidget;
     setWidget(container);
-    //widget()->layout()
 
-    _layout = new QVBoxLayout(container);
-    _layout->setAlignment(Qt::AlignTop);
-    _layout->setMargin(0);
-    _layout->setContentsMargins(0, 0, 0, 0);
-    _layout->setSpacing(0);
-}
-
-QLabel* DynamicList::addItem(std::string name) {
-    QWidget* container = new QWidget;
-    QBoxLayout* layout = new QHBoxLayout(container);
-    layout->setContentsMargins(10, 5, 10, 5);
-
-    QLabel* node = new QLabel(QString::fromStdString(name));
-    node->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    node->setCursor(QCursor(Qt::IBeamCursor));
-    layout->addWidget(node);
-
-    QPushButton* remove = new RemoveButton;
-    connect(
-        remove, &QPushButton::clicked,
-        [this, node]() { removeItem(node); }
-    );
-    layout->addWidget(remove);
-
-    _layout->addWidget(container);
-    _items.push_back(node);
-    return node;
-}
-
-std::vector<std::string> DynamicList::items() const {
-    std::vector<std::string> res;
-    res.reserve(_items.size());
-    for (QLabel* label : _items) {
-        res.push_back(label->text().toStdString());
-    }
-    return res;
-}
-
-bool DynamicList::empty() const {
-    return _items.empty();
-}
-
-void DynamicList::removeItem(QLabel* sender) {
-    const auto it = std::find(_items.cbegin(), _items.cend(), sender);
-    assert(it != _items.cend());
-
-    _items.erase(it);
-    _layout->removeWidget(sender->parentWidget());
-    sender->parent()->deleteLater();
-
-    emit updated();
+    QBoxLayout* layout = new QVBoxLayout(container);
+    layout->setAlignment(Qt::AlignTop);
+    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
 }

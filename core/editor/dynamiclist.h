@@ -40,26 +40,34 @@
 #include <vector>
 
 class QBoxLayout;
-class QLabel;
 
-class DynamicList : public QScrollArea {
+class DynamicListBase : public QScrollArea {
 Q_OBJECT
 public:
-    DynamicList();
-
-    QLabel* addItem(std::string name);
-
-    bool empty() const;
-    std::vector<std::string> items() const;
+    DynamicListBase();
 
 signals:
     void updated();
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+template <typename T>
+class DynamicList : public DynamicListBase {
+public:
+    void addItem(T* item);
+
+    bool empty() const;
+    std::vector<T*> items() const;
 
 private:
-    void removeItem(QLabel* sender);
+    void removeItem(T* sender);
 
-    QBoxLayout* _layout;
-    std::vector<QLabel*> _items;
+    std::vector<T*> _items;
 };
+
+#include "dynamiclist.inl"
 
 #endif // __EDITOR__DYNAMICLIST_H__
