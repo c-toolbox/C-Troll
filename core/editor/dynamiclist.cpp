@@ -32,63 +32,70 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __EDITOR__PROGRAMDIALOG_H__
-#define __EDITOR__PROGRAMDIALOG_H__
-
-#include <QDialog>
-
 #include "dynamiclist.h"
-#include <QWidget>
-#include <string>
-#include <vector>
 
-class QBoxLayout;
-class QCheckBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QSpinBox;
+#include "removebutton.h"
+#include <QLabel>
+#include <QPushButton>
+#include <QVBoxLayout>
 
-class ProgramDialog : public QDialog {
-Q_OBJECT
-public:
-    ProgramDialog(QWidget* parent, std::string programPath, std::string clusterPath);
+DynamicList::DynamicList() {
+    setWidgetResizable(true);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-private:
-    struct Configuration {
-        QLineEdit* name = nullptr;
-        QLineEdit* parameters = nullptr;
-    };
+    QWidget* container = new QWidget;
+    setWidget(container);
+    //widget()->layout()
 
-private slots:
-    void save();
-    Configuration* addConfiguration();
-    void updateSaveButton();
+    _layout = new QVBoxLayout(container);
+    _layout->setAlignment(Qt::AlignTop);
+    _layout->setMargin(0);
+    _layout->setContentsMargins(0, 0, 0, 0);
+    _layout->setSpacing(0);
+}
 
-private:
-    std::string selectCluster();
-    void removeConfiguration(const Configuration& configuration);
-    
-    const std::string _programPath;
-    const std::string _clusterPath;
+QLabel* DynamicList::addItem(std::string name) {
+    QWidget* container = new QWidget;
+    QBoxLayout* layout = new QHBoxLayout(container);
+    layout->setContentsMargins(10, 5, 10, 5);
 
-    QLineEdit* _name = nullptr;
-    QLineEdit* _executable = nullptr;
-    QLineEdit* _commandLineParameters = nullptr;
-    QLineEdit* _workingDirectory = nullptr;
-    QCheckBox* _shouldForwardMessages = nullptr;
+    QLabel* node = new QLabel(QString::fromStdString(name));
+    node->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    node->setCursor(QCursor(Qt::IBeamCursor));
+    layout->addWidget(node);
 
-    QCheckBox* _hasDelay = nullptr;
-    QSpinBox* _delay = nullptr;
+    QPushButton* remove = new RemoveButton;
+    connect(
+        remove, &QPushButton::clicked,
+        [this, node]() { removeItem(node); }
+    );
+    layout->addWidget(remove);
 
-    DynamicList* _tags;
+    _layout->addWidget(container);
+    _items.push_back(node);
+    return node;
+}
 
-    QBoxLayout* _configurationLayout = nullptr;
-    std::vector<Configuration> _configurations;
+std::vector<std::string> DynamicList::items() const {
+    std::vector<std::string> res;
+    res.reserve(_items.size());
+    for (QLabel* label : _items) {
+        res.push_back(label->text().toStdString());
+    }
+    return res;
+}
 
-    DynamicList* _clusters;
+bool DynamicList::empty() const {
+    return _items.empty();
+}
 
-    QPushButton* _saveButton = nullptr;
-};
+void DynamicList::removeItem(QLabel* sender) {
+    const auto it = std::find(_items.cbegin(), _items.cend(), sender);
+    assert(it != _items.cend());
 
-#endif // __EDITOR__PROGRAMDIALOG_H__
+    _items.erase(it);
+    _layout->removeWidget(sender->parentWidget());
+    sender->parent()->deleteLater();
+
+    emit updated();
+}

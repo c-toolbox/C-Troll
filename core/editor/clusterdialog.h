@@ -36,6 +36,8 @@
 #define __EDITOR__CLUSTERDIALOG_H__
 
 #include <QDialog>
+
+#include "dynamiclist.h"
 #include <QWidget>
 #include <string>
 #include <vector>
@@ -54,18 +56,14 @@ public:
 private slots:
     void save();
     void updateSaveButton();
-    QLabel* addNode(std::string name);
 
 private:
-    void removeNode(QLabel* sender);
-
     const std::string _clusterPath;
     const std::string _nodePath;
 
     QLineEdit* _name = nullptr;
     QCheckBox* _enabled = nullptr;
-    QBoxLayout* _nodeLayout = nullptr;
-    std::vector<QLabel*> _nodes;
+    DynamicList* _nodes = nullptr;
 
     QPushButton* _saveButton = nullptr;
 };

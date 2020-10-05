@@ -32,63 +32,34 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __EDITOR__PROGRAMDIALOG_H__
-#define __EDITOR__PROGRAMDIALOG_H__
+#ifndef __EDITOR__DYNAMICLIST_H__
+#define __EDITOR__DYNAMICLIST_H__
 
-#include <QDialog>
+#include <QScrollArea>
 
-#include "dynamiclist.h"
-#include <QWidget>
-#include <string>
 #include <vector>
 
 class QBoxLayout;
-class QCheckBox;
 class QLabel;
-class QLineEdit;
-class QPushButton;
-class QSpinBox;
 
-class ProgramDialog : public QDialog {
+class DynamicList : public QScrollArea {
 Q_OBJECT
 public:
-    ProgramDialog(QWidget* parent, std::string programPath, std::string clusterPath);
+    DynamicList();
+
+    QLabel* addItem(std::string name);
+
+    bool empty() const;
+    std::vector<std::string> items() const;
+
+signals:
+    void updated();
 
 private:
-    struct Configuration {
-        QLineEdit* name = nullptr;
-        QLineEdit* parameters = nullptr;
-    };
+    void removeItem(QLabel* sender);
 
-private slots:
-    void save();
-    Configuration* addConfiguration();
-    void updateSaveButton();
-
-private:
-    std::string selectCluster();
-    void removeConfiguration(const Configuration& configuration);
-    
-    const std::string _programPath;
-    const std::string _clusterPath;
-
-    QLineEdit* _name = nullptr;
-    QLineEdit* _executable = nullptr;
-    QLineEdit* _commandLineParameters = nullptr;
-    QLineEdit* _workingDirectory = nullptr;
-    QCheckBox* _shouldForwardMessages = nullptr;
-
-    QCheckBox* _hasDelay = nullptr;
-    QSpinBox* _delay = nullptr;
-
-    DynamicList* _tags;
-
-    QBoxLayout* _configurationLayout = nullptr;
-    std::vector<Configuration> _configurations;
-
-    DynamicList* _clusters;
-
-    QPushButton* _saveButton = nullptr;
+    QBoxLayout* _layout;
+    std::vector<QLabel*> _items;
 };
 
-#endif // __EDITOR__PROGRAMDIALOG_H__
+#endif // __EDITOR__DYNAMICLIST_H__

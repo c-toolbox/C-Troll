@@ -35,6 +35,7 @@
 set(HEADER_FILES
   addbutton.h
   clusterdialog.h
+  dynamiclist.h
   mainwindow.h
   nodedialog.h
   programdialog.h
@@ -45,6 +46,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
   addbutton.cpp
   clusterdialog.cpp
+  dynamiclist.cpp
   main.cpp
   mainwindow.cpp
   nodedialog.cpp
@@ -59,6 +61,7 @@ qt5_wrap_cpp(
   MOC_FILES
   addbutton.h
   clusterdialog.h
+  dynamiclist.h
   mainwindow.h
   nodedialog.h
   programdialog.h  
