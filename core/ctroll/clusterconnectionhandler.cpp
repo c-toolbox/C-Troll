@@ -86,7 +86,14 @@ void ClusterConnectionHandler::initialize() {
         );
         connect(
             jsonSocket.get(), &common::JsonSocket::messageReceived,
-            [this, id = node->id](nlohmann::json message) { handleMessage(message, id); }
+            [this, id = node->id](nlohmann::json message) {
+                try {
+                    handleMessage(message, id);
+                }
+                catch (const std::exception& e) {
+                    Log("Message Decode", e.what());
+                }
+            }
         );
         common::JsonSocket* s = jsonSocket.get();
         _sockets[node->id] = std::move(jsonSocket);
