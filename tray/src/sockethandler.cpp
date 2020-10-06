@@ -114,7 +114,14 @@ void SocketHandler::newConnectionEstablished() {
 
         QObject::connect(
             socket, &common::JsonSocket::messageReceived,
-            [this, socket](nlohmann::json message) { handleMessage(message, socket); }
+            [this, socket](nlohmann::json message) {
+                try {
+                    handleMessage(message, socket);
+                }
+                catch (const std::exception& e) {
+                    Log("Message Decode", e.what());
+                }
+            }
         );
 
         _sockets.push_back(socket);

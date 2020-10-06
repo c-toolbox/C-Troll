@@ -41,6 +41,7 @@
 #include <QFileDialog>
 #include <QIcon>
 #include <QMessageBox>
+#include <QPushButton>
 #include <filesystem>
 
 int main(int argc, char** argv) {
@@ -73,18 +74,22 @@ int main(int argc, char** argv) {
     }
     else {
         QMessageBox box;
-        box.setText("Text");
-        box.setInformativeText("InfText");
-        QPushButton* b = box.addButton("Create", QMessageBox::ButtonRole::YesRole);
-        box.addButton("Search", QMessageBox::ButtonRole::NoRole);
-        box.setDefaultButton(b);
-        const int res = box.exec();
+        box.setText("Configuration File");
+        box.setInformativeText(
+            "Could not detect 'config.json' file. Either select the location of an "
+            "existing configuration file, or create a new one"
+        );
+        QPushButton* create = box.addButton("Create", QMessageBox::ButtonRole::YesRole);
+        QPushButton* search = box.addButton("Search", QMessageBox::ButtonRole::NoRole);
+        box.setDefaultButton(create);
+        box.exec();
+        QAbstractButton* clicked = box.clickedButton();
 
-        if (res == QMessageBox::Yes) {
+        if (clicked == create) {
             common::saveToJson(BaseConfiguration::ConfigurationFile, config);
             std::filesystem::create_directory(config.applicationPath);
             std::filesystem::create_directory(config.clusterPath);
-            std::filesystem::create_directory(config.applicationPath);
+            std::filesystem::create_directory(config.nodePath);
         }
         else {
             QString s = QFileDialog::getOpenFileName(nullptr, "Select config file");
@@ -92,6 +97,8 @@ int main(int argc, char** argv) {
                 Q_CLEANUP_RESOURCE(resources);
                 return 0;
             }
+            ;
+            QDir::setCurrent(QFileInfo(s).absoluteDir().path());
             config = common::loadFromJson<BaseConfiguration>(s.toStdString());
         }
     }
