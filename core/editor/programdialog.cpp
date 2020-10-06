@@ -65,6 +65,10 @@ ProgramDialog::Configuration::Configuration() {
     layout->addWidget(parameters);
 }
 
+bool operator==(const Cluster& c, const std::string& name) {
+    return c.name == name;
+}
+
 ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                              std::string clusterPath)
     : QDialog(parent)
@@ -272,10 +276,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             QLabel* clusterLabel = new QLabel(QString::fromStdString(cluster));
             _clusters->addItem(clusterLabel);
 
-            const auto it = std::find_if(
-                clusters.cbegin(), clusters.cend(),
-                [cluster](const Cluster& c) { return c.name == cluster; }
-            );
+            const auto it = std::find(clusters.cbegin(), clusters.cend(), cluster);
             if (it == clusters.end()) {
                 clusterLabel->setObjectName("invalid");
                 clusterLabel->setToolTip("Could not find cluster in clusters folder");
@@ -314,19 +315,20 @@ void ProgramDialog::save() {
     accept();
 }
 
+bool operator==(QLabel* name, const Cluster& cluster) {
+    return cluster.name == name->text().toStdString();
+}
+
 std::string ProgramDialog::selectCluster() {
     std::vector<Cluster> clusters = common::loadJsonFromDirectory<Cluster>(_clusterPath);
 
-    std::vector<QLabel*> currentClusters = _clusters->items<QLabel>();
+    std::vector<QLabel*> currClusters = _clusters->items<QLabel>();
         clusters.erase(
         std::remove_if(
             clusters.begin(), clusters.end(),
-            [&currentClusters](const Cluster& c) {
-                const auto it = std::find_if(
-                    currentClusters.cbegin(), currentClusters.cend(),
-                    [c](QLabel* l) { return l->text().toStdString() == c.name; }
-                );
-                return it != currentClusters.cend();
+            [&currClusters](const Cluster& c) {
+                const auto it = std::find(currClusters.cbegin(), currClusters.cend(), c);
+                return it != currClusters.cend();
             }
         ),
         clusters.end()

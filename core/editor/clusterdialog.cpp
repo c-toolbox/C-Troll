@@ -52,6 +52,10 @@
 #include <QVBoxLayout>
 #include <filesystem>
 
+bool operator==(const Node& node, const std::string& name) {
+    return node.name == name;
+}
+
 ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
                              std::string nodePath)
     : QDialog(parent)
@@ -119,10 +123,7 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
             QLabel* nodeLabel = new QLabel(QString::fromStdString(node));
             _nodes->addItem(nodeLabel);
 
-            const auto it = std::find_if(
-                nodes.cbegin(), nodes.cend(),
-                [node](const Node& n) { return n.name == node; }
-            );
+            const auto it = std::find(nodes.cbegin(), nodes.cend(), node);
             if (it == nodes.cend()) {
                 nodeLabel->setObjectName("invalid");
                 nodeLabel->setToolTip("Could not find node in nodes folder");
@@ -149,6 +150,10 @@ void ClusterDialog::updateSaveButton() {
     _saveButton->setEnabled(!_name->text().isEmpty() && hasItems);
 }
 
+bool operator==(QLabel* name, const Node& node) {
+    return node.name == name->text().toStdString();
+}
+
 void ClusterDialog::addNewNode() {
     std::vector<Node> nodes = common::loadJsonFromDirectory<Node>(_nodePath);
 
@@ -158,10 +163,7 @@ void ClusterDialog::addNewNode() {
         std::remove_if(
             nodes.begin(), nodes.end(),
             [&currentNodes](const Node& n) {
-                const auto it = std::find_if(
-                    currentNodes.cbegin(), currentNodes.cend(),
-                    [n](QLabel* l) { return l->text().toStdString() == n.name; }
-                );
+                const auto it = std::find(currentNodes.cbegin(), currentNodes.cend(), n);
                 return it != currentNodes.cend();
             }
         ),
