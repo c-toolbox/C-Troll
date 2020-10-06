@@ -15,16 +15,17 @@ def createDirectory(dir) {
 }
 
 def build() {
-  createDirectory('build');
-  dir('build') {
-    cmake([
-      installation: 'InSearchPath',
-      arguments: '..'
-    ])
-  }
+  // createDirectory('build');
+  // dir('build') {
+  //   cmake([
+  //     installation: 'InSearchPath',
+  //     arguments: '..'
+  //   ])
+  // }
   cmakeBuild([
     installation: "InSearchPath",
-    buildDir: 'build'
+    buildDir: 'build',
+    steps: []
   ])
 }
 
