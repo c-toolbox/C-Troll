@@ -52,7 +52,7 @@ linux_gcc: {
         buildDir: 'build',
         generator: 'Unix Makefiles',
         installation: "InSearchPath",
-        steps: [[  withCmake: true  ]]
+        steps: [[ args: " -- -j4", withCmake: true ]]
       ])
     }
   } // node('linux' && 'gcc')
@@ -68,7 +68,7 @@ linux_clang: {
         buildDir: 'build',
         generator: 'Unix Makefiles',
         installation: "InSearchPath",
-        steps: [[  withCmake: true  ]]
+        steps: [[ args: " -- -j4", withCmake: true ]]
       ])
 
     }
@@ -82,10 +82,10 @@ windows: {
     }
     stage('windows/build') {
       cmakeBuild([
-        buildDir: 'Visual Studio 16 2019',
-        generator: 'Makefile',
+        buildDir: 'build',
+        generator: 'Visual Studio 16 2019',
         installation: "InSearchPath",
-        steps: [[  withCmake: true  ]]
+        steps: [[ args: " -- /nologo /verbosity:minimal /m:4", withCmake: true ]]
       ])
 
     }
@@ -102,7 +102,7 @@ macos: {
         buildDir: 'build',
         generator: 'Xcode',
         installation: "InSearchPath",
-        steps: [[  withCmake: true  ]]
+        steps: [[ args: " -- -quiet -parallelizeTargets -jobs 4", withCmake: true ]]
       ])
 
     }
