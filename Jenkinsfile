@@ -3,10 +3,10 @@ def checkoutGit() {
   def branch = env.BRANCH_NAME
 
   if (isUnix()) {
-    sh "git clone --recursive --jobs 4 --depth 1 ${url} --branch ${branch} --single-branch ."
+    sh "git clone --recursive --depth 1 ${url} --branch ${branch} --single-branch ."
   }
   else {
-    bat "git clone --recursive --jobs 4 --depth 1 ${url} --branch ${branch} --single-branch ."
+    bat "git clone --recursive --depth 1 ${url} --branch ${branch} --single-branch ."
   }
 }
 
@@ -24,7 +24,7 @@ def build() {
   ])
 }
 
-parallel master: {
+parallel tools: {
   node('tools') {
     stage('tools/scm') {
       deleteDir();
