@@ -15,8 +15,8 @@ def createDirectory(dir) {
 }
 
 def build() {
+  createDirectory('build');
   dir('build') {
-    createDirectory('build');
     cmake([
       installation: 'InSearchPath',
       arguments: '..'
