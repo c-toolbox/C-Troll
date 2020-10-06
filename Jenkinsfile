@@ -10,9 +10,13 @@ def checkoutGit() {
   }
 }
 
+def createDirectory(dir) {
+  cmake([installation: 'InSearchPath', arguments: "-E make_directory ${dir}"])
+}
+
 def build() {
-  cmake([installation: 'InSearchPath', arguments: "-E make_directory build"])
   dir('build') {
+    createDirectory('build');
     cmake([
       installation: 'InSearchPath',
       arguments: '..'
@@ -31,9 +35,11 @@ parallel tools: {
       checkoutGit();
     }
     stage('tools/cppcheck/create') {
+      createDirectory('build');
       sh 'cppcheck --enable=all --xml --xml-version=2 -i ext common core tray 2> build/cppcheck.xml';
     }
     stage('tools/cloc/create') {
+      createDirectory('build');
       sh 'cloc --by-file --exclude-dir=build,example,ext --xml --out=build/cloc.xml --quiet .';
     }
   } // node('tools')
