@@ -48,18 +48,6 @@ namespace {
     constexpr const char* KeyRestPort = "port";
 } // namespace
 
-void to_json(nlohmann::json& j, const Configuration::Rest& r) {
-    if (!r.username.empty()) {
-        j[KeyRestUsername] = r.username;
-    }
-    if (!r.password.empty()) {
-        j[KeyRestPassword] = r.password;
-    }
-    if (r.port != Configuration::Rest().port) {
-        j[KeyRestPort] = r.port;
-    }
-}
-
 void to_json(nlohmann::json& j, const Configuration& c) {
     to_json(j, static_cast<const BaseConfiguration&>(c));
 
@@ -80,19 +68,15 @@ void to_json(nlohmann::json& j, const Configuration& c) {
     }
 
     if (c.rest.has_value()) {
-        j[KeyRest] = *c.rest;
-    }
-}
-
-void from_json(const nlohmann::json& j, Configuration::Rest& r) {
-    if (j.find(KeyRestUsername) != j.end()) {
-        j[KeyRestUsername].get_to(r.username);
-    }
-    if (j.find(KeyRestPassword) != j.end()) {
-        j[KeyRestPassword].get_to(r.username);
-    }
-    if (j.find(KeyRestPort) != j.end()) {
-        j[KeyRestPort].get_to(r.port);
+        if (!c.rest->username.empty()) {
+            j[KeyRest][KeyRestUsername] = c.rest->username;
+        }
+        if (!c.rest->password.empty()) {
+            j[KeyRest][KeyRestPassword] = c.rest->password;
+        }
+        if (c.rest->port != Configuration::Rest().port) {
+            j[KeyRest][KeyRestPort] = c.rest->port;
+        }
     }
 }
 
@@ -122,8 +106,18 @@ void from_json(const nlohmann::json& j, Configuration& c) {
     if (j.find(KeyLogRotation) != j.end()) {
         c.logRotation = j[KeyLogRotation].get<common::LogRotation>();
     }
-    
+
     if (j.find(KeyRest) != j.end()) {
-        c.rest = j[KeyRest].get<Configuration::Rest>();
+        Configuration::Rest r;
+        if (j[KeyRest].find(KeyRestUsername) != j.end()) {
+            j[KeyRest][KeyRestUsername].get_to(r.username);
+        }
+        if (j[KeyRest].find(KeyRestPassword) != j.end()) {
+            j[KeyRest][KeyRestPassword].get_to(r.username);
+        }
+        if (j[KeyRest].find(KeyRestPort) != j.end()) {
+            j[KeyRest][KeyRestPort].get_to(r.port);
+        }
+        c.rest = r;
     }
 }
