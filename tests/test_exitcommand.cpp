@@ -32,18 +32,51 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "invalidauthmessage.h"
+#include "catch2/catch.hpp"
 
-namespace common {
+#include "exitcommandmessage.h"
+#include <json/json.hpp>
 
-void to_json(nlohmann::json& j, const InvalidAuthMessage& p) {
-    j[Message::KeyType] = InvalidAuthMessage::Type;
-    j[Message::KeyVersion] = p.CurrentVersion;
+TEST_CASE("(ExitCommand) Default Ctor", "[ExitCommand]") {
+    common::ExitCommandMessage msg;
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    common::ExitCommandMessage msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
 }
 
-void from_json(const nlohmann::json& j, InvalidAuthMessage& p) {
-    validateMessage(j, InvalidAuthMessage::Type);
-    from_json(j, static_cast<Message&>(p));
+TEST_CASE("(ExitCommand) Correct Type", "[ExitCommand]") {
+    common::ExitCommandMessage msg;
+
+
+    nlohmann::json j;
+    to_json(j, msg);
+
+    common::ExitCommandMessage msgDeserialize;
+    from_json(j, msgDeserialize);
+
+    REQUIRE(msgDeserialize.type == common::ExitCommandMessage::Type);
 }
 
-} // namespace common
+TEST_CASE("(ExitCommand) id", "[ExitCommand]") {
+    common::ExitCommandMessage msg;
+    msg.id = 13;
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    common::ExitCommandMessage msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}

@@ -86,4 +86,4 @@ add_subdirectory(ext/simplecrypt)
 add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(tray)
-
+add_subdirectory(tests)

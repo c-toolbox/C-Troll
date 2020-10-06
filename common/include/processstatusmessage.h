@@ -47,7 +47,6 @@ struct ProcessStatusMessage : public Message {
     static constexpr const char* Type = "ProcessStatusMessage";
 
     enum class Status : int {
-        Unknown = -1,
         Starting = 0,
         Running,
         NormalExit,
@@ -62,7 +61,7 @@ struct ProcessStatusMessage : public Message {
     /// The unique identifier for the process that will be created
     int processId = -1;
     /// The process status
-    Status status = Status::Unknown;
+    Status status = Status::UnknownError;
 };
   
 void to_json(nlohmann::json& j, const ProcessStatusMessage& p);

@@ -32,18 +32,71 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "invalidauthmessage.h"
+#include "catch2/catch.hpp"
 
-namespace common {
+#include "message.h"
+#include <json/json.hpp>
 
-void to_json(nlohmann::json& j, const InvalidAuthMessage& p) {
-    j[Message::KeyType] = InvalidAuthMessage::Type;
-    j[Message::KeyVersion] = p.CurrentVersion;
+TEST_CASE("(Message) Default Ctor", "[Message]") {
+    nlohmann::json j = {
+        { common::Message::KeyType, "" },
+        { common::Message::KeySecret, "" }
+    };
+
+    common::Message msg;
+
+    common::Message msg2;
+    from_json(j, msg2);
+
+    REQUIRE(msg.type == msg2.type);
+    REQUIRE(msg.secret == msg2.secret);
 }
 
-void from_json(const nlohmann::json& j, InvalidAuthMessage& p) {
-    validateMessage(j, InvalidAuthMessage::Type);
-    from_json(j, static_cast<Message&>(p));
+TEST_CASE("(Message) Type", "[Message]") {
+    nlohmann::json j = {
+        { common::Message::KeyType, "abc" },
+        { common::Message::KeySecret, "" }
+    };
+
+    common::Message msg;
+    msg.type = "abc";
+
+    common::Message msg2;
+    from_json(j, msg2);
+
+    REQUIRE(msg.type == msg2.type);
+    REQUIRE(msg.secret == msg2.secret);
 }
 
-} // namespace common
+TEST_CASE("(Message) Secret", "[Message]") {
+    nlohmann::json j = {
+        { common::Message::KeyType, "" },
+        { common::Message::KeySecret, "abc" }
+    };
+
+    common::Message msg;
+    msg.secret = "abc";
+
+    common::Message msg2;
+    from_json(j, msg2);
+
+    REQUIRE(msg.type == msg2.type);
+    REQUIRE(msg.secret == msg2.secret);
+}
+
+TEST_CASE("(Message) Type & Secret", "[Message]") {
+    nlohmann::json j = {
+        { common::Message::KeyType, "abc" },
+        { common::Message::KeySecret, "def" }
+    };
+
+    common::Message msg;
+    msg.type = "abc";
+    msg.secret = "def";
+
+    common::Message msg2;
+    from_json(j, msg2);
+
+    REQUIRE(msg.type == msg2.type);
+    REQUIRE(msg.secret == msg2.secret);
+}

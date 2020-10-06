@@ -32,71 +32,15 @@
 #                                                                                        #
 ##########################################################################################
 
-set(HEADER_FILES
-  clusterconnectionhandler.h
-  clusterwidget.h
-  color.h
-  configuration.h
-  database.h
-  logwidget.h
-  mainwindow.h
-  process.h
-  processwidget.h
-  programwidget.h
-  restconnectionhandler.h
-  settingswidget.h
-  version.h
-)
-
-set(SOURCE_FILES
-  clusterconnectionhandler.cpp
-  clusterwidget.cpp
-  color.cpp
-  configuration.cpp
-  database.cpp
-  logwidget.cpp
-  mainwindow.cpp
-  process.cpp
-  processwidget.cpp
-  programwidget.cpp
-  restconnectionhandler.cpp
-  settingswidget.cpp
-)
-
-find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
-
-set(MOC_FILES "")
-qt5_wrap_cpp(
-  MOC_FILES
-  clusterconnectionhandler.h
-  clusterwidget.h
-  mainwindow.h
-  processwidget.h
-  programwidget.h
-  restconnectionhandler.h
-  settingswidget.h
-)
-
-set(RESOURCE_FILES "")
-qt5_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
-
-add_executable(C-Troll WIN32 MACOSX_BUNDLE
+add_executable(UnitTest
   main.cpp
-  ${SOURCE_FILES}
-  ${HEADER_FILES}
-  ${MOC_FILES}
-  ${RESOURCE_FILES}
-  ${CMAKE_SOURCE_DIR}/resources/icon.rc  
+  test_exitcommand.cpp
+  test_killall.cpp
+  test_message.cpp
+  test_processoutput.cpp
+  test_processstatusmessage.cpp
+  test_startcommandmessage.cpp
+  test_traystatus.cpp
 )
-target_include_directories(C-Troll PUBLIC "src")
-target_link_libraries(C-Troll PUBLIC core-shared Qt5::Core Qt5::Widgets Qt5::Network)
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  # These warnings are in Qt 5.12.2 and raised on GCC 9.3.0
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_clusterconnectionhandler.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_clusterwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_processwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_programwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_restconnectionhandler.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_settingswidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-endif ()
+target_include_directories(UnitTest PUBLIC ${CMAKE_SOURCE_DIR}/ext/catch2/single_include)
+target_link_libraries(UnitTest PUBLIC common)

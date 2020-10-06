@@ -49,6 +49,7 @@ void to_json(nlohmann::json& j, const ExitCommandMessage& p) {
 
 void from_json(const nlohmann::json& j, ExitCommandMessage& p) {
     validateMessage(j, ExitCommandMessage::Type);
+    from_json(j, static_cast<Message&>(p));
     j.at(KeyId).get_to(p.id);
 }
 

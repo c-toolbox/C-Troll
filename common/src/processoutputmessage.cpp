@@ -63,6 +63,7 @@ void to_json(nlohmann::json& j, const ProcessOutputMessage& p) {
 
 void from_json(const nlohmann::json& j, ProcessOutputMessage& p) {
     validateMessage(j, ProcessOutputMessage::Type);
+    from_json(j, static_cast<Message&>(p));
 
     j.at(KeyIdentifier).get_to(p.processId);
     j.at(KeyMessage).get_to(p.message);
@@ -74,7 +75,7 @@ void from_json(const nlohmann::json& j, ProcessOutputMessage& p) {
         p.outputType = ProcessOutputMessage::OutputType::StdErr;
     }
     else {
-        ::Log("Error", fmt::format("Unknown output type '{}'", type));
+        throw std::runtime_error(fmt::format("Unknown output type '{}'", type));
     }
 }
     

@@ -32,18 +32,51 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "invalidauthmessage.h"
+#include "catch2/catch.hpp"
 
-namespace common {
+#include "traystatusmessage.h"
+#include <json/json.hpp>
 
-void to_json(nlohmann::json& j, const InvalidAuthMessage& p) {
-    j[Message::KeyType] = InvalidAuthMessage::Type;
-    j[Message::KeyVersion] = p.CurrentVersion;
+TEST_CASE("(TrayStatusMessage) Default Ctor", "[TrayStatusMessage]") {
+    common::TrayStatusMessage msg;
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    common::TrayStatusMessage msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
 }
 
-void from_json(const nlohmann::json& j, InvalidAuthMessage& p) {
-    validateMessage(j, InvalidAuthMessage::Type);
-    from_json(j, static_cast<Message&>(p));
+TEST_CASE("(TrayStatusMessage) Correct Type", "[TrayStatusMessage]") {
+    common::TrayStatusMessage msg;
+
+
+    nlohmann::json j;
+    to_json(j, msg);
+
+    common::TrayStatusMessage msgDeserialize;
+    from_json(j, msgDeserialize);
+
+    REQUIRE(msgDeserialize.type == common::TrayStatusMessage::Type);
 }
 
-} // namespace common
+TEST_CASE("(TrayStatusMessage) processes", "[TrayStatusMessage]") {
+    common::TrayStatusMessage msg;
+    msg.processes.push_back({ 1, 2, 3, 4, 5, 6 });
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    common::TrayStatusMessage msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}

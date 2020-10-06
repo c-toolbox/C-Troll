@@ -42,8 +42,9 @@ void to_json(nlohmann::json& j, const KillAllMessage& p) {
     j[Message::KeySecret] = p.secret;
 }
 
-void from_json(const nlohmann::json& j, KillAllMessage&) {
+void from_json(const nlohmann::json& j, KillAllMessage& p) {
     validateMessage(j, KillAllMessage::Type);
+    from_json(j, static_cast<Message&>(p));
 }
 
 } // namespace common

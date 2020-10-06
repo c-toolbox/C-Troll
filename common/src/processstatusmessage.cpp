@@ -41,16 +41,17 @@ namespace {
     constexpr const char* KeyStatus = "status";
 
     std::string_view fromStatus(common::ProcessStatusMessage::Status status) {
+        using PSM = common::ProcessStatusMessage;
         switch (status) {
-            case common::ProcessStatusMessage::Status::Starting: return "Starting";
-            case common::ProcessStatusMessage::Status::Running: return "Running";
-            case common::ProcessStatusMessage::Status::NormalExit: return "NormalExit";
-            case common::ProcessStatusMessage::Status::CrashExit: return "CrashExit";
-            case common::ProcessStatusMessage::Status::FailedToStart: return "FailedToStart";
-            case common::ProcessStatusMessage::Status::TimedOut: return "TimedOut";
-            case common::ProcessStatusMessage::Status::WriteError: return "WriteError";
-            case common::ProcessStatusMessage::Status::ReadError: return "ReadError";
-            case common::ProcessStatusMessage::Status::UnknownError: return "UnknownError";
+            case PSM::Status::Starting: return "Starting";
+            case PSM::Status::Running: return "Running";
+            case PSM::Status::NormalExit: return "NormalExit";
+            case PSM::Status::CrashExit: return "CrashExit";
+            case PSM::Status::FailedToStart: return "FailedToStart";
+            case PSM::Status::TimedOut: return "TimedOut";
+            case PSM::Status::WriteError: return "WriteError";
+            case PSM::Status::ReadError: return "ReadError";
+            case PSM::Status::UnknownError: return "UnknownError";
             default: throw std::logic_error("Unhandled case label");
         }
     }
@@ -80,8 +81,11 @@ namespace {
         else if (status == "ReadError") {
             return common::ProcessStatusMessage::Status::ReadError;
         }
-        else {
+        else if (status == "UnknownError") {
             return common::ProcessStatusMessage::Status::UnknownError;
+        }
+        else {
+            throw std::runtime_error("Unknown status");
         }
     }
 } // namespace
@@ -97,6 +101,7 @@ void to_json(nlohmann::json& j, const ProcessStatusMessage& p) {
 
 void from_json(const nlohmann::json& j, ProcessStatusMessage& p) {
     validateMessage(j, ProcessStatusMessage::Type);
+    from_json(j, static_cast<Message&>(p));
 
     j.at(KeyProcessId).get_to(p.processId);
     std::string status = j.at(KeyStatus).get<std::string>();

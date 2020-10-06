@@ -68,6 +68,7 @@ void to_json(nlohmann::json& j, const StartCommandMessage& p) {
 
 void from_json(const nlohmann::json& j, StartCommandMessage& p) {
     validateMessage(j, StartCommandMessage::Type);
+    from_json(j, static_cast<Message&>(p));
 
     j.at(KeyId).get_to(p.id);
     j.at(KeyForwardOutErr).get_to(p.forwardStdOutStdErr);

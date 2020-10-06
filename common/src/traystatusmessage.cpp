@@ -73,6 +73,7 @@ void to_json(nlohmann::json& j, const TrayStatusMessage& p) {
 
 void from_json(const nlohmann::json& j, TrayStatusMessage& p) {
     validateMessage(j, TrayStatusMessage::Type);
+    from_json(j, static_cast<Message&>(p));
 
     j.at(KeyProcesses).get_to(p.processes);
 }

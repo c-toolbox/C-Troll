@@ -32,18 +32,10 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "invalidauthmessage.h"
+#define CATCH_CONFIG_RUNNER
+#include "catch2/catch.hpp"
 
-namespace common {
-
-void to_json(nlohmann::json& j, const InvalidAuthMessage& p) {
-    j[Message::KeyType] = InvalidAuthMessage::Type;
-    j[Message::KeyVersion] = p.CurrentVersion;
+int main(int argc, char** argv) {
+    int result = Catch::Session().run(argc, argv);
+    return result;
 }
-
-void from_json(const nlohmann::json& j, InvalidAuthMessage& p) {
-    validateMessage(j, InvalidAuthMessage::Type);
-    from_json(j, static_cast<Message&>(p));
-}
-
-} // namespace common

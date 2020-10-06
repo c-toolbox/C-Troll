@@ -32,18 +32,35 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "invalidauthmessage.h"
+#include "catch2/catch.hpp"
 
-namespace common {
+#include "killallmessage.h"
+#include <json/json.hpp>
 
-void to_json(nlohmann::json& j, const InvalidAuthMessage& p) {
-    j[Message::KeyType] = InvalidAuthMessage::Type;
-    j[Message::KeyVersion] = p.CurrentVersion;
+TEST_CASE("(KillAll) Default Ctor", "[KillAll]") {
+    common::KillAllMessage msg;
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    common::KillAllMessage msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
 }
 
-void from_json(const nlohmann::json& j, InvalidAuthMessage& p) {
-    validateMessage(j, InvalidAuthMessage::Type);
-    from_json(j, static_cast<Message&>(p));
-}
+TEST_CASE("(KillAll) Correct Type", "[KillAll]") {
+    common::KillAllMessage msg;
 
-} // namespace common
+
+    nlohmann::json j;
+    to_json(j, msg);
+
+    common::KillAllMessage msgDeserialize;
+    from_json(j, msgDeserialize);
+
+    REQUIRE(msgDeserialize.type == common::KillAllMessage::Type);
+}
