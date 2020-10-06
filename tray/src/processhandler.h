@@ -73,6 +73,7 @@ signals:
 
     void startedProcess(ProcessInfo process);
     void closedProcess(ProcessInfo process);
+    void closeApplication();
 
 private slots:
     void handlerErrorOccurred(QProcess::ProcessError error);

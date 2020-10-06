@@ -32,60 +32,22 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__MAINWINDOW_H__
-#define __CORE__MAINWINDOW_H__
+#ifndef __COMMON__KILLTRAYMESSAGE_H__
+#define __COMMON__KILLTRAYMESSAGE_H__
 
-#include <QMainWindow>
+#include "message.h"
 
-#include "clusterconnectionhandler.h"
-#include "configuration.h"
-#include "logwidget.h"
-#include "process.h"
-#include <QTextEdit>
-#include <memory>
-#include <string>
+#include <json/json.hpp>
 
-class ClustersWidget;
-class ProcessesWidget;
-class RestConnectionHandler;
+namespace common {
 
-namespace programs { class ProgramsWidget; }
-
-class MainWindow : public QMainWindow {
-Q_OBJECT
-public:
-    MainWindow();
-
-private slots:
-    void handleTrayProcess(common::ProcessStatusMessage status);
-    void handleTrayStatus(Node::ID, common::TrayStatusMessage status);
-    void handleInvalidAuth(Node::ID id, common::InvalidAuthMessage);
-
-    void stopProcess(Process::ID processId) const;
-
-private:
-    void startProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId);
-    void stopProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId) const;
-    void startProcess(Process::ID processId) const;
-    void killAllProcesses(Cluster::ID id) const;
-    void killAllProcesses(Node::ID id) const;
-    void killTray(Node::ID id) const;
-    void killTrays(Cluster::ID id) const;
-
-    void log(std::string msg);
-
-    programs::ProgramsWidget* _programWidget = nullptr;
-    ClustersWidget* _clustersWidget = nullptr;
-    ProcessesWidget* _processesWidget = nullptr;
-    LogWidget _logWidget;
-
-    ClusterConnectionHandler _clusterConnectionHandler;
-    RestConnectionHandler* _restHandler = nullptr;
-    Configuration _config;
-
-    QTextEdit _messageBox;
+struct KillTrayMessage : public Message {
+    static constexpr const char* Type = "KillTrayMessage";
 };
 
-#endif // __CORE__MAINWINDOW_H__
+void to_json(nlohmann::json& j, const KillTrayMessage& p);
+void from_json(const nlohmann::json& j, KillTrayMessage& p);
+
+} // namespace common
+
+#endif // __COMMON__KILLTRAYMESSAGE_H__

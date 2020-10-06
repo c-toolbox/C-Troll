@@ -130,6 +130,11 @@ ClusterWidget  QPushButton {
   font-size: 8pt;
 }
 
+ClusterWidget  QPushButton#killtrays:enabled {
+  color: #f33e3e;
+  font-weight: bold;
+}
+
 NodeWidget  ConnectionWidget {
   min-width: 0.75em;
   max-width: 0.75em;
@@ -138,6 +143,11 @@ NodeWidget  ConnectionWidget {
 
 NodeWidget  ConnectionWidget[state="connected"] {
   background: #33cc33;
+}
+
+NodeWidget  QPushButton#killtray:enabled {
+  color: #f33e3e;
+  font-weight: bold;
 }
 
 ConnectionWidget[state="partially connected"] {

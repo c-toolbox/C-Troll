@@ -36,6 +36,7 @@ add_executable(UnitTest
   main.cpp
   test_exitcommand.cpp
   test_killall.cpp
+  test_killtraymessage.cpp
   test_message.cpp
   test_processoutput.cpp
   test_processstatusmessage.cpp

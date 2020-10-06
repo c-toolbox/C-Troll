@@ -108,15 +108,16 @@ void from_json(const nlohmann::json& j, Configuration& c) {
     }
 
     if (j.find(KeyRest) != j.end()) {
+        const nlohmann::json& rest = j[KeyRest];
         Configuration::Rest r;
-        if (j[KeyRest].find(KeyRestUsername) != j.end()) {
-            j[KeyRest][KeyRestUsername].get_to(r.username);
+        if (rest.find(KeyRestUsername) != rest.end()) {
+            rest[KeyRestUsername].get_to(r.username);
         }
-        if (j[KeyRest].find(KeyRestPassword) != j.end()) {
-            j[KeyRest][KeyRestPassword].get_to(r.username);
+        if (rest.find(KeyRestPassword) != rest.end()) {
+            rest[KeyRestPassword].get_to(r.username);
         }
-        if (j[KeyRest].find(KeyRestPort) != j.end()) {
-            j[KeyRest][KeyRestPort].get_to(r.port);
+        if (rest.find(KeyRestPort) != rest.end()) {
+            rest[KeyRestPort].get_to(r.port);
         }
         c.rest = r;
     }

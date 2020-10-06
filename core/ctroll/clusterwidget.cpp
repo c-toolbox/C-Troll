@@ -97,10 +97,9 @@ NodeWidget::NodeWidget(const Node& node)
     QLabel* ip = new QLabel(QString::fromStdString(node.ipAddress));
     layout->addWidget(ip);
 
-    //layout->addStretch();
-    QPushButton* kill = new QPushButton("Kill processes");
+    _killProcesses = new QPushButton("Kill processes");
     connect(
-        kill, &QPushButton::clicked,
+        _killProcesses, &QPushButton::clicked,
         [this, node]() {
             std::string text = fmt::format(
                 "Are you sure you want to kill all processes on '{}'?", node.name
@@ -118,7 +117,32 @@ NodeWidget::NodeWidget(const Node& node)
             }
         }
     );
-    //layout->addWidget(kill);
+    layout->addWidget(_killProcesses);
+
+    _killTray = new QPushButton("X");
+    _killTray->setObjectName("killtray");
+    connect(_killTray, &QPushButton::clicked,
+        [this, node]() {
+            std::string text = fmt::format(
+                "Are you sure you want to kill the TRAY on '{}'?", node.name
+            );
+
+            QMessageBox box;
+            box.setText("Kill TRAY application");
+            box.setInformativeText(QString::fromStdString(text));
+            box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            box.setDefaultButton(QMessageBox::Ok);
+            box.exec();
+
+            box.setInformativeText(QString::fromStdString("AGAIN: " + text));
+            const int res = box.exec();
+
+            if (res == QMessageBox::Ok) {
+                emit killTray(node.id);
+            }
+        }
+    );
+    layout->addWidget(_killTray);
 }
 
 void NodeWidget::updateConnectionStatus() {
@@ -129,6 +153,9 @@ void NodeWidget::updateConnectionStatus() {
         ConnectionWidget::ConnectionStatus::Connected :
         ConnectionWidget::ConnectionStatus::Disconnected
     );
+
+    _killProcesses->setEnabled(n->isConnected);
+    _killTray->setEnabled(n->isConnected);
 }
 
 
@@ -157,19 +184,22 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
             node, &NodeWidget::killProcesses,
             this, QOverload<Node::ID>::of(&ClusterWidget::killProcesses)
         );
+        connect(node, &NodeWidget::killTray, this, &ClusterWidget::killTray);
         layout->addWidget(
             node,
             static_cast<int>(i) / Columns,
             static_cast<int>(i) % Columns
         );
         _nodeWidgets[n->id] = node;
-        updateConnectionStatus(n->id);
     }
 
-    QPushButton* kill = new QPushButton("Kill all processes");
-    kill->setObjectName("killall");
+    QWidget* boxContainer = new QWidget;
+    QBoxLayout* btnLayout = new QHBoxLayout(boxContainer);
+    btnLayout->setContentsMargins(0, 0, 0, 0);
+
+    _killProcesses = new QPushButton("Kill all processes");
     connect(
-        kill, &QPushButton::clicked,
+        _killProcesses, &QPushButton::clicked,
         [this, cluster]() {
             std::string text = fmt::format(
                 "Are you sure you want to kill all processes on cluster '{}'?",
@@ -188,13 +218,47 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
             }
         }
     );
+    btnLayout->addWidget(_killProcesses);
+
+    _killTrays = new QPushButton("Kill all trays");
+    _killTrays->setObjectName("killtrays");
+    connect(
+        _killTrays, &QPushButton::clicked,
+        [this, cluster]() {
+            std::string text = fmt::format(
+                "Are you sure you want to kill all TRAYs on cluster '{}'?",
+                cluster.name
+            );
+
+            QMessageBox box;
+            box.setText("Kill Trays");
+            box.setInformativeText(QString::fromStdString(text));
+            box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            box.setDefaultButton(QMessageBox::Ok);
+            box.exec();
+
+            box.setInformativeText(QString::fromStdString("AGAIN: " + text));
+            const int res = box.exec();
+
+
+            if (res == QMessageBox::Ok) {
+                emit killTrays(cluster.id);
+            }
+        }
+    );
+    btnLayout->addWidget(_killTrays);
+
     layout->addWidget(
-        kill,
+        boxContainer,
         static_cast<int>(nodes.size()) / Columns + 1,
         0,
         1,
         Columns
     );
+
+    for (const Node* node : nodes) {
+        updateConnectionStatus(node->id);
+    }
 }
 
 void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
@@ -219,6 +283,8 @@ void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
             ConnectionWidget::ConnectionStatus::Disconnected;
 
     _connectionLabel->setStatus(status);
+    _killProcesses->setEnabled(someConnected);
+    _killTrays->setEnabled(someConnected);
 }
 
 
@@ -242,9 +308,13 @@ ClustersWidget::ClustersWidget() {
             widget, QOverload<Cluster::ID>::of(&ClusterWidget::killProcesses),
             this, QOverload<Cluster::ID>::of(&ClustersWidget::killProcesses)
         );
+        connect(widget, &ClusterWidget::killTray, this, &ClustersWidget::killTray);
+        connect(widget, &ClusterWidget::killTrays, this, &ClustersWidget::killTrays);
         _clusterWidgets[c->id] = widget;
         contentLayout->addWidget(widget);
     }
+
+    contentLayout->addStretch();
 }
 
 void ClustersWidget::connectedStatusChanged(Cluster::ID clusterId, Node::ID nodeId) {

@@ -161,6 +161,10 @@ int main(int argc, char** argv) {
         &socketHandler, &SocketHandler::sendMessage
     );
     QObject::connect(
+        &processHandler, &ProcessHandler::closeApplication,
+        &app, &QCoreApplication::quit, Qt::QueuedConnection
+    );
+    QObject::connect(
         &socketHandler, &SocketHandler::newConnection,
         &mw, &MainWindow::newConnection
     );

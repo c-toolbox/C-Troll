@@ -32,60 +32,19 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__MAINWINDOW_H__
-#define __CORE__MAINWINDOW_H__
+#include "killtraymessage.h"
 
-#include <QMainWindow>
+namespace common {
 
-#include "clusterconnectionhandler.h"
-#include "configuration.h"
-#include "logwidget.h"
-#include "process.h"
-#include <QTextEdit>
-#include <memory>
-#include <string>
+void to_json(nlohmann::json& j, const KillTrayMessage& p) {
+    j[Message::KeyType] = KillTrayMessage::Type;
+    j[Message::KeyVersion] = p.CurrentVersion;
+    j[Message::KeySecret] = p.secret;
+}
 
-class ClustersWidget;
-class ProcessesWidget;
-class RestConnectionHandler;
+void from_json(const nlohmann::json& j, KillTrayMessage& p) {
+    validateMessage(j, KillTrayMessage::Type);
+    from_json(j, static_cast<Message&>(p));
+}
 
-namespace programs { class ProgramsWidget; }
-
-class MainWindow : public QMainWindow {
-Q_OBJECT
-public:
-    MainWindow();
-
-private slots:
-    void handleTrayProcess(common::ProcessStatusMessage status);
-    void handleTrayStatus(Node::ID, common::TrayStatusMessage status);
-    void handleInvalidAuth(Node::ID id, common::InvalidAuthMessage);
-
-    void stopProcess(Process::ID processId) const;
-
-private:
-    void startProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId);
-    void stopProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId) const;
-    void startProcess(Process::ID processId) const;
-    void killAllProcesses(Cluster::ID id) const;
-    void killAllProcesses(Node::ID id) const;
-    void killTray(Node::ID id) const;
-    void killTrays(Cluster::ID id) const;
-
-    void log(std::string msg);
-
-    programs::ProgramsWidget* _programWidget = nullptr;
-    ClustersWidget* _clustersWidget = nullptr;
-    ProcessesWidget* _processesWidget = nullptr;
-    LogWidget _logWidget;
-
-    ClusterConnectionHandler _clusterConnectionHandler;
-    RestConnectionHandler* _restHandler = nullptr;
-    Configuration _config;
-
-    QTextEdit _messageBox;
-};
-
-#endif // __CORE__MAINWINDOW_H__
+} // namespace common

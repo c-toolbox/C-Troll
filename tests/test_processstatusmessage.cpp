@@ -209,22 +209,6 @@ TEST_CASE("(ProcessStatus) Status ReadError", "[ProcessStatus]") {
     REQUIRE(j1 == j2);
 }
 
-TEST_CASE("(ProcessStatus) Status UnknownError", "[ProcessStatus]") {
-    common::ProcessStatusMessage msg;
-    msg.status = common::ProcessStatusMessage::Status::UnknownError;
-
-
-    nlohmann::json j1;
-    to_json(j1, msg);
-
-    common::ProcessStatusMessage msgDeserialize;
-    from_json(j1, msgDeserialize);
-    nlohmann::json j2;
-    to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
-}
-
 TEST_CASE("(ProcessStatus) Wrong Status", "[ProcessStatus]") {
     common::ProcessStatusMessage msg;
     nlohmann::json j;

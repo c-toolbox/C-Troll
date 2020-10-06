@@ -44,6 +44,7 @@
 #include <map>
 
 class QLabel;
+class QPushButton;
 
 class ConnectionWidget : public QWidget {
 Q_OBJECT
@@ -71,11 +72,14 @@ public:
 
 signals:
     void killProcesses(Node::ID id);
+    void killTray(Node::ID id);
 
 private:
     const Node::ID _nodeId;
 
     ConnectionWidget* _connectionLabel = nullptr;
+    QPushButton* _killProcesses = nullptr;
+    QPushButton* _killTray = nullptr;
 };
 
 
@@ -92,11 +96,15 @@ public:
 signals:
     void killProcesses(Node::ID id);
     void killProcesses(Cluster::ID id);
+    void killTray(Node::ID id);
+    void killTrays(Cluster::ID id);
 
 private:
     const Cluster::ID _clusterId;
 
     ConnectionWidget* _connectionLabel = nullptr;
+    QPushButton* _killProcesses = nullptr;
+    QPushButton* _killTrays = nullptr;
     std::map<Node::ID, NodeWidget*> _nodeWidgets;
 };
 
@@ -115,6 +123,8 @@ public slots:
 signals:
     void killProcesses(Node::ID id);
     void killProcesses(Cluster::ID id);
+    void killTray(Node::ID id);
+    void killTrays(Cluster::ID id);
 
 private:
     std::map<Cluster::ID, ClusterWidget*> _clusterWidgets;

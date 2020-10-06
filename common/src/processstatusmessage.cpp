@@ -43,6 +43,7 @@ namespace {
     std::string_view fromStatus(common::ProcessStatusMessage::Status status) {
         using PSM = common::ProcessStatusMessage;
         switch (status) {
+            case PSM::Status::Unknown: return "Unknown";
             case PSM::Status::Starting: return "Starting";
             case PSM::Status::Running: return "Running";
             case PSM::Status::NormalExit: return "NormalExit";
@@ -51,13 +52,15 @@ namespace {
             case PSM::Status::TimedOut: return "TimedOut";
             case PSM::Status::WriteError: return "WriteError";
             case PSM::Status::ReadError: return "ReadError";
-            case PSM::Status::UnknownError: return "UnknownError";
             default: throw std::logic_error("Unhandled case label");
         }
     }
 
     common::ProcessStatusMessage::Status toStatus(std::string_view status) {
-        if (status == "Starting") {
+        if (status == "Unknown") {
+            return common::ProcessStatusMessage::Status::Unknown;
+        }
+        else if (status == "Starting") {
             return common::ProcessStatusMessage::Status::Starting;
         }
         else if (status == "Running") {
@@ -80,9 +83,6 @@ namespace {
         }
         else if (status == "ReadError") {
             return common::ProcessStatusMessage::Status::ReadError;
-        }
-        else if (status == "UnknownError") {
-            return common::ProcessStatusMessage::Status::UnknownError;
         }
         else {
             throw std::runtime_error("Unknown status");

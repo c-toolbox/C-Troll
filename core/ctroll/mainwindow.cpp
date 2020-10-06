@@ -38,6 +38,7 @@
 #include "database.h"
 #include "jsonload.h"
 #include "killallmessage.h"
+#include "killtraymessage.h"
 #include "processwidget.h"
 #include "programwidget.h"
 #include "restconnectionhandler.h"
@@ -158,12 +159,14 @@ MainWindow::MainWindow() {
     );
     connect(
         _clustersWidget, QOverload<Node::ID>::of(&ClustersWidget::killProcesses),
-        [this](Node::ID id) { killAllProcesses(id); }
+        this, QOverload<Node::ID>::of(&MainWindow::killAllProcesses)
     );
     connect(
         _clustersWidget, QOverload<Cluster::ID>::of(&ClustersWidget::killProcesses),
         this, QOverload<Cluster::ID>::of(&MainWindow::killAllProcesses)
     );
+    connect(_clustersWidget, &ClustersWidget::killTray, this, &MainWindow::killTray);
+    connect(_clustersWidget, &ClustersWidget::killTrays, this, &MainWindow::killTrays);
 
     // Processes
     _processesWidget = new ProcessesWidget(_config.removalTimeout);
@@ -452,4 +455,59 @@ void MainWindow::killAllProcesses(Node::ID id) const {
         j.dump()
     );
     _clusterConnectionHandler.sendMessage(*node, j);
+}
+
+void MainWindow::killTray(Node::ID id) const {
+    Log("Sending", fmt::format("Send message to kill Tray on {}", id.v));
+    const Node* node = data::findNode(id);
+    assert(node);
+
+    common::KillTrayMessage command;
+    if (!node->secret.empty()) {
+        command.secret = node->secret;
+    }
+    nlohmann::json j = command;
+
+    Log(
+        fmt::format("Sending [{}:{} ({})]", node->ipAddress, node->port, node->name),
+        j.dump()
+    );
+    _clusterConnectionHandler.sendMessage(*node, j);
+}
+
+void MainWindow::killTrays(Cluster::ID id) const {
+    Log("Sending", fmt::format("Send message to kill Trays on {}", id.v));
+
+    std::vector<const Node*> nodes;
+    if (id.v == -1) {
+        // Send kill command to all clusters
+        for (const Cluster* cluster : data::clusters()) {
+            std::vector<const Node*> ns = data::findNodesForCluster(*cluster);
+            std::copy(ns.begin(), ns.end(), std::back_inserter(nodes));
+        }
+
+        // We have probably picked up a number of duplicates in this process as nodes can
+        // be specified in multiple clusters
+        std::sort(nodes.begin(), nodes.end());
+        nodes.erase(std::unique(nodes.begin(), nodes.end()), nodes.end());
+    }
+    else {
+        // We want to send the kill command only to the nodes of a specific cluster
+        const Cluster* cluster = data::findCluster(id);
+        nodes = data::findNodesForCluster(*cluster);
+    }
+
+    for (const Node* node : nodes) {
+        common::KillTrayMessage command;
+        if (!node->secret.empty()) {
+            command.secret = node->secret;
+        }
+        nlohmann::json j = command;
+
+        Log(
+            fmt::format("Sending [{}:{} ({})]", node->ipAddress, node->port, node->name),
+            j.dump()
+        );
+        _clusterConnectionHandler.sendMessage(*node, j);
+    }
 }

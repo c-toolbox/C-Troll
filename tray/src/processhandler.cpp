@@ -36,6 +36,7 @@
 
 #include <QMetaEnum>
 #include "killallmessage.h"
+#include "killtraymessage.h"
 #include "logging.h"
 #include "message.h"
 #include "processoutputmessage.h"
@@ -151,6 +152,11 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
             p.process->deleteLater();
         }
         _processes.clear();
+    }
+    else if (common::isValidMessage<common::KillTrayMessage>(message)) {
+        Log(fmt::format("Received [{}]", peerAddress), message.dump());
+
+        emit closeApplication();
     }
 }
 

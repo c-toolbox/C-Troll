@@ -32,60 +32,35 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__MAINWINDOW_H__
-#define __CORE__MAINWINDOW_H__
+#include "catch2/catch.hpp"
 
-#include <QMainWindow>
+#include "killtraymessage.h"
+#include <json/json.hpp>
 
-#include "clusterconnectionhandler.h"
-#include "configuration.h"
-#include "logwidget.h"
-#include "process.h"
-#include <QTextEdit>
-#include <memory>
-#include <string>
+TEST_CASE("(KillTrayMessage) Default Ctor", "[KillTrayMessage]") {
+    common::KillTrayMessage msg;
 
-class ClustersWidget;
-class ProcessesWidget;
-class RestConnectionHandler;
 
-namespace programs { class ProgramsWidget; }
+    nlohmann::json j1;
+    to_json(j1, msg);
 
-class MainWindow : public QMainWindow {
-Q_OBJECT
-public:
-    MainWindow();
+    common::KillTrayMessage msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
 
-private slots:
-    void handleTrayProcess(common::ProcessStatusMessage status);
-    void handleTrayStatus(Node::ID, common::TrayStatusMessage status);
-    void handleInvalidAuth(Node::ID id, common::InvalidAuthMessage);
+    REQUIRE(j1 == j2);
+}
 
-    void stopProcess(Process::ID processId) const;
+TEST_CASE("(KillTrayMessage) Correct Type", "[KillTrayMessage]") {
+    common::KillTrayMessage msg;
 
-private:
-    void startProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId);
-    void stopProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId) const;
-    void startProcess(Process::ID processId) const;
-    void killAllProcesses(Cluster::ID id) const;
-    void killAllProcesses(Node::ID id) const;
-    void killTray(Node::ID id) const;
-    void killTrays(Cluster::ID id) const;
 
-    void log(std::string msg);
+    nlohmann::json j;
+    to_json(j, msg);
 
-    programs::ProgramsWidget* _programWidget = nullptr;
-    ClustersWidget* _clustersWidget = nullptr;
-    ProcessesWidget* _processesWidget = nullptr;
-    LogWidget _logWidget;
+    common::KillTrayMessage msgDeserialize;
+    from_json(j, msgDeserialize);
 
-    ClusterConnectionHandler _clusterConnectionHandler;
-    RestConnectionHandler* _restHandler = nullptr;
-    Configuration _config;
-
-    QTextEdit _messageBox;
-};
-
-#endif // __CORE__MAINWINDOW_H__
+    REQUIRE(msgDeserialize.type == common::KillTrayMessage::Type);
+}
