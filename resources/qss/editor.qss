@@ -12,8 +12,9 @@ QToolTip {
   background-color: #454545;
   color: #efefef;
   border: 2px solid #202020;
-  padding: 5px;
   border-radius: 3px;
+
+  padding: 5px;
 
   font-size: 10pt;
 }
@@ -108,6 +109,7 @@ AddButton {
     color: #32c432;
 
     padding: 0px 0px 0px 0px;
+    font-weight: bold;
 }
 
 AddButton:hover {
@@ -123,6 +125,7 @@ RemoveButton {
     color: #e22929;
 
     padding: 0px 0px 0px 0px;
+    font-weight: bold;
 }
 
 RemoveButton:hover {

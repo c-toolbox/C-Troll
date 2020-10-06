@@ -44,12 +44,12 @@ class QBoxLayout;
 class DynamicList : public QScrollArea {
 Q_OBJECT
 public:
-    DynamicList();
+    DynamicList(QWidget* parent = nullptr);
+
     void addItem(QWidget* item);
 
-    bool empty() const;
-    std::vector<QWidget*> items() const;
-
+    template <typename T>
+    std::vector<T*> items() const;
 
 signals:
     void updated();
@@ -59,5 +59,17 @@ private:
 
     std::vector<QWidget*> _items;
 };
+
+template <typename T>
+std::vector<T*> DynamicList::items() const {
+    std::vector<T*> res;
+    res.reserve(_items.size());
+    for (QWidget* i : _items) {
+        T* l = dynamic_cast<T*>(i);
+        assert(l);
+        res.push_back(l);
+    }
+    return res;
+}
 
 #endif // __EDITOR__DYNAMICLIST_H__

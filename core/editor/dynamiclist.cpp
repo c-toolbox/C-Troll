@@ -40,7 +40,9 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-DynamicList::DynamicList() {
+DynamicList::DynamicList(QWidget* parent) 
+    : QScrollArea(parent)
+{
     setWidgetResizable(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
@@ -67,14 +69,6 @@ void DynamicList::addItem(QWidget* item) {
 
     widget()->layout()->addWidget(container);
     _items.push_back(item);
-}
-
-bool DynamicList::empty()  const {
-    return _items.empty();
-}
-
-std::vector<QWidget*> DynamicList::items() const {
-    return _items;
 }
 
 void DynamicList::removeItem(QWidget* sender) {

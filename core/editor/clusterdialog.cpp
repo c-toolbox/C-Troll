@@ -85,31 +85,7 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
         editLayout->addWidget(new QLabel("Nodes"), 3, 0);
 
         QPushButton* newNode = new AddButton;
-        connect(
-            newNode, &QPushButton::clicked,
-            [this]() {
-                std::vector<Node> nodes = common::loadJsonFromDirectory<Node>(_nodePath);
-                // @TODO Remove nodes that already have been added
-
-                QStringList list;
-                for (const Node& node : nodes) {
-                    list.push_back(QString::fromStdString(node.name));
-                }
-
-                QString selected = QInputDialog::getItem(
-                    this,
-                    "Add Node",
-                    "Select the node to add",
-                    list
-                );
-
-                if (!selected.isEmpty()) {
-                    QLabel* label = new QLabel(selected);
-                    _nodes->addItem(label);
-                    updateSaveButton();
-                }
-            }
-        );
+        connect(newNode, &QPushButton::clicked, this, &ClusterDialog::addNewNode);
         editLayout->addWidget(newNode, 3, 1, Qt::AlignRight);
 
         _nodes = new DynamicList;
@@ -161,15 +137,52 @@ void ClusterDialog::save() {
     Cluster cluster;
     cluster.name = _name->text().toStdString();
     cluster.isEnabled = _enabled->isChecked();
-    for (QWidget* node : _nodes->items()) {
-        QLabel* l = dynamic_cast<QLabel*>(node);
-        assert(l);
-        cluster.nodes.push_back(l->text().toStdString());
+    for (QLabel* node : _nodes->items<QLabel>()) {
+        cluster.nodes.push_back(node->text().toStdString());
     }
     common::saveToJson(_clusterPath, cluster);
     accept();
 }
 
 void ClusterDialog::updateSaveButton() {
-    _saveButton->setEnabled(!_name->text().isEmpty() && !_nodes->empty());
+    const bool hasItems = !_nodes->items<QLabel>().empty();
+    _saveButton->setEnabled(!_name->text().isEmpty() && hasItems);
+}
+
+void ClusterDialog::addNewNode() {
+    std::vector<Node> nodes = common::loadJsonFromDirectory<Node>(_nodePath);
+
+    // Remove the nodes that have already been added
+    std::vector<QLabel*> currentNodes = _nodes->items<QLabel>();
+    nodes.erase(
+        std::remove_if(
+            nodes.begin(), nodes.end(),
+            [&currentNodes](const Node& n) {
+                const auto it = std::find_if(
+                    currentNodes.cbegin(), currentNodes.cend(),
+                    [n](QLabel* l) { return l->text().toStdString() == n.name; }
+                );
+                return it != currentNodes.cend();
+            }
+        ),
+        nodes.end()
+    );
+
+    if (nodes.empty()) {
+        QMessageBox::information(this, "Add node", "No available nodes left to add");
+        return;
+    }
+
+
+    QStringList list;
+    for (const Node& node : nodes) {
+        list.push_back(QString::fromStdString(node.name));
+    }
+
+    QString n = QInputDialog::getItem(this, "Add Node", "Select the node to add", list);
+
+    if (!n.isEmpty()) {
+        _nodes->addItem(new QLabel(n));
+        updateSaveButton();
+    }
 }

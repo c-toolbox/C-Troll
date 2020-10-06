@@ -156,10 +156,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
 
             _tags = new DynamicList;
             _tags->setToolTip("A list of all tags that this program is associated with");
-            connect(
-                _tags, &DynamicList::updated,
-                this, &ProgramDialog::updateSaveButton
-            );
+            connect(_tags, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
          
             editLayout->addWidget(_tags, 8, 0, 1, 2);
         }
@@ -299,23 +296,17 @@ void ProgramDialog::save() {
     if (_hasDelay->isChecked()) {
         program.delay = std::chrono::milliseconds(_delay->value());
     }
-    for (QWidget* tag : _tags->items()) {
-        QLineEdit* t = dynamic_cast<QLineEdit*>(tag);
-        assert(t);
-        program.tags.push_back(t->text().toStdString());
+    for (QLineEdit* tag : _tags->items<QLineEdit>()) {
+        program.tags.push_back(tag->text().toStdString());
     }
-    for (QWidget* configuration : _configurations->items()) {
-        Configuration* conf = dynamic_cast<Configuration*>(configuration);
-        assert(conf);
+    for (Configuration* configuration : _configurations->items<Configuration>()) {
         Program::Configuration c;
-        c.name = conf->name->text().toStdString();
-        c.parameters = conf->parameters->text().toStdString();
+        c.name = configuration->name->text().toStdString();
+        c.parameters = configuration->parameters->text().toStdString();
         program.configurations.push_back(c);
     }
-    for (QWidget* cluster : _clusters->items()) {
-        QLabel* c = dynamic_cast<QLabel*>(cluster);
-        assert(c);
-        program.clusters.push_back(c->text().toStdString());
+    for (QLabel* cluster : _clusters->items<QLabel>()) {
+        program.clusters.push_back(cluster->text().toStdString());
     }
 
     common::saveToJson(_programPath, program);
@@ -325,6 +316,29 @@ void ProgramDialog::save() {
 
 std::string ProgramDialog::selectCluster() {
     std::vector<Cluster> clusters = common::loadJsonFromDirectory<Cluster>(_clusterPath);
+
+    std::vector<QLabel*> currentClusters = _clusters->items<QLabel>();
+        clusters.erase(
+        std::remove_if(
+            clusters.begin(), clusters.end(),
+            [&currentClusters](const Cluster& c) {
+                const auto it = std::find_if(
+                    currentClusters.cbegin(), currentClusters.cend(),
+                    [c](QLabel* l) { return l->text().toStdString() == c.name; }
+                );
+                return it != currentClusters.cend();
+            }
+        ),
+        clusters.end()
+    );
+
+    if (clusters.empty()) {
+        QMessageBox::information(
+            this,
+            "Add clusters",
+            "No available clusters left to add"
+        );
+    }
 
     QStringList list;
     for (const Cluster& cluster : clusters) {
@@ -342,18 +356,14 @@ std::string ProgramDialog::selectCluster() {
 }
 
 void ProgramDialog::updateSaveButton() {
-    std::vector<QWidget*> configurations = _configurations->items();
+    std::vector<Configuration*> configurations = _configurations->items<Configuration>();
     const bool confHasName = std::all_of(
         configurations.cbegin(), configurations.cend(),
-        [](QWidget* config) {
-            Configuration* conf = dynamic_cast<Configuration*>(config);
-            assert(conf);
-            return !conf->name->text().isEmpty();
-        }
+        [](Configuration* config) { return !config->name->text().isEmpty(); }
     );
 
     _saveButton->setEnabled(
         !_name->text().isEmpty() && !_executable->text().isEmpty() &&
-        !_clusters->empty() && confHasName
+        !_clusters->items<QLabel>().empty() && confHasName
     );
 }

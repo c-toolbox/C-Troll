@@ -56,6 +56,7 @@ public:
 private slots:
     void save();
     void updateSaveButton();
+    void addNewNode();
 
 private:
     const std::string _clusterPath;
