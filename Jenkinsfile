@@ -22,11 +22,7 @@ def build() {
   //     arguments: '..'
   //   ])
   // }
-  cmakeBuild([
-    installation: "InSearchPath",
-    buildDir: 'build',
-    steps: []
-  ])
+
 }
 
 parallel tools: {
@@ -52,7 +48,12 @@ linux_gcc: {
       checkoutGit();
     }
     stage('linux-gcc/build') {
-      build()
+      cmakeBuild([
+        buildDir: 'build',
+        generator: 'Unix Makefiles',
+        installation: "InSearchPath",
+        steps: []
+      ])
     }
   } // node('linux' && 'gcc')
 },
@@ -63,7 +64,13 @@ linux_clang: {
       checkoutGit();
     }
     stage('linux-clang/build') {
-      build()
+      cmakeBuild([
+        buildDir: 'build',
+        generator: 'Unix Makefiles',
+        installation: "InSearchPath",
+        steps: []
+      ])
+
     }
   } // node('linux' && 'clang')
 },
@@ -74,7 +81,13 @@ windows: {
       checkoutGit();
     }
     stage('windows/build') {
-      build()
+      cmakeBuild([
+        buildDir: 'Visual Studio 16 2019 Win64',
+        generator: 'Makefile',
+        installation: "InSearchPath",
+        steps: []
+      ])
+
     }
   } // node('windows')
 },
@@ -85,7 +98,13 @@ macos: {
       checkoutGit();
     }
     stage('macos/build') {
-      build()
+      cmakeBuild([
+        buildDir: 'build',
+        generator: 'Xcode',
+        installation: "InSearchPath",
+        steps: []
+      ])
+
     }
   } // node('macos')
 }
