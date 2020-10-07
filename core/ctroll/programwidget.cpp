@@ -39,6 +39,8 @@
 #include "database.h"
 #include "logging.h"
 #include <QApplication>
+#include <QCheckBox>
+#include <QComboBox>
 #include <QDesktopWidget>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -48,6 +50,12 @@
 #include <QVBoxLayout>
 #include <fmt/format.h>
 #include <set>
+
+namespace {
+    constexpr const int TagSeparator = -1;
+    constexpr const int TagCluster = 0;
+    constexpr const int TagNode = 1;
+} // namespace
 
 namespace programs {
 
@@ -451,11 +459,13 @@ void TagsWidget::buttonPressed() {
 
 
 ProgramsWidget::ProgramsWidget() {
-    QBoxLayout* layout = new QHBoxLayout(this);
+    QGridLayout* layout = new QGridLayout(this);
     layout->setContentsMargins(10, 2, 2, 2);
-    layout->addWidget(createControls());
-    layout->addWidget(createPrograms());
-    layout->setStretch(1, 5);
+    layout->addWidget(createControls(), 0, 0);
+    layout->addWidget(createPrograms(), 0, 1);
+    layout->setColumnStretch(1, 5);
+
+    layout->addWidget(createCustomProgramControl(), 1, 0, 1, 2);
 }
 
 QWidget* ProgramsWidget::createControls() {
@@ -520,9 +530,91 @@ QWidget* ProgramsWidget::createPrograms() {
         contentLayout->addWidget(w);
     }
 
-    contentLayout->addStretch();
+    contentLayout->addStretch(0);
 
     return area;
+}
+
+QWidget* ProgramsWidget::createCustomProgramControl() {
+    QWidget* box = new QWidget;
+    QBoxLayout* layout = new QHBoxLayout(box);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    QComboBox* target = new QComboBox;   
+    target->addItem("Clusters", TagSeparator);
+    for (const Cluster* c : data::clusters()) {
+        target->addItem(QString::fromStdString(c->name), TagCluster);
+    }
+    target->addItem("------------", TagSeparator);
+    for (const Node* n : data::nodes()) {
+        target->addItem(QString::fromStdString(n->name), TagNode);
+    }
+    layout->addWidget(target);
+
+    QLineEdit* executable = new QLineEdit;
+    executable->setPlaceholderText("Executable name");
+    layout->addWidget(executable);
+
+    QLineEdit* workingDirectory = new QLineEdit;
+    workingDirectory->setPlaceholderText("Working directory");
+    layout->addWidget(workingDirectory);
+
+    QLineEdit* parameters = new QLineEdit;
+    parameters->setPlaceholderText("Commandline parameters (optional)");
+    layout->addWidget(parameters);
+
+    QPushButton* run = new QPushButton("Run");
+    run->setEnabled(false); // since the "Clusters" target will be selected by default
+    connect(
+        run, &QPushButton::clicked,
+        [this, target, executable, workingDirectory, parameters]() {
+            const std::string exec = executable->text().toStdString();
+            const std::string workDir = workingDirectory->text().toStdString();
+            const std::string args = parameters->text().toStdString();
+
+            const int tag = target->currentData().toInt();
+            assert(tag == TagCluster || tag == TagNode);
+            if (tag == TagCluster) {
+                const std::string cluster = target->currentText().toStdString();
+                const Cluster* c = data::findCluster(cluster);
+                assert(c);
+                for (const std::string& node : c->nodes) {
+                    const Node* n = data::findNode(node);
+                    assert(n);
+                    emit startCustomProgram(n->id, exec, workDir, args);
+                }
+            }
+            else {
+                const std::string node = target->currentText().toStdString();
+                const Node* n = data::findNode(node);
+                assert(n);
+                emit startCustomProgram(n->id, exec, workDir, args);
+            }
+        }
+    );
+    layout->addWidget(run, 1);
+
+    QPushButton* clear = new QPushButton("Clear");
+    connect(
+        clear, &QPushButton::clicked,
+        [target, executable, workingDirectory, parameters]() {
+            target->setCurrentIndex(-1);
+            executable->setText("");
+            workingDirectory->setText("");
+            parameters->setText("");
+        }
+    );
+    layout->addWidget(clear);
+
+    connect(
+        target, QOverload<int>::of(&QComboBox::currentIndexChanged),
+        [target, run](int ) {
+            run->setEnabled(target->currentData().toInt() != TagSeparator);
+        }
+    );
+
+
+    return box;
 }
 
 void ProgramsWidget::processUpdated(Process::ID processId) {

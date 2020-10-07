@@ -147,6 +147,10 @@ MainWindow::MainWindow() {
         this, &MainWindow::stopProcess
     );
     connect(
+        _programWidget, &programs::ProgramsWidget::startCustomProgram,
+        this, &MainWindow::startCustomProgram
+    );
+    connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
         _programWidget, &programs::ProgramsWidget::connectedStatusChanged
     );
@@ -367,6 +371,25 @@ void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
             std::this_thread::sleep_for(*p->delay);
         }
     }
+}
+
+void MainWindow::startCustomProgram(Node::ID nodeId, std::string executable,
+                                    std::string workingDir, std::string arguments)
+{
+    const Node* n = data::findNode(nodeId);
+    assert(n);
+
+    common::StartCommandMessage command;
+    command.executable = std::move(executable);
+    command.workingDirectory = std::move(workingDir);
+    command.commandlineParameters = std::move(arguments);
+
+    if (!n->secret.empty()) {
+        command.secret = n->secret;
+    }
+
+    nlohmann::json j = command;
+    _clusterConnectionHandler.sendMessage(*n, j);
 }
 
 void MainWindow::stopProgram(Cluster::ID clusterId, Program::ID programId,

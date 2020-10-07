@@ -183,6 +183,8 @@ signals:
         Program::Configuration::ID configurationId);
     void stopProgram(Cluster::ID clusterId, Program::ID programId,
         Program::Configuration::ID configurationId);
+    void startCustomProgram(Node::ID nodeId, std::string executable,
+        std::string workingDir, std::string arguments);
 
     void restartProcess(Process::ID processId);
     void stopProcess(Process::ID processId);
@@ -190,6 +192,7 @@ signals:
 private:
     QWidget* createControls();
     QWidget* createPrograms();
+    QWidget* createCustomProgramControl();
 
     void updatedVisibilityState();
 
