@@ -92,7 +92,15 @@ programs--ProgramsWidget  QLineEdit, QComboBox {
   border: 1px outset #acacac;
 }
 
- programs--ProgramsWidget  programs--TagsWidget  QPushButton {
+programs--ProgramsWidget  programs--CustomProgramWidget  QWidget {
+  font-size: 10pt;
+}
+
+programs--ProgramsWidget  programs--CustomProgramWidget  QComboBox, QPushButton#run {
+  min-width: 7.5em;
+}
+
+programs--ProgramsWidget  programs--TagsWidget  QPushButton {
   color: #202020;
   border-color: #303030;
   border-style: outset;
@@ -118,9 +126,23 @@ programs--ProgramsWidget  programs--TagsWidget  QPushButton:open {
   /* background-color is specified in the C++ source code */
 }
 
-programs--ProgramsWidget  QComboBox {
+/* programs--ProgramsWidget  QComboBox::item {
+  height: 10px;
+  margin: 5px 0 0 5px;
+  padding: 6px 0 5px 20px;
+
 
 }
+
+QComboBox QAbstractItemView
+{
+   color:#ccc;
+   background-color:#333;
+   border:none;
+   selection-background-color:#1c1c1c;
+   selection-color: #ccc; 
+   min-height: 5em;
+} */
 
 programs--ProgramWidget  programs--TagInfoWidget {
   min-width: 0.5em;

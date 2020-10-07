@@ -55,10 +55,14 @@ void to_json(nlohmann::json& j, const StartCommandMessage& m) {
     j[Message::KeyVersion] = m.CurrentVersion;
     j[Message::KeySecret] = m.secret;
     j[KeyId] = m.id;
-    j[KeyForwardOutErr] = m.forwardStdOutStdErr;
+    if (m.forwardStdOutStdErr) {
+        j[KeyForwardOutErr] = m.forwardStdOutStdErr;
+    }
     j[KeyExecutable] = m.executable;
     j[KeyWorkingDirectory] = m.workingDirectory;
-    j[KeyCommandlineArguments] = m.commandlineParameters;
+    if (!m.commandlineParameters.empty()) {
+        j[KeyCommandlineArguments] = m.commandlineParameters;
+    }
     j[KeyProgramId] = m.programId;
     j[KeyConfigurationId] = m.configurationId;
     j[KeyClusterId] = m.clusterId;
@@ -71,11 +75,16 @@ void from_json(const nlohmann::json& j, StartCommandMessage& m) {
     from_json(j, static_cast<Message&>(m));
 
     j.at(KeyId).get_to(m.id);
-    j.at(KeyForwardOutErr).get_to(m.forwardStdOutStdErr);
+    if (j.find(KeyForwardOutErr) != j.end()) {
+        j[KeyForwardOutErr].get_to(m.forwardStdOutStdErr);
+    }
     
     j.at(KeyExecutable).get_to(m.executable);
     j.at(KeyWorkingDirectory).get_to(m.workingDirectory);
-    j.at(KeyCommandlineArguments).get_to(m.commandlineParameters);
+
+    if (j.find(KeyCommandlineArguments) != j.end()) {
+        j.at(KeyCommandlineArguments).get_to(m.commandlineParameters);
+    }
 
     j.at(KeyProgramId).get_to(m.programId);
     j.at(KeyConfigurationId).get_to(m.configurationId);
