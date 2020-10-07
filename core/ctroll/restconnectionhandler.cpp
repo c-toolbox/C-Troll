@@ -422,12 +422,22 @@ void RestConnectionHandler::handleApiInfoMessage(QTcpSocket& socket) {
 
     result["endpoints"].push_back({
         { "url", "/program/start" },
-        { "description", "Starts already registered programs" }
+        { "description", "Starts already registered programs" },
+        { "parameters", {
+            { "program", "Name of the program to start" },
+            { "configuration", "Which configuration of the program should be started " },
+            { "cluster", "On which cluster should the program be started"}
+        }}
     });
 
     result["endpoints"].push_back({
         { "url", "/program/stop" },
-        { "description", "Stops already registered programs" }
+        { "description", "Stops already registered programs" },
+        { "parameters", {
+            { "program", "Name of the program to start" },
+            { "configuration", "Which configuration of the program should be started " },
+            { "cluster", "On which cluster should the program be started"}
+        }}
     });
 
     result["endpoints"].push_back({

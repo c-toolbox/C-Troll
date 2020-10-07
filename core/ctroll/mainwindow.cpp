@@ -406,10 +406,6 @@ void MainWindow::startProcess(Process::ID processId) const {
     }
     
     nlohmann::json j = command;
-    Log(
-        fmt::format("Sending [{}:{} ({})]", node->ipAddress, node->port, node->name),
-        j.dump()
-    );
     _clusterConnectionHandler.sendMessage(*node, j);
 }
 
@@ -425,7 +421,6 @@ void MainWindow::stopProcess(Process::ID processId) const {
     }
 
     nlohmann::json j = command;
-    Log("Sending", j.dump());
     _clusterConnectionHandler.sendMessage(*node, j);
 }
 
@@ -457,11 +452,6 @@ void MainWindow::killAllProcesses(Cluster::ID id) const {
             command.secret = node->secret;
         }
         nlohmann::json j = command;
-
-        Log(
-            fmt::format("Sending [{}:{} ({})]", node->ipAddress, node->port, node->name),
-            j.dump()
-        );
         _clusterConnectionHandler.sendMessage(*node, j);
     }
 }
@@ -475,11 +465,6 @@ void MainWindow::killAllProcesses(Node::ID id) const {
         command.secret = node->secret;
     }
     nlohmann::json j = command;
-
-    Log(
-        fmt::format("Sending [{}:{} ({})]", node->ipAddress, node->port, node->name),
-        j.dump()
-    );
     _clusterConnectionHandler.sendMessage(*node, j);
 }
 
@@ -493,11 +478,6 @@ void MainWindow::killTray(Node::ID id) const {
         command.secret = node->secret;
     }
     nlohmann::json j = command;
-
-    Log(
-        fmt::format("Sending [{}:{} ({})]", node->ipAddress, node->port, node->name),
-        j.dump()
-    );
     _clusterConnectionHandler.sendMessage(*node, j);
 }
 
@@ -529,11 +509,6 @@ void MainWindow::killTrays(Cluster::ID id) const {
             command.secret = node->secret;
         }
         nlohmann::json j = command;
-
-        Log(
-            fmt::format("Sending [{}:{} ({})]", node->ipAddress, node->port, node->name),
-            j.dump()
-        );
         _clusterConnectionHandler.sendMessage(*node, j);
     }
 }

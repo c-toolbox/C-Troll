@@ -95,7 +95,7 @@ std::array<SocketHandler::MessageLog, 3> SocketHandler::lastMessages() const {
 
 void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* socket) {
 #ifdef QT_DEBUG
-    Log(fmt::format("Received [{}]", socket->peerAddress()), message.dump());
+    Log(fmt::format("(Debug) Received [{}]", socket->peerAddress()), message.dump());
 #endif // QT_DEBUG
 
     common::Message msg = message;
@@ -115,9 +115,6 @@ void SocketHandler::sendMessage(const nlohmann::json& message, bool printMessage
         std::string peer = jsonSocket->peerAddress();
         if (printMessage) {
             Log(fmt::format("Sending [{}]", peer), message.dump());
-        }
-        else {
-            Log(fmt::format("Sending [{}]", peer), message["type"].dump());
         }
         jsonSocket->write(message);
     }

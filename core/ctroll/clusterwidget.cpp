@@ -84,8 +84,12 @@ NodeWidget::NodeWidget(const Node& node)
     setToolTip(QString::fromStdString(node.description));
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
     
-    QBoxLayout* layout = new QHBoxLayout(this);
+    QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
+
+    QWidget* topRow = new QWidget;
+    QBoxLayout* topLayout = new QHBoxLayout(topRow);
+    topLayout->setContentsMargins(0, 0, 0, 0);
 
     _connectionLabel = new ConnectionWidget;
     _connectionLabel->setStatus(
@@ -93,10 +97,15 @@ NodeWidget::NodeWidget(const Node& node)
         ConnectionWidget::ConnectionStatus::Connected :
         ConnectionWidget::ConnectionStatus::Disconnected
     );
-    layout->addWidget(_connectionLabel);
+    topLayout->addWidget(_connectionLabel);
 
     QLabel* ip = new QLabel(QString::fromStdString(node.ipAddress));
-    layout->addWidget(ip);
+    topLayout->addWidget(ip);
+    layout->addWidget(topRow);
+
+    QWidget* bottomRow = new QWidget;
+    QBoxLayout* bottomLayout = new QHBoxLayout(bottomRow);
+    bottomLayout->setContentsMargins(0, 0, 0, 0);
 
     _killProcesses = new QPushButton("Kill processes");
     _killProcesses->setToolTip("Kills all processes on this particular node");
@@ -119,9 +128,9 @@ NodeWidget::NodeWidget(const Node& node)
             }
         }
     );
-    layout->addWidget(_killProcesses);
+    bottomLayout->addWidget(_killProcesses);
 
-    _killTray = new QPushButton("X");
+    _killTray = new QPushButton("Kill Tray");
     _killTray->setObjectName("killtray");
     _killTray->setToolTip("Kills the Tray application on this particular node");
     connect(_killTray, &QPushButton::clicked,
@@ -145,7 +154,8 @@ NodeWidget::NodeWidget(const Node& node)
             }
         }
     );
-    layout->addWidget(_killTray);
+    bottomLayout->addWidget(_killTray);
+    layout->addWidget(bottomRow);
 }
 
 void NodeWidget::updateConnectionStatus() {

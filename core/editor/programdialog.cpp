@@ -169,6 +169,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 [this]() {
                     QLineEdit* tag = new QLineEdit;
                     _tags->addItem(tag);
+                    tag->setFocus();
                     updateSaveButton();
                 }
             );
@@ -198,6 +199,8 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                         this, &ProgramDialog::updateSaveButton
                     );
                     _configurations->addItem(config);
+                    config->name->setFocus();
+                    updateSaveButton();
                 }
             );
             editLayout->addWidget(newConfiguration, 11, 1, Qt::AlignRight);

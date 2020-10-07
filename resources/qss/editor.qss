@@ -153,5 +153,5 @@ ProgramDialog > QWidget > QLineEdit {
 }
 
 ProgramDialog  QScrollArea {
-  min-height: 10em;
+  min-height: 7.5em;
 }
