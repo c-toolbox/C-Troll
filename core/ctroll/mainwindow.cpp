@@ -222,7 +222,8 @@ MainWindow::MainWindow() {
             this,
             _config.rest->port,
             _config.rest->username,
-            _config.rest->password
+            _config.rest->password,
+            _config.rest->allowCustomPrograms
         );
         connect(
             _restHandler, &RestConnectionHandler::startProgram,
@@ -231,6 +232,10 @@ MainWindow::MainWindow() {
         connect(
             _restHandler, &RestConnectionHandler::stopProgram,
             this, &MainWindow::stopProgram
+        );
+        connect(
+            _restHandler, &RestConnectionHandler::startCustomProgram,
+            this, &MainWindow::startCustomProgram
         );
     }
 }

@@ -74,6 +74,7 @@ struct Configuration : public BaseConfiguration {
         std::string username;
         std::string password;
         int port = 7000;
+        bool allowCustomPrograms = false;
     };
     std::optional<Rest> rest;
 };

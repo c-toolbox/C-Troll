@@ -46,6 +46,7 @@ namespace {
     constexpr const char* KeyRestUsername = "username";
     constexpr const char* KeyRestPassword = "password";
     constexpr const char* KeyRestPort = "port";
+    constexpr const char* KeyRestAllowCustomPrograms = "allowCustomPrograms";
 } // namespace
 
 void to_json(nlohmann::json& j, const Configuration& c) {
@@ -76,6 +77,9 @@ void to_json(nlohmann::json& j, const Configuration& c) {
         }
         if (c.rest->port != Configuration::Rest().port) {
             j[KeyRest][KeyRestPort] = c.rest->port;
+        }
+        if (c.rest->allowCustomPrograms != Configuration::Rest().allowCustomPrograms) {
+            j[KeyRest][KeyRestAllowCustomPrograms] = c.rest->allowCustomPrograms;
         }
     }
 }
@@ -118,6 +122,9 @@ void from_json(const nlohmann::json& j, Configuration& c) {
         }
         if (rest.find(KeyRestPort) != rest.end()) {
             rest[KeyRestPort].get_to(r.port);
+        }
+        if (rest.find(KeyRestAllowCustomPrograms) != rest.end()) {
+            rest[KeyRestAllowCustomPrograms].get_to(r.allowCustomPrograms);
         }
         c.rest = r;
     }

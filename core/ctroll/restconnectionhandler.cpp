@@ -45,10 +45,11 @@
 
 namespace {
     enum class Response {
-        BadRequest,
-        NotFound,
         Ok,
-        Unauthorized
+        BadRequest,
+        Unauthorized,
+        Forbidden,
+        NotFound
     };
 
     enum class HttpMethod {
@@ -64,6 +65,7 @@ namespace {
         InfoCluster,
         InfoProgram,
         InfoNode,
+        StartCustomProgram,
         Unknown
     };
 
@@ -72,10 +74,11 @@ namespace {
     {
         std::string_view code = [](Response response) {
             switch (response) {
-                case Response::BadRequest: return "400 Bad Request";
-                case Response::NotFound: return "404 Not Found";
                 case Response::Ok: return "200 OK";
+                case Response::BadRequest: return "400 Bad Request";
                 case Response::Unauthorized: return "401 Unauthorized";
+                case Response::Forbidden: return "403 Forbidden";
+                case Response::NotFound: return "404 Not Found";
                 default: throw std::logic_error("Unhandled case label");
             }
         }(response);
@@ -115,6 +118,9 @@ namespace {
         else if ((value == "/program/stop") || (value == "/program/stop/")) {
             return Endpoint::StopProgram;
         }
+        else if ((value == "/program/custom") || (value == "/program/custom/")) {
+            return Endpoint::StartCustomProgram;
+        }
         else if ((value == "/program") || (value == "/program/")) {
             return Endpoint::InfoProgram;
         }
@@ -147,16 +153,16 @@ namespace {
         constexpr const char* KeyConfiguration = "configuration";
         constexpr const char* KeyCluster = "cluster";
 
-        const bool hasCluster = params.find(KeyCluster) == params.end();
-        const bool hasProgram = params.find(KeyProgram) == params.end();
-        const bool hasConfiguration = params.find(KeyConfiguration) == params.end();
-        if (hasCluster || hasProgram || hasConfiguration) {
+        const bool hasCluster = params.find(KeyCluster) != params.end();
+        const bool hasProgram = params.find(KeyProgram) != params.end();
+        const bool hasConfiguration = params.find(KeyConfiguration) != params.end();
+        if (!hasCluster || !hasProgram || !hasConfiguration) {
             return { nullptr, nullptr, nullptr };
         }
 
-        std::string cluster = params.at(KeyCluster);
-        std::string program = params.at(KeyProgram);
-        std::string configuration = params.at(KeyConfiguration);
+        const std::string cluster = params.at(KeyCluster);
+        const std::string program = params.at(KeyProgram);
+        const std::string configuration = params.at(KeyConfiguration);
 
         const Cluster* c = data::findCluster(cluster);
         const Program* p = data::findProgram(program);
@@ -174,8 +180,10 @@ namespace {
 } // namespace
 
 RestConnectionHandler::RestConnectionHandler(QObject* parent, int port,
-                                             std::string user, std::string password)
+                                             std::string user, std::string password,
+                                             bool provideCustomProgramAPI)
     : QObject(parent)
+    , _hasCustomProgramAPI(provideCustomProgramAPI)
 {
     Log("Status", fmt::format("REST API listening on port: {}", port));
 
@@ -310,6 +318,57 @@ void RestConnectionHandler::handleNewConnection() {
 
         handleStopProgramMessage(*socket, *pi.cluster, *pi.program, *pi.configuration);
     }
+    else if (method == HttpMethod::Post && endpoint == Endpoint::StartCustomProgram) {
+        if (!_hasCustomProgramAPI) {
+            sendResponse(*socket, Response::Forbidden);
+            return;
+        }
+
+        constexpr const char* KeyCluster = "cluster";
+        constexpr const char* KeyNode = "node";
+        constexpr const char* KeyExecutable = "executable";
+        constexpr const char* KeyWorkingDir = "workingDir";
+        constexpr const char* KeyArguments = "arguments";
+
+
+        const bool hasCluster = params.find(KeyCluster) != params.end();
+        const bool hasNode = params.find(KeyNode) != params.end();
+        const bool hasExecutable = params.find(KeyExecutable) != params.end();
+        const bool hasWorkingDir = params.find(KeyWorkingDir) != params.end();
+        const bool hasArguments = params.find(KeyArguments) != params.end();
+
+        if (!(hasCluster || hasNode) || !hasExecutable) {
+            sendResponse(*socket, Response::BadRequest);
+            return;
+        }
+
+        const std::string exec = params[KeyExecutable];
+        const std::string workingDir = hasWorkingDir ? params[KeyWorkingDir] : "";
+        const std::string arguments = KeyArguments ? params[KeyArguments] : "";
+
+
+        if (hasCluster) {
+            const Cluster* c = data::findCluster(params[KeyCluster]);
+            if (!c) {
+                sendResponse(*socket, Response::BadRequest);
+                return;
+            }
+
+            handleStartCustomProgramMessage(*socket, c, exec, workingDir, arguments);
+        }
+        else if (hasNode) {
+            const Node* n = data::findNode(params[KeyNode]);
+            if (!n) {
+                sendResponse(*socket, Response::BadRequest);
+                return;
+            }
+
+            handleStartCustomProgramMessage(*socket, n, exec, workingDir, arguments);
+        }
+        else {
+            throw std::logic_error("Shouldn't get here");
+        }
+    }
     else if (method == HttpMethod::Get && endpoint == Endpoint::InfoProgram) {
         handleProgramInfoMessage(*socket);
     }
@@ -356,6 +415,48 @@ void RestConnectionHandler::handleStopProgramMessage(QTcpSocket& socket,
         )
     );
     emit stopProgram(cluster.id, program.id, configuration.id);
+    sendResponse(socket, Response::Ok);
+}
+
+void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
+                                         std::variant<const Cluster*, const Node*> target,
+                                                                   std::string executable,
+                                                                   std::string workingDir,
+                                                                    std::string arguments)
+{
+    if (std::holds_alternative<const Cluster*>(target)) {
+        const Cluster* cluster = std::get<const Cluster*>(target);
+        assert(cluster);
+
+        Log(
+            "REST",
+            fmt::format(
+                "Received command to start {} {} in {} on cluster {}",
+                executable, arguments, workingDir, cluster->name
+            )
+        );
+
+        for (const std::string& node : cluster->nodes) {
+            const Node* n = data::findNode(node);
+            assert(n);
+
+            emit startCustomProgram(n->id, executable, workingDir, arguments);
+        }
+    }
+    else {
+        const Node* node = std::get<const Node*>(target);
+        assert(node);
+
+        Log(
+            "REST",
+            fmt::format(
+                "Received command to start {} {} in {} on node {}",
+                executable, arguments, workingDir, node->name
+            )
+        );
+
+        emit startCustomProgram(node->id, executable, workingDir, arguments);
+    }
     sendResponse(socket, Response::Ok);
 }
 
@@ -439,6 +540,30 @@ void RestConnectionHandler::handleApiInfoMessage(QTcpSocket& socket) {
             { "cluster", "On which cluster should the program be started"}
         }}
     });
+
+    if (_hasCustomProgramAPI) {
+        result["endpoints"].push_back({
+            { "url", "/program/custom" },
+            { "description", "Starts an arbitrary executable on a node or a cluster" },
+            { "parameters", {
+                {
+                    "cluster",
+                    "The name of the cluster on which to start the executable, this "
+                    "parameter and the 'nodes' parameter are mutually exclusive and "
+                    "cannot be used at the same time"
+                },
+                {
+                    "node",
+                    "The name of the node on which to start the executable, this "
+                    "parameter and the 'cluster' parameter are mutually exclusive and "
+                    "cannot be used at the same time"
+                },
+                { "executable", "The name of the executable to start" },
+                { "workingDir", "The working directory where to start the executable "},
+                { "arguments", "Additional commandline arguments to pass to the program "}
+            }}
+        });
+    }
 
     result["endpoints"].push_back({
         { "url", "/program" },
