@@ -43,6 +43,36 @@
 #include <iostream>
 #include <memory>
 
+#ifdef WIN32
+#include <Windows.h>
+#else
+#include <sys/time.h>
+#endif
+
+namespace {
+    std::string currentTime() {
+#ifdef WIN32
+        SYSTEMTIME t = {};
+        GetLocalTime(&t);
+
+        return fmt::format(
+            "{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0<3}",
+            t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, t.wMilliseconds
+        );
+#else
+        struct timeval t;
+        gettimeofday(&t, nullptr);
+        tm* m = gmtime(&t.tv_sec);
+
+        return fmt::format(
+            "{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0<3}",
+            m->tm_year, m->tm_mon, m->tm_mday,
+            m->tm_hour, m->tm_min, m->tm_sec, t.tv_usec / 1000
+        );
+#endif
+    }
+} // namespace
+
 SocketHandler::SocketHandler(int port, std::string secret)
     : _secret(std::move(secret))
 {
@@ -57,6 +87,10 @@ SocketHandler::SocketHandler(int port, std::string secret)
         &_server, &QTcpServer::newConnection,
         this, &SocketHandler::newConnectionEstablished
     );
+}
+
+std::array<SocketHandler::MessageLog, 3> SocketHandler::lastMessages() const {
+    return _lastMessages;
 }
 
 void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* socket) {
@@ -116,6 +150,20 @@ void SocketHandler::newConnectionEstablished() {
             socket, &common::JsonSocket::messageReceived,
             [this, socket](nlohmann::json message) {
                 try {
+                    // We store a copy of the last n messages to be able to print those in
+                    // case of a catastrophic error
+                    std::rotate(
+                        _lastMessages.rbegin(),
+                        _lastMessages.rbegin() + 1,
+                        _lastMessages.rend()
+                    );
+
+                    MessageLog ml;
+                    ml.time = currentTime();
+                    ml.message = message;
+                    ml.peer = socket->peerAddress();
+                    _lastMessages.front() = ml;
+
                     handleMessage(message, socket);
                 }
                 catch (const std::exception& e) {

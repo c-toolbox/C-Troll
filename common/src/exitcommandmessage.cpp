@@ -40,17 +40,17 @@ namespace {
 
 namespace common {
 
-void to_json(nlohmann::json& j, const ExitCommandMessage& p) {
+void to_json(nlohmann::json& j, const ExitCommandMessage& m) {
     j[Message::KeyType] = ExitCommandMessage::Type;
-    j[Message::KeyVersion] = p.CurrentVersion;
-    j[Message::KeySecret] = p.secret;
-    j[KeyId] = p.id;
+    j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeySecret] = m.secret;
+    j[KeyId] = m.id;
 }
 
-void from_json(const nlohmann::json& j, ExitCommandMessage& p) {
+void from_json(const nlohmann::json& j, ExitCommandMessage& m) {
     validateMessage(j, ExitCommandMessage::Type);
-    from_json(j, static_cast<Message&>(p));
-    j.at(KeyId).get_to(p.id);
+    from_json(j, static_cast<Message&>(m));
+    j.at(KeyId).get_to(m.id);
 }
 
 } // namespace common

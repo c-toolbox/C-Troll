@@ -57,8 +57,8 @@ struct TrayStatusMessage : public Message {
     std::vector<ProcessInfo> processes;
 };
 
-void to_json(nlohmann::json& j, const TrayStatusMessage& p);
-void from_json(const nlohmann::json& j, TrayStatusMessage& p);
+void to_json(nlohmann::json& j, const TrayStatusMessage& m);
+void from_json(const nlohmann::json& j, TrayStatusMessage& m);
 
 } // namespace
 

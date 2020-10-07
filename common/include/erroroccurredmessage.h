@@ -32,92 +32,27 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __COMMON__JSONLOAD_H__
-#define __COMMON__JSONLOAD_H__
+#ifndef __COMMON__ERROROCCURREDMESSAGE_H__
+#define __COMMON__ERROROCCURREDMESSAGE_H__
 
-#include "logging.h"
-#include <QDirIterator>
-#include <fmt/format.h>
+#include "message.h"
+
 #include <json/json.hpp>
-#include <filesystem>
-#include <string>
-#include <string_view>
-#include <vector>
 
 namespace common {
 
-/**
- * This function loads an object \tparam T from the specified \p jsonFile. \p jsonFile has
- * to be a fully qualified path to the JSON file on disk and \p baseDirectory is the part
- * of the path that is removed to make a unique identifier that is stored in the object.
- * For example: <code>loadFromJson('c/d/e/foobar.json', 'c/d')</code> will result in an
- * identifier <code>e/foobar</code>.
- *
- * \tparam T The type of the object that should be constructed from the JSON file
- * \param jsonFile The path to the JSON file that contains the data for the object T
- * \return A constructed object T that is initialized from the JSON file \p jsonFile
- */
-template <typename T>
-T loadFromJson(const std::string& jsonFile) {
-    std::ifstream f(jsonFile);
-    nlohmann::json obj;
-    f >> obj;
-    return T(obj);
-}
+/// This struct is the data structure that gets send from the Tray to the Core in the case
+/// of a near-catastrophical error, i.e. an exception that would have terminated the Tray
+struct ErrorOccurredMessage : public Message {
+    static constexpr const char* Type = "ErrorOccurredMessage";
 
-template <typename T>
-void saveToJson(const std::string& filename, const T& value) {
-    nlohmann::json obj;
-    to_json(obj, value);
+    std::string error;
+    std::vector<std::string> lastMessages;
+};
 
-    std::ofstream j(filename);
-    j << obj.dump(2);
-}
-
-/**
- * This function reads all <code>.json</code> files in the provided \p directory and
- * creates a list of \tparam T objects from these files. Each file in the directory will
- * lead to a single \tparam T in the result vector. For each of the valid files in
- * \p directory, the loadFromJson function will be called
- *
- * \tparam T The type of the object that is created from the JSON files in \p directory
- * \param directory The path to the directory that contains a list of JSON files, this
- *        directory is traversed recursively
- * \return A list of \tparam T objects that was created from JSON files in \p directory
- */
-template <typename T>
-std::vector<T> loadJsonFromDirectory(std::string_view directory) {
-    namespace fs = std::filesystem;
-    if (!fs::is_directory(directory)) {
-        throw std::runtime_error(fmt::format("Could not find directory '{}'", directory));
-    }
-
-    std::vector<T> res;
-
-    for (const fs::directory_entry& p : fs::recursive_directory_iterator(directory)) {
-        if (!p.is_regular_file()) {
-            continue;
-        }
-
-        const fs::path ext = p.path().extension();
-        if (ext != ".json") {
-            continue;
-        }
-
-        const std::string file = p.path().string();
-        ::Log("Status", fmt::format("Loading file '{}'", file));
-        try {
-            T obj = common::loadFromJson<T>(file);
-            res.push_back(std::move(obj));
-        }
-        catch (const std::runtime_error& e) {
-            ::Log("Error",fmt::format("Failed to load file '{}': {}", file, e.what()));
-        }
-    }
-
-    return res;
-}
+void to_json(nlohmann::json& j, const ErrorOccurredMessage& m);
+void from_json(const nlohmann::json& j, ErrorOccurredMessage& m);
 
 } // namespace common
 
-#endif // __COMMON__JSONLOAD_H__
+#endif // __COMMON__ERROROCCURREDMESSAGE_H__

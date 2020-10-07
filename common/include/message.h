@@ -73,7 +73,7 @@ template <typename T>
 // Throws std::runtime_error if the version is different from the current version
 void validateMessage(const nlohmann::json& message, std::string_view expectedType);
     
-void from_json(const nlohmann::json& j, Message& p);
+void from_json(const nlohmann::json& j, Message& m);
 
 } // namespace common
     

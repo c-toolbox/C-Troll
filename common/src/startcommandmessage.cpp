@@ -50,38 +50,38 @@ namespace {
 
 namespace common {
 
-void to_json(nlohmann::json& j, const StartCommandMessage& p) {
+void to_json(nlohmann::json& j, const StartCommandMessage& m) {
     j[Message::KeyType] = StartCommandMessage::Type;
-    j[Message::KeyVersion] = p.CurrentVersion;
-    j[Message::KeySecret] = p.secret;
-    j[KeyId] = p.id;
-    j[KeyForwardOutErr] = p.forwardStdOutStdErr;
-    j[KeyExecutable] = p.executable;
-    j[KeyWorkingDirectory] = p.workingDirectory;
-    j[KeyCommandlineArguments] = p.commandlineParameters;
-    j[KeyProgramId] = p.programId;
-    j[KeyConfigurationId] = p.configurationId;
-    j[KeyClusterId] = p.clusterId;
-    j[KeyNodeId] = p.nodeId;
-    j[KeyDataHash] = p.dataHash;
+    j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeySecret] = m.secret;
+    j[KeyId] = m.id;
+    j[KeyForwardOutErr] = m.forwardStdOutStdErr;
+    j[KeyExecutable] = m.executable;
+    j[KeyWorkingDirectory] = m.workingDirectory;
+    j[KeyCommandlineArguments] = m.commandlineParameters;
+    j[KeyProgramId] = m.programId;
+    j[KeyConfigurationId] = m.configurationId;
+    j[KeyClusterId] = m.clusterId;
+    j[KeyNodeId] = m.nodeId;
+    j[KeyDataHash] = m.dataHash;
 }
 
-void from_json(const nlohmann::json& j, StartCommandMessage& p) {
+void from_json(const nlohmann::json& j, StartCommandMessage& m) {
     validateMessage(j, StartCommandMessage::Type);
-    from_json(j, static_cast<Message&>(p));
+    from_json(j, static_cast<Message&>(m));
 
-    j.at(KeyId).get_to(p.id);
-    j.at(KeyForwardOutErr).get_to(p.forwardStdOutStdErr);
+    j.at(KeyId).get_to(m.id);
+    j.at(KeyForwardOutErr).get_to(m.forwardStdOutStdErr);
     
-    j.at(KeyExecutable).get_to(p.executable);
-    j.at(KeyWorkingDirectory).get_to(p.workingDirectory);
-    j.at(KeyCommandlineArguments).get_to(p.commandlineParameters);
+    j.at(KeyExecutable).get_to(m.executable);
+    j.at(KeyWorkingDirectory).get_to(m.workingDirectory);
+    j.at(KeyCommandlineArguments).get_to(m.commandlineParameters);
 
-    j.at(KeyProgramId).get_to(p.programId);
-    j.at(KeyConfigurationId).get_to(p.configurationId);
-    j.at(KeyClusterId).get_to(p.clusterId);
-    j.at(KeyNodeId).get_to(p.nodeId);
-    j.at(KeyDataHash).get_to(p.dataHash);
+    j.at(KeyProgramId).get_to(m.programId);
+    j.at(KeyConfigurationId).get_to(m.configurationId);
+    j.at(KeyClusterId).get_to(m.clusterId);
+    j.at(KeyNodeId).get_to(m.nodeId);
+    j.at(KeyDataHash).get_to(m.dataHash);
 }
 
 } // namespace common

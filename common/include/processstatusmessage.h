@@ -65,8 +65,8 @@ struct ProcessStatusMessage : public Message {
     Status status = Status::Unknown;
 };
   
-void to_json(nlohmann::json& j, const ProcessStatusMessage& p);
-void from_json(const nlohmann::json& j, ProcessStatusMessage& p);
+void to_json(nlohmann::json& j, const ProcessStatusMessage& m);
+void from_json(const nlohmann::json& j, ProcessStatusMessage& m);
 
 } // namespace common
 

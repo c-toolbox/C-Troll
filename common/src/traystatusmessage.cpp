@@ -65,17 +65,17 @@ void from_json(const nlohmann::json & j, TrayStatusMessage::ProcessInfo& p) {
     j.at(KeyDataHash).get_to(p.dataHash);
 }
 
-void to_json(nlohmann::json& j, const TrayStatusMessage& p) {
+void to_json(nlohmann::json& j, const TrayStatusMessage& m) {
     j[Message::KeyType] = TrayStatusMessage::Type;
-    j[Message::KeyVersion] = p.CurrentVersion;
-    j[KeyProcesses] = p.processes;
+    j[Message::KeyVersion] = m.CurrentVersion;
+    j[KeyProcesses] = m.processes;
 }
 
-void from_json(const nlohmann::json& j, TrayStatusMessage& p) {
+void from_json(const nlohmann::json& j, TrayStatusMessage& m) {
     validateMessage(j, TrayStatusMessage::Type);
-    from_json(j, static_cast<Message&>(p));
+    from_json(j, static_cast<Message&>(m));
 
-    j.at(KeyProcesses).get_to(p.processes);
+    j.at(KeyProcesses).get_to(m.processes);
 }
 
 } // namespace

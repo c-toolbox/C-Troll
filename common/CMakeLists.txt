@@ -34,6 +34,7 @@
 
 set(HEADER_FILES
   include/apiversion.h
+  include/erroroccurredmessage.h
   include/exitcommandmessage.h
   include/invalidauthmessage.h
   include/jsonload.h
@@ -50,6 +51,7 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+  src/erroroccurredmessage.cpp
   src/exitcommandmessage.cpp
   src/invalidauthmessage.cpp
   src/jsonsocket.cpp

@@ -64,10 +64,10 @@ void validateMessage(const nlohmann::json& message, std::string_view expectedTyp
     }
 }
 
-void from_json(const nlohmann::json& message, Message& msg) {
-    message.at(Message::KeyType).get_to(msg.type);
+void from_json(const nlohmann::json& message, Message& m) {
+    message.at(Message::KeyType).get_to(m.type);
     if (message.find(Message::KeySecret) != message.end()) {
-        message[Message::KeySecret].get_to(msg.secret);
+        message[Message::KeySecret].get_to(m.secret);
     }
 }
 

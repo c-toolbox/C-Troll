@@ -59,8 +59,8 @@ struct ProcessOutputMessage : Message {
     OutputType outputType = OutputType::StdOut;
 };
     
-void to_json(nlohmann::json& j, const ProcessOutputMessage& p);
-void from_json(const nlohmann::json& j, ProcessOutputMessage& p);
+void to_json(nlohmann::json& j, const ProcessOutputMessage& m);
+void from_json(const nlohmann::json& j, ProcessOutputMessage& m);
 
 } // namespace common
 

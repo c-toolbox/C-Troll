@@ -36,15 +36,15 @@
 
 namespace common {
 
-void to_json(nlohmann::json& j, const KillAllMessage& p) {
+void to_json(nlohmann::json& j, const KillAllMessage& m) {
     j[Message::KeyType] = KillAllMessage::Type;
-    j[Message::KeyVersion] = p.CurrentVersion;
-    j[Message::KeySecret] = p.secret;
+    j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeySecret] = m.secret;
 }
 
-void from_json(const nlohmann::json& j, KillAllMessage& p) {
+void from_json(const nlohmann::json& j, KillAllMessage& m) {
     validateMessage(j, KillAllMessage::Type);
-    from_json(j, static_cast<Message&>(p));
+    from_json(j, static_cast<Message&>(m));
 }
 
 } // namespace common

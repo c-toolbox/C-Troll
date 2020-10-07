@@ -92,20 +92,20 @@ namespace {
 
 namespace common {
 
-void to_json(nlohmann::json& j, const ProcessStatusMessage& p) {
+void to_json(nlohmann::json& j, const ProcessStatusMessage& m) {
     j[Message::KeyType] = ProcessStatusMessage::Type;
-    j[Message::KeyVersion] = p.CurrentVersion;
-    j[KeyProcessId] = p.processId;
-    j[KeyStatus] = fromStatus(p.status);
+    j[Message::KeyVersion] = m.CurrentVersion;
+    j[KeyProcessId] = m.processId;
+    j[KeyStatus] = fromStatus(m.status);
 }
 
-void from_json(const nlohmann::json& j, ProcessStatusMessage& p) {
+void from_json(const nlohmann::json& j, ProcessStatusMessage& m) {
     validateMessage(j, ProcessStatusMessage::Type);
-    from_json(j, static_cast<Message&>(p));
+    from_json(j, static_cast<Message&>(m));
 
-    j.at(KeyProcessId).get_to(p.processId);
+    j.at(KeyProcessId).get_to(m.processId);
     std::string status = j.at(KeyStatus).get<std::string>();
-    p.status = toStatus(status);
+    m.status = toStatus(status);
 }
     
 } // namespace common

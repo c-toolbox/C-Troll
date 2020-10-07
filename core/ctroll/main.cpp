@@ -59,9 +59,9 @@ int main(int argc, char** argv) {
         app.setStyleSheet(styleSheet);
     }
 
-    MainWindow mw;
-    mw.show();
     try {
+        MainWindow mw;
+        mw.show();
         app.exec();
     }
     catch (const std::exception& e) {

@@ -35,6 +35,7 @@
 add_executable(UnitTest
   main.cpp
   test_cluster.cpp
+  test_erroroccurred.cpp
   test_exitcommand.cpp
   test_killall.cpp
   test_killtraymessage.cpp

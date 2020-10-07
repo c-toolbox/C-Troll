@@ -45,8 +45,8 @@ struct InvalidAuthMessage : public Message {
     static constexpr const char* Type = "InvalidAuthMessage";
 };
 
-void to_json(nlohmann::json& j, const InvalidAuthMessage& p);
-void from_json(const nlohmann::json& j, InvalidAuthMessage& p);
+void to_json(nlohmann::json& j, const InvalidAuthMessage& m);
+void from_json(const nlohmann::json& j, InvalidAuthMessage& m);
 
 } // namespace
 

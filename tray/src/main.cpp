@@ -33,6 +33,7 @@
  ****************************************************************************************/
 
 #include "configuration.h"
+#include "erroroccurredmessage.h"
 #include "jsonload.h"
 #include "logging.h"
 #include "mainwindow.h"
@@ -77,6 +78,7 @@ int main(int argc, char** argv) {
                 "{} ({}: {}, {})\n",
                 localMsg.constData(), context.file, context.line, context.function
             );
+            std::cerr.flush();
         }
     );
 
@@ -181,14 +183,52 @@ int main(int argc, char** argv) {
         &mw, &MainWindow::endedProcess
     );
 
-    try {
-        app.exec();
-    }
-    catch (const std::exception& e) {
-        QMessageBox::critical(nullptr, "Exception", e.what());
-    }
-    catch (...) {
-        QMessageBox::critical(nullptr, "Exception", "Unknown error");
+    // This looks a bit weird, but here it goes:  There might be an unexpected exception
+    // that would kill the Tray process if it would leak, which would be no bueno.
+    //  a. An exception happens -> it gets caught in the catch blocks below, but we still
+    //     want to continue running the tray, so we go back into the event loop
+    //  b. The user wants to close the Tray application which means that the exec function
+    //     actually returns, in which case we immediately break out of the loop to get to
+    //     the cleanup functions
+    while (true) {
+        try {
+            app.exec();
+            break;
+        }
+        catch (const std::exception& e) {
+            Log("Leaked Exception", e.what());
+            Log("Debug", "Last received messages:");
+
+            common::ErrorOccurredMessage message;
+            message.error = e.what();
+            std::array<SocketHandler::MessageLog, 3> mls = socketHandler.lastMessages();
+            for (const SocketHandler::MessageLog& m : mls) {
+                std::string msg = fmt::format(
+                    "{} ({}): {}", m.time, m.peer, m.message.dump()
+                );
+                message.lastMessages.push_back(msg);
+                Log("Msg", msg);
+            }
+
+            nlohmann::json j = message;
+            socketHandler.sendMessage(j);
+        }
+        catch (...) {
+            Log("Leaked Exception", "Unknown error");
+            Log("Debug", "Last received messages:");
+            common::ErrorOccurredMessage message;
+            message.error = "Unknown exception";
+            std::array<SocketHandler::MessageLog, 3> mls = socketHandler.lastMessages();
+            for (const SocketHandler::MessageLog& m : mls) {
+                std::string msg = fmt::format(
+                    "{} ({}): {}", m.time, m.peer, m.message.dump()
+                );
+                message.lastMessages.push_back(msg);
+                Log("Msg", msg);
+            }
+            nlohmann::json j = message;
+            socketHandler.sendMessage(j);
+        }
     }
 
     Q_CLEANUP_RESOURCE(resources);

@@ -51,6 +51,7 @@
 #include <QVBoxLayout>
 #include <filesystem>
 #include <iostream>
+#include <numeric>
 #include <set>
 #include <thread>
 
@@ -187,6 +188,10 @@ MainWindow::MainWindow() {
         _processesWidget, &ProcessesWidget::receivedProcessMessage
     );
     connect(
+        &_clusterConnectionHandler, &ClusterConnectionHandler::receivedErrorMessage,
+        this, &MainWindow::handleErrorMessage
+    );
+    connect(
         _processesWidget, &ProcessesWidget::killProcess,
         this, &MainWindow::stopProcess
     );
@@ -305,9 +310,30 @@ void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
 
 void MainWindow::handleInvalidAuth(Node::ID id, common::InvalidAuthMessage) {
     const Node* node = data::findNode(id);
+    assert(node);
 
     std::string m = fmt::format("Send invalid auth token to node {}", node->name);
     QMessageBox::critical(this, "Error in Connection", QString::fromStdString(m));
+}
+
+void MainWindow::handleErrorMessage(Node::ID id, common::ErrorOccurredMessage message) {
+    const Node* node = data::findNode(id);
+    assert(node);
+
+    std::string msg = std::accumulate(
+        message.lastMessages.begin(), message.lastMessages.end(),
+        std::string(""),
+        [](const std::string& lhs, const std::string& rhs) { return lhs + "\n\n" + rhs; }
+    );
+    QMessageBox::critical(
+        this,
+        "Tray error",
+        QString::fromStdString(fmt::format(
+            "Node {} reported a critical error. It said: \n{}\n\nThe last {} messages "
+            "that were received on that node were:\n\n{}",
+            node->name, message.error, message.lastMessages.size(), msg
+        ))
+    );
 }
 
 void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,

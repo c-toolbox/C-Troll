@@ -45,8 +45,8 @@ struct KillAllMessage : public Message {
     static constexpr const char* Type = "KillAllMessage";
 };
 
-void to_json(nlohmann::json& j, const KillAllMessage& p);
-void from_json(const nlohmann::json& j, KillAllMessage& p);
+void to_json(nlohmann::json& j, const KillAllMessage& m);
+void from_json(const nlohmann::json& j, KillAllMessage& m);
 
 } // namespace commmon
 

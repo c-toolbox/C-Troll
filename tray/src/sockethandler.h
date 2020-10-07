@@ -38,13 +38,22 @@
 #include <QObject>
 #include <QTcpServer>
 #include <json/json.hpp>
+#include <array>
 
 namespace common { class JsonSocket; }
 
 class SocketHandler : public QObject {
 Q_OBJECT
 public:
+    struct MessageLog {
+        std::string time;
+        nlohmann::json message;
+        std::string peer;
+    };
+
     SocketHandler(int port, std::string secret);
+
+    std::array<MessageLog, 3> lastMessages() const;
 
 public slots:    
     void sendMessage(const nlohmann::json& message, bool printMessage = true);
@@ -62,6 +71,8 @@ private:
     QTcpServer _server;
     std::vector<common::JsonSocket*> _sockets;
     std::string _secret;
+
+    std::array<MessageLog, 3> _lastMessages;
 };
 
 #endif // __TRAY__SOCKETHANDLER_H__

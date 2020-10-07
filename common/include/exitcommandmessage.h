@@ -50,8 +50,8 @@ struct ExitCommandMessage : public Message {
     int id = -1;
 };
 
-void to_json(nlohmann::json& j, const ExitCommandMessage& p);
-void from_json(const nlohmann::json& j, ExitCommandMessage& p);
+void to_json(nlohmann::json& j, const ExitCommandMessage& m);
+void from_json(const nlohmann::json& j, ExitCommandMessage& m);
 
 } // namespace commmon
 

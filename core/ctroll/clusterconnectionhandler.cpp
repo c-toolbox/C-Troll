@@ -170,6 +170,10 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
         common::ProcessOutputMessage msg = message;
         emit receivedProcessMessage(nodeId, msg);
     }
+    else if (common::isValidMessage<common::ErrorOccurredMessage>(message)) {
+        common::ErrorOccurredMessage msg = message;
+        emit receivedErrorMessage(nodeId, msg);
+    }
     else {
         const Node* n = data::findNode(nodeId);
         assert(n);

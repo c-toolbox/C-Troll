@@ -59,7 +59,8 @@ public:
 private slots:
     void handleTrayProcess(common::ProcessStatusMessage status);
     void handleTrayStatus(Node::ID, common::TrayStatusMessage status);
-    void handleInvalidAuth(Node::ID id, common::InvalidAuthMessage);
+    void handleInvalidAuth(Node::ID id, common::InvalidAuthMessage message);
+    void handleErrorMessage(Node::ID id, common::ErrorOccurredMessage message);
 
     void stopProcess(Process::ID processId) const;
 

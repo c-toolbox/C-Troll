@@ -45,8 +45,8 @@ struct KillTrayMessage : public Message {
     static constexpr const char* Type = "KillTrayMessage";
 };
 
-void to_json(nlohmann::json& j, const KillTrayMessage& p);
-void from_json(const nlohmann::json& j, KillTrayMessage& p);
+void to_json(nlohmann::json& j, const KillTrayMessage& m);
+void from_json(const nlohmann::json& j, KillTrayMessage& m);
 
 } // namespace common
 

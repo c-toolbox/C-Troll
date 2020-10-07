@@ -66,8 +66,8 @@ struct StartCommandMessage : public Message {
     std::size_t dataHash = 0;
 };
 
-void to_json(nlohmann::json& j, const StartCommandMessage& p);
-void from_json(const nlohmann::json& j, StartCommandMessage& p);
+void to_json(nlohmann::json& j, const StartCommandMessage& m);
+void from_json(const nlohmann::json& j, StartCommandMessage& m);
 
 } // namespace commmon
 
