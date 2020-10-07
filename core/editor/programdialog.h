@@ -57,6 +57,7 @@ public:
 
         QLineEdit* name = nullptr;
         QLineEdit* parameters = nullptr;
+        QLineEdit* description = nullptr;
     };
 
     ProgramDialog(QWidget* parent, std::string programPath, std::string clusterPath);
@@ -79,6 +80,8 @@ private:
 
     QCheckBox* _hasDelay = nullptr;
     QSpinBox* _delay = nullptr;
+
+    QLineEdit* _description = nullptr;
 
     DynamicList* _tags = nullptr;
     DynamicList* _configurations = nullptr;

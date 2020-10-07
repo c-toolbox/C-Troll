@@ -1,4 +1,5 @@
 {
+  "description": "abc",
   "enabled": true,
   "name": "Local",
   "nodes": [

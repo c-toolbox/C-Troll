@@ -34,14 +34,17 @@
 
 add_executable(UnitTest
   main.cpp
+  test_cluster.cpp
   test_exitcommand.cpp
   test_killall.cpp
   test_killtraymessage.cpp
   test_message.cpp
+  test_node.cpp
   test_processoutput.cpp
   test_processstatusmessage.cpp
+  test_program.cpp
   test_startcommandmessage.cpp
   test_traystatus.cpp
 )
 target_include_directories(UnitTest PUBLIC ${CMAKE_SOURCE_DIR}/ext/catch2/single_include)
-target_link_libraries(UnitTest PUBLIC common)
+target_link_libraries(UnitTest PUBLIC common core-shared)

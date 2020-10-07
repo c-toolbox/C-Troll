@@ -81,6 +81,7 @@ NodeWidget::NodeWidget(const Node& node)
     : QGroupBox(QString::fromStdString(node.name))
     , _nodeId(node.id)
 {
+    setToolTip(QString::fromStdString(node.description));
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
     
     QBoxLayout* layout = new QHBoxLayout(this);
@@ -98,6 +99,7 @@ NodeWidget::NodeWidget(const Node& node)
     layout->addWidget(ip);
 
     _killProcesses = new QPushButton("Kill processes");
+    _killProcesses->setToolTip("Kills all processes on this particular node");
     connect(
         _killProcesses, &QPushButton::clicked,
         [this, node]() {
@@ -121,6 +123,7 @@ NodeWidget::NodeWidget(const Node& node)
 
     _killTray = new QPushButton("X");
     _killTray->setObjectName("killtray");
+    _killTray->setToolTip("Kills the Tray application on this particular node");
     connect(_killTray, &QPushButton::clicked,
         [this, node]() {
             std::string text = fmt::format(
@@ -166,6 +169,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
     : QGroupBox(QString::fromStdString(cluster.name))
     , _clusterId(cluster.id)
 {
+    setToolTip(QString::fromStdString(cluster.description));
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 
     QGridLayout* layout = new QGridLayout(this);

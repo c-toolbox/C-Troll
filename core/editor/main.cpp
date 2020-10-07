@@ -81,6 +81,7 @@ int main(int argc, char** argv) {
         );
         QPushButton* create = box.addButton("Create", QMessageBox::ButtonRole::YesRole);
         QPushButton* search = box.addButton("Search", QMessageBox::ButtonRole::NoRole);
+        QPushButton* cancel = box.addButton("Cancel", QMessageBox::ButtonRole::ResetRole);
         box.setDefaultButton(create);
         box.exec();
         QAbstractButton* clicked = box.clickedButton();
@@ -91,15 +92,21 @@ int main(int argc, char** argv) {
             std::filesystem::create_directory(config.clusterPath);
             std::filesystem::create_directory(config.nodePath);
         }
-        else {
+        else if (clicked == search) {
             QString s = QFileDialog::getOpenFileName(nullptr, "Select config file");
             if (s.isEmpty()) {
                 Q_CLEANUP_RESOURCE(resources);
                 return 0;
             }
-            ;
             QDir::setCurrent(QFileInfo(s).absoluteDir().path());
             config = common::loadFromJson<BaseConfiguration>(s.toStdString());
+        }
+        else if (clicked == cancel) {
+            Q_CLEANUP_RESOURCE(resources);
+            return 0;
+        }
+        else {
+            throw std::logic_error("Unknown if/else statement case");
         }
     }
 

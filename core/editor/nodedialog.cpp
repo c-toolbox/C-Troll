@@ -84,11 +84,17 @@ NodeDialog::NodeDialog(QWidget* parent, std::string path)
         _port->setMaximum(std::numeric_limits<int>::max());
         editLayout->addWidget(_port, 2, 1);
 
-        editLayout->addWidget(new QLabel("Secret"), 3, 0);
+        editLayout->addWidget(new QLabel("Secret:"), 3, 0);
         _secret = new QLineEdit;
         _secret->setToolTip("The secret that used to authenticate and encrypt traffic");
         _secret->setPlaceholderText("optional");
         editLayout->addWidget(_secret, 3, 1);
+
+        editLayout->addWidget(new QLabel("Description:"), 4, 0);
+        _description = new QLineEdit;
+        _description->setToolTip("Additional information for the user about this node");
+        _description->setPlaceholderText("optional");
+        editLayout->addWidget(_description, 4, 1);
 
         layout->addWidget(edit);
     }
@@ -108,6 +114,7 @@ NodeDialog::NodeDialog(QWidget* parent, std::string path)
         _ip->setText(QString::fromStdString(node.ipAddress));
         _port->setValue(node.port);
         _secret->setText(QString::fromStdString(node.secret));
+        _description->setText(QString::fromStdString(node.description));
     }
 
     updateSaveButton();
@@ -119,9 +126,9 @@ void NodeDialog::save() {
     node.ipAddress = _ip->text().toStdString();
     node.port = _port->value();
     node.secret = _secret->text().toStdString();
+    node.description = _description->text().toStdString();
 
     common::saveToJson(_path, node);
-
     accept();
 }
 

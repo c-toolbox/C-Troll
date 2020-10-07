@@ -57,6 +57,10 @@ struct Node {
     int port = -1;
     /// The secret that is sent to the tray application for authentication
     std::string secret;
+    /// A user-friendly description that potentially better identifies the node
+    std::string description;
+
+
     /// A flag representing whether the node is connected or not
     bool isConnected = false;
 };

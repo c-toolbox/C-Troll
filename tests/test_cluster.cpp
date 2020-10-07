@@ -32,42 +32,103 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __EDITOR__CLUSTERDIALOG_H__
-#define __EDITOR__CLUSTERDIALOG_H__
+#include "catch2/catch.hpp"
 
-#include <QDialog>
+#include "cluster.h"
+#include <json/json.hpp>
 
-#include "dynamiclist.h"
-#include <QWidget>
-#include <string>
-#include <vector>
+TEST_CASE("(Cluster) Default Ctor", "[Cluster]") {
+    Cluster msg;
 
-class QBoxLayout;
-class QCheckBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
 
-class ClusterDialog : public QDialog {
-Q_OBJECT
-public:
-    ClusterDialog(QWidget* parent, std::string clusterPath, std::string nodePath);
+    nlohmann::json j1;
+    to_json(j1, msg);
 
-private slots:
-    void save();
-    void updateSaveButton();
-    void addNewNode();
+    Cluster msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
 
-private:
-    const std::string _clusterPath;
-    const std::string _nodePath;
+    REQUIRE(j1 == j2);
+}
 
-    QLineEdit* _name = nullptr;
-    QCheckBox* _enabled = nullptr;
-    QLineEdit* _description = nullptr;
-    DynamicList* _nodes = nullptr;
+TEST_CASE("(Cluster) id", "[Cluster]") {
+    Cluster msg;
+    msg.id = 13;
 
-    QPushButton* _saveButton = nullptr;
-};
 
-#endif // __EDITOR__CLUSTERDIALOG_H__
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Cluster msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}
+
+TEST_CASE("(Cluster) name", "[Cluster]") {
+    Cluster msg;
+    msg.name = "foobar";
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Cluster msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}
+
+TEST_CASE("(Cluster) isEnabled", "[Cluster]") {
+    Cluster msg;
+    msg.isEnabled = false;
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Cluster msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}
+
+TEST_CASE("(Cluster) description", "[Cluster]") {
+    Cluster msg;
+    msg.description = "foobar";
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Cluster msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}
+
+TEST_CASE("(Cluster) nodes", "[Cluster]") {
+    Cluster msg;
+    msg.nodes.push_back("foo");
+    msg.nodes.push_back("bar");
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Cluster msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}

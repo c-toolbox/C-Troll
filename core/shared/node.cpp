@@ -46,6 +46,7 @@ namespace {
     constexpr const char* KeyIpAddress = "ip";
     constexpr const char* KeyPort = "port";
     constexpr const char* KeySecret = "secret";
+    constexpr const char* KeyDescription = "description";
 } // namespace
 
 template <>
@@ -59,8 +60,9 @@ struct fmt::formatter<Node> {
     auto format(const Node& n, FormatContext& ctx) {
         return format_to(
             ctx.out(),
-            "( id: {}, name: \"{}\", ipAddress: \"{}\", port: {}, isConnected: {} )",
-            n.id.v, n.name, n.ipAddress, n.port, n.isConnected
+            "( id: {}, name: \"{}\", ipAddress: \"{}\", port: {}, description: {}, "
+            "isConnected: {} )",
+            n.id.v, n.name, n.ipAddress, n.port, n.description, n.isConnected
         );
     }
 };
@@ -70,7 +72,10 @@ void from_json(const nlohmann::json& j, Node& n) {
     j.at(KeyIpAddress).get_to(n.ipAddress);
     j.at(KeyPort).get_to(n.port);
     if (j.find(KeySecret) != j.end()) {
-        j.at(KeySecret).get_to(n.secret);
+        j[KeySecret].get_to(n.secret);
+    }
+    if (j.find(KeyDescription) != j.end()) {
+        j[KeyDescription].get_to(n.description);
     }
 }
 
@@ -78,9 +83,8 @@ void to_json(nlohmann::json& j, const Node& n) {
     j[KeyName] = n.name;
     j[KeyIpAddress] = n.ipAddress;
     j[KeyPort] = n.port;
-    if (!n.secret.empty()) {
-        j[KeySecret] = n.secret;
-    }
+    j[KeySecret] = n.secret;
+    j[KeyDescription] = n.description;
 }
 
 std::vector<Node> loadNodesFromDirectory(std::string_view directory) {

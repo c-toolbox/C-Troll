@@ -55,6 +55,9 @@ struct Program {
 
         /// Commandline parameters that are associated with the configuration
         std::string parameters;
+
+        /// A user-friendly description that better identifies this configuration
+        std::string description;
     };
 
     using ID = TypedId<int, struct ProgramTag>;
@@ -75,6 +78,8 @@ struct Program {
     std::optional<std::chrono::milliseconds> delay;
     /// A list of tags that are associated with this Program
     std::vector<std::string> tags;
+    /// A user-friendly description that potentially better identifies the whole program
+    std::string description;
     /// List of all configurations
     std::vector<Configuration> configurations;
     /// List of all clusters

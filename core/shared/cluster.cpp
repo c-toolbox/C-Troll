@@ -45,12 +45,16 @@ namespace {
     constexpr const char* KeyName = "name";
     constexpr const char* KeyEnabled = "enabled";
     constexpr const char* KeyNodes = "nodes";
+    constexpr const char* KeyDescription = "description";
 } // namespace
 
 void from_json(const nlohmann::json& j, Cluster& c) {
     j.at(KeyName).get_to(c.name);
     if (j.find(KeyEnabled) != j.end()) {
         j[KeyEnabled].get_to(c.isEnabled);
+    }
+    if (j.find(KeyDescription) != j.end()) {
+        j[KeyDescription].get_to(c.description);
     }
     
     j.at(KeyNodes).get_to(c.nodes);
@@ -59,6 +63,7 @@ void from_json(const nlohmann::json& j, Cluster& c) {
 void to_json(nlohmann::json& j, const Cluster& c) {
     j[KeyName] = c.name;
     j[KeyEnabled] = c.isEnabled;
+    j[KeyDescription] = c.description;
     j[KeyNodes] = c.nodes;
 }
 

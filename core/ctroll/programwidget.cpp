@@ -58,6 +58,10 @@ ProgramButton::ProgramButton(const Cluster* cluster,
     , _configuration(configuration)
     , _actionMenu(new QMenu(this))
 {
+    assert(cluster);
+    assert(configuration);
+
+    setToolTip(QString::fromStdString(configuration->description));
     setEnabled(false);
     connect(this, &QPushButton::clicked, this, &ProgramButton::handleButtonPress);
 }
@@ -249,6 +253,7 @@ ClusterWidget::ClusterWidget(const Cluster* cluster,
 {
     assert(cluster);
     setTitle(QString::fromStdString(cluster->name));
+    setToolTip(QString::fromStdString(cluster->description));
 
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
@@ -324,6 +329,8 @@ TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
 ProgramWidget::ProgramWidget(const Program& program)
     : QGroupBox(QString::fromStdString(program.name))
 {
+    setToolTip(QString::fromStdString(program.description));
+
     QBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
     layout->setSpacing(10);

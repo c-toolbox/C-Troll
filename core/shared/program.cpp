@@ -46,22 +46,30 @@ namespace {
     constexpr const char* KeyWorkingDirectory = "workingDirectory";
     constexpr const char* KeyClusters = "clusters";
     constexpr const char* KeyTags = "tags";
+    constexpr const char* KeyDescription = "description";
     constexpr const char* KeySendConsole = "shouldForwardMessages";
     constexpr const char* KeyDelay = "delay";
     constexpr const char* KeyConfigurations = "configurations";
 
     constexpr const char* KeyConfigurationName = "name";
     constexpr const char* KeyConfigurationParameters = "parameters";
+    constexpr const char* KeyConfigurationDescription = "description";
 } // namespace
 
 void from_json(const nlohmann::json& j, Program::Configuration& p) {
     j.at(KeyConfigurationName).get_to(p.name);
-    j.at(KeyConfigurationParameters).get_to(p.parameters);
+    if (j.find(KeyConfigurationParameters) != j.end()) {
+        j[KeyConfigurationParameters].get_to(p.parameters);
+    }
+    if (j.find(KeyConfigurationDescription) != j.end()) {
+        j[KeyConfigurationDescription].get_to(p.description);
+    }
 }
 
 void to_json(nlohmann::json& j, const Program::Configuration& p) {
     j[KeyConfigurationName] = p.name;
     j[KeyConfigurationParameters] = p.parameters;
+    j[KeyConfigurationDescription] = p.description;
 }
 
 void from_json(const nlohmann::json& j, Program& p) {
@@ -75,6 +83,9 @@ void from_json(const nlohmann::json& j, Program& p) {
     }
     if (j.find(KeyTags) != j.end()) {
         j.at(KeyTags).get_to(p.tags);
+    }
+    if (j.find(KeyDescription) != j.end()) {
+        j.at(KeyDescription).get_to(p.description);
     }
     if (j.find(KeySendConsole) != j.end()) {
         j.at(KeySendConsole).get_to(p.shouldForwardMessages);
@@ -97,21 +108,12 @@ void from_json(const nlohmann::json& j, Program& p) {
 void to_json(nlohmann::json& j, const Program& p) {
     j[KeyName] = p.name;
     j[KeyExecutable] = p.executable;
-    if (!p.commandlineParameters.empty()) {
-        j[KeyCommandlineParameters] = p.commandlineParameters;
-    }
-    if (!p.workingDirectory.empty()) {
-        j[KeyWorkingDirectory] = p.workingDirectory;
-    }
-    if (!p.tags.empty()) {
-        j[KeyTags] = p.tags;
-    }
-    if (p.shouldForwardMessages) {
-        j[KeySendConsole] = p.shouldForwardMessages;
-    }
-    if (p.delay.has_value()) {
-        j[KeyDelay] = p.delay->count();
-    }
+    j[KeyCommandlineParameters] = p.commandlineParameters;
+    j[KeyWorkingDirectory] = p.workingDirectory;
+    j[KeyTags] = p.tags;
+    j[KeyDescription] = p.description;
+    j[KeySendConsole] = p.shouldForwardMessages;
+    j[KeyDelay] = p.delay->count();
     j[KeyConfigurations] = p.configurations;
     j[KeyClusters] = p.clusters;
 }

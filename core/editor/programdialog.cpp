@@ -58,11 +58,20 @@ ProgramDialog::Configuration::Configuration() {
     layout->setMargin(0);
     layout->setContentsMargins(0, 0, 0, 0);
     name = new QLineEdit;
+    name->setToolTip("The user-facing name of this configuration");
     layout->addWidget(name);
 
     parameters = new QLineEdit;
+    parameters->setToolTip("Additional commandline parameters that are passed");
     parameters->setPlaceholderText("optional");
     layout->addWidget(parameters);
+
+    description = new QLineEdit;
+    description->setToolTip(
+        "Additional information for the user about this configuration"
+    );
+    description->setPlaceholderText("optional");
+    layout->addWidget(description);
 }
 
 bool operator==(const Cluster& c, const std::string& name) {
@@ -141,11 +150,18 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
         delayLayout->addWidget(_delay);
         editLayout->addWidget(delayContainer, 5, 1);
 
-        editLayout->addWidget(new Spacer, 6, 0);
+        editLayout->addWidget(new QLabel("Description:"), 6, 0);
+        _description = new QLineEdit;
+        _description->setToolTip("Additional information for the user about the program");
+        _description->setPlaceholderText("optional");
+        editLayout->addWidget(_description, 6, 1);
+
+
+        editLayout->addWidget(new Spacer, 7, 0, 1, 2);
 
         {
             // Tags
-            editLayout->addWidget(new QLabel("Tags"), 7, 0);
+            editLayout->addWidget(new QLabel("Tags"), 8, 0);
 
             QPushButton* t = new AddButton;
             connect(
@@ -156,21 +172,21 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                     updateSaveButton();
                 }
             );
-            editLayout->addWidget(t, 7, 1, Qt::AlignRight);
+            editLayout->addWidget(t, 8, 1, Qt::AlignRight);
 
             _tags = new DynamicList;
             _tags->setToolTip("A list of all tags that this program is associated with");
             connect(_tags, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
          
-            editLayout->addWidget(_tags, 8, 0, 1, 2);
+            editLayout->addWidget(_tags, 9, 0, 1, 2);
         }
 
-        editLayout->addWidget(new Spacer, 9, 0);
+        editLayout->addWidget(new Spacer, 10, 0, 1, 2);
 
         {
             // Configurations
 
-            editLayout->addWidget(new QLabel("Configurations"), 10, 0);
+            editLayout->addWidget(new QLabel("Configurations"), 11, 0);
 
             QPushButton* newConfiguration = new AddButton;
             connect(
@@ -184,7 +200,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                     _configurations->addItem(config);
                 }
             );
-            editLayout->addWidget(newConfiguration, 10, 1, Qt::AlignRight);
+            editLayout->addWidget(newConfiguration, 11, 1, Qt::AlignRight);
 
             _configurations = new DynamicList;
             _configurations->setToolTip(
@@ -194,15 +210,15 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 _configurations, &DynamicList::updated,
                 this, &ProgramDialog::updateSaveButton
             );
-            editLayout->addWidget(_configurations, 11, 0, 1, 2);
+            editLayout->addWidget(_configurations, 12, 0, 1, 2);
         }
 
-        editLayout->addWidget(new Spacer, 12, 0);
+        editLayout->addWidget(new Spacer, 13, 0, 1, 2);
 
         {
             // Clusters
 
-            editLayout->addWidget(new QLabel("Clusters"), 13, 0);
+            editLayout->addWidget(new QLabel("Clusters"), 14, 0);
 
             QPushButton* newCluster = new AddButton;
             connect(
@@ -216,7 +232,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                     }
                 }
             );
-            editLayout->addWidget(newCluster, 13, 1, Qt::AlignRight);
+            editLayout->addWidget(newCluster, 14, 1, Qt::AlignRight);
 
             _clusters = new DynamicList;
             _clusters->setToolTip("The list of clusters on which the program can be run");
@@ -224,7 +240,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 _clusters, &DynamicList::updated,
                 this, &ProgramDialog::updateSaveButton
             );
-            editLayout->addWidget(_clusters, 14, 0, 1, 2);
+            editLayout->addWidget(_clusters, 15, 0, 1, 2);
         }
 
         layout->addWidget(edit);
@@ -257,6 +273,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
         if (program.delay.has_value()) {
             _delay->setValue(program.delay->count());
         }
+        _description->setText(QString::fromStdString(program.description));
         for (const std::string& tag : program.tags) {
             QLineEdit* t = new QLineEdit(QString::fromStdString(tag));
             _tags->addItem(t);
@@ -270,6 +287,9 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
 
             config->name->setText(QString::fromStdString(configuration.name));
             config->parameters->setText(QString::fromStdString(configuration.parameters));
+            config->description->setText(
+                QString::fromStdString(configuration.description)
+            );
             _configurations->addItem(config);
         }
         for (const std::string& cluster : program.clusters) {
@@ -297,6 +317,7 @@ void ProgramDialog::save() {
     if (_hasDelay->isChecked()) {
         program.delay = std::chrono::milliseconds(_delay->value());
     }
+    program.description = _description->text().toStdString();
     for (QLineEdit* tag : _tags->items<QLineEdit>()) {
         program.tags.push_back(tag->text().toStdString());
     }
@@ -304,6 +325,7 @@ void ProgramDialog::save() {
         Program::Configuration c;
         c.name = configuration->name->text().toStdString();
         c.parameters = configuration->parameters->text().toStdString();
+        c.description = configuration->description->text().toStdString();
         program.configurations.push_back(c);
     }
     for (QLabel* cluster : _clusters->items<QLabel>()) {

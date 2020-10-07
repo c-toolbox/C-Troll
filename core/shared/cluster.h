@@ -54,6 +54,9 @@ struct Cluster {
     /// A flag whether this Cluster is enabled or disabled
     bool isEnabled = true;
 
+    /// A user-friendly description that potentially better identifies the cluster
+    std::string description;
+
     /// A list of all nodes belonging to this cluster
     std::vector<std::string> nodes;
 };

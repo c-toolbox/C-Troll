@@ -84,13 +84,23 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
         _enabled->setToolTip("Determines whether this cluster is currenty used");
         editLayout->addWidget(_enabled, 1, 1);
 
-        editLayout->addWidget(new Spacer, 2, 0);
+        editLayout->addWidget(new QLabel("Description:"), 2, 0);
+        _description = new QLineEdit;
+        _description->setToolTip(
+            "Additional information for the user about this cluster"
+        );
+        _description->setPlaceholderText("optional");
+        editLayout->addWidget(_description, 2, 1);
 
-        editLayout->addWidget(new QLabel("Nodes"), 3, 0);
+
+
+        editLayout->addWidget(new Spacer, 3, 0, 1, 2);
+
+        editLayout->addWidget(new QLabel("Nodes"), 4, 0);
 
         QPushButton* newNode = new AddButton;
         connect(newNode, &QPushButton::clicked, this, &ClusterDialog::addNewNode);
-        editLayout->addWidget(newNode, 3, 1, Qt::AlignRight);
+        editLayout->addWidget(newNode, 4, 1, Qt::AlignRight);
 
         _nodes = new DynamicList;
         _nodes->setToolTip("The nodes that belong to this cluster");
@@ -98,8 +108,8 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
             _nodes, &DynamicList::updated,
             this, &ClusterDialog::updateSaveButton
         );
-        editLayout->addWidget(_nodes, 4, 0, 1, 2);
-        editLayout->setRowStretch(4, 1);
+        editLayout->addWidget(_nodes, 5, 0, 1, 2);
+        editLayout->setRowStretch(5, 1);
 
         layout->addWidget(edit);
     }
@@ -119,6 +129,7 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
 
         _name->setText(QString::fromStdString(cluster.name));
         _enabled->setChecked(cluster.isEnabled);
+        _description->setText(QString::fromStdString(cluster.description));
         for (const std::string& node : cluster.nodes) {
             QLabel* nodeLabel = new QLabel(QString::fromStdString(node));
             _nodes->addItem(nodeLabel);
@@ -138,6 +149,7 @@ void ClusterDialog::save() {
     Cluster cluster;
     cluster.name = _name->text().toStdString();
     cluster.isEnabled = _enabled->isChecked();
+    cluster.description = _description->text().toStdString();
     for (QLabel* node : _nodes->items<QLabel>()) {
         cluster.nodes.push_back(node->text().toStdString());
     }

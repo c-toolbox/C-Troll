@@ -32,42 +32,118 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __EDITOR__CLUSTERDIALOG_H__
-#define __EDITOR__CLUSTERDIALOG_H__
+#include "catch2/catch.hpp"
 
-#include <QDialog>
+#include "node.h"
+#include <json/json.hpp>
 
-#include "dynamiclist.h"
-#include <QWidget>
-#include <string>
-#include <vector>
+TEST_CASE("(Node) Default Ctor", "[Node]") {
+    Node msg;
 
-class QBoxLayout;
-class QCheckBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
 
-class ClusterDialog : public QDialog {
-Q_OBJECT
-public:
-    ClusterDialog(QWidget* parent, std::string clusterPath, std::string nodePath);
+    nlohmann::json j1;
+    to_json(j1, msg);
 
-private slots:
-    void save();
-    void updateSaveButton();
-    void addNewNode();
+    Node msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
 
-private:
-    const std::string _clusterPath;
-    const std::string _nodePath;
+    REQUIRE(j1 == j2);
+}
 
-    QLineEdit* _name = nullptr;
-    QCheckBox* _enabled = nullptr;
-    QLineEdit* _description = nullptr;
-    DynamicList* _nodes = nullptr;
+TEST_CASE("(Node) id", "[Node]") {
+    Node msg;
+    msg.id = 13;
 
-    QPushButton* _saveButton = nullptr;
-};
 
-#endif // __EDITOR__CLUSTERDIALOG_H__
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Node msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}
+
+TEST_CASE("(Node) name", "[Node]") {
+    Node msg;
+    msg.name = "foobar";
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Node msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}
+
+TEST_CASE("(Node) ipAddress", "[Node]") {
+    Node msg;
+    msg.ipAddress = "foobar";
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Node msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}
+
+TEST_CASE("(Node) port", "[Node]") {
+    Node msg;
+    msg.port = 13;
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Node msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}
+
+TEST_CASE("(Node) secret", "[Node]") {
+    Node msg;
+    msg.secret = "foobar";
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Node msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}
+
+TEST_CASE("(Node) description", "[Node]") {
+    Node msg;
+    msg.description = "foobar";
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Node msgDeserialize;
+    from_json(j1, msgDeserialize);
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+
+    REQUIRE(j1 == j2);
+}
