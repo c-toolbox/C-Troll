@@ -452,6 +452,7 @@ void TagsWidget::buttonPressed() {
 
 ProgramsWidget::ProgramsWidget() {
     QBoxLayout* layout = new QHBoxLayout(this);
+    layout->setContentsMargins(10, 2, 2, 2);
     layout->addWidget(createControls());
     layout->addWidget(createPrograms());
     layout->setStretch(1, 5);
@@ -485,6 +486,7 @@ QWidget* ProgramsWidget::createPrograms() {
     QWidget* content = new QWidget;
     area->setWidget(content);
     QBoxLayout* contentLayout = new QVBoxLayout(content);
+    contentLayout->setContentsMargins(5, 5, 5, 5);
     area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     for (const Program* p : data::programs()) {

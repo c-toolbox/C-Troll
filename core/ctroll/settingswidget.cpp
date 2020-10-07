@@ -54,6 +54,7 @@ ColorWidget::ColorWidget(Color color)
     : _color(std::move(color))
 {
     QGridLayout* layout = new QGridLayout;
+    layout->setContentsMargins(5, 5, 5, 5);
 
     _colorButton = new QPushButton;
     applyColor();
@@ -344,6 +345,7 @@ SettingsWidget::SettingsWidget(Configuration configuration,
             area->setWidget(content);
             area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
             _colorLayout = new QGridLayout;
+            _colorLayout->setContentsMargins(5, 5, 5, 5);
             _colorLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
             createColorWidgets();
             content->setLayout(_colorLayout);

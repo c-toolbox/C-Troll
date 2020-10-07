@@ -310,6 +310,7 @@ ClustersWidget::ClustersWidget() {
     QWidget* content = new QWidget;
     setWidget(content);
     QBoxLayout* contentLayout = new QVBoxLayout(content);
+    contentLayout->setContentsMargins(10, 2, 2, 2);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     for (const Cluster* c : data::clusters()) {

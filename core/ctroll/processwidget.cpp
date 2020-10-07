@@ -273,7 +273,8 @@ ProcessesWidget::ProcessesWidget(const std::chrono::milliseconds& processTimeout
     : _processTimeout(processTimeout)
 {
     QBoxLayout* layout = new QVBoxLayout(this);
-    
+    layout->setContentsMargins(10, 2, 2, 2);
+
     QScrollArea* area = new QScrollArea;
     area->setWidgetResizable(true);
     area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
