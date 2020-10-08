@@ -14,17 +14,6 @@ def createDirectory(dir) {
   cmake([installation: 'InSearchPath', arguments: "-E make_directory ${dir}"])
 }
 
-def build() {
-  // createDirectory('build');
-  // dir('build') {
-  //   cmake([
-  //     installation: 'InSearchPath',
-  //     arguments: '..'
-  //   ])
-  // }
-
-}
-
 parallel tools: {
   node('tools') {
     stage('tools/scm') {

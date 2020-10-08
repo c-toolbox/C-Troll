@@ -319,6 +319,19 @@ SettingsWidget::SettingsWidget(Configuration configuration,
         );
         contentLayout->addWidget(_port, 2, 1);
 
+        contentLayout->addWidget(new QLabel("Allow Custom Programs:"), 3, 0);
+        _allowCustomPrograms = new QCheckBox;
+        _allowCustomPrograms->setToolTip(
+            "If this is checked, the REST API allows the execution of custom programs on "
+            "nodes and clusters. Depending on who has access to the REST API, this might "
+            "be a big security hole, so only enable if you are sure about access"
+        );
+        connect(
+            _allowCustomPrograms, &QCheckBox::stateChanged,
+            this, &SettingsWidget::valuesChanged
+        );
+        contentLayout->addWidget(_allowCustomPrograms, 3, 1);
+
         groupLayouts->addWidget(_rest);
     }
 
@@ -449,7 +462,8 @@ void SettingsWidget::valuesChanged() {
         hasRestChanged =
             (_configuration.rest->username != _username->text().toStdString()) ||
             (_configuration.rest->password != _password->text().toStdString()) ||
-            (_configuration.rest->port != _port->value());
+            (_configuration.rest->port != _port->value()) ||
+          (_configuration.rest->allowCustomPrograms != _allowCustomPrograms->isChecked());
     }
 
     const bool hasColorChanged = (_configuration.tagColors != tagColors());
@@ -487,6 +501,7 @@ void SettingsWidget::resetValues() {
         _username->setText(QString::fromStdString(_configuration.rest->username));
         _password->setText(QString::fromStdString(_configuration.rest->password));
         _port->setValue(_configuration.rest->port);
+        _allowCustomPrograms->setChecked(_configuration.rest->allowCustomPrograms);
     }
     else {
         Configuration::Rest re;
@@ -494,6 +509,7 @@ void SettingsWidget::resetValues() {
         _username->setText(QString::fromStdString(re.username));
         _password->setText(QString::fromStdString(re.password));
         _port->setValue(re.port);
+        _allowCustomPrograms->setChecked(false);
     }
 
     for (ColorWidget* cw : _colors) {
@@ -526,6 +542,7 @@ void SettingsWidget::saveValues() {
         re.username = _username->text().toStdString();
         re.password = _password->text().toStdString();
         re.port = _port->value();
+        re.allowCustomPrograms = _allowCustomPrograms->isChecked();
         config.rest = re;
     }
 

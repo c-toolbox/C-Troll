@@ -120,6 +120,12 @@ void ClusterConnectionHandler::initialize() {
 void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
                                                        QAbstractSocket::SocketState state)
 {
+    if (state != QAbstractSocket::SocketState::UnconnectedState &&
+        state != QAbstractSocket::SocketState::ConnectedState)
+    {
+        return;
+    }
+
     const Node* node = data::findNode(nodeId);
     assert(node);
 

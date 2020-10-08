@@ -167,12 +167,18 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     
     // Find specifc value in process map i.e. process
     const auto p = processIt(process);
-    if (p != _processes.end() ) {
+    if (p != _processes.end()) {
         common::ProcessStatusMessage msg;
         msg.processId = p->processId;
         msg.status = toTrayStatus(error);
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
+
+        // The FailedToStart error is handled differently since that is the one that will
+        // not also lead to a `handleFinished` call
+        if (error == QProcess::ProcessError::FailedToStart) {
+            emit closedProcess(*p);
+        }
     }
 }
 
@@ -204,9 +210,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
         emit sendSocketMessage(j);
         
         // Remove this process from the list as we consider it finished
-        ProcessInfo info = *p;
-        _processes.erase(p);
-        emit closedProcess(info);
+        emit closedProcess(*p);
     }
 }
 
@@ -269,10 +273,14 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
         );
         process->start(QString::fromStdString(cmd));
     }
-    process->waitForStarted();
 
-    const auto p = processIt(process);
-    emit startedProcess(*p);
+    // If the executable does not exist, the process might still be in the NotRunning
+    // state. It also will have already triggered the `errorOccurred` message by that time
+    if (process->state() != QProcess::ProcessState::NotRunning) {
+        process->waitForStarted();
+        const auto p = processIt(process);
+        emit startedProcess(*p);
+    }
 }
 
 void ProcessHandler::createAndRunProcessFromCommandMessage(

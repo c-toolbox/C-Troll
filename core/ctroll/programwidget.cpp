@@ -39,6 +39,8 @@
 #include "database.h"
 #include "logging.h"
 #include <QApplication>
+#include <QCheckBox>
+#include <QComboBox>
 #include <QDesktopWidget>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -450,12 +452,126 @@ void TagsWidget::buttonPressed() {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ProgramsWidget::ProgramsWidget() {
+CustomProgramWidget::CustomProgramWidget(QWidget* parent)
+    : QWidget(parent)
+{
     QBoxLayout* layout = new QHBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    QComboBox* targetList = new QComboBox;
+    std::vector<const Cluster*> clusters = data::clusters();
+    if (!clusters.empty()) {
+        targetList->addItem("Clusters", TagSeparator);
+        for (const Cluster* c : clusters) {
+            targetList->addItem(QString::fromStdString(c->name), TagCluster);
+        }
+    }
+
+    std::vector<const Node*> nodes = data::nodes();
+    if (!nodes.empty()) {
+        if (!clusters.empty()) {
+            targetList->addItem("", TagSeparator);
+        }
+        targetList->addItem("Nodes", TagSeparator);
+        targetList->addItem("------------", TagSeparator);
+        for (const Node* n : nodes) {
+            targetList->addItem(QString::fromStdString(n->name), TagNode);
+        }
+    }
+    targetList->setCurrentIndex(-1);
+    layout->addWidget(targetList);
+
+    QLineEdit* executable = new QLineEdit;
+    executable->setPlaceholderText("Executable name");
+    layout->addWidget(executable);
+
+    QLineEdit* workingDirectory = new QLineEdit;
+    workingDirectory->setPlaceholderText("Working directory");
+    layout->addWidget(workingDirectory);
+
+    QLineEdit* parameters = new QLineEdit;
+    parameters->setPlaceholderText("Parameters (optional)");
+    layout->addWidget(parameters);
+
+    layout->addStretch(0);
+
+    QPushButton* run = new QPushButton("Run");
+    run->setObjectName("run");
+    run->setEnabled(false); // since the "Clusters" target will be selected by default
+    connect(
+        run, &QPushButton::clicked,
+        [this, targetList, executable, workingDirectory, parameters]() {
+            const std::string exec = executable->text().toStdString();
+            const std::string workDir = workingDirectory->text().toStdString();
+            const std::string args = parameters->text().toStdString();
+
+            const int tag = targetList->currentData().toInt();
+            assert(tag == TagCluster || tag == TagNode);
+            if (tag == TagCluster) {
+                const std::string cluster = targetList->currentText().toStdString();
+                const Cluster* c = data::findCluster(cluster);
+                assert(c);
+                for (const std::string& node : c->nodes) {
+                    const Node* n = data::findNode(node);
+                    assert(n);
+                    emit startCustomProgram(n->id, exec, workDir, args);
+                }
+            }
+            else {
+                const std::string node = targetList->currentText().toStdString();
+                const Node* n = data::findNode(node);
+                assert(n);
+                emit startCustomProgram(n->id, exec, workDir, args);
+            }
+        }
+    );
+    layout->addWidget(run);
+
+    QPushButton* clear = new QPushButton("Clear");
+    connect(
+        clear, &QPushButton::clicked,
+        [this, targetList, executable, workingDirectory, parameters]() {
+            targetList->setCurrentIndex(-1);
+            executable->setText("");
+            workingDirectory->setText("");
+            parameters->setText("");
+        }
+    );
+    layout->addWidget(clear);
+
+    auto updateRunButton = [this, targetList, executable, run]() {
+        const bool goodTarget = targetList->currentData().toInt() != TagSeparator;
+        const bool goodExec = !executable->text().isEmpty();
+        run->setEnabled(goodTarget && goodExec);
+    };
+
+    connect(
+        targetList, QOverload<int>::of(&QComboBox::currentIndexChanged),
+        updateRunButton
+    );
+    connect(
+        executable, &QLineEdit::textChanged,
+        updateRunButton
+    );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+ProgramsWidget::ProgramsWidget() {
+    QGridLayout* layout = new QGridLayout(this);
     layout->setContentsMargins(10, 2, 2, 2);
-    layout->addWidget(createControls());
-    layout->addWidget(createPrograms());
-    layout->setStretch(1, 5);
+    layout->addWidget(createControls(), 0, 0);
+    layout->addWidget(createPrograms(), 0, 1);
+    layout->setColumnStretch(1, 5);
+
+    CustomProgramWidget* customPrograms = new CustomProgramWidget(this);
+    connect(
+        customPrograms, &CustomProgramWidget::startCustomProgram,
+        this, &ProgramsWidget::startCustomProgram
+    );
+    layout->addWidget(customPrograms, 1, 0, 1, 2);
 }
 
 QWidget* ProgramsWidget::createControls() {
@@ -520,7 +636,7 @@ QWidget* ProgramsWidget::createPrograms() {
         contentLayout->addWidget(w);
     }
 
-    contentLayout->addStretch();
+    contentLayout->addStretch(0);
 
     return area;
 }

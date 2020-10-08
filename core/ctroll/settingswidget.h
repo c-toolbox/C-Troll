@@ -105,10 +105,11 @@ private:
     QCheckBox* _keepOldLog = nullptr;
 
     // REST controls
-    QGroupBox* _rest;
-    QLineEdit* _username;
-    QLineEdit* _password;
-    QSpinBox* _port;
+    QGroupBox* _rest = nullptr;
+    QLineEdit* _username = nullptr;
+    QLineEdit* _password = nullptr;
+    QSpinBox* _port = nullptr;
+    QCheckBox* _allowCustomPrograms = nullptr;
 
     QGridLayout* _colorLayout = nullptr;
     std::vector<ColorWidget*> _colors;

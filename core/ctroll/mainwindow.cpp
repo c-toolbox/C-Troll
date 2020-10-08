@@ -147,6 +147,10 @@ MainWindow::MainWindow() {
         this, &MainWindow::stopProcess
     );
     connect(
+        _programWidget, &programs::ProgramsWidget::startCustomProgram,
+        this, &MainWindow::startCustomProgram
+    );
+    connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
         _programWidget, &programs::ProgramsWidget::connectedStatusChanged
     );
@@ -218,7 +222,8 @@ MainWindow::MainWindow() {
             this,
             _config.rest->port,
             _config.rest->username,
-            _config.rest->password
+            _config.rest->password,
+            _config.rest->allowCustomPrograms
         );
         connect(
             _restHandler, &RestConnectionHandler::startProgram,
@@ -228,6 +233,10 @@ MainWindow::MainWindow() {
             _restHandler, &RestConnectionHandler::stopProgram,
             this, &MainWindow::stopProgram
         );
+        connect(
+            _restHandler, &RestConnectionHandler::startCustomProgram,
+            this, &MainWindow::startCustomProgram
+        );
     }
 }
 
@@ -236,11 +245,18 @@ void MainWindow::log(std::string msg) {
 }
 
 void MainWindow::handleTrayProcess(common::ProcessStatusMessage status) {
+    if (status.processId < 0) {
+        // This will be the case for custom processes, since we manually assign them
+        // negative process ids.  We don't store any process information for them, so
+        // there is nothing to update here
+        return;
+    }
+
     const Process* process = data::findProcess(Process::ID(status.processId));
     if (!process) {
         // This state might happen if C-Troll was restarted while programs were
         // still running on the trays, if we than issue a killall command, we are
-        // handed back a process id that we don't know
+        // handed back a process id that we don't know.
         return;
     }
 
@@ -252,6 +268,20 @@ void MainWindow::handleTrayProcess(common::ProcessStatusMessage status) {
 }
 
 void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
+    // We need to remove all negative process ids as these are custom programs that we
+    // don't really care about
+    status.processes.erase(
+        std::remove_if(
+            status.processes.begin(), status.processes.end(),
+            [](const common::TrayStatusMessage::ProcessInfo& pi) {
+                return pi.processId < 0;
+            }
+        ),
+        status.processes.end()
+    );
+
+    // We need to check this *after* we remove the negative process IDs as we will
+    // otherwise run into issues if the only running process is a custom one
     if (status.processes.empty()) {
         // Nothing to do here
         return;
@@ -262,10 +292,10 @@ void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
     std::sort(
         status.processes.begin(), status.processes.end(),
         [](const common::TrayStatusMessage::ProcessInfo& lhs,
-            const common::TrayStatusMessage::ProcessInfo& rhs)
-    {
-        return lhs.processId < rhs.processId;
-    }
+           const common::TrayStatusMessage::ProcessInfo& rhs)
+        {
+            return lhs.processId < rhs.processId;
+        }
     );
     const int hightestId = status.processes.back().processId;
     Process::setNextIdIfHigher(hightestId + 1);
@@ -367,6 +397,31 @@ void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
             std::this_thread::sleep_for(*p->delay);
         }
     }
+}
+
+void MainWindow::startCustomProgram(Node::ID nodeId, std::string executable,
+                                    std::string workingDir, std::string arguments)
+{
+    static int CustomCommandId = -1;
+
+    const Node* n = data::findNode(nodeId);
+    assert(n);
+
+    common::StartCommandMessage command;
+    command.id = CustomCommandId;
+    command.executable = std::move(executable);
+    command.workingDirectory = std::move(workingDir);
+    command.commandlineParameters = std::move(arguments);
+
+    if (!n->secret.empty()) {
+        command.secret = n->secret;
+    }
+
+    nlohmann::json j = command;
+    _clusterConnectionHandler.sendMessage(*n, j);
+
+    // Decrease the ID for the next custom program
+    --CustomCommandId;
 }
 
 void MainWindow::stopProgram(Cluster::ID clusterId, Program::ID programId,

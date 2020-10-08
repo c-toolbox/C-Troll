@@ -92,11 +92,13 @@ void CentralWidget::newProcess(ProcessHandler::ProcessInfo process) {
 
 void CentralWidget::endedProcess(ProcessHandler::ProcessInfo process) {
     const auto it = _processes.find(process.processId);
-    assert(it != _processes.end());
-
-    it->second->deleteLater();
-    _processesLayout->removeWidget(it->second);
-    _processes.erase(it);
+    // The processId might not exist yet if the process starting fails (for example if the
+    // requested executable does not exist)
+    if (it != _processes.end()) {
+        it->second->deleteLater();
+        _processesLayout->removeWidget(it->second);
+        _processes.erase(it);
+    }
 }
 
 QWidget* CentralWidget::createInfoWidget() {

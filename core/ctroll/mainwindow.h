@@ -67,6 +67,8 @@ private slots:
 private:
     void startProgram(Cluster::ID clusterId, Program::ID programId,
         Program::Configuration::ID configurationId);
+    void startCustomProgram(Node::ID nodeId, std::string executable,
+        std::string workingDir, std::string arguments);
     void stopProgram(Cluster::ID clusterId, Program::ID programId,
         Program::Configuration::ID configurationId) const;
     void startProcess(Process::ID processId) const;

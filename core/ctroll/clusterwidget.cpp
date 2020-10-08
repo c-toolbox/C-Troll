@@ -144,13 +144,14 @@ NodeWidget::NodeWidget(const Node& node)
             box.setInformativeText(QString::fromStdString(text));
             box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             box.setDefaultButton(QMessageBox::Ok);
-            box.exec();
-
-            box.setInformativeText(QString::fromStdString("AGAIN: " + text));
-            const int res = box.exec();
-
+            int res = box.exec();
             if (res == QMessageBox::Ok) {
-                emit killTray(node.id);
+                box.setInformativeText(QString::fromStdString("AGAIN: " + text));
+                res = box.exec();
+
+                if (res == QMessageBox::Ok) {
+                    emit killTray(node.id);
+                }
             }
         }
     );
@@ -249,14 +250,13 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
             box.setInformativeText(QString::fromStdString(text));
             box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             box.setDefaultButton(QMessageBox::Ok);
-            box.exec();
-
-            box.setInformativeText(QString::fromStdString("AGAIN: " + text));
-            const int res = box.exec();
-
-
+            int res = box.exec();
             if (res == QMessageBox::Ok) {
-                emit killTrays(cluster.id);
+                box.setInformativeText(QString::fromStdString("AGAIN: " + text));
+                res = box.exec();
+                if (res == QMessageBox::Ok) {
+                    emit killTrays(cluster.id);
+                }
             }
         }
     );

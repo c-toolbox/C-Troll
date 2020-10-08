@@ -38,21 +38,25 @@
 #include <QObject>
 
 #include "cluster.h"
+#include "node.h"
 #include "program.h"
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <variant>
 
 class RestConnectionHandler : public QObject {
 Q_OBJECT
 public:
     RestConnectionHandler(QObject* parent, int port, std::string user,
-        std::string password);
+        std::string password, bool provideCustomProgramAPI);
 
 signals:
     void startProgram(Cluster::ID clusterId, Program::ID programId,
         Program::Configuration::ID configurationId);
     void stopProgram(Cluster::ID clusterId, Program::ID programId,
         Program::Configuration::ID configurationId);
+    void startCustomProgram(Node::ID nodeId, std::string executable,
+        std::string workingDir, std::string arguments);
 
 private slots:
     void newConnectionEstablished();
@@ -63,6 +67,9 @@ private:
         const Program& program, const Program::Configuration& configuration);
     void handleStopProgramMessage(QTcpSocket& socket, const Cluster& cluster,
         const Program& program, const Program::Configuration& configuration);
+    void handleStartCustomProgramMessage(QTcpSocket& socket,
+        std::variant<const Cluster*, const Node*> target, std::string executable,
+        std::string workingDir, std::string arguments);
     void handleProgramInfoMessage(QTcpSocket& socket);
     void handleClusterInfoMessage(QTcpSocket& socket);
     void handleNodeInfoMessage(QTcpSocket& socket);
@@ -70,6 +77,7 @@ private:
 
     QTcpServer _server;
     std::vector<QTcpSocket*> _sockets;
+    bool _hasCustomProgramAPI = false;
     std::string _secret;
 };
 
