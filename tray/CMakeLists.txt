@@ -79,3 +79,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set_source_files_properties("${CMAKE_BINARY_DIR}/tray/src/moc_processhandler.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
   set_source_files_properties("${CMAKE_BINARY_DIR}/tray/src/moc_sockethandler.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
 endif ()
+
+if(WIN32)
+  foreach(lib Qt5::Widgets Qt5::Core Qt5::Network Qt5::Gui)
+    copy_dynamic_library(${lib} Tray)
+  endforeach()
+  
+  copy_qt_platforms_plugin(Tray)
+endif(WIN32)

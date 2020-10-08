@@ -54,9 +54,10 @@ if (ENABLE_IPO)
   endif ()
 endif ()
 
+include(cmake/build_helper_commands.cmake)
+
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_17)
-
 include (cmake/compiler_warnings.cmake)
 set_project_warnings(project_options)
 
