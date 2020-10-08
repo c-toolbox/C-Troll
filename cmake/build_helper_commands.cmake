@@ -31,80 +31,33 @@
 # DAMAGE.                                                                                #
 #                                                                                        #
 ##########################################################################################
+# Based on Jason Turner's cpp_starter_project                                            #
+##########################################################################################
 
-set(HEADER_FILES
-  clusterconnectionhandler.h
-  clusterwidget.h
-  color.h
-  configuration.h
-  database.h
-  logwidget.h
-  mainwindow.h
-  process.h
-  processwidget.h
-  programwidget.h
-  restconnectionhandler.h
-  settingswidget.h
-  version.h
-)
+# Copies a dynamic library cmake-module to our build target dir
+# library is expected to be a cmake module on the Library::Module with dynamic linkage
+function (copy_dynamic_library library output_target)
+  add_custom_command(
+    TARGET ${output_target} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:${library}>
+    $<TARGET_FILE_DIR:${output_target}>
+  )
+endfunction()
 
-set(SOURCE_FILES
-  clusterconnectionhandler.cpp
-  clusterwidget.cpp
-  color.cpp
-  configuration.cpp
-  database.cpp
-  logwidget.cpp
-  mainwindow.cpp
-  process.cpp
-  processwidget.cpp
-  programwidget.cpp
-  restconnectionhandler.cpp
-  settingswidget.cpp
-)
 
-find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
+# Copy the qt 'platforms'-directory to our build target dir
+function(copy_qt_platforms_plugin output_target)
+  add_custom_command(
+    TARGET ${output_target} PRE_BUILD 
+    COMMAND ${CMAKE_COMMAND} -E make_directory 
+    $<TARGET_FILE_DIR:${output_target}>/platforms
+  )
 
-set(MOC_FILES "")
-qt5_wrap_cpp(
-  MOC_FILES
-  clusterconnectionhandler.h
-  clusterwidget.h
-  mainwindow.h
-  processwidget.h
-  programwidget.h
-  restconnectionhandler.h
-  settingswidget.h
-)
-
-set(RESOURCE_FILES "")
-qt5_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
-
-add_executable(C-Troll WIN32 MACOSX_BUNDLE
-  main.cpp
-  ${SOURCE_FILES}
-  ${HEADER_FILES}
-  ${MOC_FILES}
-  ${RESOURCE_FILES}
-  ${CMAKE_SOURCE_DIR}/resources/icon.rc  
-)
-target_include_directories(C-Troll PUBLIC "src")
-target_link_libraries(C-Troll PUBLIC core-shared Qt5::Core Qt5::Widgets Qt5::Network)
-
-if(WIN32)
-  foreach(lib Qt5::Widgets Qt5::Core Qt5::Network Qt5::Gui)
-    copy_dynamic_library(${lib} C-Troll)
-  endforeach()
-  
-  copy_qt_platforms_plugin(C-Troll)
-endif(WIN32)
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  # These warnings are in Qt 5.12.2 and raised on GCC 9.3.0
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_clusterconnectionhandler.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_clusterwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_processwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_programwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_restconnectionhandler.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_settingswidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-endif ()
+  add_custom_command(
+    TARGET ${output_target} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:Qt5::QWindowsIntegrationPlugin>
+    $<TARGET_FILE_DIR:${output_target}>/platforms/
+  )
+endfunction()
