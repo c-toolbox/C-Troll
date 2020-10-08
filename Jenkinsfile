@@ -38,7 +38,7 @@ linux_gcc: {
     }
     stage('linux-gcc/build(make)') {
       cmakeBuild([
-        buildDir: 'build',
+        buildDir: 'build-make',
         generator: 'Unix Makefiles',
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
@@ -46,7 +46,7 @@ linux_gcc: {
     }
     stage('linux-gcc/build(ninja)') {
       cmakeBuild([
-        buildDir: 'build',
+        buildDir: 'build-ninja',
         generator: 'Ninja',
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
@@ -62,7 +62,7 @@ linux_clang: {
     }
     stage('linux-clang/build(make)') {
       cmakeBuild([
-        buildDir: 'build',
+        buildDir: 'build-make',
         generator: 'Unix Makefiles',
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
@@ -70,7 +70,7 @@ linux_clang: {
     }
     stage('linux-clang/build(ninja)') {
       cmakeBuild([
-        buildDir: 'build',
+        buildDir: 'build-ninja',
         generator: 'Ninja',
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
@@ -86,7 +86,7 @@ windows: {
     }
     stage('windows/build(vs)') {
       cmakeBuild([
-        buildDir: 'build',
+        buildDir: 'build-vs',
         generator: 'Visual Studio 16 2019',
         installation: "InSearchPath",
         steps: [[ args: "-- /nologo /verbosity:minimal /m:4", withCmake: true ]]
@@ -94,7 +94,7 @@ windows: {
     }
     stage('windows/build(ninja)') {
       cmakeBuild([
-        buildDir: 'build',
+        buildDir: 'build-ninja',
         generator: 'Ninja',
         installation: "InSearchPath",
         steps: [[ args: "-- /nologo /verbosity:minimal /m:4", withCmake: true ]]
