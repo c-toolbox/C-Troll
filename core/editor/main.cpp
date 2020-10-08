@@ -93,13 +93,25 @@ int main(int argc, char** argv) {
             std::filesystem::create_directory(config.nodePath);
         }
         else if (clicked == search) {
-            QString s = QFileDialog::getOpenFileName(nullptr, "Select config file");
-            if (s.isEmpty()) {
-                Q_CLEANUP_RESOURCE(resources);
-                return 0;
+            try {
+                QString s = QFileDialog::getOpenFileName(nullptr, "Select config file");
+                if (s.isEmpty()) {
+                    Q_CLEANUP_RESOURCE(resources);
+                    return 0;
+                }
+                QDir::setCurrent(QFileInfo(s).absoluteDir().path());
+                config = common::loadFromJson<BaseConfiguration>(s.toStdString());
             }
-            QDir::setCurrent(QFileInfo(s).absoluteDir().path());
-            config = common::loadFromJson<BaseConfiguration>(s.toStdString());
+            catch (const std::exception& e) {
+                QMessageBox::critical(nullptr, "Exception", e.what());
+                Q_CLEANUP_RESOURCE(resources);
+                return 1;
+            }
+            catch (...) {
+                QMessageBox::critical(nullptr, "Exception", "Unknown error");
+                Q_CLEANUP_RESOURCE(resources);
+                return 1;
+            }
         }
         else if (clicked == cancel) {
             Q_CLEANUP_RESOURCE(resources);
