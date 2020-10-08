@@ -408,7 +408,6 @@ void MainWindow::startCustomProgram(Node::ID nodeId, std::string executable,
     assert(n);
 
     common::StartCommandMessage command;
-    // we set -1 explicitly to signal to the Tray that this is custom
     command.id = CustomCommandId;
     command.executable = std::move(executable);
     command.workingDirectory = std::move(workingDir);
@@ -421,7 +420,7 @@ void MainWindow::startCustomProgram(Node::ID nodeId, std::string executable,
     nlohmann::json j = command;
     _clusterConnectionHandler.sendMessage(*n, j);
 
-    // Decrease the next ID
+    // Decrease the ID for the next custom program
     --CustomCommandId;
 }
 
