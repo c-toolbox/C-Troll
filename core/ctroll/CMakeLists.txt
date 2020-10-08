@@ -91,13 +91,13 @@ add_executable(C-Troll WIN32 MACOSX_BUNDLE
 target_include_directories(C-Troll PUBLIC "src")
 target_link_libraries(C-Troll PUBLIC core-shared Qt5::Core Qt5::Widgets Qt5::Network)
 
-if(WIN32)
-  foreach(lib Qt5::Widgets Qt5::Core Qt5::Network Qt5::Gui)
+if (WIN32)
+  foreach (lib Qt5::Widgets Qt5::Core Qt5::Network Qt5::Gui)
     copy_dynamic_library(${lib} C-Troll)
-  endforeach()
+  endforeach ()
   
   copy_qt_platforms_plugin(C-Troll)
-endif(WIN32)
+endif (WIN32)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # These warnings are in Qt 5.12.2 and raised on GCC 9.3.0

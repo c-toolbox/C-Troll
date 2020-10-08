@@ -84,22 +84,14 @@ windows: {
       deleteDir();
       checkoutGit();
     }
-    stage('windows/build(vs)') {
+    stage('windows/build') {
       cmakeBuild([
-        buildDir: 'build-vs',
+        buildDir: 'build',
         generator: 'Visual Studio 16 2019',
         installation: "InSearchPath",
         steps: [[ args: "-- /nologo /verbosity:minimal /m:4", withCmake: true ]]
       ])
     }
-    stage('windows/build(ninja)') {
-      cmakeBuild([
-        buildDir: 'build-ninja',
-        generator: 'Ninja',
-        installation: "InSearchPath",
-        steps: [[ args: "-- /nologo /verbosity:minimal /m:4", withCmake: true ]]
-      ])
-    }    
   } // node('windows')
 },
 macos: {
