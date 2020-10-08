@@ -444,7 +444,7 @@ void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
         }
     }
     else {
-        const Node* node = std::get<const Node*>(target);
+        const Node* node = std::get<const Node*>(target); 
         assert(node);
 
         Log(
