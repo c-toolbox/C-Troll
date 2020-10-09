@@ -96,9 +96,9 @@ windows: {
       deleteDir();
       checkoutGit();
     }
-    stage('windows/build') {
+    stage('windows/build-msvc') {
       cmakeBuild([
-        buildDir: 'build',
+        buildDir: 'build-msvc',
         generator: 'Visual Studio 16 2019',
         installation: "InSearchPath",
         steps: [[ args: "-- /nologo /m:4", withCmake: true ]]
@@ -106,6 +106,18 @@ windows: {
       recordIssues(
         id: 'windows-msbuild',
         tool: msBuild()
+      )
+    }
+    stage('windows/build-ninja') {
+      bat(
+        script: """
+        call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
+        if not exist build-ninja mkdir build-ninja
+        cd build-ninja
+        cmake -G Ninja ..
+        cmake --build . -- -j 4 all
+        """,
+        label: 'Generate build-scripts with cmake and execute them'
       )
     }
   } // node('windows')
