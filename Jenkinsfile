@@ -22,7 +22,10 @@ parallel tools: {
     }
     stage('tools/cppcheck/create') {
       createDirectory('build');
-      sh 'cppcheck --enable=all --xml --xml-version=2 -i ext common core tray 2> build/cppcheck.xml';
+      sh(
+        script: 'cppcheck --enable=all --xml --xml-version=2 -i ext common core tray 2> build/cppcheck.xml',
+        label: 'Run CPPCheck'
+      )
       recordIssues(
         id: 'tools-cppcheck',
         tool: cppCheck()
@@ -96,7 +99,7 @@ windows: {
       deleteDir();
       checkoutGit();
     }
-    stage('windows/build-msvc') {
+    stage('windows/build(msvc)') {
       cmakeBuild([
         buildDir: 'build-msvc',
         generator: 'Visual Studio 16 2019',
@@ -108,7 +111,7 @@ windows: {
         tool: msBuild()
       )
     }
-    stage('windows/build-ninja') {
+    stage('windows/build(ninja)') {
       bat(
         script: """
         call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
@@ -128,7 +131,7 @@ macos: {
       deleteDir();
       checkoutGit();
     }
-    stage('macos/build-make') {
+    stage('macos/build(make)') {
       cmakeBuild([
         buildDir: 'build-make',
         generator: 'Unix Makefiles',
@@ -143,7 +146,7 @@ macos: {
       //   tool: clang()
       // )
     }
-    stage('macos/build-xcode') {
+    stage('macos/build(xcode)') {
       cmakeBuild([
         buildDir: 'build-xcode',
         generator: 'Xcode',
