@@ -94,7 +94,7 @@ windows: {
         installation: "InSearchPath",
         steps: [[ args: "-- /nologo /m:4", withCmake: true ]]
       ])
-      recordIssues(tools: [msbuild()])
+      recordIssues(tools: [msBuild()])
     }
   } // node('windows')
 },
