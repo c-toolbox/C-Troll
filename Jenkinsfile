@@ -118,7 +118,7 @@ windows: {
         cmake --build .. -- /nologo /m:4
         """,
         label: 'Generate build-scripts with cmake and execute them'
-      ])
+      )
     }
   } // node('windows')
 },
