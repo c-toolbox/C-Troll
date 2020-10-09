@@ -24,7 +24,7 @@ parallel tools: {
       createDirectory('build');
       sh 'cppcheck --enable=all --xml --xml-version=2 -i ext common core tray 2> build/cppcheck.xml';
       recordIssues(
-        id: 'tools-cppcheck'
+        id: 'tools-cppcheck',
         tools: [cppCheck()
       ])
     }
