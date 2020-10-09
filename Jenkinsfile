@@ -53,7 +53,6 @@ linux_gcc: {
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
       ])
-      recordIssues(tools: [gcc()])
     }    
   } // node('linux' && 'gcc')
 },
@@ -70,7 +69,7 @@ linux_clang: {
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
       ])
-      // recordIssues(tools: [cmake(), clang()])
+      recordIssues(tools: [clang()])
     }
     stage('linux-clang/build(ninja)') {
       cmakeBuild([
@@ -79,7 +78,6 @@ linux_clang: {
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
       ])
-      recordIssues(tools: [clang()])
     } 
   } // node('linux' && 'clang')
 },
@@ -94,7 +92,7 @@ windows: {
         buildDir: 'build',
         generator: 'Visual Studio 16 2019',
         installation: "InSearchPath",
-        steps: [[ args: "-- /nologo /verbosity:minimal /m:4", withCmake: true ]]
+        steps: [[ args: "-- /nologo /m:4", withCmake: true ]]
       ])
       recordIssues(tools: [msbuild()])
     }
