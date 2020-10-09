@@ -109,13 +109,16 @@ windows: {
       )
     }
     stage('windows/build-ninja') {
-      bat """set path=%path:\"=%
-        call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64"""
+      bat """
+        call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64"
+        set > build.props
+        """
+      var = readFile("build.props")
       cmakeBuild([
         buildDir: 'build-ninja',
         generator: 'Ninja',
         installation: "InSearchPath",
-        steps: [[ args: "-- /nologo /m:4", withCmake: true ]]
+        steps: [[ args: "-- /nologo /m:4", envVars: var,  withCmake: true ]]
       ])
     }
   } // node('windows')
