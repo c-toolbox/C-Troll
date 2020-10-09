@@ -121,7 +121,7 @@ macos: {
         buildDir: 'build',
         generator: 'Unix Makefiles',
         installation: "InSearchPath",
-        steps: [[ args: "-- -quiet -parallelizeTargets -jobs 4", withCmake: true ]]
+        steps: [[ args: "-- -j4", withCmake: true ]]
       ])
       // For some reason this raises an error
       // ID clang is already used by another action: io.jenkins.plugins.analysis.core.model.ResultAction for Clang (LLVM based)
