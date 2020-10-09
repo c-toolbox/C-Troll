@@ -1,4 +1,4 @@
-![Build Status](http://dev.openspaceproject.com/job/C-Toolbox/job/C-Troll/job/master/badge/icon?style=flat-square)
+![Build Status](http://dev.openspaceproject.com/buildStatus/icon?job=C-Toolbox%2FC-Troll%2Fmaster&style=flat-square)
 
 C-Troll is a suite of applications that make it possible to controls applications in a distributed computing environment, for example a planetarium dome.  It provides the ability for a central _Control_ computer to control a number of _Node_ and start configurable programs on these clusters.
 
