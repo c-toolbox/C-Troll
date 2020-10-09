@@ -1,4 +1,8 @@
 ![Build Status](http://dev.openspaceproject.com/buildStatus/icon?job=C-Toolbox%2FC-Troll%2Fmaster&style=flat-square)
+[![GitHub Issues](https://img.shields.io/github/issues/C-Toolbox/C-Troll.svg)](https://github.com/C-Toolbox/C-Troll/issues)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/c-toolbox/c-troll.svg)](http://isitmaintained.com/project/c-toolbox/c-troll "Average time to resolve an issue")
+[![GitHub Releases](https://img.shields.io/github/release/C-Toolbox/C-Troll.svg)](https://github.com/C-Toolbox/C-Troll/releases)
+[![GitHub Downloads](https://img.shields.io/github/downloads/C-Toolbox/C-Troll/total)](https://github.com/C-Toolbox/C-Troll/releases)
 
 C-Troll is a suite of applications that make it possible to controls applications in a distributed computing environment, for example a planetarium dome.  It provides the ability for a central _Control_ computer to control a number of _Node_ and start configurable programs on these clusters.
 
