@@ -113,12 +113,17 @@ windows: {
         call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
         set > build.props
         """
-      var = readFile("build.props")
+      def props = readProperties(file: "build.props")
+      keys = props.keySet()
+      for (key in keys) {
+        value = props["${key}"]
+        env."${key}" = "${value}"
+      }
       cmakeBuild([
         buildDir: 'build-ninja',
         generator: 'Ninja',
         installation: "InSearchPath",
-        steps: [[ args: "-- /nologo /m:4", envVars: var,  withCmake: true ]]
+        steps: [[ args: "-- /nologo /m:4", withCmake: true ]]
       ])
     }
   } // node('windows')
