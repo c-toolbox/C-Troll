@@ -96,9 +96,9 @@ windows: {
       deleteDir();
       checkoutGit();
     }
-    stage('windows/build') {
+    stage('windows/build-msvc') {
       cmakeBuild([
-        buildDir: 'build',
+        buildDir: 'build-msvc',
         generator: 'Visual Studio 16 2019',
         installation: "InSearchPath",
         steps: [[ args: "-- /nologo /m:4", withCmake: true ]]
@@ -107,6 +107,14 @@ windows: {
         id: 'windows-msbuild',
         tool: msBuild()
       )
+    }
+    stage('windows/build-ninja') {
+      cmakeBuild([
+        buildDir: 'build-ninja',
+        generator: 'Ninja',
+        installation: "InSearchPath",
+        steps: [[ args: "-- /nologo /m:4", withCmake: true ]]
+      ])
     }
   } // node('windows')
 },
