@@ -23,7 +23,10 @@ parallel tools: {
     stage('tools/cppcheck/create') {
       createDirectory('build');
       sh 'cppcheck --enable=all --xml --xml-version=2 -i ext common core tray 2> build/cppcheck.xml';
-      recordIssues(tools: [cppCheck()])
+      recordIssues(
+        id: 'tools-cppcheck'
+        tools: [cppCheck()
+      ])
     }
     // stage('tools/cloc/create') {
     //   createDirectory('build');
@@ -44,7 +47,10 @@ linux_gcc: {
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
       ])
-      recordIssues(tools: [gcc()])
+      recordIssues(
+        id: 'linux-gcc',
+        tools: [gcc()]
+      )
     }
     stage('linux-gcc/build(ninja)') {
       cmakeBuild([
@@ -69,7 +75,10 @@ linux_clang: {
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
       ])
-      recordIssues(tools: [clang()])
+      recordIssues(
+        id: 'linux-clang',
+        tools: [clang()]
+      )
     }
     stage('linux-clang/build(ninja)') {
       cmakeBuild([
@@ -94,7 +103,10 @@ windows: {
         installation: "InSearchPath",
         steps: [[ args: "-- /nologo /m:4", withCmake: true ]]
       ])
-      recordIssues(tools: [msBuild()])
+      recordIssues(
+        id: 'windows-msbuild',
+        tools: [msBuild()]
+      )
     }
   } // node('windows')
 },
@@ -111,7 +123,10 @@ macos: {
         installation: "InSearchPath",
         steps: [[ args: "-- -quiet -parallelizeTargets -jobs 4", withCmake: true ]]
       ])
-      recordIssues(tools: [clang()])
+      recordIssues(
+        id: 'macos-clang',
+        tools: [clang()]
+      )
     }
   } // node('macos')
 }
