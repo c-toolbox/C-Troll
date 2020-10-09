@@ -115,7 +115,7 @@ windows: {
         if not exist build-ninja mkdir build-ninja
         cd build-ninja
         cmake -G Ninja ..
-        cmake --build .. -- /nologo /m:4
+        cmake --build . -- /nologo /m:4
         """,
         label: 'Generate build-scripts with cmake and execute them'
       )
