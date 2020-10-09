@@ -109,6 +109,8 @@ windows: {
       )
     }
     stage('windows/build-ninja') {
+      bat """set path=%path:\"=%
+        call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64"""
       cmakeBuild([
         buildDir: 'build-ninja',
         generator: 'Ninja',
