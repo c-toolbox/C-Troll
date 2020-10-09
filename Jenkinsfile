@@ -109,21 +109,15 @@ windows: {
       )
     }
     stage('windows/build-ninja') {
-      bat """
+      bat(
+        script: """
         call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
-        set > build.props
-        """
-      def props = readProperties(file: "build.props")
-      keys = props.keySet()
-      for (key in keys) {
-        value = props["${key}"]
-        env."${key}" = "${value}"
-      }
-      cmakeBuild([
-        buildDir: 'build-ninja',
-        generator: 'Ninja',
-        installation: "InSearchPath",
-        steps: [[ args: "-- /nologo /m:4", withCmake: true ]]
+        if not exist build-ninja mkdir build-ninja
+        cd build-ninja
+        cmake -G Ninja ..
+        cmake --build .. -- /nologo /m:4
+        """,
+        label: 'Generate build-scripts with cmake and execute them'
       ])
     }
   } // node('windows')
