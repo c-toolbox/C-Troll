@@ -44,7 +44,7 @@ linux_gcc: {
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
       ])
-      recordIssues(tools: [cmake(), gcc()])
+      // recordIssues(tools: [cmake(), gcc()])
     }
     stage('linux-gcc/build(ninja)') {
       cmakeBuild([
@@ -53,7 +53,7 @@ linux_gcc: {
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
       ])
-      recordIssues(tools: [cmake(), gcc()])
+      // recordIssues(tools: [cmake(), gcc()])
     }    
   } // node('linux' && 'gcc')
 },
@@ -70,7 +70,7 @@ linux_clang: {
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
       ])
-      recordIssues(tools: [cmake(), clang()])
+      // recordIssues(tools: [cmake(), clang()])
     }
     stage('linux-clang/build(ninja)') {
       cmakeBuild([
@@ -79,7 +79,7 @@ linux_clang: {
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
       ])
-      recordIssues(tools: [cmake(), clang()])
+      // recordIssues(tools: [cmake(), clang()])
     } 
   } // node('linux' && 'clang')
 },
@@ -96,7 +96,7 @@ windows: {
         installation: "InSearchPath",
         steps: [[ args: "-- /nologo /verbosity:minimal /m:4", withCmake: true ]]
       ])
-      recordIssues(tools: [cmake(), msbuild()])
+      // recordIssues(tools: [cmake(), msbuild()])
     }
   } // node('windows')
 },
@@ -113,7 +113,7 @@ macos: {
         installation: "InSearchPath",
         steps: [[ args: "-- -quiet -parallelizeTargets -jobs 4", withCmake: true ]]
       ])
-      recordIssues(tools: [cmake(), clang()])
+      // recordIssues(tools: [cmake(), clang()])
     }
   } // node('macos')
 }
