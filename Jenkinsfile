@@ -118,7 +118,7 @@ macos: {
     }
     stage('macos/build-make') {
       cmakeBuild([
-        buildDir: 'build',
+        buildDir: 'build-make',
         generator: 'Unix Makefiles',
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
@@ -133,7 +133,7 @@ macos: {
     }
     stage('macos/build-xcode') {
       cmakeBuild([
-        buildDir: 'build',
+        buildDir: 'build-xcode',
         generator: 'Xcode',
         installation: "InSearchPath",
         steps: [[ args: "-- -quiet -parallelizeTargets -jobs 4", withCmake: true ]]
