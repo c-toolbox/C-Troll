@@ -530,7 +530,7 @@ CustomProgramWidget::CustomProgramWidget(QWidget* parent)
     QPushButton* clear = new QPushButton("Clear");
     connect(
         clear, &QPushButton::clicked,
-        [this, targetList, executable, workingDirectory, parameters]() {
+        [targetList, executable, workingDirectory, parameters]() {
             targetList->setCurrentIndex(-1);
             executable->setText("");
             workingDirectory->setText("");
@@ -539,7 +539,7 @@ CustomProgramWidget::CustomProgramWidget(QWidget* parent)
     );
     layout->addWidget(clear);
 
-    auto updateRunButton = [this, targetList, executable, run]() {
+    auto updateRunButton = [targetList, executable, run]() {
         const bool goodTarget = targetList->currentData().toInt() != TagSeparator;
         const bool goodExec = !executable->text().isEmpty();
         run->setEnabled(goodTarget && goodExec);

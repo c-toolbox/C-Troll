@@ -274,7 +274,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
         _shouldForwardMessages->setChecked(program.shouldForwardMessages);
         _hasDelay->setChecked(program.delay.has_value());
         if (program.delay.has_value()) {
-            _delay->setValue(program.delay->count());
+            _delay->setValue(static_cast<int>(program.delay->count()));
         }
         _description->setText(QString::fromStdString(program.description));
         for (const std::string& tag : program.tags) {

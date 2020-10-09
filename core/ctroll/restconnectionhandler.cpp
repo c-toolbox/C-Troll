@@ -72,8 +72,8 @@ namespace {
     void sendResponse(QTcpSocket& socket, Response response,
                       nlohmann::json payload = nlohmann::json())
     {
-        std::string_view code = [](Response response) {
-            switch (response) {
+        std::string_view code = [](Response resp) {
+            switch (resp) {
                 case Response::Ok: return "200 OK";
                 case Response::BadRequest: return "400 Bad Request";
                 case Response::Unauthorized: return "401 Unauthorized";
@@ -83,9 +83,9 @@ namespace {
             }
         }(response);
 
-        std::string status = fmt::format("HTTP/1.1 {}\n", code);
+        const std::string status = fmt::format("HTTP/1.1 {}\n", code);
         if (payload.empty()) {
-            socket.write(status.data(), status.size());
+            socket.write(status.data(), static_cast<qint64>(status.size()));
         }
         else {
             std::string content = payload.dump();
@@ -93,7 +93,7 @@ namespace {
                 "{}Content-Type: application/json\nContent-Length: {}\n\n{}",
                 status, content.size(), content
             );
-            socket.write(message.data(), message.size());
+            socket.write(message.data(), static_cast<qint64>(message.size()));
         }
         socket.close();
     }
@@ -284,8 +284,6 @@ void RestConnectionHandler::handleNewConnection() {
         parseEndpoint(*endpointValue) :
         Endpoint::Unknown;
 
-    const bool hasMethod = method != HttpMethod::Unknown;
-    const bool hasEndpoint = endpoint != Endpoint::Unknown;
     if (method == HttpMethod::Unknown) {
         sendResponse(*socket, Response::BadRequest);
         return;
@@ -344,7 +342,7 @@ void RestConnectionHandler::handleNewConnection() {
 
         const std::string exec = params[KeyExecutable];
         const std::string workingDir = hasWorkingDir ? params[KeyWorkingDir] : "";
-        const std::string arguments = KeyArguments ? params[KeyArguments] : "";
+        const std::string arguments = hasArguments ? params[KeyArguments] : "";
 
 
         if (hasCluster) {

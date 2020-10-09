@@ -99,7 +99,7 @@ void from_json(const nlohmann::json& j, Program& p) {
     }
     else {
         // There always has to be at least a default configuration
-        p.configurations.push_back({ Program::Configuration::ID(0), "Default", "" });
+        p.configurations.push_back({ Program::Configuration::ID(0), "Default", "", "" });
     }
 
     j.at(KeyClusters).get_to(p.clusters);
