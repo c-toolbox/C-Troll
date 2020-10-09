@@ -23,6 +23,10 @@ parallel tools: {
     stage('tools/cppcheck/create') {
       createDirectory('build');
       sh 'cppcheck --enable=all --xml --xml-version=2 -i ext common core tray 2> build/cppcheck.xml';
+      recordIssues(
+        id: 'tools-cppcheck',
+        tool: cppCheck()
+      )
     }
     // stage('tools/cloc/create') {
     //   createDirectory('build');
@@ -43,6 +47,10 @@ linux_gcc: {
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
       ])
+      recordIssues(
+        id: 'linux-gcc',
+        tool: gcc()
+      )
     }
     stage('linux-gcc/build(ninja)') {
       cmakeBuild([
@@ -67,6 +75,10 @@ linux_clang: {
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
       ])
+      recordIssues(
+        id: 'linux-clang',
+        tool: clang()
+      )
     }
     stage('linux-clang/build(ninja)') {
       cmakeBuild([
@@ -75,7 +87,7 @@ linux_clang: {
         installation: "InSearchPath",
         steps: [[ args: "-- -j4", withCmake: true ]]
       ])
-    }    
+    } 
   } // node('linux' && 'clang')
 },
 windows: {
@@ -89,8 +101,12 @@ windows: {
         buildDir: 'build',
         generator: 'Visual Studio 16 2019',
         installation: "InSearchPath",
-        steps: [[ args: "-- /nologo /verbosity:minimal /m:4", withCmake: true ]]
+        steps: [[ args: "-- /nologo /m:4", withCmake: true ]]
       ])
+      recordIssues(
+        id: 'windows-msbuild',
+        tool: msBuild()
+      )
     }
   } // node('windows')
 },
@@ -100,14 +116,28 @@ macos: {
       deleteDir();
       checkoutGit();
     }
-    stage('macos/build') {
+    stage('macos/build-make') {
       cmakeBuild([
-        buildDir: 'build',
+        buildDir: 'build-make',
+        generator: 'Unix Makefiles',
+        installation: "InSearchPath",
+        steps: [[ args: "-- -j4", withCmake: true ]]
+      ])
+      // For some reason this raises an error
+      // ID clang is already used by another action: io.jenkins.plugins.analysis.core.model.ResultAction for Clang (LLVM based)
+      // even though we give it a unique ID
+      // recordIssues(
+      //   id: 'macos-clang',
+      //   tool: clang()
+      // )
+    }
+    stage('macos/build-xcode') {
+      cmakeBuild([
+        buildDir: 'build-xcode',
         generator: 'Xcode',
         installation: "InSearchPath",
         steps: [[ args: "-- -quiet -parallelizeTargets -jobs 4", withCmake: true ]]
       ])
-
     }
   } // node('macos')
 }
