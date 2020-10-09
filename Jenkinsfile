@@ -25,8 +25,8 @@ parallel tools: {
       sh 'cppcheck --enable=all --xml --xml-version=2 -i ext common core tray 2> build/cppcheck.xml';
       recordIssues(
         id: 'tools-cppcheck',
-        tools: [cppCheck()
-      ])
+        tool: cppCheck()
+      )
     }
     // stage('tools/cloc/create') {
     //   createDirectory('build');
@@ -49,7 +49,7 @@ linux_gcc: {
       ])
       recordIssues(
         id: 'linux-gcc',
-        tools: [gcc()]
+        tool: gcc()
       )
     }
     stage('linux-gcc/build(ninja)') {
@@ -77,7 +77,7 @@ linux_clang: {
       ])
       recordIssues(
         id: 'linux-clang',
-        tools: [clang()]
+        tool: clang()
       )
     }
     stage('linux-clang/build(ninja)') {
@@ -105,7 +105,7 @@ windows: {
       ])
       recordIssues(
         id: 'windows-msbuild',
-        tools: [msBuild()]
+        tool: msBuild()
       )
     }
   } // node('windows')
@@ -125,7 +125,7 @@ macos: {
       ])
       recordIssues(
         id: 'macos-clang',
-        tools: [clang()]
+        tool: clang()
       )
     }
   } // node('macos')
