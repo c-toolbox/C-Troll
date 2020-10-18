@@ -89,74 +89,82 @@ void ProcessHandler::newConnection() {
 void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                                          const std::string& peerAddress)
 {
-    const bool validMessage = common::validateMessage(message);
-    if (!validMessage) {
-        return;
-    }
-
-    common::Message msg = message;
-
-    if (common::isValidMessage<common::StartCommandMessage>(message)) {
-        common::StartCommandMessage command = message;
-        Log(fmt::format("Received [{}]", peerAddress), message.dump());
-
-        // Check if the identifier of traycommand already is tied to a process
-        // We don't allow the same id for multiple processes
-        const auto p = processIt(command.id);
-        if (p == _processes.end()) {
-            // Not Found, create and run a process with it
-            createAndRunProcessFromCommandMessage(command);
+    try {
+        const bool validMessage = common::validateMessage(message);
+        if (!validMessage) {
+            return;
         }
-        else {
-            // Found
-            executeProcessWithCommandMessage(p->process, command);
-        }
-    }
-    else if (common::isValidMessage<common::ExitCommandMessage>(message)) {
-        common::ExitCommandMessage command = message;
-        Log(fmt::format("Received [{}]", peerAddress), message.dump());
 
-        // Check if the identifier of traycommand already is tied to a process
-        // We don't allow the same id for multiple processes
-        const auto p = processIt(command.id);
-        if (p == _processes.end()) {
-            handlerErrorOccurred(QProcess::ProcessError::FailedToStart);
-        }
-        else {
-            // Found
-            common::ProcessStatusMessage returnMsg;
-            p->process->terminate();
-            returnMsg.status = common::ProcessStatusMessage::Status::NormalExit;
-            // Find specifc value in process map i.e. process
-            const auto pIt = processIt(p->process);
+        common::Message msg = message;
 
-            if (pIt != _processes.end()) {
-                returnMsg.processId = pIt->processId;
-                nlohmann::json j = returnMsg;
-                emit sendSocketMessage(j);
-                
-                // Remove this process from the list as we consider it finished
-                ProcessInfo info = *pIt;
-                _processes.erase(pIt);
-                emit closedProcess(info);
+        if (common::isValidMessage<common::StartCommandMessage>(message)) {
+            common::StartCommandMessage command = message;
+            Log(fmt::format("Received [{}]", peerAddress), message.dump());
+
+            // Check if the identifier of traycommand already is tied to a process
+            // We don't allow the same id for multiple processes
+            const auto p = processIt(command.id);
+            if (p == _processes.end()) {
+                // Not Found, create and run a process with it
+                createAndRunProcessFromCommandMessage(command);
+            }
+            else {
+                // Found
+                executeProcessWithCommandMessage(p->process, command);
             }
         }
-    }
-    else if (common::isValidMessage<common::KillAllMessage>(message)) {
-        Log(fmt::format("Received [{}]", peerAddress), message.dump());
+        else if (common::isValidMessage<common::ExitCommandMessage>(message)) {
+            common::ExitCommandMessage command = message;
+            Log(fmt::format("Received [{}]", peerAddress), message.dump());
 
-        for (const ProcessInfo& p : _processes) {
-            Log("Killing", fmt::format("Process {}", p.processId));
+            // Check if the identifier of traycommand already is tied to a process
+            // We don't allow the same id for multiple processes
+            const auto p = processIt(command.id);
+            if (p == _processes.end()) {
+                handlerErrorOccurred(QProcess::ProcessError::FailedToStart);
+            }
+            else {
+                // Found
+                common::ProcessStatusMessage returnMsg;
+                p->process->terminate();
+                returnMsg.status = common::ProcessStatusMessage::Status::NormalExit;
+                // Find specifc value in process map i.e. process
+                const auto pIt = processIt(p->process);
 
-            p.process->close();
-            p.process->deleteLater();
+                if (pIt != _processes.end()) {
+                    returnMsg.processId = pIt->processId;
+                    nlohmann::json j = returnMsg;
+                    emit sendSocketMessage(j);
+
+                    // Remove this process from the list as we consider it finished
+                    ProcessInfo info = *pIt;
+                    _processes.erase(pIt);
+                    emit closedProcess(info);
+                }
+            }
         }
-        _processes.clear();
-    }
-    else if (common::isValidMessage<common::KillTrayMessage>(message)) {
-        Log(fmt::format("Received [{}]", peerAddress), message.dump());
+        else if (common::isValidMessage<common::KillAllMessage>(message)) {
+            Log(fmt::format("Received [{}]", peerAddress), message.dump());
 
-        emit closeApplication();
+            for (const ProcessInfo& p : _processes) {
+                Log("Killing", fmt::format("Process {}", p.processId));
+
+                p.process->close();
+                p.process->deleteLater();
+            }
+            _processes.clear();
+        }
+        else if (common::isValidMessage<common::KillTrayMessage>(message)) {
+            Log(fmt::format("Received [{}]", peerAddress), message.dump());
+
+            emit closeApplication();
+        }
+    }
+    catch (const std::exception& e) {
+        Log(
+            "handleSocketMessage",
+            fmt::format("Caught exception {} with message: {}", e.what(), message.dump())
+        );
     }
 }
 

@@ -94,17 +94,31 @@ void JsonSocket::write(nlohmann::json jsonDocument) {
 }
 
 void JsonSocket::readToBuffer() {
-    QByteArray incomingData = _socket->readAll();
+    try {
+        QByteArray incomingData = _socket->readAll();
 
-    if (_crypto.has_value()) {
-        QByteArray payload = _crypto->decryptToByteArray(incomingData);
-        incomingData = payload;
+        if (_crypto.has_value()) {
+            QByteArray payload = _crypto->decryptToByteArray(incomingData);
+            incomingData = payload;
+        }
+
+        _buffer.resize(static_cast<size_t>(incomingData.size()));
+        std::copy(incomingData.begin(), incomingData.end(), _buffer.begin());
+
+        parseBuffer();
     }
+    catch (const std::exception& e) {
+        ::Log("JsonSocket::readToBuffer", "Caught exception when trying to read buffer");
+        ::Log("JsonSocket::readToBuffer (Buffer Size", std::to_string(_buffer.size()));
+        ::Log(
+            "JsonSocket::readToBuffer (Buffer Contents)",
+            std::string(_buffer.begin(), _buffer.end())
+        );
+        ::Log("JsonSocket::readToBuffer (payload size)", std::to_string(_payloadSize));
 
-    _buffer.resize(static_cast<size_t>(incomingData.size()));
-    std::copy(incomingData.begin(), incomingData.end(), _buffer.begin());
-
-    parseBuffer();
+        _payloadSize = -1;
+        _buffer.clear();
+    }
 }
 
 void JsonSocket::parseBuffer() {

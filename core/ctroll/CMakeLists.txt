@@ -89,10 +89,10 @@ add_executable(C-Troll WIN32 MACOSX_BUNDLE
   ${CMAKE_SOURCE_DIR}/resources/icon.rc  
 )
 target_include_directories(C-Troll PUBLIC "src")
-target_link_libraries(C-Troll PUBLIC core-shared Qt5::Core Qt5::Widgets Qt5::Network)
+target_link_libraries(C-Troll PUBLIC core-shared Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
 
 if (WIN32)
-  foreach (lib Qt5::Widgets Qt5::Core Qt5::Network Qt5::Gui)
+  foreach (lib Qt5::Core Qt5::Gui Qt5::Network Qt5::Widgets)
     copy_dynamic_library(${lib} C-Troll)
   endforeach ()
   

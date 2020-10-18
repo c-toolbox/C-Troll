@@ -91,7 +91,13 @@ void ClusterConnectionHandler::initialize() {
                     handleMessage(message, id);
                 }
                 catch (const std::exception& e) {
-                    Log("Message Decode", e.what());
+                    Log(
+                        "ClusterConnectionHandler::initialize",
+                        fmt::format(
+                            "Caught exception {} when receiving message {}",
+                            e.what(), message.dump()
+                        )
+                    );
                 }
             }
         );
