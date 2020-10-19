@@ -40,7 +40,7 @@ function (set_project_warnings project_name)
   set(MSVC_WARNINGS
     /MP
     /ZI
-    /std:c++latest
+    /std:c++17
     /permissive-
     /W4 # Baseline reasonable warnings
     /w14242 # 'identfier': conversion from 'type1' to 'type1', possible loss of data
