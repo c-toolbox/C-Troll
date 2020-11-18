@@ -45,7 +45,6 @@ set(HEADER_FILES
   programwidget.h
   restconnectionhandler.h
   settingswidget.h
-  version.h
 )
 
 set(SOURCE_FILES

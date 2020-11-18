@@ -38,6 +38,7 @@ set(HEADER_FILES
   node.h
   program.h
   typedid.h
+  version.h
 )
 
 set(SOURCE_FILES

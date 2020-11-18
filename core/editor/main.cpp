@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
                 QString s = QFileDialog::getOpenFileName(nullptr, "Select config file");
                 if (s.isEmpty()) {
                     Q_CLEANUP_RESOURCE(resources);
-                    return 0;
+                    return EXIT_SUCCESS;
                 }
                 QDir::setCurrent(QFileInfo(s).absoluteDir().path());
                 config = common::loadFromJson<BaseConfiguration>(s.toStdString());
@@ -105,21 +105,54 @@ int main(int argc, char** argv) {
             catch (const std::exception& e) {
                 QMessageBox::critical(nullptr, "Exception", e.what());
                 Q_CLEANUP_RESOURCE(resources);
-                return 1;
+                return EXIT_FAILURE;
             }
             catch (...) {
                 QMessageBox::critical(nullptr, "Exception", "Unknown error");
                 Q_CLEANUP_RESOURCE(resources);
-                return 1;
+                return EXIT_FAILURE;
             }
         }
         else if (clicked == cancel) {
             Q_CLEANUP_RESOURCE(resources);
-            return 0;
+            return EXIT_SUCCESS;
         }
         else {
             throw std::logic_error("Unknown if/else statement case");
         }
+    }
+    if (!std::filesystem::exists(config.applicationPath)) {
+        QMessageBox::critical(
+            nullptr,
+            "Directory missing",
+            QString::fromStdString(fmt::format(
+                "Could not find application path directory '{}'", config.applicationPath
+            ))
+        );
+        Q_CLEANUP_RESOURCE(resources);
+        return EXIT_SUCCESS;
+    }
+    if (!std::filesystem::exists(config.clusterPath)) {
+        QMessageBox::critical(
+            nullptr,
+            "Directory missing",
+            QString::fromStdString(fmt::format(
+                "Could not find cluster path directory '{}'", config.clusterPath
+            ))
+        );
+        Q_CLEANUP_RESOURCE(resources);
+        return EXIT_SUCCESS;
+    }
+    if (!std::filesystem::exists(config.nodePath)) {
+        QMessageBox::critical(
+            nullptr,
+            "Directory missing",
+            QString::fromStdString(fmt::format(
+                "Could not find node path directory '{}'", config.nodePath
+            ))
+        );
+        Q_CLEANUP_RESOURCE(resources);
+        return EXIT_SUCCESS;
     }
 
     MainWindow mw(config.applicationPath, config.clusterPath, config.nodePath);
@@ -136,5 +169,5 @@ int main(int argc, char** argv) {
     }
 
     Q_CLEANUP_RESOURCE(resources);
-    return 0;
+    return EXIT_SUCCESS;
 }

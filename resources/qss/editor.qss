@@ -19,6 +19,10 @@ QToolTip {
   font-size: 10pt;
 }
 
+QLabel#version {
+  font-size: 8pt;
+}
+
 MainWindow {
   min-width: 40em;
   min-height: 20em;

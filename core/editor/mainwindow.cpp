@@ -37,6 +37,7 @@
 #include "clusterdialog.h"
 #include "nodedialog.h"
 #include "programdialog.h"
+#include "version.h"
 #include <QFileDialog>
 #include <QFileSystemModel>
 #include <QGridLayout>
@@ -44,6 +45,7 @@
 #include <QPushButton>
 #include <QTreeView>
 #include <QWidget>
+#include <fmt/format.h>
 #include <functional>
 
 namespace {
@@ -157,6 +159,14 @@ MainWindow::MainWindow(std::string applicationPath, std::string clusterPath,
             }
         );
         layout->addWidget(newApplication, 2, 2);
+    }
+
+    {
+        QLabel* version = new QLabel(QString::fromStdString(
+            fmt::format("Version: {}", Version))
+        );
+        version->setObjectName("version");
+        layout->addWidget(version, 3, 0, 1, 3, Qt::AlignLeft);
     }
 }
 

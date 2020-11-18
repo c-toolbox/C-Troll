@@ -37,6 +37,7 @@
 
 #include <json/json.hpp>
 
+// @VER2:  Change the names of the folders to either all plural or all singular
 struct BaseConfiguration {
     static constexpr const char* ConfigurationFile = "config.json";
 
