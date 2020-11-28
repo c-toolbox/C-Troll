@@ -214,7 +214,7 @@ ProcessesWidget  QLabel#status[state="Failed To Start"] {
 }
 
 ProcessesWidget  QPushButton#kill {
-  background-color: #7e771c;
+  background-color: #801512;
   color: #dddddd;
 }
 
@@ -223,7 +223,7 @@ ProcessesWidget  QPushButton#kill:disabled {
 }
 
 ProcessesWidget  QPushButton#removeprocess {
-  background-color: #801512;
+  background-color: #7e771c;
   color: #dddddd;
 }
 
