@@ -108,12 +108,22 @@ void from_json(const nlohmann::json& j, Program& p) {
 void to_json(nlohmann::json& j, const Program& p) {
     j[KeyName] = p.name;
     j[KeyExecutable] = p.executable;
-    j[KeyCommandlineParameters] = p.commandlineParameters;
-    j[KeyWorkingDirectory] = p.workingDirectory;
-    j[KeyTags] = p.tags;
-    j[KeyDescription] = p.description;
+    if (!p.commandlineParameters.empty()) {
+        j[KeyCommandlineParameters] = p.commandlineParameters;
+    }
+    if (!p.workingDirectory.empty()) {
+        j[KeyWorkingDirectory] = p.workingDirectory;
+    }
+    if (!p.tags.empty()) {
+        j[KeyTags] = p.tags;
+    }
+    if (!p.description.empty()) {
+        j[KeyDescription] = p.description;
+    }
     j[KeySendConsole] = p.shouldForwardMessages;
-    j[KeyDelay] = p.delay->count();
+    if (p.delay.has_value()) {
+        j[KeyDelay] = p.delay->count();
+    }
     j[KeyConfigurations] = p.configurations;
     j[KeyClusters] = p.clusters;
 }
