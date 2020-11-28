@@ -69,6 +69,7 @@ void to_json(nlohmann::json& j, const Configuration& c) {
     }
 
     if (c.rest.has_value()) {
+        j[KeyRest] = nlohmann::json::object();
         if (!c.rest->username.empty()) {
             j[KeyRest][KeyRestUsername] = c.rest->username;
         }
