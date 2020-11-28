@@ -200,6 +200,9 @@ void ProcessWidget::removeFromLayout(QGridLayout* layout) {
 
 QWidget* ProcessWidget::createMessageContainer() {
     QWidget* container = new QWidget;
+    std::string title = fmt::format("C-Troll | Process: {}", _processId.v);
+    container->setWindowTitle(QString::fromStdString(title));
+
     container->setMinimumSize(1200, 500);
     QVBoxLayout* containerLayout = new QVBoxLayout(container);
 
