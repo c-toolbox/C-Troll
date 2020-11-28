@@ -43,6 +43,7 @@
 #include "processstatusmessage.h"
 #include "traystatusmessage.h"
 #include <fmt/format.h>
+#include <filesystem>
 #include <functional>
 
 namespace {
@@ -269,6 +270,11 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
 
     if (!command.workingDirectory.empty()) {
         process->setWorkingDirectory(QString::fromStdString(command.workingDirectory));
+    }
+    else {
+        std::filesystem::path executablePath = std::filesystem::path(command.executable);
+        std::string workingDirectory = executablePath.parent_path().string();
+        process->setWorkingDirectory(QString::fromStdString(workingDirectory));
     }
         
     if (command.commandlineParameters.empty()) {
