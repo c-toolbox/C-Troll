@@ -41,11 +41,11 @@ parallel tools: {
 linux_gcc_make: { // linux-gcc/build(make)
   if (env.USE_BUILD_OS_LINUX == 'true') {
     node('linux' && 'gcc') {
-      stage('linux-gcc/scm') {
+      stage('linux-gcc-make/scm') {
         deleteDir();
         checkoutGit();
       }
-      stage('linux-gcc/build(make)') {
+      stage('linux-gcc-make/build') {
         cmakeBuild([
           buildDir: 'build-make',
           generator: 'Unix Makefiles',
@@ -53,7 +53,7 @@ linux_gcc_make: { // linux-gcc/build(make)
           steps: [[ args: "-- -j4", withCmake: true ]]
         ])
         recordIssues(
-          id: 'linux-gcc',
+          id: 'linux-gcc-make',
           tool: gcc()
         )
       }
@@ -64,11 +64,11 @@ linux_gcc_make: { // linux-gcc/build(make)
 linux_gcc_ninja: { // linux-gcc/build(ninja)
   if (env.USE_BUILD_OS_LINUX == 'true') {
     node('linux' && 'gcc') {
-      stage('linux-gcc/scm') {
+      stage('linux-gcc-ninja/scm') {
         deleteDir();
         checkoutGit();
       }
-      stage('linux-gcc/build(ninja)') {
+      stage('linux-gcc-ninja/build') {
         cmakeBuild([
           buildDir: 'build-ninja',
           generator: 'Ninja',
@@ -83,11 +83,11 @@ linux_gcc_ninja: { // linux-gcc/build(ninja)
 linux_clang_make: { // linux-clang/build(make)
   if (env.USE_BUILD_OS_LINUX == 'true') {
     node('linux' && 'clang') {
-      stage('linux-clang/scm') {
+      stage('linux-clang-make/scm') {
         deleteDir();
         checkoutGit();
       }
-      stage('linux-clang/build(make)') {
+      stage('linux-clang-make/build') {
         cmakeBuild([
           buildDir: 'build-make',
           generator: 'Unix Makefiles',
@@ -95,7 +95,7 @@ linux_clang_make: { // linux-clang/build(make)
           steps: [[ args: "-- -j4", withCmake: true ]]
         ])
         recordIssues(
-          id: 'linux-clang',
+          id: 'linux-clang-make',
           tool: clang()
         )
       }
@@ -106,11 +106,11 @@ linux_clang_make: { // linux-clang/build(make)
 linux_clang_ninja: { // linux-clang/build(ninja)
   if (env.USE_BUILD_OS_LINUX == 'true') {
     node('linux' && 'clang') {
-      stage('linux-clang/scm') {
+      stage('linux-clang-ninja/scm') {
         deleteDir();
         checkoutGit();
       }
-      stage('linux-clang/build(ninja)') {
+      stage('linux-clang-ninja/build') {
         cmakeBuild([
           buildDir: 'build-ninja',
           generator: 'Ninja',
@@ -125,11 +125,11 @@ linux_clang_ninja: { // linux-clang/build(ninja)
 windows_msvc: { // windows/build(msvc)
   if (env.USE_BUILD_OS_WINDOWS == 'true') {
     node('windows') {
-      stage('windows/scm') {
+      stage('windows-msvc/scm') {
         deleteDir();
         checkoutGit();
       }
-      stage('windows/build(msvc)') {
+      stage('windows-msvc/build') {
         cmakeBuild([
           buildDir: 'build-msvc',
           generator: 'Visual Studio 16 2019',
@@ -137,7 +137,7 @@ windows_msvc: { // windows/build(msvc)
           steps: [[ args: "-- /nologo /m:4", withCmake: true ]]
         ])
         recordIssues(
-          id: 'windows-msbuild',
+          id: 'windows-msvc',
           tool: msBuild()
         )
       }
@@ -148,11 +148,11 @@ windows_msvc: { // windows/build(msvc)
 windows_ninja: { // windows/build(msvc)
   if (env.USE_BUILD_OS_WINDOWS == 'true') {
     node('windows') {
-      stage('windows/scm') {
+      stage('windows-ninja/scm') {
         deleteDir();
         checkoutGit();
       }
-      stage('windows/build(ninja)') {
+      stage('windows-ninja/build') {
         bat(
           script: """
           call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
@@ -171,11 +171,11 @@ windows_ninja: { // windows/build(msvc)
 macos_make: { // macos/build(make)
   if (env.USE_BUILD_OS_MACOS == 'true') {
     node('macos') {
-      stage('macos/scm') {
+      stage('macos-make/scm') {
         deleteDir();
         checkoutGit();
       }
-      stage('macos/build(make)') {
+      stage('macos-make/build') {
         cmakeBuild([
           buildDir: 'build-make',
           generator: 'Unix Makefiles',
@@ -197,11 +197,11 @@ macos_make: { // macos/build(make)
 macos_ninja: { // macos/build(make)
   if (env.USE_BUILD_OS_MACOS == 'true') {
     node('macos') {
-      stage('macos/scm') {
+      stage('macos-xcode/scm') {
         deleteDir();
         checkoutGit();
       }
-      stage('macos/build(xcode)') {
+      stage('macos-xcode/build') {
         cmakeBuild([
           buildDir: 'build-xcode',
           generator: 'Xcode',
