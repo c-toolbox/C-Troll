@@ -38,7 +38,7 @@ parallel tools: {
     cleanWs()
   } // node('tools')
 },
-linux_gcc: {
+linux_gcc_make: { // linux-gcc/build(make)
   if (env.USE_BUILD_OS_LINUX == 'true') {
     node('linux' && 'gcc') {
       stage('linux-gcc/scm') {
@@ -57,6 +57,17 @@ linux_gcc: {
           tool: gcc()
         )
       }
+      cleanWs()
+    } // node('linux' && 'gcc')
+  }
+},
+linux_gcc_ninja: { // linux-gcc/build(ninja)
+  if (env.USE_BUILD_OS_LINUX == 'true') {
+    node('linux' && 'gcc') {
+      stage('linux-gcc/scm') {
+        deleteDir();
+        checkoutGit();
+      }
       stage('linux-gcc/build(ninja)') {
         cmakeBuild([
           buildDir: 'build-ninja',
@@ -69,7 +80,7 @@ linux_gcc: {
     } // node('linux' && 'gcc')
   }
 },
-linux_clang: {
+linux_clang_make: { // linux-clang/build(make)
   if (env.USE_BUILD_OS_LINUX == 'true') {
     node('linux' && 'clang') {
       stage('linux-clang/scm') {
@@ -88,6 +99,17 @@ linux_clang: {
           tool: clang()
         )
       }
+      cleanWs()
+    } // node('linux' && 'clang')
+  }
+},
+linux_clang_ninja: { // linux-clang/build(ninja)
+  if (env.USE_BUILD_OS_LINUX == 'true') {
+    node('linux' && 'clang') {
+      stage('linux-clang/scm') {
+        deleteDir();
+        checkoutGit();
+      }
       stage('linux-clang/build(ninja)') {
         cmakeBuild([
           buildDir: 'build-ninja',
@@ -100,7 +122,7 @@ linux_clang: {
     } // node('linux' && 'clang')
   }
 },
-windows: {
+windows_msvc: { // windows/build(msvc)
   if (env.USE_BUILD_OS_WINDOWS == 'true') {
     node('windows') {
       stage('windows/scm') {
@@ -119,6 +141,17 @@ windows: {
           tool: msBuild()
         )
       }
+      cleanWs()
+    } // node('windows')
+  }
+},
+windows_ninja: { // windows/build(msvc)
+  if (env.USE_BUILD_OS_WINDOWS == 'true') {
+    node('windows') {
+      stage('windows/scm') {
+        deleteDir();
+        checkoutGit();
+      }
       stage('windows/build(ninja)') {
         bat(
           script: """
@@ -135,7 +168,7 @@ windows: {
     } // node('windows')
   }
 },
-macos: {
+macos_make: { // macos/build(make)
   if (env.USE_BUILD_OS_MACOS == 'true') {
     node('macos') {
       stage('macos/scm') {
@@ -156,6 +189,17 @@ macos: {
         //   id: 'macos-clang',
         //   tool: clang()
         // )
+      }
+      cleanWs()
+    } // node('macos')
+  }
+},
+macos_ninja: { // macos/build(make)
+  if (env.USE_BUILD_OS_MACOS == 'true') {
+    node('macos') {
+      stage('macos/scm') {
+        deleteDir();
+        checkoutGit();
       }
       stage('macos/build(xcode)') {
         cmakeBuild([
