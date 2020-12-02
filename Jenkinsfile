@@ -194,7 +194,7 @@ macos_make: { // macos/build(make)
     } // node('macos')
   }
 },
-macos_ninja: { // macos/build(make)
+macos_xcode: { // macos_xcode
   if (env.USE_BUILD_OS_MACOS == 'true') {
     node('macos') {
       stage('macos-xcode/scm') {
