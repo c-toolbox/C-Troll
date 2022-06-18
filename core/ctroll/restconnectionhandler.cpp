@@ -36,6 +36,7 @@
 
 #include "database.h"
 #include "logging.h"
+#include <QRegularExpression>
 #include <QTcpSocket>
 #include <fmt/format.h>
 #include <json/json.hpp>
@@ -261,7 +262,8 @@ void RestConnectionHandler::handleNewConnection() {
     assert(socket);
     assert(std::find(_sockets.begin(), _sockets.end(), socket) != _sockets.end());
 
-    QStringList tokens = QString(socket->readAll()).split(QRegExp("[ \r\n][ \r\n]*"));
+    QString content = socket->readAll();
+    QStringList tokens = content.split(QRegularExpression("[ \r\n][ \r\n]*"));
     if (tokens.empty()) {
         sendResponse(*socket, Response::BadRequest);
         return;

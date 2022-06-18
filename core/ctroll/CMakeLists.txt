@@ -62,10 +62,10 @@ set(SOURCE_FILES
   settingswidget.cpp
 )
 
-find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Network Widgets REQUIRED)
 
 set(MOC_FILES "")
-qt5_wrap_cpp(
+qt_wrap_cpp(
   MOC_FILES
   clusterconnectionhandler.h
   clusterwidget.h
@@ -77,7 +77,7 @@ qt5_wrap_cpp(
 )
 
 set(RESOURCE_FILES "")
-qt5_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
+qt_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
 
 add_executable(C-Troll WIN32 MACOSX_BUNDLE
   main.cpp
@@ -88,22 +88,15 @@ add_executable(C-Troll WIN32 MACOSX_BUNDLE
   ${CMAKE_SOURCE_DIR}/resources/icon.rc  
 )
 target_include_directories(C-Troll PUBLIC "src")
-target_link_libraries(C-Troll PUBLIC core-shared Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
+target_link_libraries(C-Troll PUBLIC core-shared Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
+qt_disable_unicode_defines(C-Troll)
 
 if (WIN32)
-  foreach (lib Qt5::Core Qt5::Gui Qt5::Network Qt5::Widgets)
+  foreach (lib Qt6::Core Qt6::Gui Qt6::Network Qt6::Widgets)
     copy_dynamic_library(${lib} C-Troll)
   endforeach ()
   
   copy_qt_platforms_plugin(C-Troll)
 endif (WIN32)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  # These warnings are in Qt 5.12.2 and raised on GCC 9.3.0
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_clusterconnectionhandler.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_clusterwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_processwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_programwidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_restconnectionhandler.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-  set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_settingswidget.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-endif ()
+qt_finalize_target(C-Troll)

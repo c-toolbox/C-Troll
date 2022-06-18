@@ -44,7 +44,6 @@
 #include "restconnectionhandler.h"
 #include "settingswidget.h"
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QMessageBox>
 #include <QTabBar>
 #include <QTimer>
@@ -75,7 +74,7 @@ MainWindow::MainWindow() {
     // Set up the container widgets
     QWidget* center = new QWidget;
     QBoxLayout* layout = new QVBoxLayout(center);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     setCentralWidget(center);
 
     QTabWidget* tabWidget = new QTabWidget;

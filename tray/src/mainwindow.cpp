@@ -39,7 +39,6 @@
 #include "version.h"
 #include <fmt/format.h>
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>

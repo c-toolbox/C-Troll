@@ -66,10 +66,8 @@ set(SOURCE_FILES
   src/traystatusmessage.cpp
 )
 
-find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
-
 set(MOC_FILES "")
-qt5_wrap_cpp(
+qt_wrap_cpp(
   MOC_FILES
   include/jsonsocket.h
 )
@@ -85,9 +83,6 @@ add_subdirectory(ext/fmt)
 
 target_include_directories(common PUBLIC "include")
 target_include_directories(common SYSTEM PUBLIC "ext" "ext/fmt/include")
-target_link_libraries(common PUBLIC project_options fmt Qt5::Core Qt5::Widgets Qt5::Network simplecrypt)
+target_link_libraries(common PUBLIC project_options fmt Qt::Core Qt::Widgets Qt::Network simplecrypt)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  # These warnings are in Qt 5.12.2 and raised on GCC 9.3.0
-  set_source_files_properties("${CMAKE_BINARY_DIR}/common/include/moc_jsonsocket.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-endif ()
+qt_disable_unicode_defines(common)

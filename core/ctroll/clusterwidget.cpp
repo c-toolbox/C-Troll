@@ -37,7 +37,6 @@
 #include "database.h"
 #include "node.h"
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QGridLayout>
 #include <QLabel>
 #include <QMessageBox>
@@ -68,7 +67,7 @@ void ConnectionWidget::paintEvent(QPaintEvent*) {
     // Since this is a pretty empty widget, we need to overwrite this function:
     // https://doc.qt.io/qt-5/stylesheet-reference.html
     QStyleOption opt;
-    opt.init(this);
+    opt.initFrom(this);
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

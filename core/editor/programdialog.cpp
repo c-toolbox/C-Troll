@@ -55,7 +55,6 @@
 
 ProgramDialog::Configuration::Configuration() {
     QBoxLayout* layout = new QHBoxLayout(this);
-    layout->setMargin(0);
     layout->setContentsMargins(0, 0, 0, 0);
     name = new QLineEdit;
     name->setToolTip("The user-facing name of this configuration");
@@ -91,7 +90,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     {
         QWidget* edit = new QWidget;
         QGridLayout* editLayout = new QGridLayout(edit);
-        editLayout->setMargin(0);
+        editLayout->setContentsMargins(0, 0, 0, 0);
 
         editLayout->addWidget(new QLabel("Name:"), 0, 0);
         _name = new QLineEdit;
@@ -131,7 +130,6 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
         editLayout->addWidget(new QLabel("Delay"), 5, 0);
         QWidget* delayContainer = new QWidget;
         QBoxLayout* delayLayout = new QHBoxLayout(delayContainer);
-        delayLayout->setMargin(0);
         delayLayout->setContentsMargins(0, 0, 0, 0);
         delayLayout->setSpacing(0);
         _hasDelay = new QCheckBox("Enabled");

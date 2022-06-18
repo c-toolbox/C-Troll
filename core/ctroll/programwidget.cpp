@@ -41,7 +41,6 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
-#include <QDesktopWidget>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -309,7 +308,7 @@ void ClusterWidget::processUpdated(Process::ID processId) {
 
 TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
     QBoxLayout* layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     for (const std::string& tag : tags) {
         QWidget* w = new QWidget;
@@ -577,7 +576,7 @@ ProgramsWidget::ProgramsWidget() {
 QWidget* ProgramsWidget::createControls() {
     QWidget* controls = new QWidget;
     QBoxLayout* layout = new QVBoxLayout(controls);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     QLineEdit* search = new QLineEdit;
     search->setPlaceholderText("Search...");

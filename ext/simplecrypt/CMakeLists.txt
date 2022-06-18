@@ -32,12 +32,12 @@
 #                                                                                        #
 ##########################################################################################
 
-find_package(Qt5 COMPONENTS Core REQUIRED)
+find_package(Qt6 COMPONENTS Core REQUIRED)
 
 add_library(simplecrypt simplecrypt.cpp)
 target_include_directories(simplecrypt SYSTEM PUBLIC "include")
 target_include_directories(simplecrypt SYSTEM PRIVATE "include/simplecrypt")
-target_link_libraries(simplecrypt PUBLIC Qt5::Core)
+target_link_libraries(simplecrypt PUBLIC Qt6::Core)
 
 set(MSVC_WARNINGS
   /MP
@@ -62,3 +62,5 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 else ()
   target_compile_options(simplecrypt PRIVATE ${GCC_WARNINGS})
 endif ()
+
+qt_finalize_target(simplecrypt)

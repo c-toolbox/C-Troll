@@ -42,7 +42,7 @@
 
 CentralWidget::CentralWidget() {
     QLayout* layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     _messageBox = new QTextEdit;
     layout->addWidget(_messageBox);

@@ -51,13 +51,37 @@ function(copy_qt_platforms_plugin output_target)
   add_custom_command(
     TARGET ${output_target} PRE_BUILD 
     COMMAND ${CMAKE_COMMAND} -E make_directory 
-    $<TARGET_FILE_DIR:${output_target}>/platforms
+    $<TARGET_FILE_DIR:${output_target}>/plugins
+  )
+
+  add_custom_command(
+    TARGET ${output_target} PRE_BUILD 
+    COMMAND ${CMAKE_COMMAND} -E make_directory 
+    $<TARGET_FILE_DIR:${output_target}>/plugins/platforms
+  )
+
+  
+  set(PLUGIN_DIR "${Qt6_DIR}/../../../plugins")
+  set(PLATFORM_FILE "$<IF:$<CONFIG:Debug>,qwindowsd.dll,qwindows.dll>")
+  set(STYLE_FILE "$<IF:$<CONFIG:Debug>,qwindowsvistastyled.dll,qwindowsvistastyle.dll>")
+
+  add_custom_command(
+    TARGET ${output_target} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PLUGIN_DIR}/platforms/${PLATFORM_FILE}"
+    $<TARGET_FILE_DIR:${output_target}>/plugins/platforms/
+  )
+
+  add_custom_command(
+    TARGET ${output_target} PRE_BUILD 
+    COMMAND ${CMAKE_COMMAND} -E make_directory 
+    $<TARGET_FILE_DIR:${output_target}>/plugins/styles
   )
 
   add_custom_command(
     TARGET ${output_target} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    $<TARGET_FILE:Qt5::QWindowsIntegrationPlugin>
-    $<TARGET_FILE_DIR:${output_target}>/platforms/
+    "${PLUGIN_DIR}/styles/${STYLE_FILE}"
+    $<TARGET_FILE_DIR:${output_target}>/plugins/styles/
   )
 endfunction()

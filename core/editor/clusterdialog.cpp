@@ -71,7 +71,7 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
     {
         QWidget* edit = new QWidget;
         QGridLayout* editLayout = new QGridLayout(edit);
-        editLayout->setMargin(0);
+        editLayout->setContentsMargins(0, 0, 0, 0);
 
         editLayout->addWidget(new QLabel("Name:"), 0, 0);
         _name = new QLineEdit;

@@ -51,7 +51,6 @@ DynamicList::DynamicList(QWidget* parent)
 
     QBoxLayout* layout = new QVBoxLayout(container);
     layout->setAlignment(Qt::AlignTop);
-    layout->setMargin(0);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 }

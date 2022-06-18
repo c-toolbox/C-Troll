@@ -54,10 +54,8 @@ set(SOURCE_FILES
   removebutton.cpp
 )
 
-find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
-
 set(MOC_FILES "")
-qt5_wrap_cpp(
+qt_wrap_cpp(
   MOC_FILES
   addbutton.h
   clusterdialog.h
@@ -70,7 +68,7 @@ qt5_wrap_cpp(
 )
 
 set(RESOURCE_FILES "")
-qt5_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
+qt_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
 
 add_executable(Editor WIN32 MACOSX_BUNDLE
   ${SOURCE_FILES}
@@ -80,17 +78,15 @@ add_executable(Editor WIN32 MACOSX_BUNDLE
   ${CMAKE_SOURCE_DIR}/resources/icon.rc
 )
 target_include_directories(Editor PUBLIC "src")
-target_link_libraries(Editor PUBLIC core-shared Qt5::Core Qt5::Widgets Qt5::Network)
+target_link_libraries(Editor PUBLIC core-shared Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
+qt_disable_unicode_defines(Editor)
 
 if (WIN32)
-  foreach (lib Qt5::Widgets Qt5::Core Qt5::Network Qt5::Gui)
+  foreach (lib Qt6::Core Qt6::Gui Qt6::Network Qt6::Widgets)
     copy_dynamic_library(${lib} Editor)
   endforeach ()
   
   copy_qt_platforms_plugin(Editor)
 endif (WIN32)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  # These warnings are in Qt 5.12.2 and raised on GCC 9.3.0
-  # set_source_files_properties("${CMAKE_BINARY_DIR}/core/ctroll/moc_clusterconnectionhandler.cpp" PROPERTIES COMPILE_FLAGS "-Wno-useless-cast")
-endif ()
+qt_finalize_target(Editor)

@@ -36,6 +36,9 @@ cmake_minimum_required (VERSION 3.14 FATAL_ERROR)
 
 project (C-Troll VERSION 0.1)
 
+find_package(Qt6 COMPONENTS Core Gui Network Widgets REQUIRED)
+qt_standard_project_setup()
+
 # Generate compile_commands.json to make it easier to work with clang based tools
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -66,25 +69,10 @@ if (ENABLE_PCH)
   target_precompile_headers(project_options INTERFACE <vector> <string> <map> <utility>)
 endif ()
 
-if (APPLE)
-  set(CMAKE_PREFIX_PATH
-    "~/Qt/5.15.1/clang_64/lib/cmake"
-    "~/Qt/5.6/clang_64/lib/cmake"
-    "~/Qt/5.7/clang_64/lib/cmake"
-  )
-elseif (WIN32)
-  set(CMAKE_PREFIX_PATH
-    "C:/Qt/5.12.1/msvc2019_64"
-    "C:/Qt/Development/5.12.1/msvc2019_64"
-    "C:/Qt/5.12.6/msvc2019_64"
-    "C:/Qt/Development/5.12.6/msvc2019_64"
-    "C:/Qt/5.15.1/msvc2019_64"
-    "C:/Qt/Development/5.15.1/msvc2019_64"
-  )
-endif ()
-
 add_subdirectory(ext/simplecrypt)
 add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(tray)
 add_subdirectory(tests)
+
+qt_finalize_project()
