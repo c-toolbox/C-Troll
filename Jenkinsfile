@@ -132,7 +132,7 @@ windows_msvc: { // windows/build(msvc)
       stage('windows-msvc/build') {
         cmakeBuild([
           buildDir: 'build-msvc',
-          generator: 'Visual Studio 16 2022',
+          generator: 'Visual Studio 17 2022',
           installation: "InSearchPath",
           steps: [[ args: "-- /nologo /m:6", withCmake: true ]]
         ])
