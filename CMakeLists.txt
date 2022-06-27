@@ -37,7 +37,6 @@ cmake_minimum_required (VERSION 3.14 FATAL_ERROR)
 project (C-Troll VERSION 0.1)
 
 find_package(Qt6 COMPONENTS Core Gui Network Widgets REQUIRED)
-qt_standard_project_setup()
 
 # Generate compile_commands.json to make it easier to work with clang based tools
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -74,5 +73,3 @@ add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(tray)
 add_subdirectory(tests)
-
-qt_finalize_project()
