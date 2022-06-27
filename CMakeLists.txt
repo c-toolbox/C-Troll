@@ -36,6 +36,15 @@ cmake_minimum_required (VERSION 3.14 FATAL_ERROR)
 
 project (C-Troll VERSION 0.1)
 
+# Qt
+# Unfortunately, we have to set this value manually; sigh
+# In the future, if the Qt version is updated, just add to this variable ---abock
+if (APPLE)
+  set(CMAKE_PREFIX_PATH
+    "~/Qt/6.2.3/macos/lib/cmake"
+  )
+endif ()
+
 find_package(Qt6 COMPONENTS Core Gui Network Widgets REQUIRED)
 
 # Generate compile_commands.json to make it easier to work with clang based tools
