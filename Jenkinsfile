@@ -50,7 +50,7 @@ linux_gcc_make: { // linux-gcc/build(make)
           buildDir: 'build-make',
           generator: 'Unix Makefiles',
           installation: "InSearchPath",
-          steps: [[ args: "-- -j4", withCmake: true ]]
+          steps: [[ args: "-- -j6", withCmake: true ]]
         ])
         recordIssues(
           id: 'linux-gcc-make',
@@ -73,7 +73,7 @@ linux_gcc_ninja: { // linux-gcc/build(ninja)
           buildDir: 'build-ninja',
           generator: 'Ninja',
           installation: "InSearchPath",
-          steps: [[ args: "-- -j4", withCmake: true ]]
+          steps: [[ args: "-- -j6", withCmake: true ]]
         ])
       }    
       cleanWs()
@@ -92,7 +92,7 @@ linux_clang_make: { // linux-clang/build(make)
           buildDir: 'build-make',
           generator: 'Unix Makefiles',
           installation: "InSearchPath",
-          steps: [[ args: "-- -j4", withCmake: true ]]
+          steps: [[ args: "-- -j6", withCmake: true ]]
         ])
         recordIssues(
           id: 'linux-clang-make',
@@ -115,7 +115,7 @@ linux_clang_ninja: { // linux-clang/build(ninja)
           buildDir: 'build-ninja',
           generator: 'Ninja',
           installation: "InSearchPath",
-          steps: [[ args: "-- -j4", withCmake: true ]]
+          steps: [[ args: "-- -j6", withCmake: true ]]
         ])
       } 
       cleanWs()
@@ -132,9 +132,9 @@ windows_msvc: { // windows/build(msvc)
       stage('windows-msvc/build') {
         cmakeBuild([
           buildDir: 'build-msvc',
-          generator: 'Visual Studio 16 2019',
+          generator: 'Visual Studio 16 2022',
           installation: "InSearchPath",
-          steps: [[ args: "-- /nologo /m:4", withCmake: true ]]
+          steps: [[ args: "-- /nologo /m:6", withCmake: true ]]
         ])
         recordIssues(
           id: 'windows-msvc',
@@ -155,11 +155,11 @@ windows_ninja: { // windows/build(msvc)
       stage('windows-ninja/build') {
         bat(
           script: """
-          call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
+          call "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
           if not exist build-ninja mkdir build-ninja
           cd build-ninja
           cmake -G Ninja ..
-          cmake --build . -- -j 4 all
+          cmake --build . -- -j 6 all
           """,
           label: 'Generate build-scripts with cmake and execute them'
         )
@@ -180,7 +180,7 @@ macos_make: { // macos/build(make)
           buildDir: 'build-make',
           generator: 'Unix Makefiles',
           installation: "InSearchPath",
-          steps: [[ args: "-- -j4", withCmake: true ]]
+          steps: [[ args: "-- -j6", withCmake: true ]]
         ])
         // For some reason this raises an error
         // ID clang is already used by another action: io.jenkins.plugins.analysis.core.model.ResultAction for Clang (LLVM based)
@@ -206,7 +206,7 @@ macos_xcode: { // macos_xcode
           buildDir: 'build-xcode',
           generator: 'Xcode',
           installation: "InSearchPath",
-          steps: [[ args: "-- -quiet -parallelizeTargets -jobs 4", withCmake: true ]]
+          steps: [[ args: "-- -quiet -parallelizeTargets -jobs 6", withCmake: true ]]
         ])
       }
       cleanWs()
