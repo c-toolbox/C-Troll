@@ -37,7 +37,7 @@
 
 #include "message.h"
 
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 namespace common {
     

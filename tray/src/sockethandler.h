@@ -37,7 +37,7 @@
 
 #include <QObject>
 #include <QTcpServer>
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 #include <array>
 
 namespace common { class JsonSocket; }

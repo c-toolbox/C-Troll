@@ -35,7 +35,7 @@
 #ifndef __SHARED__BASECONFIGURATION_H__
 #define __SHARED__BASECONFIGURATION_H__
 
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 // @VER2:  Change the names of the folders to either all plural or all singular
 struct BaseConfiguration {

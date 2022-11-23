@@ -34,7 +34,9 @@
 
 cmake_minimum_required (VERSION 3.14 FATAL_ERROR)
 
-project (C-Troll VERSION 0.1)
+project (C-Troll VERSION 2.0)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 # Qt
 # Unfortunately, we have to set this value manually; sigh
@@ -65,8 +67,6 @@ if (ENABLE_IPO)
   endif ()
 endif ()
 
-include(cmake/build_helper_commands.cmake)
-
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_17)
 include (cmake/compiler_warnings.cmake)
@@ -77,8 +77,7 @@ if (ENABLE_PCH)
   target_precompile_headers(project_options INTERFACE <vector> <string> <map> <utility>)
 endif ()
 
-add_subdirectory(ext/catch2)
-add_subdirectory(ext/simplecrypt)
+add_subdirectory(ext)
 add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(tray)

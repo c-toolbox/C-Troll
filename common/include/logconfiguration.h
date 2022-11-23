@@ -35,7 +35,7 @@
 #ifndef __COMMON__LOGCONFIGURATION_H__
 #define __COMMON__LOGCONFIGURATION_H__
 
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 #include <chrono>
 
 namespace common {

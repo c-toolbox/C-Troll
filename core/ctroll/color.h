@@ -35,7 +35,7 @@
 #ifndef __CORE__COLOR_H__
 #define __CORE__COLOR_H__
 
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 struct Color {
     int r = 255;

@@ -1,6 +1,9 @@
-[submodule "common/ext/fmt"]
-	path = common/ext/fmt
+[submodule "ext/fmt"]
+	path = ext/fmt
 	url = https://github.com/fmtlib/fmt.git
 [submodule "ext/catch2"]
 	path = ext/catch2
 	url = https://github.com/catchorg/Catch2.git
+[submodule "ext/json"]
+	path = ext/json
+	url = https://github.com/nlohmann/json.git

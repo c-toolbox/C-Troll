@@ -37,7 +37,7 @@
 
 #include "cluster.h"
 #include "typedid.h"
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 #include <chrono>
 #include <optional>
 #include <string>

@@ -36,7 +36,7 @@
 #define __TRAY__CONFIGURATION_H__
 
 #include "logconfiguration.h"
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 #include <chrono>
 #include <optional>
 #include <string>

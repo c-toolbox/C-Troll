@@ -38,7 +38,7 @@
 #include "baseconfiguration.h"
 #include "color.h"
 #include "logconfiguration.h"
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 #include <chrono>
 #include <optional>
 #include <string>

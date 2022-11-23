@@ -35,7 +35,7 @@
 #include "catch2/catch_test_macros.hpp"
 
 #include "cluster.h"
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 TEST_CASE("(Cluster) Default Ctor", "[Cluster]") {
     Cluster msg;

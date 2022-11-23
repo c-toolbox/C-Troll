@@ -35,7 +35,7 @@
 #include "catch2/catch_test_macros.hpp"
 
 #include "erroroccurredmessage.h"
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 TEST_CASE("(ErrorOccurred) Default Ctor", "[ErrorOccurred]") {
     common::ErrorOccurredMessage msg;

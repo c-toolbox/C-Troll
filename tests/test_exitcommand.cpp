@@ -35,7 +35,7 @@
 #include "catch2/catch_test_macros.hpp"
 
 #include "exitcommandmessage.h"
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 TEST_CASE("(ExitCommand) Default Ctor", "[ExitCommand]") {
     common::ExitCommandMessage msg;

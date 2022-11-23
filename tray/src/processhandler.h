@@ -40,7 +40,7 @@
 #include "exitcommandmessage.h"
 #include "startcommandmessage.h"
 #include <QProcess>
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 #include <map>
 #include <string>
 

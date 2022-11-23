@@ -46,7 +46,7 @@
 #include <QSpinBox>
 #include <QVBoxLayout>
 #include <fmt/format.h>
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 #include <fstream>
 #include <random>
 

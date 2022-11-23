@@ -35,7 +35,7 @@
 #ifndef __COMMON__MESSAGE_H__
 #define __COMMON__MESSAGE_H__
 
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 #include <string_view>
 
 namespace common {

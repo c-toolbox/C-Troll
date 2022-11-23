@@ -36,7 +36,7 @@
 #define __SHARED__NODE_H__
 
 #include "typedid.h"
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 /**
  * This struct contains information about individual computer nodes of the cluster.

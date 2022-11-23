@@ -72,12 +72,14 @@ add_executable(Tray WIN32 MACOSX_BUNDLE
 target_link_libraries(Tray PUBLIC common Qt6::Core Qt6::Widgets Qt6::Network)
 qt_disable_unicode_defines(Tray)
 
-if (WIN32)
-  foreach (lib Qt6::Widgets Qt6::Core Qt6::Network Qt6::Gui)
-    copy_dynamic_library(${lib} Tray)
-  endforeach ()
-  
-  copy_qt_platforms_plugin(Tray)
-endif (WIN32)
+# Find the windeployqt application
+get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
+get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+add_custom_command(
+  TARGET Tray POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" -E env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime \"$<TARGET_FILE:Tray>\"
+  COMMENT "Deploying Qt libraries"
+)
 
 qt_finalize_target(Tray)

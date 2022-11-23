@@ -1,3 +1,4 @@
 build/
 example/log_core.txt
 .vscode/settings.json
+bin/*

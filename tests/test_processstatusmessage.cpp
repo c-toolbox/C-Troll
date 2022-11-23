@@ -35,7 +35,7 @@
 #include "catch2/catch_test_macros.hpp"
 
 #include "processstatusmessage.h"
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 TEST_CASE("(ProcessStatus) Default Ctor", "[ProcessStatus]") {
     common::ProcessStatusMessage msg;

@@ -38,7 +38,7 @@
 #include <QObject>
 
 #include <QTcpSocket>
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 #include <simplecrypt/simplecrypt.h>
 #include <memory>
 #include <optional>

@@ -35,7 +35,7 @@
 #include "catch2/catch_test_macros.hpp"
 
 #include "program.h"
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 TEST_CASE("(Program) Default Ctor", "[Program]") {
     Program msg;

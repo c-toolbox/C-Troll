@@ -35,7 +35,7 @@
 #include "catch2/catch_test_macros.hpp"
 
 #include "killtraymessage.h"
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 TEST_CASE("(KillTrayMessage) Default Ctor", "[KillTrayMessage]") {
     common::KillTrayMessage msg;

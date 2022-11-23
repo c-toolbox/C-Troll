@@ -36,7 +36,7 @@
 #define __SHARED__CLUSTER_H__
 
 #include "typedid.h"
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 /**
  * This structure represents a cluster setup, that is, a collection of computers that are

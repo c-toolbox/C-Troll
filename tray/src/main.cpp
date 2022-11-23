@@ -43,7 +43,7 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <fmt/format.h>
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 #include <filesystem>
 #include <iostream>
 #include <string_view>
