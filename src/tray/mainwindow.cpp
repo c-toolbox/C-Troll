@@ -72,12 +72,12 @@ MainWindow::MainWindow() {
     QAction* quit = new QAction("Quit", this);
     connect(quit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
     menu->addAction(quit);
- 
+
     // Set the context menu on the icon and show the application icon in the system tray
     trayIcon->setContextMenu(menu);
     trayIcon->show();
- 
-    // Also connect clicking on the icon to the signal processor of this press 
+
+    // Also connect clicking on the icon to the signal processor of this press
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
 }
 
@@ -125,7 +125,7 @@ void MainWindow::changeEvent(QEvent* event) {
         event->ignore();
     }
 }
- 
+
 // The method that handles click on the application icon in the system tray
 void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason) {
     if (reason == QSystemTrayIcon::Trigger) {

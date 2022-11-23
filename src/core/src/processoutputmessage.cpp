@@ -44,7 +44,7 @@ namespace {
 } // namespace
 
 namespace common {
-    
+
 void to_json(nlohmann::json& j, const ProcessOutputMessage& m) {
     std::string t = [](ProcessOutputMessage::OutputType type) {
         switch (type) {
@@ -78,5 +78,5 @@ void from_json(const nlohmann::json& j, ProcessOutputMessage& m) {
         throw std::runtime_error(fmt::format("Unknown output type '{}'", type));
     }
 }
-    
+
 } // namespace common

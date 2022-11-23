@@ -106,7 +106,7 @@ namespace {
 namespace common {
 
 Log* Log::_log;
-    
+
 void Log::initialize(std::string application, bool createLogFile,
                      std::function<void(std::string)> loggingFunction)
 {
@@ -114,12 +114,12 @@ void Log::initialize(std::string application, bool createLogFile,
     _log = new Log(std::move(application), createLogFile);
     _log->_loggingFunction = std::move(loggingFunction);
 }
-    
+
 Log& Log::ref() {
     assert(_log);
     return *_log;
 }
-    
+
 Log::Log(std::string componentName, bool createLogFile) {
     assert(!componentName.empty());
     if (createLogFile) {
@@ -127,11 +127,11 @@ Log::Log(std::string componentName, bool createLogFile) {
         _file = std::ofstream(_filePath);
     }
 }
-    
+
 Log::~Log() {
     _file.close();
 }
-    
+
 void Log::logMessage(std::string category, std::string message) {
     message = fmt::format("{}  ({}): {}", currentTime(), category, message);
 

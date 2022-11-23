@@ -82,7 +82,7 @@ NodeWidget::NodeWidget(const Node& node)
 {
     setToolTip(QString::fromStdString(node.description));
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
-    
+
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
 

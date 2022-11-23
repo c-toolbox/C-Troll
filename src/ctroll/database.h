@@ -47,7 +47,7 @@
 #include <vector>
 
 namespace data {
-    
+
 std::vector<const Cluster*> clusters();
 std::vector<const Node*> nodes();
 std::vector<const Program*> programs();

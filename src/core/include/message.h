@@ -62,7 +62,7 @@ struct Message {
  * for the type \tparam T. \tparam T must define a static variable named \c Type that is
  * comparable to a string. Furthermore, this function will check that the version recieved
  * is compatible with the version expected.
- * 
+ *
  * \param message The message that should be checked for validity
  * \return \c true if the message is valid, \c false otherwise
  */
@@ -92,9 +92,9 @@ template <typename T = void>
 // Throws std::logic_error if the internal type is different from the expected type
 // Throws std::runtime_error if the version is different from the current version
 void validateMessage(const nlohmann::json& message, std::string_view expectedType);
-    
+
 void from_json(const nlohmann::json& j, Message& m);
 
 } // namespace common
-    
+
 #endif // __COMMON__MESSAGE_H__

@@ -70,7 +70,7 @@ signals:
     void messageReceived(nlohmann::json message);
     void disconnected();
 
-private: 
+private:
     void readToBuffer();
     void parseBuffer();
 

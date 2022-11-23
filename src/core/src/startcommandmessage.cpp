@@ -78,7 +78,7 @@ void from_json(const nlohmann::json& j, StartCommandMessage& m) {
     if (j.find(KeyForwardOutErr) != j.end()) {
         j[KeyForwardOutErr].get_to(m.forwardStdOutStdErr);
     }
-    
+
     j.at(KeyExecutable).get_to(m.executable);
     j.at(KeyWorkingDirectory).get_to(m.workingDirectory);
 

@@ -173,7 +173,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             _tags = new DynamicList;
             _tags->setToolTip("A list of all tags that this program is associated with");
             connect(_tags, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
-         
+
             editLayout->addWidget(_tags, 9, 0, 1, 2);
         }
 

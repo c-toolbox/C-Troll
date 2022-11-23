@@ -41,7 +41,7 @@
 #include <string>
 
 namespace common {
-    
+
 /**
  * This static class provides the ability to log information to both the console and a
  * persistent file. The file will be created in working directory of the application will
@@ -64,7 +64,7 @@ public:
      */
     static void initialize(std::string application,
         bool createLogFile, std::function<void(std::string)> loggingFunction);
-    
+
     /**
      * Returns the static reference to the Log instance.
      *
@@ -72,7 +72,7 @@ public:
      * \pre Log::initialize needs to be called before the first call to Log::ref
      */
     static Log& ref();
- 
+
     /**
      * Logs a message with the Log. This message is both logged to the log file as well
      * as to the console using the \c qDebug macro. Every content to the file is flushed
@@ -88,7 +88,7 @@ public:
      * log file is discarded.
      */
     void performLogRotation(bool keepLog);
-  
+
 private:
     /**
      * Constructs a Log and opens the file for reading, overwriting any old content that
@@ -99,13 +99,13 @@ private:
      *        to file
      */
     Log(std::string application, bool createLogFile);
-    
+
     /// Destructor the will close the file.
     ~Log();
 
     // The static Log that is returned in the Log::ref method.
     static Log* _log;
-    
+
     /// Mutex that protects the access to the log file
     std::mutex _access;
 
@@ -115,7 +115,7 @@ private:
 
     std::function<void(std::string)> _loggingFunction;
 };
-    
+
 } // namespace common
 
 /**

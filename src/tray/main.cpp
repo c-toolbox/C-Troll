@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
 
     SocketHandler socketHandler(config.port, config.secret);
     ProcessHandler processHandler;
-    
+
     QObject::connect(
         &socketHandler, &SocketHandler::messageReceived,
         &processHandler, &ProcessHandler::handleSocketMessage

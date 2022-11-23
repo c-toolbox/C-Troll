@@ -41,7 +41,7 @@ namespace {
 
     constexpr std::string_view KeyLogFile = "logFile";
     constexpr std::string_view KeyLogRotation = "logRotation";
-    
+
     constexpr std::string_view KeyTagColors = "tagColors";
 
     constexpr std::string_view KeyRest = "rest";

@@ -114,7 +114,7 @@ void ProgramButton::handleButtonPress() {
 
     if (hasNoProcessRunning()) {
         emit startProgram(_configuration->id);
-        
+
         // We disable the button until we get another message back from the tray
         setEnabled(false);
     }
@@ -245,7 +245,7 @@ bool ProgramButton::hasAllProcessesRunning() const {
     );
 }
 
-    
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -384,7 +384,7 @@ void ProgramWidget::processUpdated(Process::ID processId) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-TagsWidget::TagsWidget() 
+TagsWidget::TagsWidget()
     : QGroupBox("Tags")
 {
     QBoxLayout* layout = new QVBoxLayout(this);

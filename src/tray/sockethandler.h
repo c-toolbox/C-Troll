@@ -55,7 +55,7 @@ public:
 
     std::array<MessageLog, 3> lastMessages() const;
 
-public slots:    
+public slots:
     void sendMessage(const nlohmann::json& message, bool printMessage = true);
 
 signals:

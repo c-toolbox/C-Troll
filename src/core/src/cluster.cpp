@@ -56,7 +56,7 @@ void from_json(const nlohmann::json& j, Cluster& c) {
     if (j.find(KeyDescription) != j.end()) {
         j[KeyDescription].get_to(c.description);
     }
-    
+
     j.at(KeyNodes).get_to(c.nodes);
 }
 

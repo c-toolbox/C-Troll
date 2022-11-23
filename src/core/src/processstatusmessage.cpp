@@ -107,5 +107,5 @@ void from_json(const nlohmann::json& j, ProcessStatusMessage& m) {
     std::string status = j.at(KeyStatus).get<std::string>();
     m.status = toStatus(status);
 }
-    
+
 } // namespace common

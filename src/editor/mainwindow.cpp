@@ -102,7 +102,7 @@ MainWindow::MainWindow(std::string applicationPath, std::string clusterPath,
             _nodePath,
             [this](const std::string& path) { editNode(path); }
         );
-        
+
         layout->addWidget(nodesTree, 1, 0);
         QPushButton* newNode = new QPushButton("Add new Node");
         connect(

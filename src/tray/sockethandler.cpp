@@ -77,7 +77,7 @@ SocketHandler::SocketHandler(int port, std::string secret)
     : _secret(std::move(secret))
 {
     Log("Status", fmt::format("Listening on port: {}", port));
-    
+
     const bool success = _server.listen(QHostAddress::Any, static_cast<quint16>(port));
     if (!success) {
         Log("Error", fmt::format("Creating socket to listen on port {} failed", port));

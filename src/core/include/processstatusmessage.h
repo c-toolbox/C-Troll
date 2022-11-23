@@ -41,7 +41,7 @@
 #include <string_view>
 
 namespace common {
-    
+
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
 struct ProcessStatusMessage : public Message {
@@ -59,13 +59,13 @@ struct ProcessStatusMessage : public Message {
         ReadError,
         UnknownError
     };
-    
+
     /// The unique identifier for the process that will be created
     int processId = -1;
     /// The process status
     Status status = Status::Unknown;
 };
-  
+
 void to_json(nlohmann::json& j, const ProcessStatusMessage& m);
 void from_json(const nlohmann::json& j, ProcessStatusMessage& m);
 

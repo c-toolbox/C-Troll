@@ -87,7 +87,7 @@ private:
 
     void createAndRunProcessFromCommandMessage(
         const common::StartCommandMessage& command);
-    
+
     std::vector<ProcessInfo>::const_iterator processIt(QProcess* process);
     std::vector<ProcessInfo>::const_iterator processIt(int id);
 

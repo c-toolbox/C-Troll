@@ -68,7 +68,7 @@ private slots:
 
 private:
     std::string selectCluster();
-    
+
     const std::string _programPath;
     const std::string _clusterPath;
 

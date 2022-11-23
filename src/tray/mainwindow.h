@@ -34,7 +34,7 @@
 
 #ifndef __TRAY__MAINWINDOW_H__
 #define __TRAY__MAINWINDOW_H__
- 
+
 #include <QMainWindow>
 
 #include "processhandler.h"
@@ -42,7 +42,7 @@
 #include <QSystemTrayIcon>
 #include <QLabel>
 #include <QTextEdit>
- 
+
 class CentralWidget;
 
 class MainWindow : public QMainWindow {
@@ -64,12 +64,12 @@ public slots:
 protected:
     void closeEvent(QCloseEvent* event);
     void changeEvent(QEvent* event);
- 
+
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
     CentralWidget* _centralWidget;
 };
- 
+
 #endif // __TRAY__MAINWINDOW_H__

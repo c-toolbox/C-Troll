@@ -40,7 +40,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-DynamicList::DynamicList(QWidget* parent) 
+DynamicList::DynamicList(QWidget* parent)
     : QScrollArea(parent)
 {
     setWidgetResizable(true);

@@ -50,7 +50,7 @@ JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, std::string secret)
             QString::fromStdString(secret).toUtf8(),
             QCryptographicHash::Sha1
         );
-        
+
         quint64 key = secretHash.toULongLong();
         _crypto = SimpleCrypt(key);
     }

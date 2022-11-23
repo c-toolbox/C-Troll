@@ -96,7 +96,7 @@ private:
     QLineEdit* _nodePath = nullptr;
     QSpinBox* _removalTimeout = nullptr;
     QCheckBox* _logFile = nullptr;
-    
+
     // Log Rotation
     QGroupBox* _logRotation = nullptr;
     QSpinBox* _frequency = nullptr;

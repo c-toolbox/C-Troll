@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
             Log("Qt", msg.toLocal8Bit().constData());
         }
     );
-    
+
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 

@@ -387,7 +387,7 @@ SettingsWidget::SettingsWidget(Configuration configuration,
 
     // Separator
     {
-        
+
         QFrame* separator = new QFrame;
         separator->setObjectName("line");
         separator->setFrameShape(QFrame::HLine);

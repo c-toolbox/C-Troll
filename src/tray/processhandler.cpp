@@ -173,7 +173,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     std::string err = QMetaEnum::fromType<QProcess::ProcessError>().valueToKey(error);
     Log("Process Error", err);
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
-    
+
     // Find specifc value in process map i.e. process
     const auto p = processIt(process);
     if (p != _processes.end()) {
@@ -193,7 +193,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
 
 void ProcessHandler::handleStarted() {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
-    
+
     // Find specifc value in process map i.e. process
     auto p = processIt(process);
     if (p != _processes.end()) {
@@ -208,7 +208,7 @@ void ProcessHandler::handleStarted() {
 
 void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
-    
+
     // Find specifc value in process map i.e. process
     auto p = processIt(process);
     if (p != _processes.end()) {
@@ -217,7 +217,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
         msg.status = toTrayStatus(exitStatus);
         nlohmann::json j = msg;
         emit sendSocketMessage(j);
-        
+
         // Remove this process from the list as we consider it finished
         emit closedProcess(*p);
     }
@@ -225,7 +225,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
 
 void ProcessHandler::handleReadyReadStandardError() {
     QProcess* proc = qobject_cast<QProcess*>(QObject::sender());
-    
+
     // Find specifc value in process map i.e. process
     auto p = processIt(proc);
     if (p != _processes.end()) {
@@ -242,7 +242,7 @@ void ProcessHandler::handleReadyReadStandardError() {
 
 void ProcessHandler::handleReadyReadStandardOutput() {
     QProcess* proc = qobject_cast<QProcess*>(QObject::sender());
-    
+
     // Find specifc value in process map i.e. process
     auto p = processIt(proc);
     if (p != _processes.end()) {
@@ -276,7 +276,7 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
         std::string workingDirectory = executablePath.parent_path().string();
         process->setWorkingDirectory(QString::fromStdString(workingDirectory));
     }
-        
+
     if (command.commandlineParameters.empty()) {
         std::string cmd = fmt::format("\"{}\"", command.executable);
         process->start(QString::fromStdString(cmd));
@@ -301,7 +301,7 @@ void ProcessHandler::createAndRunProcessFromCommandMessage(
                                                    const common::StartCommandMessage& cmd)
 {
     QProcess* proc = new QProcess(this);
-    
+
     // Connect all process signals for logging feedback to core
     connect(proc, &QProcess::errorOccurred, this, &ProcessHandler::handlerErrorOccurred);
     connect(
@@ -326,7 +326,7 @@ void ProcessHandler::createAndRunProcessFromCommandMessage(
         proc->closeReadChannel(QProcess::ProcessChannel::StandardError);
     }
     connect(proc, &QProcess::started, this, &ProcessHandler::handleStarted);
-    
+
     // Insert command identifier and process into out lists
     ProcessInfo info;
     info.processId = cmd.id;
@@ -338,7 +338,7 @@ void ProcessHandler::createAndRunProcessFromCommandMessage(
     info.nodeId = cmd.nodeId;
     info.dataHash = cmd.dataHash;
     _processes.push_back(info);
-    
+
     // Run the process with the command
     executeProcessWithCommandMessage(proc, cmd);
 }

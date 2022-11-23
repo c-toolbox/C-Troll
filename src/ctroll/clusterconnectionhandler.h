@@ -72,7 +72,7 @@ signals:
 private:
     void handleSocketStateChange(Node::ID nodeId, QAbstractSocket::SocketState state);
     void handleMessage(nlohmann::json message, Node::ID nodeId);
-    
+
     std::map<Node::ID, std::unique_ptr<common::JsonSocket>> _sockets;
 };
 

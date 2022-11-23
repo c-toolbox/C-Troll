@@ -146,7 +146,7 @@ ProcessWidget::ProcessWidget(Process::ID processId,
             }
         );
     }
-    
+
     _removalTimer = new QTimer(this);
     _removalTimer->setSingleShot(true);
     connect(

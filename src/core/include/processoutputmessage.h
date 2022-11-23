@@ -41,7 +41,7 @@
 #include <string_view>
 
 namespace common {
-    
+
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
 struct ProcessOutputMessage : Message {
@@ -59,7 +59,7 @@ struct ProcessOutputMessage : Message {
     /// The type of output
     OutputType outputType = OutputType::StdOut;
 };
-    
+
 void to_json(nlohmann::json& j, const ProcessOutputMessage& m);
 void from_json(const nlohmann::json& j, ProcessOutputMessage& m);
 

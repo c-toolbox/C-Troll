@@ -75,7 +75,7 @@ linux_gcc_ninja: { // linux-gcc/build(ninja)
           installation: "InSearchPath",
           steps: [[ args: "-- -j6", withCmake: true ]]
         ])
-      }    
+      }
       cleanWs()
     } // node('linux' && 'gcc')
   }
@@ -117,7 +117,7 @@ linux_clang_ninja: { // linux-clang/build(ninja)
           installation: "InSearchPath",
           steps: [[ args: "-- -j6", withCmake: true ]]
         ])
-      } 
+      }
       cleanWs()
     } // node('linux' && 'clang')
   }

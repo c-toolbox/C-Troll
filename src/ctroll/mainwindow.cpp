@@ -456,7 +456,7 @@ void MainWindow::startProcess(Process::ID processId) const {
     if (!node->secret.empty()) {
         command.secret = node->secret;
     }
-    
+
     nlohmann::json j = command;
     _clusterConnectionHandler.sendMessage(*node, j);
 }
