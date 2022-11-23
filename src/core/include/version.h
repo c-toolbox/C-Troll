@@ -35,6 +35,6 @@
 #ifndef __CORE__VERSION_H__
 #define __CORE__VERSION_H__
 
-constexpr const char* Version = "2.0.0";
+constexpr const char* Version = "1.0.1";
 
 #endif // __CORE__VERSION_H__
