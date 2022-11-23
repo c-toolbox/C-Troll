@@ -77,6 +77,7 @@ if (ENABLE_PCH)
   target_precompile_headers(project_options INTERFACE <vector> <string> <map> <utility>)
 endif ()
 
+add_subdirectory(ext/catch2)
 add_subdirectory(ext/simplecrypt)
 add_subdirectory(common)
 add_subdirectory(core)
