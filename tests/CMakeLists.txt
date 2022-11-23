@@ -33,7 +33,6 @@
 ##########################################################################################
 
 add_executable(UnitTest
-  main.cpp
   test_cluster.cpp
   test_erroroccurred.cpp
   test_exitcommand.cpp
@@ -48,5 +47,4 @@ add_executable(UnitTest
   test_traystatus.cpp
 )
 target_include_directories(UnitTest PUBLIC ${CMAKE_SOURCE_DIR}/ext/catch2/single_include)
-target_link_libraries(UnitTest PUBLIC common core-shared Catch2)
-set_target_properties(UnitTest PROPERTIES FOLDER Tests)
+target_link_libraries(UnitTest PUBLIC common core-shared Catch2WithMain)

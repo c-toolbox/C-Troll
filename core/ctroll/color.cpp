@@ -34,16 +34,18 @@
 
 #include "color.h"
 
+#include <string_view>
+
 namespace {
-    constexpr const char* KeyTagColorsRed = "r";
-    constexpr const char* KeyTagColorsGreen = "g";
-    constexpr const char* KeyTagColorsBlue = "b";
-    constexpr const char* KeyTagColorsTag = "tag";
+    constexpr std::string_view KeyTagColorsRed = "r";
+    constexpr std::string_view KeyTagColorsGreen = "g";
+    constexpr std::string_view KeyTagColorsBlue = "b";
+    constexpr std::string_view KeyTagColorsTag = "tag";
 } // namespace
 
 bool operator==(const Color& lhs, const Color& rhs) {
-    return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b) &&
-        (lhs.tag == rhs.tag);
+    return
+        (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b) && (lhs.tag == rhs.tag);
 }
 
 void to_json(nlohmann::json& j, const Color& c) {

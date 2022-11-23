@@ -53,7 +53,7 @@ NodeDialog::NodeDialog(QWidget* parent, std::string path)
 {
     assert(!_path.empty());
 
-    setWindowTitle(QString::fromStdString("Node: " + _path));
+    setWindowTitle(QString::fromStdString(fmt::format("Node: {}", _path)));
 
     QBoxLayout* layout = new QVBoxLayout(this);
 

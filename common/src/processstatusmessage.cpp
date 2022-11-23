@@ -52,8 +52,8 @@ namespace {
             case PSM::Status::TimedOut: return "TimedOut";
             case PSM::Status::WriteError: return "WriteError";
             case PSM::Status::ReadError: return "ReadError";
-            default: throw std::logic_error("Unhandled case label");
         }
+        throw std::logic_error("Unhandled case label");
     }
 
     common::ProcessStatusMessage::Status toStatus(std::string_view status) {

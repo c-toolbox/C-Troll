@@ -42,7 +42,7 @@
 namespace common {
 
 struct InvalidAuthMessage : public Message {
-    static constexpr const char* Type = "InvalidAuthMessage";
+    static constexpr std::string_view Type = "InvalidAuthMessage";
 };
 
 void to_json(nlohmann::json& j, const InvalidAuthMessage& m);

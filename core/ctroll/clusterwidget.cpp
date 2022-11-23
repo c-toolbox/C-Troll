@@ -53,8 +53,8 @@ void ConnectionWidget::setStatus(ConnectionStatus status) {
             case ConnectionStatus::Connected:          return "connected";
             case ConnectionStatus::PartiallyConnected: return "partially connected";
             case ConnectionStatus::Disconnected:       return "disconnected";
-            default:                         throw std::logic_error("Missing case label");
         }
+        throw std::logic_error("Missing case label");
     }(status);
     setToolTip(QString::fromStdString(string));
 

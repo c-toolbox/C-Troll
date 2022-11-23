@@ -46,25 +46,23 @@ LogWidget::LogWidget() {
     layout->addWidget(&_message, 1);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    {
-        QWidget* container = new QWidget;
-        container->setObjectName("info");
-        QBoxLayout* versionLayout = new QHBoxLayout(container);
-        QMargins m = versionLayout->contentsMargins();
-        m.setTop(0);
-        m.setBottom(10);
-        versionLayout->setContentsMargins(m);
+    QWidget* container = new QWidget;
+    container->setObjectName("info");
+    QBoxLayout* versionLayout = new QHBoxLayout(container);
+    QMargins m = versionLayout->contentsMargins();
+    m.setTop(0);
+    m.setBottom(10);
+    versionLayout->setContentsMargins(m);
 
-        std::string coreVer = fmt::format("Core Version: {}", Version);
-        versionLayout->addWidget(new QLabel(QString::fromStdString(coreVer)));
+    std::string coreVer = fmt::format("Core Version: {}", Version);
+    versionLayout->addWidget(new QLabel(QString::fromStdString(coreVer)));
 
-        versionLayout->addStretch();
+    versionLayout->addStretch();
 
-        std::string apiVer = fmt::format("API Version: {}", api::Version);
-        versionLayout->addWidget(new QLabel(QString::fromStdString(apiVer)));
+    std::string apiVer = fmt::format("API Version: {}", api::Version);
+    versionLayout->addWidget(new QLabel(QString::fromStdString(apiVer)));
 
-        layout->addWidget(container);
-    }
+    layout->addWidget(container);
 }
 
 void LogWidget::appendMessage(std::string msg) {

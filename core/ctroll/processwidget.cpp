@@ -62,8 +62,8 @@ namespace {
             case Status::WriteError:    return "Write Error";
             case Status::ReadError:     return "Read Error";
             case Status::UnknownError:  return "UnknownError";
-            default:                    throw std::logic_error("Missing case label");
         }
+        throw std::logic_error("Missing case label");
     }
 } // namespace
 

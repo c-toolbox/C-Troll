@@ -45,12 +45,8 @@
 #include <QVBoxLayout>
 #include <iostream>
 
-namespace {
-    constexpr const char* Title = "C-Troll Tray";
-} // namespace
-
 MainWindow::MainWindow() {
-    setWindowTitle(Title);
+    setWindowTitle("C-Troll Tray");
 
     _centralWidget = new CentralWidget;
     setCentralWidget(_centralWidget);
@@ -61,7 +57,7 @@ MainWindow::MainWindow() {
         QIcon(":/images/C_transparent.png"), this
     );
     std::string tooltip = fmt::format(
-        "{}\nVersion: {}\nAPI: {}", Title, Version, api::Version
+        "C-Troll Tray\nVersion: {}\nAPI: {}", Version, api::Version
     );
     trayIcon->setToolTip(QString::fromStdString(tooltip));
 
@@ -73,12 +69,9 @@ MainWindow::MainWindow() {
     menu->addAction(viewWindow);
 
     // The second menu item terminates the application
-    QAction* quitAction = new QAction("Quit", this);
-    connect(
-        quitAction, &QAction::triggered,
-        QApplication::instance(), &QApplication::quit
-    );
-    menu->addAction(quitAction);
+    QAction* quit = new QAction("Quit", this);
+    connect(quit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
+    menu->addAction(quit);
  
     // Set the context menu on the icon and show the application icon in the system tray
     trayIcon->setContextMenu(menu);

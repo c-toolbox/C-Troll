@@ -38,13 +38,14 @@
 #include "message.h"
 
 #include <nlohmann/json.hpp>
+#include <string_view>
 
 namespace common {
 
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
 struct ExitCommandMessage : public Message {
-    static constexpr const char* Type = "ExitCommandMessage";
+    static constexpr std::string_view Type = "ExitCommandMessage";
 
     /// The unique identifier for the process that will be created
     int id = -1;

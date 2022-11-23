@@ -40,6 +40,7 @@
 #include "node.h"
 #include "removebutton.h"
 #include "spacer.h"
+#include <fmt/format.h>
 #include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QGridLayout>
@@ -64,7 +65,7 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
 {
     assert(!_clusterPath.empty());
 
-    setWindowTitle(QString::fromStdString("Cluster: " + _clusterPath));
+    setWindowTitle(QString::fromStdString(fmt::format("Cluster: {}", _clusterPath)));
 
     QBoxLayout* layout = new QVBoxLayout(this);
 
@@ -81,14 +82,12 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
 
         editLayout->addWidget(new QLabel("Enabled:"), 1, 0);
         _enabled = new QCheckBox;
-        _enabled->setToolTip("Determines whether this cluster is currenty used");
+        _enabled->setToolTip("Determines whether this cluster is currently used");
         editLayout->addWidget(_enabled, 1, 1);
 
         editLayout->addWidget(new QLabel("Description:"), 2, 0);
         _description = new QLineEdit;
-        _description->setToolTip(
-            "Additional information for the user about this cluster"
-        );
+        _description->setToolTip("Additional information for the user about the cluster");
         _description->setPlaceholderText("optional");
         editLayout->addWidget(_description, 2, 1);
 
@@ -104,10 +103,7 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
 
         _nodes = new DynamicList;
         _nodes->setToolTip("The nodes that belong to this cluster");
-        connect(
-            _nodes, &DynamicList::updated,
-            this, &ClusterDialog::updateSaveButton
-        );
+        connect(_nodes, &DynamicList::updated, this, &ClusterDialog::updateSaveButton);
         editLayout->addWidget(_nodes, 5, 0, 1, 2);
         editLayout->setRowStretch(5, 1);
 

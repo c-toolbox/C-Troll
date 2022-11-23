@@ -51,8 +51,8 @@ namespace {
             case QAbstractSocket::SocketState::BoundState: return "Bound";
             case QAbstractSocket::SocketState::ListeningState: return "Listening";
             case QAbstractSocket::SocketState::ClosingState: return "Closing";
-            default: throw std::logic_error("Missing case label");
         }
+        throw std::logic_error("Missing case label");
     }
 } // namespace
 
@@ -157,7 +157,7 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
     const Node* node = data::findNode(nodeId);
     assert(node);
     std::string content = common::isValidMessage<common::ProcessOutputMessage>(message) ?
-        common::ProcessOutputMessage::Type :
+        std::string(common::ProcessOutputMessage::Type) :
         message.dump();
 
     Log(

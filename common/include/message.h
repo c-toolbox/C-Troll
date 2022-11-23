@@ -41,12 +41,12 @@
 namespace common {
 
 struct Message {
-    static constexpr const char* KeyType = "type";
-    static constexpr const char* KeyVersion = "version";
-    static constexpr const char* KeySecret = "secret";
+    static constexpr std::string_view KeyType = "type";
+    static constexpr std::string_view KeyVersion = "version";
+    static constexpr std::string_view KeySecret = "secret";
 
     /// The version of the API that should be increased with breaking changes
-    static constexpr const int CurrentVersion = 1;
+    static constexpr const int CurrentVersion = 2;
 
     /// A string representing the type of payload contained in this Message
     std::string type;
@@ -57,17 +57,37 @@ struct Message {
     std::string secret;
 };
 
-template <typename T>
-[[ nodiscard ]] bool isValidMessage(const nlohmann::json& message) {
-    const std::string type = message.at(Message::KeyType).get<std::string>();
+/**
+ * This function verifies whether the provided \p message is actually containing message
+ * for the type \tparam T. \tparam T must define a static variable named \c Type that is
+ * comparable to a string. Furthermore, this function will check that the version recieved
+ * is compatible with the version expected.
+ * 
+ * \param message The message that should be checked for validity
+ * \return \c true if the message is valid, \c false otherwise
+ */
+template <typename T = void>
+[[nodiscard]] bool isValidMessage(const nlohmann::json& message) {
+    const bool hasType = message.find(Message::KeyType) != message.end();
+    const bool hasVersion = message.find(Message::KeyVersion) != message.end();
+    if (!hasType || !hasVersion) {
+        return false;
+    }
+
     const int version = message.at(Message::KeyVersion).get<int>();
-
-    return type == T::Type && version == Message::CurrentVersion;
+    if (version != Message::CurrentVersion) {
+        return false;
+    }
+    if constexpr (std::is_same_v<T, void>) {
+        // If we don't have a type, we are done
+        return true;
+    }
+    else {
+        // Otherwise we want to check that the type is correct
+        const std::string type = message.at(Message::KeyType).get<std::string>();
+        return type == T::Type;
+    }
 }
-
-// Returns true, if the message has the required fields. Returns false if they are not
-// present, preventing us from deciphering the message
-[[ nodiscard ]] bool validateMessage(const nlohmann::json& message);
 
 // Throws std::logic_error if the internal type is different from the expected type
 // Throws std::runtime_error if the version is different from the current version

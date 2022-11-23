@@ -38,13 +38,14 @@
 #include "message.h"
 
 #include <nlohmann/json.hpp>
+#include <string_view>
 
 namespace common {
     
 /// This struct is the data structure that gets send from the Core to the Tray to signal
 /// that the Tray should perform a task
 struct ProcessStatusMessage : public Message {
-    static constexpr const char* Type = "ProcessStatusMessage";
+    static constexpr std::string_view Type = "ProcessStatusMessage";
 
     enum class Status : int {
         Unknown = -1,

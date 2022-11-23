@@ -60,6 +60,8 @@ private:
     std::vector<QWidget*> _items;
 };
 
+
+
 template <typename T>
 std::vector<T*> DynamicList::items() const {
     std::vector<T*> res;

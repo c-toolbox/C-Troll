@@ -35,16 +35,17 @@
 #include "baseconfiguration.h"
 
 namespace {
-    constexpr const char* KeyApplicationPath = "applicationPath";
-    constexpr const char* KeyClusterPath = "clusterPath";
-    constexpr const char* KeyNodePath = "nodePath";
+    constexpr std::string_view KeyApplicationPath = "applicationPath";
+    constexpr std::string_view KeyClusterPath = "clusterPath";
+    constexpr std::string_view KeyNodePath = "nodePath";
 } // namespace
+
+std::string BaseConfiguration::ConfigurationFile = "config.json";
 
 void to_json(nlohmann::json& j, const BaseConfiguration& c) {
     j[KeyApplicationPath] = c.applicationPath;
     j[KeyClusterPath] = c.clusterPath;
     j[KeyNodePath] = c.nodePath;
-
 }
 
 void from_json(const nlohmann::json& j, BaseConfiguration& c) {

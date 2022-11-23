@@ -38,9 +38,9 @@
 #include <fmt/format.h>
 
 namespace {
-    constexpr const char* KeyIdentifier = "processId";
-    constexpr const char* KeyMessage = "message";
-    constexpr const char* KeyOutputType = "outputType";
+    constexpr std::string_view KeyIdentifier = "processId";
+    constexpr std::string_view KeyMessage = "message";
+    constexpr std::string_view KeyOutputType = "outputType";
 } // namespace
 
 namespace common {
@@ -50,8 +50,8 @@ void to_json(nlohmann::json& j, const ProcessOutputMessage& m) {
         switch (type) {
             case ProcessOutputMessage::OutputType::StdOut: return "stdout";
             case ProcessOutputMessage::OutputType::StdErr: return "stderr";
-            default: throw std::logic_error("Missing case label");
         }
+        throw std::logic_error("Missing case label");
     }(m.outputType);
 
     j[Message::KeyType] = ProcessOutputMessage::Type;

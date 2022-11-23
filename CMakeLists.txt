@@ -32,7 +32,7 @@
 #                                                                                        #
 ##########################################################################################
 
-cmake_minimum_required (VERSION 3.14 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.25 FATAL_ERROR)
 
 project (C-Troll VERSION 2.0)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -68,7 +68,7 @@ if (ENABLE_IPO)
 endif ()
 
 add_library(project_options INTERFACE)
-target_compile_features(project_options INTERFACE cxx_std_17)
+target_compile_features(project_options INTERFACE cxx_std_20)
 include (cmake/compiler_warnings.cmake)
 set_project_warnings(project_options)
 
@@ -77,7 +77,7 @@ if (ENABLE_PCH)
   target_precompile_headers(project_options INTERFACE <vector> <string> <map> <utility>)
 endif ()
 
-add_subdirectory(ext)
+add_subdirectory(ext SYSTEM)
 add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(tray)

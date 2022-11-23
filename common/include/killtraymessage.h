@@ -38,11 +38,12 @@
 #include "message.h"
 
 #include <nlohmann/json.hpp>
+#include <string_view>
 
 namespace common {
 
 struct KillTrayMessage : public Message {
-    static constexpr const char* Type = "KillTrayMessage";
+    static constexpr std::string_view Type = "KillTrayMessage";
 };
 
 void to_json(nlohmann::json& j, const KillTrayMessage& m);

@@ -59,6 +59,7 @@ JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, std::string secret)
     connect(_socket.get(), &QTcpSocket::disconnected, this, &JsonSocket::disconnected);
     _socket->setProxy(QNetworkProxy::NoProxy);
 }
+
 void JsonSocket::connectToHost(const std::string& host, int port) {
     _socket->connectToHost(QString::fromStdString(host), static_cast<quint16>(port));
 }
@@ -77,18 +78,14 @@ void JsonSocket::write(nlohmann::json jsonDocument) {
         QByteArray data = _crypto->encryptToByteArray(QString::fromStdString(msg));
         qint64 res = _socket->write(data);
         success = (data.size() == res);
-
     }
     else {
         const size_t messageSize = msg.size();
         qint64 res = _socket->write(msg.c_str());
-        success = static_cast<qint64>(messageSize) == res;
+        success = (static_cast<qint64>(messageSize) == res);
     }
     if (!success) {
-        ::Log(
-            "JsonSocket",
-            fmt::format("Error writing message: {})", msg)
-        );
+        ::Log("JsonSocket", fmt::format("Error writing message: {})", msg));
     }
     _socket->flush();
 }

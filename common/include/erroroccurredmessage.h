@@ -38,13 +38,14 @@
 #include "message.h"
 
 #include <nlohmann/json.hpp>
+#include <string_view>
 
 namespace common {
 
 /// This struct is the data structure that gets send from the Tray to the Core in the case
 /// of a near-catastrophical error, i.e. an exception that would have terminated the Tray
 struct ErrorOccurredMessage : public Message {
-    static constexpr const char* Type = "ErrorOccurredMessage";
+    static constexpr std::string_view Type = "ErrorOccurredMessage";
 
     std::string error;
     std::vector<std::string> lastMessages;

@@ -38,12 +38,13 @@
 #include "message.h"
 
 #include <nlohmann/json.hpp>
+#include <string_view>
 #include <vector>
 
 namespace common {
 
 struct TrayStatusMessage : public Message {
-    static constexpr const char* Type = "TrayStatusMessage";
+    static constexpr std::string_view Type = "TrayStatusMessage";
 
     struct ProcessInfo {
         int processId;

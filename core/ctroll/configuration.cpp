@@ -34,19 +34,21 @@
 
 #include "configuration.h"
 
+#include <string_view>
+
 namespace {
-    constexpr const char* KeyRemovalTimeout = "removalTimeout";
+    constexpr std::string_view KeyRemovalTimeout = "removalTimeout";
 
-    constexpr const char* KeyLogFile = "logFile";
-    constexpr const char* KeyLogRotation = "logRotation";
+    constexpr std::string_view KeyLogFile = "logFile";
+    constexpr std::string_view KeyLogRotation = "logRotation";
     
-    constexpr const char* KeyTagColors = "tagColors";
+    constexpr std::string_view KeyTagColors = "tagColors";
 
-    constexpr const char* KeyRest = "rest";
-    constexpr const char* KeyRestUsername = "username";
-    constexpr const char* KeyRestPassword = "password";
-    constexpr const char* KeyRestPort = "port";
-    constexpr const char* KeyRestAllowCustomPrograms = "allowCustomPrograms";
+    constexpr std::string_view KeyRest = "rest";
+    constexpr std::string_view KeyRestUsername = "username";
+    constexpr std::string_view KeyRestPassword = "password";
+    constexpr std::string_view KeyRestPort = "port";
+    constexpr std::string_view KeyRestAllowCustomPrograms = "allowCustomPrograms";
 } // namespace
 
 void to_json(nlohmann::json& j, const Configuration& c) {

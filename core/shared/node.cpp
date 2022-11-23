@@ -40,13 +40,14 @@
 #include <assert.h>
 #include <filesystem>
 #include <set>
+#include <string_view>
 
 namespace {
-    constexpr const char* KeyName = "name";
-    constexpr const char* KeyIpAddress = "ip";
-    constexpr const char* KeyPort = "port";
-    constexpr const char* KeySecret = "secret";
-    constexpr const char* KeyDescription = "description";
+    constexpr std::string_view KeyName = "name";
+    constexpr std::string_view KeyIpAddress = "ip";
+    constexpr std::string_view KeyPort = "port";
+    constexpr std::string_view KeySecret = "secret";
+    constexpr std::string_view KeyDescription = "description";
 } // namespace
 
 template <>
@@ -112,8 +113,6 @@ std::vector<Node> loadNodesFromDirectory(std::string_view directory) {
                 fmt::format("Found node without an IP address: {}", node)
             );
         }
-        // @TODO (abock, 2020-02-26) Add a clever check that makes sure the passed value
-        // is a valid DNS name or IP address
 
         if (node.port <= 0 || node.port >= 65536) {
             throw std::runtime_error(

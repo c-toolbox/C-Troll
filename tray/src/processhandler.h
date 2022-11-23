@@ -65,8 +65,7 @@ public:
 
 public slots:
     void newConnection();
-    void handleSocketMessage(const nlohmann::json& message,
-        const std::string& peerAddress);
+    void handleSocketMessage(const nlohmann::json& message, const std::string& peer);
 
 signals:
     void sendSocketMessage(const nlohmann::json& message, bool printMessage = true);

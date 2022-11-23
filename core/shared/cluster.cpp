@@ -42,10 +42,10 @@
 #include <string_view>
 
 namespace {
-    constexpr const char* KeyName = "name";
-    constexpr const char* KeyEnabled = "enabled";
-    constexpr const char* KeyNodes = "nodes";
-    constexpr const char* KeyDescription = "description";
+    constexpr std::string_view KeyName = "name";
+    constexpr std::string_view KeyEnabled = "enabled";
+    constexpr std::string_view KeyNodes = "nodes";
+    constexpr std::string_view KeyDescription = "description";
 } // namespace
 
 void from_json(const nlohmann::json& j, Cluster& c) {

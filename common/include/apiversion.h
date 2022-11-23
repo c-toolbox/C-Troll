@@ -35,8 +35,10 @@
 #ifndef __COMMON__APIVERSION_H__
 #define __COMMON__APIVERSION_H__
 
+#include <string_view>
+
 namespace api {
-    constexpr const char* Version = "1.0.0";
+    constexpr std::string_view Version = "1.0.0";
 } // namespace api
 
 #endif // __COMMON__APIVERSION_H__

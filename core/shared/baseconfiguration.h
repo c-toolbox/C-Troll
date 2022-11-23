@@ -36,10 +36,11 @@
 #define __SHARED__BASECONFIGURATION_H__
 
 #include <nlohmann/json.hpp>
+#include <string>
 
 // @VER2:  Change the names of the folders to either all plural or all singular
 struct BaseConfiguration {
-    static constexpr const char* ConfigurationFile = "config.json";
+    static std::string ConfigurationFile;
 
     /// The path that contains the JSON objects describing the available applications
     std::string applicationPath = "application";

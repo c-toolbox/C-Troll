@@ -34,9 +34,11 @@
 
 #include "logconfiguration.h"
 
+#include <string_view>
+
 namespace {
-    constexpr const char* KeyLogRotationFrequency = "frequency";
-    constexpr const char* KeyLogRotationKeepPrevious = "keepPrevious";
+    constexpr std::string_view KeyLogRotationFrequency = "frequency";
+    constexpr std::string_view KeyLogRotationKeepPrevious = "keepPrevious";
 } // namespace
 
 namespace common {

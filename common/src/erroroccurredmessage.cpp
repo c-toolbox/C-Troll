@@ -35,8 +35,8 @@
 #include "erroroccurredmessage.h"
 
 namespace {
-    constexpr const char* KeyError = "error";
-    constexpr const char* KeyLastMessages = "lastMessages";
+    constexpr std::string_view KeyError = "error";
+    constexpr std::string_view KeyLastMessages = "lastMessages";
 } // namespace
 
 namespace common {

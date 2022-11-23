@@ -66,9 +66,7 @@ ProgramDialog::Configuration::Configuration() {
     layout->addWidget(parameters);
 
     description = new QLineEdit;
-    description->setToolTip(
-        "Additional information for the user about this configuration"
-    );
+    description->setToolTip("Additional user information about this configuration");
     description->setPlaceholderText("optional");
     layout->addWidget(description);
 }
@@ -83,7 +81,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     , _programPath(std::move(programPath))
     , _clusterPath(std::move(clusterPath))
 {
-    setWindowTitle(QString::fromStdString("Program: " + _programPath));
+    setWindowTitle(QString::fromStdString(fmt::format("Program: ", _programPath)));
 
     QBoxLayout* layout = new QVBoxLayout(this);
 
@@ -153,7 +151,6 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
         _description->setToolTip("Additional information for the user about the program");
         _description->setPlaceholderText("optional");
         editLayout->addWidget(_description, 6, 1);
-
 
         editLayout->addWidget(new Spacer, 7, 0, 1, 2);
 

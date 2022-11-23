@@ -35,14 +35,14 @@
 #include "traystatusmessage.h"
 
 namespace {
-    constexpr const char* KeyProcesses = "processes";
+    constexpr std::string_view KeyProcesses = "processes";
 
-    constexpr const char* KeyProcessId = "processId";
-    constexpr const char* KeyProgramId = "programId";
-    constexpr const char* KeyConfigurationId = "configurationId";
-    constexpr const char* KeyClusterId = "clusterId";
-    constexpr const char* KeyNodeId = "nodeId";
-    constexpr const char* KeyDataHash = "datahash";
+    constexpr std::string_view KeyProcessId = "processId";
+    constexpr std::string_view KeyProgramId = "programId";
+    constexpr std::string_view KeyConfigurationId = "configurationId";
+    constexpr std::string_view KeyClusterId = "clusterId";
+    constexpr std::string_view KeyNodeId = "nodeId";
+    constexpr std::string_view KeyDataHash = "datahash";
 } // namespace
 
 namespace common {

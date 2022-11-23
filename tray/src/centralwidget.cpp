@@ -59,8 +59,7 @@ CentralWidget::CentralWidget() {
 }
 
 void CentralWidget::setPort(int port) {
-    std::string p = fmt::format("Port: {}", port);
-    _portLabel->setText(QString::fromStdString(p));
+    _portLabel->setText(QString::fromStdString(fmt::format("Port: {}", port)));
 }
 
 void CentralWidget::log(std::string msg) {

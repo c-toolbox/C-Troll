@@ -35,7 +35,7 @@
 #include "exitcommandmessage.h"
 
 namespace {
-    constexpr const char* KeyId = "id";
+    constexpr std::string_view KeyId = "id";
 } // namespace
 
 namespace common {

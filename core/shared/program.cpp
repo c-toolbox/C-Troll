@@ -38,22 +38,23 @@
 #include "logging.h"
 #include <fmt/format.h>
 #include <assert.h>
+#include <string_view>
 
 namespace {
-    constexpr const char* KeyName = "name";
-    constexpr const char* KeyExecutable = "executable";
-    constexpr const char* KeyCommandlineParameters = "commandlineParameters";
-    constexpr const char* KeyWorkingDirectory = "workingDirectory";
-    constexpr const char* KeyClusters = "clusters";
-    constexpr const char* KeyTags = "tags";
-    constexpr const char* KeyDescription = "description";
-    constexpr const char* KeySendConsole = "shouldForwardMessages";
-    constexpr const char* KeyDelay = "delay";
-    constexpr const char* KeyConfigurations = "configurations";
+    constexpr std::string_view KeyName = "name";
+    constexpr std::string_view KeyExecutable = "executable";
+    constexpr std::string_view KeyCommandlineParameters = "commandlineParameters";
+    constexpr std::string_view KeyWorkingDirectory = "workingDirectory";
+    constexpr std::string_view KeyClusters = "clusters";
+    constexpr std::string_view KeyTags = "tags";
+    constexpr std::string_view KeyDescription = "description";
+    constexpr std::string_view KeySendConsole = "shouldForwardMessages";
+    constexpr std::string_view KeyDelay = "delay";
+    constexpr std::string_view KeyConfigurations = "configurations";
 
-    constexpr const char* KeyConfigurationName = "name";
-    constexpr const char* KeyConfigurationParameters = "parameters";
-    constexpr const char* KeyConfigurationDescription = "description";
+    constexpr std::string_view KeyConfigurationName = "name";
+    constexpr std::string_view KeyConfigurationParameters = "parameters";
+    constexpr std::string_view KeyConfigurationDescription = "description";
 } // namespace
 
 void from_json(const nlohmann::json& j, Program::Configuration& p) {

@@ -35,12 +35,12 @@
 #include "configuration.h"
 
 namespace {
-    constexpr const char* KeyPort = "port";
-    constexpr const char* KeySecret = "secret";
-    constexpr const char* KeyShowWindow = "showWindow";
+    constexpr std::string_view KeyPort = "port";
+    constexpr std::string_view KeySecret = "secret";
+    constexpr std::string_view KeyShowWindow = "showWindow";
 
-    constexpr const char* KeyLogFile = "logFile";
-    constexpr const char* KeyLogRotation = "logRotation";
+    constexpr std::string_view KeyLogFile = "logFile";
+    constexpr std::string_view KeyLogRotation = "logRotation";
 } // namespace
 
 void to_json(nlohmann::json& j, const Configuration& c) {

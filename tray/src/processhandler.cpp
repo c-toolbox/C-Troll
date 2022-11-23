@@ -56,8 +56,8 @@ namespace {
             case QProcess::WriteError:    return PSM::Status::WriteError;
             case QProcess::ReadError:     return PSM::Status::ReadError;
             case QProcess::UnknownError:  return PSM::Status::UnknownError;
-            default:                   throw std::logic_error("Unhandled case exception");
         }
+        throw std::logic_error("Unhandled case exception");
     }
 
     common::ProcessStatusMessage::Status toTrayStatus(QProcess::ExitStatus status) {
@@ -65,8 +65,8 @@ namespace {
         switch (status) {
             case QProcess::NormalExit: return PSM::Status::NormalExit;
             case QProcess::CrashExit:  return PSM::Status::CrashExit;
-            default:                   throw std::logic_error("Unhandled case exception");
         }
+        throw std::logic_error("Unhandled case exception");
     }
 } // namespace
 
@@ -88,7 +88,7 @@ void ProcessHandler::newConnection() {
 }
 
 void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
-                                         const std::string& peerAddress)
+                                         const std::string& peer)
 {
     try {
         const bool validMessage = common::isValidMessage(message);
@@ -100,7 +100,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
 
         if (common::isValidMessage<common::StartCommandMessage>(message)) {
             common::StartCommandMessage command = message;
-            Log(fmt::format("Received [{}]", peerAddress), message.dump());
+            Log(fmt::format("Received [{}]", peer), message.dump());
 
             // Check if the identifier of traycommand already is tied to a process
             // We don't allow the same id for multiple processes
@@ -116,7 +116,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
         }
         else if (common::isValidMessage<common::ExitCommandMessage>(message)) {
             common::ExitCommandMessage command = message;
-            Log(fmt::format("Received [{}]", peerAddress), message.dump());
+            Log(fmt::format("Received [{}]", peer), message.dump());
 
             // Check if the identifier of traycommand already is tied to a process
             // We don't allow the same id for multiple processes
@@ -145,7 +145,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
             }
         }
         else if (common::isValidMessage<common::KillAllMessage>(message)) {
-            Log(fmt::format("Received [{}]", peerAddress), message.dump());
+            Log(fmt::format("Received [{}]", peer), message.dump());
 
             for (const ProcessInfo& p : _processes) {
                 Log("Killing", fmt::format("Process {}", p.processId));
@@ -156,7 +156,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
             _processes.clear();
         }
         else if (common::isValidMessage<common::KillTrayMessage>(message)) {
-            Log(fmt::format("Received [{}]", peerAddress), message.dump());
+            Log(fmt::format("Received [{}]", peer), message.dump());
 
             emit closeApplication();
         }

@@ -39,18 +39,12 @@
 
 namespace common {
 
-bool validateMessage(const nlohmann::json& message) {
-    const bool hasType = message.find(Message::KeyType) != message.end();
-    const bool hasVersion = message.find(Message::KeyVersion) != message.end();
-    return hasType && hasVersion;
-}
-
 void validateMessage(const nlohmann::json& message, std::string_view expectedType) {
     // Sanity checks
     const std::string type = message.at(Message::KeyType).get<std::string>();
     if (type != expectedType) {
         throw std::logic_error(fmt::format(
-            "Validation failed. Expected type {}, got {}", expectedType, type
+            "Validation failed. Expected type '{}', got '{}'", expectedType, type
         ));
     }
 
@@ -58,8 +52,7 @@ void validateMessage(const nlohmann::json& message, std::string_view expectedTyp
     if (version != Message::CurrentVersion) {
         throw std::runtime_error(fmt::format(
             "Mismatching version number. Expected {} got {}",
-            Message::CurrentVersion,
-            version
+            Message::CurrentVersion, version
         ));
     }
 }

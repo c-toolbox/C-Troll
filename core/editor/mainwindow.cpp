@@ -49,8 +49,6 @@
 #include <functional>
 
 namespace {
-    constexpr const char* Title = "Editor";
-
     QTreeView* createTreeView(const std::string& folder,
                               std::function<void(const std::string&)> editFunction)
     {
@@ -91,7 +89,7 @@ MainWindow::MainWindow(std::string applicationPath, std::string clusterPath,
     , _clusterPath(std::move(clusterPath))
     , _nodePath(std::move(nodePath))
 {
-    setWindowTitle(Title);
+    setWindowTitle("Editor");
 
     QWidget* center = new QWidget;
     QGridLayout* layout = new QGridLayout(center);

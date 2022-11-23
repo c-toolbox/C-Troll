@@ -52,14 +52,11 @@
 #include <iostream>
 #include <numeric>
 #include <set>
+#include <string_view>
 #include <thread>
 
-namespace {
-    constexpr const char* Title = "C-Troll";
-} // namespace
-
 MainWindow::MainWindow() {
-    setWindowTitle(Title);
+    setWindowTitle("C-Troll");
 
     //
     // Set up the logging
@@ -90,7 +87,8 @@ MainWindow::MainWindow() {
         );
 
         nlohmann::json obj = Configuration();
-        std::ofstream file(BaseConfiguration::ConfigurationFile);
+        std::ofstream file =
+            std::ofstream(std::string(BaseConfiguration::ConfigurationFile));
         file << obj.dump(2);
     }
     std::cout << fmt::format(

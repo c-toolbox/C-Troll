@@ -211,7 +211,6 @@ signals:
 private:
     QWidget* createControls();
     QWidget* createPrograms();
-    QWidget* createCustomProgramControl();
 
     void updatedVisibilityState();
 

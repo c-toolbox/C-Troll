@@ -58,19 +58,19 @@ namespace common {
  * \return A constructed object T that is initialized from the JSON file \p jsonFile
  */
 template <typename T>
-T loadFromJson(const std::string& jsonFile) {
-    std::ifstream f(jsonFile);
+T loadFromJson(std::string_view jsonFile) {
+    std::ifstream f = std::ifstream(std::string(jsonFile));
     nlohmann::json obj;
     f >> obj;
     return T(obj);
 }
 
 template <typename T>
-void saveToJson(const std::string& filename, const T& value) {
+void saveToJson(std::string_view filename, const T& value) {
     nlohmann::json obj;
     to_json(obj, value);
 
-    std::ofstream j(filename);
+    std::ofstream j = std::ofstream(std::string(filename));
     j << obj.dump(2);
 }
 

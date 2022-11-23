@@ -39,16 +39,14 @@
 #include <random>
 
 namespace {
+    std::vector<std::unique_ptr<Cluster>> gClusters;
+    std::vector<std::unique_ptr<Node>> gNodes;
+    std::vector<std::unique_ptr<Program>> gPrograms;
+    std::vector<std::unique_ptr<Process>> gProcesses;
 
-std::vector<std::unique_ptr<Cluster>> gClusters;
-std::vector<std::unique_ptr<Node>> gNodes;
-std::vector<std::unique_ptr<Program>> gPrograms;
-std::vector<std::unique_ptr<Process>> gProcesses;
+    std::vector<Color> gTagColors;
 
-std::vector<Color> gTagColors;
-
-std::size_t gDataHash = 0;
-
+    std::size_t gDataHash = 0;
 } // namespace
 
 namespace data {

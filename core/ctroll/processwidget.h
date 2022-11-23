@@ -53,8 +53,7 @@ class QTimer;
 class ProcessWidget : public QWidget {
 Q_OBJECT
 public:
-    ProcessWidget(Process::ID processId,
-        const std::chrono::milliseconds& timeout);
+    ProcessWidget(Process::ID processId, const std::chrono::milliseconds& timeout);
     ~ProcessWidget();
 
     void addToLayout(QGridLayout* layout, int row);

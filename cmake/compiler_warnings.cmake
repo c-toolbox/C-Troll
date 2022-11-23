@@ -71,6 +71,7 @@ function (set_project_warnings project_name)
     /w14906 # string literal cast to 'LPWSTR'
     /w14928 # illegal copy-initialization; more than one user-defined
             # conversion has been implicitly applied
+    /w44061 # enumerator 'identifier' in switch of enum 'enumeration' is not explicitly handled by a case label
     /wd4619 # #pragma warning: there is no warning number '4345'
   )
 

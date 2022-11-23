@@ -50,7 +50,6 @@ class QSpinBox;
 
 class ColorWidget : public QWidget {
 Q_OBJECT
-
 public:
     ColorWidget(Color color);
 
@@ -75,7 +74,6 @@ private:
 
 class SettingsWidget : public QWidget {
 Q_OBJECT
-
 public:
     SettingsWidget(Configuration configuration, std::string filePath);
 

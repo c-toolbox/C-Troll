@@ -80,8 +80,8 @@ namespace {
                 case Response::Unauthorized: return "401 Unauthorized";
                 case Response::Forbidden: return "403 Forbidden";
                 case Response::NotFound: return "404 Not Found";
-                default: throw std::logic_error("Unhandled case label");
             }
+            throw std::logic_error("Unhandled case label");
         }(response);
 
         const std::string status = fmt::format("HTTP/1.1 {}\n", code);
