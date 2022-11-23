@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2020                                                             *
+ * Copyright (c) 2016 - 2022                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -91,7 +91,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                                          const std::string& peerAddress)
 {
     try {
-        const bool validMessage = common::validateMessage(message);
+        const bool validMessage = common::isValidMessage(message);
         if (!validMessage) {
             return;
         }

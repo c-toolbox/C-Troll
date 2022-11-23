@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016 - 2020                                                             *
+ * Copyright (c) 2016 - 2022                                                             *
  * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
  *                                                                                       *
  * All rights reserved.                                                                  *
@@ -107,7 +107,7 @@ void JsonSocket::readToBuffer() {
 
         parseBuffer();
     }
-    catch (const std::exception& e) {
+    catch (const std::exception&) {
         ::Log("JsonSocket::readToBuffer", "Caught exception when trying to read buffer");
         ::Log("JsonSocket::readToBuffer (Buffer Size", std::to_string(_buffer.size()));
         ::Log(
