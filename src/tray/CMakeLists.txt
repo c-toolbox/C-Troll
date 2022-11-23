@@ -68,18 +68,6 @@ add_executable(Tray WIN32 MACOSX_BUNDLE
   ${RESOURCE_FILES}
   ${CMAKE_SOURCE_DIR}/resources/icon.rc
 )
-
 target_link_libraries(Tray PUBLIC core Qt6::Core Qt6::Widgets Qt6::Network)
 qt_disable_unicode_defines(Tray)
-
-# Find the windeployqt application
-get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
-get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
-find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
-add_custom_command(
-  TARGET Tray POST_BUILD
-  COMMAND "${CMAKE_COMMAND}" -E env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime \"$<TARGET_FILE:Tray>\"
-  COMMENT "Deploying Qt libraries"
-)
-
 qt_finalize_target(Tray)
