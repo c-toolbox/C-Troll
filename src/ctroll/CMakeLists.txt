@@ -1,7 +1,7 @@
 ##########################################################################################
 #                                                                                        #
 # Copyright (c) 2016 - 2022                                                              #
-# Alexander Bock, Erik Sundén, Emil Axelsson                                             #
+# Alexander Bock, Erik Sunden, Emil Axelsson                                             #
 #                                                                                        #
 # All rights reserved.                                                                   #
 #                                                                                        #
@@ -32,6 +32,73 @@
 #                                                                                        #
 ##########################################################################################
 
-add_subdirectory(shared)
-add_subdirectory(ctroll)
-add_subdirectory(editor)
+set(HEADER_FILES
+  clusterconnectionhandler.h
+  clusterwidget.h
+  color.h
+  configuration.h
+  database.h
+  logwidget.h
+  mainwindow.h
+  process.h
+  processwidget.h
+  programwidget.h
+  restconnectionhandler.h
+  settingswidget.h
+)
+
+set(SOURCE_FILES
+  clusterconnectionhandler.cpp
+  clusterwidget.cpp
+  color.cpp
+  configuration.cpp
+  database.cpp
+  logwidget.cpp
+  mainwindow.cpp
+  process.cpp
+  processwidget.cpp
+  programwidget.cpp
+  restconnectionhandler.cpp
+  settingswidget.cpp
+)
+
+find_package(Qt6 COMPONENTS Core Gui Network Widgets REQUIRED)
+
+set(MOC_FILES "")
+qt_wrap_cpp(
+  MOC_FILES
+  clusterconnectionhandler.h
+  clusterwidget.h
+  mainwindow.h
+  processwidget.h
+  programwidget.h
+  restconnectionhandler.h
+  settingswidget.h
+)
+
+set(RESOURCE_FILES "")
+qt_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
+
+add_executable(C-Troll WIN32 MACOSX_BUNDLE
+  main.cpp
+  ${SOURCE_FILES}
+  ${HEADER_FILES}
+  ${MOC_FILES}
+  ${RESOURCE_FILES}
+  ${CMAKE_SOURCE_DIR}/resources/icon.rc
+)
+target_include_directories(C-Troll PUBLIC "src")
+target_link_libraries(C-Troll PUBLIC core Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
+qt_disable_unicode_defines(C-Troll)
+
+# Find the windeployqt application
+get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
+get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+add_custom_command(
+  TARGET C-Troll POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" -E env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime \"$<TARGET_FILE:C-Troll>\"
+  COMMENT "Deploying Qt libraries"
+)
+
+qt_finalize_target(C-Troll)

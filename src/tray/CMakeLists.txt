@@ -33,29 +33,29 @@
 ##########################################################################################
 
 set(HEADER_FILES
-  src/centralwidget.h
-  src/configuration.h
-  src/mainwindow.h
-  src/processhandler.h
-  src/sockethandler.h
-  src/version.h
+  centralwidget.h
+  configuration.h
+  mainwindow.h
+  processhandler.h
+  sockethandler.h
+  version.h
 )
 
 set(SOURCE_FILES
-  src/centralwidget.cpp
-  src/configuration.cpp
-  src/main.cpp
-  src/mainwindow.cpp
-  src/processhandler.cpp
-  src/sockethandler.cpp
+  centralwidget.cpp
+  configuration.cpp
+  main.cpp
+  mainwindow.cpp
+  processhandler.cpp
+  sockethandler.cpp
 )
 
 set(MOC_FILES "")
 qt_wrap_cpp(MOC_FILES
-  src/centralwidget.h
-  src/mainwindow.h
-  src/processhandler.h
-  src/sockethandler.h
+  centralwidget.h
+  mainwindow.h
+  processhandler.h
+  sockethandler.h
 )
 
 set(RESOURCE_FILES "")
@@ -69,7 +69,7 @@ add_executable(Tray WIN32 MACOSX_BUNDLE
   ${CMAKE_SOURCE_DIR}/resources/icon.rc
 )
 
-target_link_libraries(Tray PUBLIC common Qt6::Core Qt6::Widgets Qt6::Network)
+target_link_libraries(Tray PUBLIC core Qt6::Core Qt6::Widgets Qt6::Network)
 qt_disable_unicode_defines(Tray)
 
 # Find the windeployqt application
