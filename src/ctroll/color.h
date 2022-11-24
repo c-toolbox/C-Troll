@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__COLOR_H__
-#define __CORE__COLOR_H__
+#ifndef __CTROLL__COLOR_H__
+#define __CTROLL__COLOR_H__
 
 #include <nlohmann/json.hpp>
 
@@ -48,4 +48,4 @@ bool operator==(const Color& lhs, const Color& rhs);
 void to_json(nlohmann::json& j, const Color& c);
 void from_json(const nlohmann::json& j, Color& c);
 
-#endif // __COLOR__COLOR_H__
+#endif // __CTROLL__COLOR_H__

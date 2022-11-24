@@ -53,7 +53,6 @@ set(HEADER_FILES
   include/startcommandmessage.h
   include/traystatusmessage.h
   include/typedid.h
-  include/version.h
 )
 
 set(SOURCE_FILES
@@ -82,14 +81,14 @@ qt_wrap_cpp(
   include/jsonsocket.h
 )
 
-add_library(core
+add_library(common
   ${SOURCE_FILES}
   ${HEADER_FILES}
   ${MOC_FILES}
   ${RESOURCE_FILES}
 )
 
-target_include_directories(core PUBLIC "include")
-target_include_directories(core SYSTEM PUBLIC "ext" "ext/fmt/include")
-target_link_libraries(core PUBLIC project_options fmt nlohmann_json Qt::Core Qt::Widgets Qt::Network simplecrypt)
-qt_disable_unicode_defines(core)
+target_include_directories(common PUBLIC "include")
+target_include_directories(common SYSTEM PUBLIC "ext" "ext/fmt/include")
+target_link_libraries(common PUBLIC project_options fmt nlohmann_json Qt::Core Qt::Widgets Qt::Network simplecrypt)
+qt_disable_unicode_defines(common)

@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__PROGRAMWIDGET_H__
-#define __CORE__PROGRAMWIDGET_H__
+#ifndef __CTROLL__PROGRAMWIDGET_H__
+#define __CTROLL__PROGRAMWIDGET_H__
 
 #include <QGroupBox>
 #include <QPushButton>
@@ -225,4 +225,4 @@ private:
 
 } // namespace programs
 
-#endif // __CORE__PROGRAMWIDGET_H__
+#endif // __CTROLL__PROGRAMWIDGET_H__

@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__CLUSTERWIDGET_H__
-#define __CORE__CLUSTERWIDGET_H__
+#ifndef __CTROLL__CLUSTERWIDGET_H__
+#define __CTROLL__CLUSTERWIDGET_H__
 
 #include <QGroupBox>
 #include <QScrollArea>
@@ -130,4 +130,4 @@ private:
     std::map<Cluster::ID, ClusterWidget*> _clusterWidgets;
 };
 
-#endif // __CORE__CLUSTERWIDGET_H__
+#endif // __CTROLL__CLUSTERWIDGET_H__

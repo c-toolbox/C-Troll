@@ -32,42 +32,17 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CTROLL__PROCESS_H__
-#define __CTROLL__PROCESS_H__
+#ifndef __COMMON__APIVERSION_H__
+#define __COMMON__APIVERSION_H__
 
-#include "exitcommandmessage.h"
-#include "node.h"
-#include "processstatusmessage.h"
-#include "program.h"
-#include "startcommandmessage.h"
-#include "typedid.h"
+#include <string_view>
 
-struct Process {
-    using ID = TypedId<int, struct ProcessIdTag>;
+namespace api {
+    constexpr int MajorVersion = 1;
+    constexpr int MinorVersion = 0;
+    constexpr int PatchVersion = 0;
 
-    Process(Program::ID programId, Program::Configuration::ID configurationId,
-        Cluster::ID clusterId, Node::ID NodeId);
+    constexpr std::string_view Version = "1.0.0";
+} // namespace api
 
-    // Explicitely setting the ID;  only use this constructor if you are absolutely sure
-    // what you are doing as the process id is used as a unique identifier
-    Process(ID id, Program::ID programId, Program::Configuration::ID configurationId,
-        Cluster::ID clusterId, Node::ID NodeId);
-
-    const ID id;
-    const Program::ID programId;
-    const Program::Configuration::ID configurationId;
-    const Cluster::ID clusterId;
-    const Node::ID nodeId;
-    common::ProcessStatusMessage::Status status;
-
-    static void setNextIdIfHigher(int id);
-
-private:
-    static int nextId;
-};
-
-common::StartCommandMessage startProcessCommand(const Process& process);
-common::ExitCommandMessage exitProcessCommand(const Process& process);
-
-
-#endif // __CTROLL__PROCESS_H__
+#endif // __COMMON__APIVERSION_H__

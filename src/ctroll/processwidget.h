@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__PROCESSWIDGET_H__
-#define __CORE__PROCESSWIDGET_H__
+#ifndef __CTROLL__PROCESSWIDGET_H__
+#define __CTROLL__PROCESSWIDGET_H__
 
 #include <QWidget>
 
@@ -118,4 +118,4 @@ private:
     std::map<Process::ID, ProcessWidget*> _widgets;
 };
 
-#endif // __CORE__PROCESSWIDGET_H__
+#endif // __CTROLL__PROCESSWIDGET_H__

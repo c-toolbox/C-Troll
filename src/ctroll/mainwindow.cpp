@@ -34,6 +34,7 @@
 
 #include "mainwindow.h"
 
+#include "apiversion.h"
 #include "clusterwidget.h"
 #include "database.h"
 #include "jsonload.h"
@@ -43,7 +44,9 @@
 #include "programwidget.h"
 #include "restconnectionhandler.h"
 #include "settingswidget.h"
+#include "version.h"
 #include <QApplication>
+#include <QMenu>
 #include <QMessageBox>
 #include <QTabBar>
 #include <QTimer>

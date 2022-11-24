@@ -1,6 +1,6 @@
 {
-  "applicationPath": "application",
-  "clusterPath": "cluster",
+  "applicationPath": "applications",
+  "clusterPath": "clusters",
   "nodePath": "nodes",
   "rest": {}
 }

@@ -128,7 +128,7 @@ endif ()
 
 
 
-add_subdirectory(core)
+add_subdirectory(common)
 add_subdirectory(ctroll)
 add_subdirectory(editor)
 add_subdirectory(tray)

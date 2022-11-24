@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__SETTINGSWIDGET_H__
-#define __CORE__SETTINGSWIDGET_H__
+#ifndef __CTROLL__SETTINGSWIDGET_H__
+#define __CTROLL__SETTINGSWIDGET_H__
 
 #include <QWidget>
 
@@ -121,4 +121,4 @@ private:
     const std::string _configurationFilePath;
 };
 
-#endif // __CORE__SETTINGSWIDGET_H__
+#endif // __CTROLL__SETTINGSWIDGET_H__

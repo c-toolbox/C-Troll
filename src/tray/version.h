@@ -35,6 +35,10 @@
 #ifndef __TRAY__VERSION_H__
 #define __TRAY__VERSION_H__
 
+constexpr int MajorVersion = 1;
+constexpr int MinorVersion = 0;
+constexpr int PatchVersion = 0;
+
 constexpr const char* Version = "1.0.0";
 
 #endif // __TRAY__VERSION_H__

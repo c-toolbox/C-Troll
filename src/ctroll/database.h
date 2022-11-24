@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__DATABASE_H__
-#define __CORE__DATABASE_H__
+#ifndef __CTROLL__DATABASE_H__
+#define __CTROLL__DATABASE_H__
 
 #include "cluster.h"
 #include "color.h"
@@ -88,4 +88,4 @@ std::size_t dataHash();
 
 } // namespace data
 
-#endif // __CORE__DATABASE_H__
+#endif // __CTROLL__DATABASE_H__

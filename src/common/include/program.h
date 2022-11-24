@@ -32,20 +32,63 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __SHARED__TYPED_ID_H__
-#define __SHARED__TYPED_ID_H__
+#ifndef __COMMON__PROGRAM_H__
+#define __COMMON__PROGRAM_H__
 
-template <typename T, typename Tag>
-struct TypedId {
-    constexpr TypedId() = default;
-    constexpr explicit TypedId(T value) : v(value) {}
+#include "cluster.h"
+#include "typedid.h"
+#include <nlohmann/json.hpp>
+#include <chrono>
+#include <optional>
+#include <string>
+#include <vector>
 
-    constexpr bool operator==(const TypedId& rhs) const { return v == rhs.v; }
-    constexpr TypedId& operator=(int value) { v = value; return *this; }
+struct Program {
+    struct Configuration {
+        using ID = TypedId<int, struct ConfigurationTag>;
 
-    constexpr bool operator<(const TypedId& rhs) const { return v < rhs.v; }
+        /// Unique identifier of the configuration
+        ID id{ -1 };
 
-    T v = T(0);
+        /// User-facing name of the configuration
+        std::string name;
+
+        /// Commandline parameters that are associated with the configuration
+        std::string parameters;
+
+        /// A user-friendly description that better identifies this configuration
+        std::string description;
+    };
+
+    using ID = TypedId<int, struct ProgramTag>;
+
+    /// A unique identifier
+    ID id = ID(-1);
+    /// A human readable name for this Program
+    std::string name;
+    /// The full path to the executable
+    std::string executable;
+    /// A fixed set of commandline parameters
+    std::string commandlineParameters;
+    /// The current working directory from which the Program is started
+    std::string workingDirectory;
+    /// If this is set to 'true', child processes will forward the Std and error streams
+    bool shouldForwardMessages = false;
+    /// An optional delay that is introduced between startup of individual instances
+    std::optional<std::chrono::milliseconds> delay;
+    /// A list of tags that are associated with this Program
+    std::vector<std::string> tags;
+    /// A user-friendly description that potentially better identifies the whole program
+    std::string description;
+    /// List of all configurations
+    std::vector<Configuration> configurations;
+    /// List of all clusters
+    std::vector<std::string> clusters;
 };
 
-#endif // __SHARED__TYPED_ID_H__
+std::vector<Program> loadProgramsFromDirectory(std::string_view directory);
+
+void from_json(const nlohmann::json& j, Program& p);
+void to_json(nlohmann::json& j, const Program& p);
+
+#endif // __COMMON__PROGRAM_H__

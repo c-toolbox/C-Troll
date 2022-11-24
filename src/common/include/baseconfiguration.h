@@ -32,9 +32,24 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__VERSION_H__
-#define __CORE__VERSION_H__
+#ifndef __COMMON__BASECONFIGURATION_H__
+#define __COMMON__BASECONFIGURATION_H__
 
-constexpr const char* Version = "1.0.1";
+#include <nlohmann/json.hpp>
+#include <string>
 
-#endif // __CORE__VERSION_H__
+struct BaseConfiguration {
+    static std::string ConfigurationFile;
+
+    /// The path that contains the JSON objects describing the available applications
+    std::string applicationPath = "applications";
+    /// The path that contains the JSON objects describing the available clusters
+    std::string clusterPath = "clusters";
+    /// The path that contains the JSON objects describing the available nodes
+    std::string nodePath = "nodes";
+};
+
+void to_json(nlohmann::json& j, const BaseConfiguration& c);
+void from_json(const nlohmann::json& j, BaseConfiguration& c);
+
+#endif // __COMMON__BASECONFIGURATION_H__

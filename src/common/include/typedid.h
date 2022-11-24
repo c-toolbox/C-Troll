@@ -32,13 +32,20 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __COMMON__APIVERSION_H__
-#define __COMMON__APIVERSION_H__
+#ifndef __COMMON__TYPED_ID_H__
+#define __COMMON__TYPED_ID_H__
 
-#include <string_view>
+template <typename T, typename Tag>
+struct TypedId {
+    constexpr TypedId() = default;
+    constexpr explicit TypedId(T value) : v(value) {}
 
-namespace api {
-    constexpr std::string_view Version = "1.0.0";
-} // namespace api
+    constexpr bool operator==(const TypedId& rhs) const { return v == rhs.v; }
+    constexpr TypedId& operator=(int value) { v = value; return *this; }
 
-#endif // __COMMON__APIVERSION_H__
+    constexpr bool operator<(const TypedId& rhs) const { return v < rhs.v; }
+
+    T v = T(0);
+};
+
+#endif // __COMMON__TYPED_ID_H__

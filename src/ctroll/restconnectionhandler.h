@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__RESTCONNECTIONHANDLER_H__
-#define __CORE__RESTCONNECTIONHANDLER_H__
+#ifndef __CTROLL__RESTCONNECTIONHANDLER_H__
+#define __CTROLL__RESTCONNECTIONHANDLER_H__
 
 #include <QObject>
 
@@ -81,4 +81,4 @@ private:
     std::string _secret;
 };
 
-#endif // __CORE_RESTCONNECTIONHANDLER_H__
+#endif // __CTROLL_RESTCONNECTIONHANDLER_H__

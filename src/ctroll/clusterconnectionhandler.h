@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__CLUSTERCONNECTIONHANDLER_H__
-#define __CORE__CLUSTERCONNECTIONHANDLER_H__
+#ifndef __CTROLL__CLUSTERCONNECTIONHANDLER_H__
+#define __CTROLL__CLUSTERCONNECTIONHANDLER_H__
 
 #include <QObject>
 
@@ -76,4 +76,4 @@ private:
     std::map<Node::ID, std::unique_ptr<common::JsonSocket>> _sockets;
 };
 
-#endif // __CORE__CLUSTERCONNECTIONHANDLER_H__
+#endif // __CTROLL__CLUSTERCONNECTIONHANDLER_H__

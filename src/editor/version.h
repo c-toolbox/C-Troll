@@ -32,25 +32,13 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __SHARED__BASECONFIGURATION_H__
-#define __SHARED__BASECONFIGURATION_H__
+#ifndef __EDITOR__VERSION_H__
+#define __EDITOR__VERSION_H__
 
-#include <nlohmann/json.hpp>
-#include <string>
+constexpr int MajorVersion = 1;
+constexpr int MinorVersion = 0;
+constexpr int PatchVersion = 1;
 
-// @VER2:  Change the names of the folders to either all plural or all singular
-struct BaseConfiguration {
-    static std::string ConfigurationFile;
+constexpr const char* Version = "1.0.1";
 
-    /// The path that contains the JSON objects describing the available applications
-    std::string applicationPath = "application";
-    /// The path that contains the JSON objects describing the available clusters
-    std::string clusterPath = "cluster";
-    /// The path that contains the JSON objects describing the available nodes
-    std::string nodePath = "nodes";
-};
-
-void to_json(nlohmann::json& j, const BaseConfiguration& c);
-void from_json(const nlohmann::json& j, BaseConfiguration& c);
-
-#endif // __SHARED__BASECONFIGURATION_H__
+#endif // __EDITOR__VERSION_H__

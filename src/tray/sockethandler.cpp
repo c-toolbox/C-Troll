@@ -94,10 +94,6 @@ std::array<SocketHandler::MessageLog, 3> SocketHandler::lastMessages() const {
 }
 
 void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* socket) {
-#ifdef QT_DEBUG
-    Log(fmt::format("(Debug) Received [{}]", socket->peerAddress()), message.dump());
-#endif // QT_DEBUG
-
     common::Message msg = message;
     if (msg.secret == _secret) {
         emit messageReceived(std::move(message), socket->peerAddress());

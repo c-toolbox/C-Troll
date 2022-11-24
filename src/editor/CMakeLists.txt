@@ -41,6 +41,7 @@ set(HEADER_FILES
   programdialog.h
   removebutton.h
   spacer.h
+  version.h
 )
 
 set(SOURCE_FILES
@@ -78,6 +79,6 @@ add_executable(Editor WIN32 MACOSX_BUNDLE
   ${CMAKE_SOURCE_DIR}/resources/icon.rc
 )
 target_include_directories(Editor PUBLIC "src")
-target_link_libraries(Editor PUBLIC core Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
+target_link_libraries(Editor PUBLIC common Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
 qt_disable_unicode_defines(Editor)
 qt_finalize_target(Editor)

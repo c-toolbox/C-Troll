@@ -60,6 +60,7 @@ set(SOURCE_FILES
   programwidget.cpp
   restconnectionhandler.cpp
   settingswidget.cpp
+  version.h
 )
 
 find_package(Qt6 COMPONENTS Core Gui Network Widgets REQUIRED)
@@ -88,7 +89,7 @@ add_executable(C-Troll WIN32 MACOSX_BUNDLE
   ${CMAKE_SOURCE_DIR}/resources/icon.rc
 )
 target_include_directories(C-Troll PUBLIC "src")
-target_link_libraries(C-Troll PUBLIC core Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
+target_link_libraries(C-Troll PUBLIC common Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
 qt_disable_unicode_defines(C-Troll)
 
 # Find the windeployqt application

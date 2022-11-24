@@ -32,50 +32,46 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __SHARED__NODE_H__
-#define __SHARED__NODE_H__
+#ifndef __COMMON__CLUSTER_H__
+#define __COMMON__CLUSTER_H__
 
 #include "typedid.h"
 #include <nlohmann/json.hpp>
 
 /**
- * This struct contains information about individual computer nodes of the cluster.
- * Each node has a human-readable \m name, an \m ipAddress, and a \m port on which the
- * Tray application is listening.
+ * This structure represents a cluster setup, that is, a collection of computers that are
+ * addressed as a unit. Each cluster has a human readable \m name, a unique \m id, a
+ * setting whether or not it is \m enabled and a list of computer \m nodes.
  */
-struct Node {
-    using ID = TypedId<int, struct NodeTag>;
+struct Cluster {
+    using ID = TypedId<int, struct ClusterTag>;
 
-    /// Unique identifier for the cluster node
     ID id{ -1 };
 
-    /// The human readable name of the computer node
+    /// The human readable name of this Cluster
     std::string name;
-    /// The IP address at which the computer is reachable; this can also be a hostname
-    std::string ipAddress;
-    /// The port on which the Tray application on that computer is listening
-    int port = -1;
-    /// The secret that is sent to the tray application for authentication
-    std::string secret;
-    /// A user-friendly description that potentially better identifies the node
+
+    /// A flag whether this Cluster is enabled or disabled
+    bool isEnabled = true;
+
+    /// A user-friendly description that potentially better identifies the cluster
     std::string description;
 
-
-    /// A flag representing whether the node is connected or not
-    bool isConnected = false;
+    /// A list of all nodes belonging to this cluster
+    std::vector<std::string> nodes;
 };
 
-void from_json(const nlohmann::json& j, Node& n);
-void to_json(nlohmann::json& j, const Node& n);
+void from_json(const nlohmann::json& j, Cluster& c);
+void to_json(nlohmann::json& j, const Cluster& c);
 
 /**
  * This method walks the passed \p directory and looks for all <code>*.json</code>
- * files in it. Any \c JSON file in it will be interpreted as a node configuration and
- * returned.
- *
- * \param directory The directory that is walked in search for <code>*.json</code> files
- * \return A list of all Nodes%s that were found by walking the \p directory
+ * files in it. Any \c JSON file in it will be interpreted as a cluster configuration
+ * and returned.
+ * \param directory The directory that is walked in search for <code>*.json</code>
+ * files
+ * \return A list of all Cluster%s that were found by walking the \p directory
  */
-std::vector<Node> loadNodesFromDirectory(std::string_view directory);
+std::vector<Cluster> loadClustersFromDirectory(std::string_view directory);
 
-#endif // __SHARED__NODE_H__
+#endif // __COMMON__CLUSTER_H__

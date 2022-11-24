@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__MAINWINDOW_H__
-#define __CORE__MAINWINDOW_H__
+#ifndef __CTROLL__MAINWINDOW_H__
+#define __CTROLL__MAINWINDOW_H__
 
 #include <QMainWindow>
 
@@ -91,4 +91,4 @@ private:
     QTextEdit _messageBox;
 };
 
-#endif // __CORE__MAINWINDOW_H__
+#endif // __CTROLL__MAINWINDOW_H__

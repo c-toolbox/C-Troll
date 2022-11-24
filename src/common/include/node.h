@@ -32,63 +32,50 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __SHARED__PROGRAM_H__
-#define __SHARED__PROGRAM_H__
+#ifndef __COMMON__NODE_H__
+#define __COMMON__NODE_H__
 
-#include "cluster.h"
 #include "typedid.h"
 #include <nlohmann/json.hpp>
-#include <chrono>
-#include <optional>
-#include <string>
-#include <vector>
 
-struct Program {
-    struct Configuration {
-        using ID = TypedId<int, struct ConfigurationTag>;
+/**
+ * This struct contains information about individual computer nodes of the cluster.
+ * Each node has a human-readable \m name, an \m ipAddress, and a \m port on which the
+ * Tray application is listening.
+ */
+struct Node {
+    using ID = TypedId<int, struct NodeTag>;
 
-        /// Unique identifier of the configuration
-        ID id{ -1 };
+    /// Unique identifier for the cluster node
+    ID id{ -1 };
 
-        /// User-facing name of the configuration
-        std::string name;
-
-        /// Commandline parameters that are associated with the configuration
-        std::string parameters;
-
-        /// A user-friendly description that better identifies this configuration
-        std::string description;
-    };
-
-    using ID = TypedId<int, struct ProgramTag>;
-
-    /// A unique identifier
-    ID id = ID(-1);
-    /// A human readable name for this Program
+    /// The human readable name of the computer node
     std::string name;
-    /// The full path to the executable
-    std::string executable;
-    /// A fixed set of commandline parameters
-    std::string commandlineParameters;
-    /// The current working directory from which the Program is started
-    std::string workingDirectory;
-    /// If this is set to 'true', child processes will forward the Std and error streams
-    bool shouldForwardMessages = false;
-    /// An optional delay that is introduced between startup of individual instances
-    std::optional<std::chrono::milliseconds> delay;
-    /// A list of tags that are associated with this Program
-    std::vector<std::string> tags;
-    /// A user-friendly description that potentially better identifies the whole program
+    /// The IP address at which the computer is reachable; this can also be a hostname
+    std::string ipAddress;
+    /// The port on which the Tray application on that computer is listening
+    int port = -1;
+    /// The secret that is sent to the tray application for authentication
+    std::string secret;
+    /// A user-friendly description that potentially better identifies the node
     std::string description;
-    /// List of all configurations
-    std::vector<Configuration> configurations;
-    /// List of all clusters
-    std::vector<std::string> clusters;
+
+
+    /// A flag representing whether the node is connected or not
+    bool isConnected = false;
 };
 
-std::vector<Program> loadProgramsFromDirectory(std::string_view directory);
+void from_json(const nlohmann::json& j, Node& n);
+void to_json(nlohmann::json& j, const Node& n);
 
-void from_json(const nlohmann::json& j, Program& p);
-void to_json(nlohmann::json& j, const Program& p);
+/**
+ * This method walks the passed \p directory and looks for all <code>*.json</code>
+ * files in it. Any \c JSON file in it will be interpreted as a node configuration and
+ * returned.
+ *
+ * \param directory The directory that is walked in search for <code>*.json</code> files
+ * \return A list of all Nodes%s that were found by walking the \p directory
+ */
+std::vector<Node> loadNodesFromDirectory(std::string_view directory);
 
-#endif // __SHARED__PROGRAM_H__
+#endif // __COMMON__NODE_H__

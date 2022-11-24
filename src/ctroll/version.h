@@ -32,46 +32,13 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __SHARED__CLUSTER_H__
-#define __SHARED__CLUSTER_H__
+#ifndef __CTROLL__VERSION_H__
+#define __CTROLL__VERSION_H__
 
-#include "typedid.h"
-#include <nlohmann/json.hpp>
+constexpr int MajorVersion = 1;
+constexpr int MinorVersion = 0;
+constexpr int PatchVersion = 1;
 
-/**
- * This structure represents a cluster setup, that is, a collection of computers that are
- * addressed as a unit. Each cluster has a human readable \m name, a unique \m id, a
- * setting whether or not it is \m enabled and a list of computer \m nodes.
- */
-struct Cluster {
-    using ID = TypedId<int, struct ClusterTag>;
+constexpr const char* Version = "1.0.1";
 
-    ID id{ -1 };
-
-    /// The human readable name of this Cluster
-    std::string name;
-
-    /// A flag whether this Cluster is enabled or disabled
-    bool isEnabled = true;
-
-    /// A user-friendly description that potentially better identifies the cluster
-    std::string description;
-
-    /// A list of all nodes belonging to this cluster
-    std::vector<std::string> nodes;
-};
-
-void from_json(const nlohmann::json& j, Cluster& c);
-void to_json(nlohmann::json& j, const Cluster& c);
-
-/**
- * This method walks the passed \p directory and looks for all <code>*.json</code>
- * files in it. Any \c JSON file in it will be interpreted as a cluster configuration
- * and returned.
- * \param directory The directory that is walked in search for <code>*.json</code>
- * files
- * \return A list of all Cluster%s that were found by walking the \p directory
- */
-std::vector<Cluster> loadClustersFromDirectory(std::string_view directory);
-
-#endif // __SHARED__CLUSTER_H__
+#endif // __CTROLL__VERSION_H__

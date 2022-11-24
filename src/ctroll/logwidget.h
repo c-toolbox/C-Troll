@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__LOGWIDGET_H__
-#define __CORE__LOGWIDGET_H__
+#ifndef __CTROLL__LOGWIDGET_H__
+#define __CTROLL__LOGWIDGET_H__
 
 #include <QWidget>
 
@@ -50,4 +50,4 @@ private:
     QTextEdit _message;
 };
 
-#endif // __CORE__LOGWIDGET_H__
+#endif // __CTROLL__LOGWIDGET_H__

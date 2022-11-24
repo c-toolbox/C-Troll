@@ -32,8 +32,8 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CORE__CONFIGURATION_H__
-#define __CORE__CONFIGURATION_H__
+#ifndef __CTROLL__CONFIGURATION_H__
+#define __CTROLL__CONFIGURATION_H__
 
 #include "baseconfiguration.h"
 #include "color.h"
@@ -82,4 +82,4 @@ struct Configuration : public BaseConfiguration {
 void to_json(nlohmann::json& j, const Configuration& c);
 void from_json(const nlohmann::json& j, Configuration& c);
 
-#endif // __CORE_CONFIGURATION_H__
+#endif // __CTROLL_CONFIGURATION_H__
