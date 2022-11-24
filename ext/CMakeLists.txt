@@ -1,5 +1,5 @@
 function(set_compile_options project)
-  set(MSVC_WARNINGS /MP /ZI /permissive- /W0)
+  set(MSVC_WARNINGS /MP /permissive-)
   set(CLANG_WARNINGS -Wno-everything)
   set(GCC_WARNINGS -w)
 
@@ -11,18 +11,21 @@ function(set_compile_options project)
   else ()
     target_compile_options(${project} PRIVATE ${GCC_WARNINGS})
   endif ()
-  set_target_properties(${project} PROPERTIES FOLDER External)
 endfunction()
 
 
 add_subdirectory(catch2)
 set_compile_options(Catch2)
+set_target_properties(Catch2 PROPERTIES FOLDER External)
 set_compile_options(Catch2WithMain)
+set_target_properties(Catch2WithMain PROPERTIES FOLDER External)
 
 add_subdirectory(fmt)
 set_compile_options(fmt)
+set_target_properties(fmt PROPERTIES FOLDER External)
 
 add_subdirectory(json)
 
 add_subdirectory(simplecrypt)
 set_compile_options(simplecrypt)
+set_target_properties(simplecrypt PROPERTIES FOLDER External)
