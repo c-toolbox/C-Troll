@@ -384,67 +384,79 @@ void ProgramWidget::processUpdated(Process::ID processId) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-TagsWidget::TagsWidget()
-    : QGroupBox("Tags")
+TagsWidget::TagsWidget(QString title)
+    : QGroupBox(std::move(title))
 {
-    QBoxLayout* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(5, 5, 5, 5);
-
-    std::set<std::string> tags = data::findTags();
-    for (const std::string& tag : tags) {
-        QPushButton* button = new QPushButton(QString::fromStdString(tag));
-
-        Color color = data::colorForTag(tag);
-        constexpr const int Delta = 40;
-        Color lightColor = Color {
-            std::min(255, color.r + Delta),
-            std::min(255, color.g + Delta),
-            std::min(255, color.b + Delta),
-            ""
-        };
-        Color darkColor = Color {
-            std::max(0, color.r - Delta),
-            std::max(0, color.g - Delta),
-            std::max(0, color.b - Delta),
-            ""
-        };
-
-        std::string colorText = fmt::format(
-            R"(
-                QPushButton {{ background-color: #{0:02x}{1:02x}{2:02x}; }}
-                QPushButton:hover {{ background-color: #{3:02x}{4:02x}{5:02x}; }}
-                QPushButton:pressed {{ background-color: #{6:02x}{7:02x}{8:02x}; }}
-                QPushButton:open {{ background-color: #{6:02x}{7:02x}{8:02x}; }}
-            )",
-            color.r, color.g, color.b,
-            lightColor.r, lightColor.g, lightColor.b,
-            darkColor.r, darkColor.g, darkColor.b
-        );
-        button->setStyleSheet(QString::fromStdString(colorText));
-
-        // @TODO (abock, 2020-09-29):  Calculate the value of the background color and
-        // set a dynamic property to set the text color to either bright or dark to make
-        // the text legible regardless of what the user chose for the background color
-
-        button->setCheckable(true);
-        connect(button, &QPushButton::clicked, this, &TagsWidget::buttonPressed);
-
-        layout->addWidget(button);
-        _buttons[button] = tag;
-    }
-
-    layout->addStretch();
+    _layout = new QVBoxLayout(this);
+    _layout->setContentsMargins(5, 5, 5, 5);
+    _layout->addStretch();
 }
 
-void TagsWidget::buttonPressed() {
-    std::vector<std::string> selectedTags;
-    for (std::pair<const QPushButton*, std::string> p : _buttons) {
-        if (p.first->isChecked()) {
-            selectedTags.push_back(p.second);
+void TagsWidget::addTag(std::string tag) {
+    QPushButton* button = new QPushButton(QString::fromStdString(tag));
+
+    Color color = data::colorForTag(tag);
+    constexpr const int Delta = 40;
+    Color lightColor = Color{
+        std::min(255, color.r + Delta),
+        std::min(255, color.g + Delta),
+        std::min(255, color.b + Delta),
+        ""
+    };
+    Color darkColor = Color{
+        std::max(0, color.r - Delta),
+        std::max(0, color.g - Delta),
+        std::max(0, color.b - Delta),
+        ""
+    };
+
+    std::string colorText = fmt::format(
+        R"(
+                QPushButton {{ background-color: #{0:02x}{1:02x}{2:02x}; }}
+                QPushButton:hover {{ background-color: #{3:02x}{4:02x}{5:02x}; }}
+            )",
+        color.r, color.g, color.b,
+        lightColor.r, lightColor.g, lightColor.b,
+        darkColor.r, darkColor.g, darkColor.b
+    );
+    button->setStyleSheet(QString::fromStdString(colorText));
+    button->setCheckable(true);
+    connect(
+        button, &QPushButton::clicked,
+        [this, tag]() {
+            emit pickedTag(tag);
+        }
+    );
+
+    // Find the position in the list of buttons where to insert the new tag alphabetically
+    int position = 0;
+    for (position = 0; position < _layout->count() - 1; position++) {
+        QPushButton* w = static_cast<QPushButton*>(_layout->itemAt(position)->widget());
+        std::string label = w->text().toStdString();
+        if (tag < label) {
+            break;
         }
     }
 
-    emit pickedTags(selectedTags);
+    _layout->insertWidget(position, button);
+    _buttons[tag] = button;
+}
+
+void TagsWidget::removeTag(std::string tag) {
+    assert(_buttons.find(tag) != _buttons.end());
+
+    auto it = _buttons.find(tag);
+    _layout->removeWidget(it->second);
+    delete it->second;
+    _buttons.erase(it);
+}
+
+std::vector<std::string> TagsWidget::tags() const {
+    std::vector<std::string> selectedTags;
+    for (const std::pair<const std::string, QPushButton*>& p : _buttons) {
+        selectedTags.push_back(p.first);
+    }
+    return selectedTags;
 }
 
 
@@ -587,9 +599,35 @@ QWidget* ProgramsWidget::createControls() {
         [this](const QString& str) { emit searchUpdated(str.toLocal8Bit().constData()); }
     );
 
-    TagsWidget* tags = new TagsWidget;
-    connect(tags, &TagsWidget::pickedTags, this, &ProgramsWidget::tagsPicked);
-    layout->addWidget(tags);
+    _availableTags = new TagsWidget("Tags");
+    std::set<std::string> tags = data::findTags();
+    for (const std::string& tag : tags) {
+        _availableTags->addTag(tag);
+    }
+    connect(
+        _availableTags, &TagsWidget::pickedTag,
+        [this](std::string tag) {
+            _availableTags->removeTag(tag);
+            _selectedTags->addTag(tag);
+
+            std::vector<std::string> tags = _selectedTags->tags();
+            emit tagsPicked(tags);
+        }
+    );
+    layout->addWidget(_availableTags, 2);
+
+    _selectedTags = new TagsWidget("Selection");
+    connect(
+        _selectedTags, &TagsWidget::pickedTag,
+        [this](std::string tag) {
+            _selectedTags->removeTag(tag);
+            _availableTags->addTag(tag);
+
+            std::vector<std::string> tags = _selectedTags->tags();
+            emit tagsPicked(tags);
+        }
+    );
+    layout->addWidget(_selectedTags, 1);
 
     return controls;
 }

@@ -44,6 +44,7 @@
 #include <map>
 
 struct Cluster;
+class QBoxLayout;
 class QMenu;
 
 namespace programs {
@@ -149,16 +150,19 @@ private:
 class TagsWidget : public QGroupBox {
 Q_OBJECT
 public:
-    TagsWidget();
+    TagsWidget(QString title);
 
-private slots:
-    void buttonPressed();
+    void addTag(std::string tag);
+    void removeTag(std::string tag);
+    std::vector<std::string> tags() const;
 
 signals:
-    void pickedTags(std::vector<std::string> tags);
+    void pickedTag(std::string tags);
 
 private:
-    std::map<QPushButton*, std::string> _buttons;
+    std::map<std::string, QPushButton*> _buttons;
+
+    QBoxLayout* _layout = nullptr;
 };
 
 
@@ -213,6 +217,9 @@ private:
     QWidget* createPrograms();
 
     void updatedVisibilityState();
+
+    TagsWidget* _availableTags = nullptr;
+    TagsWidget* _selectedTags = nullptr;
 
     std::map<Program::ID, ProgramWidget*> _widgets;
 
