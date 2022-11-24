@@ -23,7 +23,7 @@ parallel tools: {
     stage('tools/cppcheck/create') {
       createDirectory('build');
       sh(
-        script: 'cppcheck --enable=all --xml --xml-version=2 -i ext common core tray 2> build/cppcheck.xml',
+        script: 'cppcheck --enable=all --xml --xml-version=2 -i src 2> build/cppcheck.xml',
         label: 'Run CPPCheck'
       )
       recordIssues(
@@ -31,10 +31,6 @@ parallel tools: {
        tool: cppCheck(pattern: 'build/cppcheck.xml')
       )
     }
-    // stage('tools/cloc/create') {
-    //   createDirectory('build');
-    //   sh 'cloc --by-file --exclude-dir=build,example,ext --xml --out=build/cloc.xml --quiet .';
-    // }
     cleanWs()
   } // node('tools')
 },
