@@ -32,9 +32,9 @@
 #                                                                                        #
 ##########################################################################################
 
-cmake_minimum_required (VERSION 3.25 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
-project (C-Troll VERSION 2.0)
+project(C-Troll)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
