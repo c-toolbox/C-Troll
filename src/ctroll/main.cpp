@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
                 nullptr,
                 "Memory error",
                 QString::fromStdString(fmt::format(
-                    "Error creating shared memory: {}", err
+                    "Error creating shared memory: {}", mem.errorString().toStdString()
                 ))
             );
         }

@@ -52,6 +52,7 @@ namespace {
             case PSM::Status::TimedOut: return "TimedOut";
             case PSM::Status::WriteError: return "WriteError";
             case PSM::Status::ReadError: return "ReadError";
+            case PSM::Status::UnknownError: return "UnknownError";
         }
         throw std::logic_error("Unhandled case label");
     }

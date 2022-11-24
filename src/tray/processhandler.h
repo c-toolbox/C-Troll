@@ -39,6 +39,7 @@
 
 #include "exitcommandmessage.h"
 #include "startcommandmessage.h"
+#include <QFloat16>
 #include <QProcess>
 #include <nlohmann/json.hpp>
 #include <map>

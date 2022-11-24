@@ -89,6 +89,5 @@ add_library(common
 )
 
 target_include_directories(common PUBLIC "include")
-target_include_directories(common SYSTEM PUBLIC "ext" "ext/fmt/include")
 target_link_libraries(common PUBLIC project_options fmt nlohmann_json Qt::Core Qt::Widgets Qt::Network simplecrypt)
 qt_disable_unicode_defines(common)

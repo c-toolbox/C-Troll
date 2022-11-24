@@ -122,7 +122,7 @@ MainWindow::MainWindow() {
 
         nlohmann::json obj = Configuration();
         std::ofstream file =
-            std::ofstream(std::string(BaseConfiguration::ConfigurationFile));
+            std::ofstream(BaseConfiguration::ConfigurationFile);
         file << obj.dump(2);
     }
     std::cout << fmt::format(
