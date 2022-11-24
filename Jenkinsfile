@@ -40,7 +40,7 @@ parallel tools: {
 },
 linux_gcc_make: { // linux-gcc/build(make)
   if (env.USE_BUILD_OS_LINUX == 'true') {
-    node('linux' && 'gcc') {
+    node('linux-gcc') {
       stage('linux-gcc-make/scm') {
         deleteDir();
         checkoutGit();
@@ -63,7 +63,7 @@ linux_gcc_make: { // linux-gcc/build(make)
 },
 linux_gcc_ninja: { // linux-gcc/build(ninja)
   if (env.USE_BUILD_OS_LINUX == 'true') {
-    node('linux' && 'gcc') {
+    node('linux-gcc') {
       stage('linux-gcc-ninja/scm') {
         deleteDir();
         checkoutGit();
@@ -82,7 +82,7 @@ linux_gcc_ninja: { // linux-gcc/build(ninja)
 },
 linux_clang_make: { // linux-clang/build(make)
   if (env.USE_BUILD_OS_LINUX == 'true') {
-    node('linux' && 'clang') {
+    node('linux-clang') {
       stage('linux-clang-make/scm') {
         deleteDir();
         checkoutGit();
@@ -105,7 +105,7 @@ linux_clang_make: { // linux-clang/build(make)
 },
 linux_clang_ninja: { // linux-clang/build(ninja)
   if (env.USE_BUILD_OS_LINUX == 'true') {
-    node('linux' && 'clang') {
+    node('linux-clang') {
       stage('linux-clang-ninja/scm') {
         deleteDir();
         checkoutGit();
