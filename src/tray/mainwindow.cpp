@@ -79,7 +79,7 @@ MainWindow::MainWindow() {
 
     // Also connect clicking on the icon to the signal processor of this press
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
-    connect(qApp, &QCoreApplication::aboutToQuit, trayIcon, QSystemTrayIcon::hide);
+    connect(qApp, &QCoreApplication::aboutToQuit, trayIcon, &QSystemTrayIcon::hide);
 }
 
 void MainWindow::setPort(int port) {

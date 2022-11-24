@@ -50,24 +50,6 @@ namespace {
     constexpr std::string_view KeyDescription = "description";
 } // namespace
 
-template <>
-struct fmt::formatter<Node> {
-    template<typename ParseContext>
-    constexpr auto parse(ParseContext& ctx) {
-        return ctx.begin();
-    }
-
-    template <typename FormatContext>
-    auto format(const Node& n, FormatContext& ctx) {
-        return format_to(
-            ctx.out(),
-            "( id: {}, name: \"{}\", ipAddress: \"{}\", port: {}, description: {}, "
-            "isConnected: {} )",
-            n.id.v, n.name, n.ipAddress, n.port, n.description, n.isConnected
-        );
-    }
-};
-
 void from_json(const nlohmann::json& j, Node& n) {
     j.at(KeyName).get_to(n.name);
     j.at(KeyIpAddress).get_to(n.ipAddress);
@@ -105,18 +87,25 @@ std::vector<Node> loadNodesFromDirectory(std::string_view directory) {
     }
 
     for (const Node& node : nodes) {
+        std::string text = fmt::format(
+            "(id: {}, name : \"{}\", ipAddress: \"{}\", port: {}, description: {}, "
+            "isConnected: {} )",
+            node.id.v, node.name, node.ipAddress, node.port, node.description,
+            node.isConnected
+        );
+
         if (node.name.empty()) {
-            throw std::runtime_error(fmt::format("Found node without a name: {}", node));
+            throw std::runtime_error(fmt::format("Found node without a name: {}", text));
         }
         if (node.ipAddress.empty()) {
             throw std::runtime_error(
-                fmt::format("Found node without an IP address: {}", node)
+                fmt::format("Found node without an IP address: {}", text)
             );
         }
 
         if (node.port <= 0 || node.port >= 65536) {
             throw std::runtime_error(
-                fmt::format("Found node with invalid port: {}", node)
+                fmt::format("Found node with invalid port: {}", text)
             );
         }
     }
