@@ -41,6 +41,8 @@
 #include "configuration.h"
 #include "logwidget.h"
 #include "process.h"
+#include <QCloseEvent>
+#include <QSystemTrayIcon>
 #include <QTextEdit>
 #include <memory>
 #include <string>
@@ -63,6 +65,12 @@ private slots:
     void handleErrorMessage(Node::ID id, common::ErrorOccurredMessage message);
 
     void stopProcess(Process::ID processId) const;
+
+    void iconActivated(QSystemTrayIcon::ActivationReason reason);
+
+protected:
+    void closeEvent(QCloseEvent* event);
+    void changeEvent(QEvent* event);
 
 private:
     void startProgram(Cluster::ID clusterId, Program::ID programId,

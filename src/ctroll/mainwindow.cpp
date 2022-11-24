@@ -70,6 +70,35 @@ MainWindow::MainWindow() {
         }
     );
 
+    // Initialize the tray icon, set the icon of a set of system icons,
+    // as well as set a tooltip
+    QSystemTrayIcon* trayIcon = new QSystemTrayIcon(
+        QIcon(":/images/C_transparent.png"), this
+    );
+    std::string tooltip = fmt::format(
+        "C-Troll\nVersion: {}\nAPI: {}", Version, api::Version
+    );
+    trayIcon->setToolTip(QString::fromStdString(tooltip));
+
+    // After that create a context menu of two items
+    QMenu* menu = new QMenu(this);
+    // The first menu item expands the application from the tray,
+    QAction* viewWindow = new QAction("Show", this);
+    connect(viewWindow, &QAction::triggered, this, &MainWindow::show);
+    menu->addAction(viewWindow);
+
+    // The second menu item terminates the application
+    QAction* quit = new QAction("Quit", this);
+    connect(quit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
+    menu->addAction(quit);
+
+    // Set the context menu on the icon and show the application icon in the system tray
+    trayIcon->setContextMenu(menu);
+    trayIcon->show();
+
+    // Also connect clicking on the icon to the signal processor of this press
+    connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
+
     //
     // Set up the container widgets
     QWidget* center = new QWidget;
@@ -565,5 +594,41 @@ void MainWindow::killTrays(Cluster::ID id) const {
         }
         nlohmann::json j = command;
         _clusterConnectionHandler.sendMessage(*node, j);
+    }
+}
+
+// The method that handles the closing event of the application window
+void MainWindow::closeEvent(QCloseEvent* event) {
+    // If the window is visible, and the checkbox is checked, then the completion of the
+    // application. Ignored, and the window simply hides that accompanied the
+    // corresponding pop-up message
+    if (isVisible()) {
+        event->ignore();
+        hide();
+    }
+}
+
+void MainWindow::changeEvent(QEvent* event) {
+    if (event->type() == QEvent::WindowStateChange) {
+        // Hide the taskbar icon if the window is minimized
+        if (isMinimized()) {
+            hide();
+        }
+        event->ignore();
+    }
+}
+
+// The method that handles click on the application icon in the system tray
+void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason) {
+    if (reason == QSystemTrayIcon::Trigger) {
+        // If the window is visible, it is hidden
+        // Conversely, if hidden, it unfolds on the screen
+        if (isVisible()) {
+            hide(); // Hide the taskbar icon
+        }
+        else {
+            show(); // Show the taskbar icon
+            showNormal(); // Bring the window to the front
+        }
     }
 }
