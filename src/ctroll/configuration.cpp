@@ -121,7 +121,7 @@ void from_json(const nlohmann::json& j, Configuration& c) {
             rest[KeyRestUsername].get_to(r.username);
         }
         if (rest.find(KeyRestPassword) != rest.end()) {
-            rest[KeyRestPassword].get_to(r.username);
+            rest[KeyRestPassword].get_to(r.password);
         }
         if (rest.find(KeyRestPort) != rest.end()) {
             rest[KeyRestPort].get_to(r.port);
