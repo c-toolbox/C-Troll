@@ -73,7 +73,8 @@ MainWindow::MainWindow() {
     // Initialize the tray icon, set the icon of a set of system icons,
     // as well as set a tooltip
     QSystemTrayIcon* trayIcon = new QSystemTrayIcon(
-        QIcon(":/images/C_transparent.png"), this
+        QIcon(":/images/C_transparent.png"),
+        this
     );
     std::string tooltip = fmt::format(
         "C-Troll\nVersion: {}\nAPI: {}", Version, api::Version
@@ -98,6 +99,7 @@ MainWindow::MainWindow() {
 
     // Also connect clicking on the icon to the signal processor of this press
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
+    connect(qApp, &QCoreApplication::aboutToQuit, trayIcon, &QSystemTrayIcon::hide);
 
     //
     // Set up the container widgets
