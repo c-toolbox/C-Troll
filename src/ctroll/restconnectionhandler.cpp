@@ -181,10 +181,12 @@ namespace {
 } // namespace
 
 RestConnectionHandler::RestConnectionHandler(QObject* parent, int port,
+                                             bool acceptOnlyLoopbackConnection,
                                              std::string user, std::string password,
                                              bool provideCustomProgramAPI)
     : QObject(parent)
     , _hasCustomProgramAPI(provideCustomProgramAPI)
+    , _acceptOnlyLoopbackConnection(acceptOnlyLoopbackConnection)
 {
     Log("Status", fmt::format("REST API listening on port: {}", port));
 
@@ -261,6 +263,10 @@ void RestConnectionHandler::handleNewConnection() {
     QTcpSocket* socket = dynamic_cast<QTcpSocket*>(QObject::sender());
     assert(socket);
     assert(std::find(_sockets.begin(), _sockets.end(), socket) != _sockets.end());
+
+    if (_acceptOnlyLoopbackConnection && !socket->peerAddress().isLoopback()) {
+        return;
+    }
 
     QString content = socket->readAll();
     QStringList tokens = content.split(QRegularExpression("[ \r\n][ \r\n]*"));

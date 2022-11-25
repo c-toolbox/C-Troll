@@ -245,27 +245,54 @@ MainWindow::MainWindow() {
     _clusterConnectionHandler.initialize();
 
 
-    if (_config.rest.has_value()) {
-        _restHandler = new RestConnectionHandler(
+    if (_config.restLoopback.has_value()) {
+        _restLoopbackHandler = new RestConnectionHandler(
             this,
-            _config.rest->port,
-            _config.rest->username,
-            _config.rest->password,
-            _config.rest->allowCustomPrograms
+            _config.restLoopback->port,
+            true, // only accept local connection
+            _config.restLoopback->username,
+            _config.restLoopback->password,
+            _config.restLoopback->allowCustomPrograms
         );
+
         connect(
-            _restHandler, &RestConnectionHandler::startProgram,
+            _restLoopbackHandler, &RestConnectionHandler::startProgram,
             this, &MainWindow::startProgram
         );
         connect(
-            _restHandler, &RestConnectionHandler::stopProgram,
+            _restLoopbackHandler, &RestConnectionHandler::stopProgram,
             this, &MainWindow::stopProgram
         );
         connect(
-            _restHandler, &RestConnectionHandler::startCustomProgram,
+            _restLoopbackHandler, &RestConnectionHandler::startCustomProgram,
             this, &MainWindow::startCustomProgram
         );
     }
+
+    if (_config.restGeneral.has_value()) {
+        _restGeneralHandler = new RestConnectionHandler(
+            this,
+            _config.restGeneral->port,
+            false, // do not only accept local connection
+            _config.restGeneral->username,
+            _config.restGeneral->password,
+            _config.restGeneral->allowCustomPrograms
+        );
+
+        connect(
+            _restGeneralHandler, &RestConnectionHandler::startProgram,
+            this, &MainWindow::startProgram
+        );
+        connect(
+            _restGeneralHandler, &RestConnectionHandler::stopProgram,
+            this, &MainWindow::stopProgram
+        );
+        connect(
+            _restGeneralHandler, &RestConnectionHandler::startCustomProgram,
+            this, &MainWindow::startCustomProgram
+        );
+    }
+
 }
 
 void MainWindow::log(std::string msg) {

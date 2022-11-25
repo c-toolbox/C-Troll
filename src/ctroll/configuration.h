@@ -76,7 +76,8 @@ struct Configuration : public BaseConfiguration {
         int port = 7000;
         bool allowCustomPrograms = false;
     };
-    std::optional<Rest> rest;
+    std::optional<Rest> restLoopback;
+    std::optional<Rest> restGeneral;
 };
 
 void to_json(nlohmann::json& j, const Configuration& c);

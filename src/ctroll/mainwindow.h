@@ -93,7 +93,8 @@ private:
     LogWidget _logWidget;
 
     ClusterConnectionHandler _clusterConnectionHandler;
-    RestConnectionHandler* _restHandler = nullptr;
+    RestConnectionHandler* _restLoopbackHandler = nullptr;
+    RestConnectionHandler* _restGeneralHandler = nullptr;
     Configuration _config;
 
     QTextEdit _messageBox;

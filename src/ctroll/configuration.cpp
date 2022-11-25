@@ -44,11 +44,16 @@ namespace {
 
     constexpr std::string_view KeyTagColors = "tagColors";
 
-    constexpr std::string_view KeyRest = "rest";
+    constexpr std::string_view KeyRestLoopback = "restLoopback";
+    constexpr std::string_view KeyRestGeneral = "restGeneral";
     constexpr std::string_view KeyRestUsername = "username";
     constexpr std::string_view KeyRestPassword = "password";
     constexpr std::string_view KeyRestPort = "port";
     constexpr std::string_view KeyRestAllowCustomPrograms = "allowCustomPrograms";
+
+    // Legacy
+    constexpr std::string_view KeyRest = "rest"; // should be mapped to restGeneral
+
 } // namespace
 
 void to_json(nlohmann::json& j, const Configuration& c) {
@@ -70,19 +75,41 @@ void to_json(nlohmann::json& j, const Configuration& c) {
         j[KeyLogRotation] = *c.logRotation;
     }
 
-    if (c.rest.has_value()) {
-        j[KeyRest] = nlohmann::json::object();
-        if (!c.rest->username.empty()) {
-            j[KeyRest][KeyRestUsername] = c.rest->username;
+    if (c.restLoopback.has_value()) {
+        j[KeyRestLoopback] = nlohmann::json::object();
+        if (!c.restLoopback->username.empty()) {
+            j[KeyRestLoopback][KeyRestUsername] = c.restLoopback->username;
         }
-        if (!c.rest->password.empty()) {
-            j[KeyRest][KeyRestPassword] = c.rest->password;
+        if (!c.restLoopback->password.empty()) {
+            j[KeyRestLoopback][KeyRestPassword] = c.restLoopback->password;
         }
-        if (c.rest->port != Configuration::Rest().port) {
-            j[KeyRest][KeyRestPort] = c.rest->port;
+        if (c.restLoopback->port != Configuration::Rest().port) {
+            j[KeyRestLoopback][KeyRestPort] = c.restLoopback->port;
         }
-        if (c.rest->allowCustomPrograms != Configuration::Rest().allowCustomPrograms) {
-            j[KeyRest][KeyRestAllowCustomPrograms] = c.rest->allowCustomPrograms;
+        if (c.restLoopback->allowCustomPrograms !=
+            Configuration::Rest().allowCustomPrograms)
+        {
+            j[KeyRestLoopback][KeyRestAllowCustomPrograms] =
+                c.restLoopback->allowCustomPrograms;
+        }
+    }
+
+    if (c.restGeneral.has_value()) {
+        j[KeyRestGeneral] = nlohmann::json::object();
+        if (!c.restGeneral->username.empty()) {
+            j[KeyRestGeneral][KeyRestUsername] = c.restGeneral->username;
+        }
+        if (!c.restGeneral->password.empty()) {
+            j[KeyRestGeneral][KeyRestPassword] = c.restGeneral->password;
+        }
+        if (c.restGeneral->port != Configuration::Rest().port) {
+            j[KeyRestGeneral][KeyRestPort] = c.restGeneral->port;
+        }
+        if (c.restGeneral->allowCustomPrograms !=
+            Configuration::Rest().allowCustomPrograms)
+        {
+            j[KeyRestGeneral][KeyRestAllowCustomPrograms] =
+                c.restGeneral->allowCustomPrograms;
         }
     }
 }
@@ -114,8 +141,9 @@ void from_json(const nlohmann::json& j, Configuration& c) {
         c.logRotation = j[KeyLogRotation].get<common::LogRotation>();
     }
 
-    if (j.find(KeyRest) != j.end()) {
-        const nlohmann::json& rest = j[KeyRest];
+    if (j.find(KeyRestLoopback) != j.end()) {
+        const nlohmann::json& rest = j[KeyRestLoopback];
+
         Configuration::Rest r;
         if (rest.find(KeyRestUsername) != rest.end()) {
             rest[KeyRestUsername].get_to(r.username);
@@ -129,6 +157,27 @@ void from_json(const nlohmann::json& j, Configuration& c) {
         if (rest.find(KeyRestAllowCustomPrograms) != rest.end()) {
             rest[KeyRestAllowCustomPrograms].get_to(r.allowCustomPrograms);
         }
-        c.rest = r;
+        c.restLoopback = r;
+    }
+
+    // @VER2: Remove KeyRest and only allow KeyRestGeneral
+    if (j.find(KeyRest) != j.end() || j.find(KeyRestGeneral) != j.end()) {
+        const nlohmann::json& rest =
+            j.find(KeyRest) != j.end() ? j[KeyRest] : j[KeyRestGeneral];
+
+        Configuration::Rest r;
+        if (rest.find(KeyRestUsername) != rest.end()) {
+            rest[KeyRestUsername].get_to(r.username);
+        }
+        if (rest.find(KeyRestPassword) != rest.end()) {
+            rest[KeyRestPassword].get_to(r.password);
+        }
+        if (rest.find(KeyRestPort) != rest.end()) {
+            rest[KeyRestPort].get_to(r.port);
+        }
+        if (rest.find(KeyRestAllowCustomPrograms) != rest.end()) {
+            rest[KeyRestAllowCustomPrograms].get_to(r.allowCustomPrograms);
+        }
+        c.restGeneral = r;
     }
 }

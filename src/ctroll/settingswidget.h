@@ -85,9 +85,12 @@ private slots:
     void saveValues();
 
 private:
+    struct RestControls;
+
     void layoutColorWidgets();
     void createColorWidget(Color color);
     void createColorWidgets();
+    void createRestWidgets(RestControls& rest, QString title);
 
     std::vector<Color> tagColors() const;
 
@@ -103,11 +106,15 @@ private:
     QCheckBox* _keepOldLog = nullptr;
 
     // REST controls
-    QGroupBox* _rest = nullptr;
-    QLineEdit* _username = nullptr;
-    QLineEdit* _password = nullptr;
-    QSpinBox* _port = nullptr;
-    QCheckBox* _allowCustomPrograms = nullptr;
+    struct RestControls {
+        QGroupBox* box = nullptr;
+        QLineEdit* username = nullptr;
+        QLineEdit* password = nullptr;
+        QSpinBox* port = nullptr;
+        QCheckBox* allowCustomPrograms = nullptr;
+    };
+    RestControls _restLoopback;
+    RestControls _restGeneral;
 
     QGridLayout* _colorLayout = nullptr;
     std::vector<ColorWidget*> _colors;

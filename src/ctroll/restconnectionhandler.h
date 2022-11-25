@@ -47,8 +47,9 @@
 class RestConnectionHandler : public QObject {
 Q_OBJECT
 public:
-    RestConnectionHandler(QObject* parent, int port, std::string user,
-        std::string password, bool provideCustomProgramAPI);
+    RestConnectionHandler(QObject* parent, int port,
+        bool acceptOnlyLoopbackConnection = true, std::string user = "",
+        std::string password = "", bool provideCustomProgramAPI = false);
 
 signals:
     void startProgram(Cluster::ID clusterId, Program::ID programId,
@@ -78,6 +79,7 @@ private:
     QTcpServer _server;
     std::vector<QTcpSocket*> _sockets;
     bool _hasCustomProgramAPI = false;
+    bool _acceptOnlyLoopbackConnection = true;
     std::string _secret;
 };
 
