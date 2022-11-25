@@ -88,7 +88,7 @@ add_executable(C-Troll WIN32 MACOSX_BUNDLE
   ${RESOURCE_FILES}
   ${CMAKE_SOURCE_DIR}/resources/icon.rc
 )
-target_link_libraries(C-Troll PUBLIC common Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
+target_link_libraries(C-Troll PRIVATE common Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
 qt_disable_unicode_defines(C-Troll)
 
 if (WIN32)

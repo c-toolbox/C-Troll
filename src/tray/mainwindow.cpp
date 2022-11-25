@@ -56,10 +56,7 @@ MainWindow::MainWindow() {
     QSystemTrayIcon* trayIcon = new QSystemTrayIcon(
         QIcon(":/images/C_transparent.png"), this
     );
-    std::string tooltip = fmt::format(
-        "C-Troll Tray\nVersion: {}\nAPI: {}", Version, api::Version
-    );
-    trayIcon->setToolTip(QString::fromStdString(tooltip));
+    trayIcon->setToolTip("C-Troll Tray");
 
     // After that create a context menu of two items
     QMenu* menu = new QMenu(this);
