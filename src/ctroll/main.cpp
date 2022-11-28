@@ -136,6 +136,7 @@ int main(int argc, char** argv) {
                 SharedMemory* m = reinterpret_cast<SharedMemory*>(mem.data());
                 if (m->showWindowMarker == std::byte(1)) {
                     mw.show();
+                    mw.setWindowState(Qt::WindowState::WindowActive);
                     m->showWindowMarker = std::byte(0);
                 }
             }
