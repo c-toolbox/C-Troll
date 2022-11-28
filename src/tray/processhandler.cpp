@@ -186,7 +186,9 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
         // The FailedToStart error is handled differently since that is the one that will
         // not also lead to a `handleFinished` call
         if (error == QProcess::ProcessError::FailedToStart) {
-            emit closedProcess(*p);
+            ProcessInfo info = *p;
+            _processes.erase(p);
+            emit closedProcess(info);
         }
     }
 }
@@ -219,7 +221,9 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
         emit sendSocketMessage(j);
 
         // Remove this process from the list as we consider it finished
-        emit closedProcess(*p);
+        ProcessInfo info = *p;
+        _processes.erase(p);
+        emit closedProcess(info);
     }
 }
 
