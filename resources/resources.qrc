@@ -1,7 +1,8 @@
 <!DOCTYPE RCC><RCC version="1.0">
   <qresource>
-    <file>images/C_transparent.png</file>
     <file>images/C_desaturated.png</file>
+    <file>images/C_transparent.png</file>
+    <file>images/C_transparent_bw.png</file>
     <file>images/arrow_down.png</file>
     <file>images/x.png</file>
     <file>qss/core.qss</file>

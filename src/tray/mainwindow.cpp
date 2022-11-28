@@ -54,7 +54,7 @@ MainWindow::MainWindow() {
     // Initialize the tray icon, set the icon of a set of system icons,
     // as well as set a tooltip
     QSystemTrayIcon* trayIcon = new QSystemTrayIcon(
-        QIcon(":/images/C_transparent.png"), this
+        QIcon(":/images/C_transparent_bw.png"), this
     );
     trayIcon->setToolTip("C-Troll Tray");
 
