@@ -54,7 +54,9 @@ namespace {
         GetLocalTime(&t);
 
         return fmt::format(
-            "{:0>2}:{:0>2}:{:0>2}.{:0<3}", t.wHour, t.wMinute, t.wSecond, t.wMilliseconds
+            "{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0<3}",
+            t.wYear, t.wMonth, t.wDay,
+            t.wHour, t.wMinute, t.wSecond, t.wMilliseconds
         );
 #else
         struct timeval t;
