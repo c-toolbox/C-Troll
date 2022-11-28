@@ -63,7 +63,7 @@ struct Process {
     static void setNextIdIfHigher(int id);
 
 private:
-    static int nextId;
+    inline static int nextId = 0;
 };
 
 common::StartCommandMessage startProcessCommand(const Process& process);

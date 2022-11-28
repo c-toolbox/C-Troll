@@ -85,8 +85,6 @@ common::ExitCommandMessage exitProcessCommand(const Process& process) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-int Process::nextId = 0;
-
 Process::Process(Program::ID programId_, Program::Configuration::ID configurationId_,
                  Cluster::ID clusterId_, Node::ID nodeId_)
     : id(nextId++)

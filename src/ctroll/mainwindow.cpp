@@ -127,7 +127,7 @@ MainWindow::MainWindow() {
     );
     _config = common::loadFromJson<Configuration>(BaseConfiguration::ConfigurationFile);
     common::Log::initialize(
-        "core",
+        "ctroll",
         _config.logFile,
         [this](std::string msg) { log(std::move(msg)); }
     );
@@ -473,6 +473,9 @@ void MainWindow::startCustomProgram(Node::ID nodeId, std::string executable,
     }
 
     nlohmann::json j = command;
+    if (!n->secret.empty()) {
+        command.secret = n->secret;
+    }
     _clusterConnectionHandler.sendMessage(*n, j);
 
     // Decrease the ID for the next custom program
