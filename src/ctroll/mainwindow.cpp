@@ -292,7 +292,6 @@ MainWindow::MainWindow() {
             this, &MainWindow::startCustomProgram
         );
     }
-
 }
 
 void MainWindow::log(std::string msg) {
@@ -323,6 +322,8 @@ void MainWindow::handleTrayProcess(common::ProcessStatusMessage status) {
 }
 
 void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
+    std::unique_lock lock(_connectionMutex);
+
     // We need to remove all negative process ids as these are custom programs that we
     // don't really care about
     status.processes.erase(
@@ -369,13 +370,14 @@ void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
             continue;
         }
 
-        if (pi.dataHash != data::dataHash()) {
+        if (pi.dataHash != data::dataHash() && !_hasShownDataHashMessage) {
             constexpr const char* Text = "Received information from a tray about a "
                 "running process that was started from a controller with a different set "
                 "of configurations. Depending on what was changed this might lead to "
                 "very strange behavior";
             QMessageBox::warning(this, "Different Data", Text);
             Log("Warning", Text);
+            _hasShownDataHashMessage = true;
         }
 
 

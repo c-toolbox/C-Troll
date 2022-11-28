@@ -45,6 +45,7 @@
 #include <QSystemTrayIcon>
 #include <QTextEdit>
 #include <memory>
+#include <mutex>
 #include <string>
 
 class ClustersWidget;
@@ -98,6 +99,9 @@ private:
     Configuration _config;
 
     QTextEdit _messageBox;
+
+    std::mutex _connectionMutex;
+    bool _hasShownDataHashMessage = false;
 };
 
 #endif // __CTROLL__MAINWINDOW_H__
