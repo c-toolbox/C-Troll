@@ -76,7 +76,10 @@ int main(int argc, char** argv) {
 
             std::cerr << fmt::format(
                 "{} ({}: {}, {})\n",
-                localMsg.constData(), context.file, context.line, context.function
+                std::string(localMsg.constData()),
+                context.file ? std::string(context.file) : "",
+                context.line,
+                context.function ? std::string(context.function) : ""
             );
             std::cerr.flush();
         }
