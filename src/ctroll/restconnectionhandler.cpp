@@ -221,8 +221,6 @@ void RestConnectionHandler::newConnectionEstablished() {
             socket, &QTcpSocket::readyRead,
             this, &RestConnectionHandler::handleNewConnection
         );
-
-        _sockets.push_back(socket);
     }
 }
 
@@ -425,44 +423,45 @@ void RestConnectionHandler::handleStopProgramMessage(QTcpSocket& socket,
 }
 
 void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
-                                         std::variant<const Cluster*, const Node*> target,
-                                                                   std::string executable,
-                                                                   std::string workingDir,
-                                                                    std::string arguments)
+                                                            const Cluster* cluster,
+                                                            std::string executable,
+                                                            std::string workingDir,
+                                                            std::string arguments)
 {
-    if (std::holds_alternative<const Cluster*>(target)) {
-        const Cluster* cluster = std::get<const Cluster*>(target);
-        assert(cluster);
+    assert(cluster);
 
-        Log(
-            "REST",
-            fmt::format(
-                "Received command to start {} {} in {} on cluster {}",
-                executable, arguments, workingDir, cluster->name
-            )
-        );
+    Log(
+        fmt::format(
+            "Received command to start {} {} in {} on cluster {}",
+            executable, arguments, workingDir, cluster->name
+        )
+    );
 
-        for (const std::string& node : cluster->nodes) {
-            const Node* n = data::findNode(node);
-            assert(n);
+    for (const std::string& node : cluster->nodes) {
+        const Node* n = data::findNode(node);
+        assert(n);
 
-            emit startCustomProgram(n->id, executable, workingDir, arguments);
-        }
+        emit startCustomProgram(n->id, executable, workingDir, arguments);
     }
-    else {
-        const Node* node = std::get<const Node*>(target);
-        assert(node);
+    sendResponse(socket, Response::Ok);
+}
 
-        Log(
-            "REST",
-            fmt::format(
-                "Received command to start {} {} in {} on node {}",
-                executable, arguments, workingDir, node->name
-            )
-        );
+void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
+                                                            const Node* node,
+                                                            std::string executable,
+                                                            std::string workingDir,
+                                                            std::string arguments)
+{
+    assert(node);
 
-        emit startCustomProgram(node->id, executable, workingDir, arguments);
-    }
+    Log(
+        fmt::format(
+            "Received command to start {} {} in {} on node {}",
+            executable, arguments, workingDir, node->name
+        )
+    );
+
+    emit startCustomProgram(node->id, executable, workingDir, arguments);
     sendResponse(socket, Response::Ok);
 }
 

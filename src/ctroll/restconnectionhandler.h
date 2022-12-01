@@ -68,16 +68,16 @@ private:
         const Program& program, const Program::Configuration& configuration);
     void handleStopProgramMessage(QTcpSocket& socket, const Cluster& cluster,
         const Program& program, const Program::Configuration& configuration);
-    void handleStartCustomProgramMessage(QTcpSocket& socket,
-        std::variant<const Cluster*, const Node*> target, std::string executable,
-        std::string workingDir, std::string arguments);
+    void handleStartCustomProgramMessage(QTcpSocket& socket, const Cluster* cluster,
+        std::string executable, std::string workingDir, std::string arguments);
+    void handleStartCustomProgramMessage(QTcpSocket& socket, const Node* node,
+        std::string executable, std::string workingDir, std::string arguments);
     void handleProgramInfoMessage(QTcpSocket& socket);
     void handleClusterInfoMessage(QTcpSocket& socket);
     void handleNodeInfoMessage(QTcpSocket& socket);
     void handleApiInfoMessage(QTcpSocket& socket);
 
     QTcpServer _server;
-    std::vector<QTcpSocket*> _sockets;
     bool _hasCustomProgramAPI = false;
     bool _acceptOnlyLoopbackConnection = true;
     std::string _secret;

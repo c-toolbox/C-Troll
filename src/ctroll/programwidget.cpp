@@ -397,12 +397,6 @@ void TagsWidget::addTag(std::string tag) {
 
     Color color = data::colorForTag(tag);
     constexpr const int Delta = 40;
-    Color lightColor = Color{
-        std::min(255, color.r + Delta),
-        std::min(255, color.g + Delta),
-        std::min(255, color.b + Delta),
-        ""
-    };
     Color darkColor = Color{
         std::max(0, color.r - Delta),
         std::max(0, color.g - Delta),
@@ -416,17 +410,11 @@ void TagsWidget::addTag(std::string tag) {
                 QPushButton:hover {{ background-color: #{3:02x}{4:02x}{5:02x}; }}
             )",
         color.r, color.g, color.b,
-        lightColor.r, lightColor.g, lightColor.b,
         darkColor.r, darkColor.g, darkColor.b
     );
     button->setStyleSheet(QString::fromStdString(colorText));
     button->setCheckable(true);
-    connect(
-        button, &QPushButton::clicked,
-        [this, tag]() {
-            emit pickedTag(tag);
-        }
-    );
+    connect(button, &QPushButton::clicked, [this, tag]() { emit pickedTag(tag); });
 
     // Find the position in the list of buttons where to insert the new tag alphabetically
     int position = 0;
@@ -614,7 +602,7 @@ QWidget* ProgramsWidget::createControls() {
             emit tagsPicked(tags);
         }
     );
-    layout->addWidget(_availableTags, 2);
+    layout->addWidget(_availableTags, 3);
 
     _selectedTags = new TagsWidget("Selection");
     connect(
@@ -733,7 +721,7 @@ void ProgramsWidget::searchUpdated(std::string text) {
                 };
 
                 const std::string sub = program->name.substr(0, text.size());
-                p.second.bySearch = toLower(sub) == toLower(text);
+                p.second.bySearch = (toLower(sub) == toLower(text));
             }
         }
     }

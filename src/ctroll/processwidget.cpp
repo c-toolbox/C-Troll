@@ -223,7 +223,7 @@ QWidget* ProcessWidget::createMessageContainer() {
 
         _errorMessages = new QPlainTextEdit;
         _errorMessages->setReadOnly(true);
-        _messages->setCenterOnScroll(true);
+        _errorMessages->setCenterOnScroll(true);
         l->addWidget(_errorMessages);
         containerLayout->addWidget(messages);
     }
@@ -243,7 +243,7 @@ void ProcessWidget::updateStatus() {
 
     if (p->status == common::ProcessStatusMessage::Status::NormalExit) {
         // Start a timer to automatically remove a process if it exited normally
-        _removalTimer->start(std::chrono::seconds(15));
+        _removalTimer->start(_timeout);
     }
 
     // The user should only be able to remove the process entry if the process has
