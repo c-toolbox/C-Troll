@@ -119,9 +119,6 @@ void SocketHandler::sendMessage(const nlohmann::json& message, bool printMessage
         if (printMessage) {
             Log(fmt::format("Sending [{}]", peer), message.dump());
         }
-        else {
-            Debug("SocketHandler", fmt::format("Sending [{}]: {}", peer, message.dump()));
-        }
         jsonSocket->write(message);
     }
 }
