@@ -51,6 +51,8 @@
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
 
+    const bool logDebug = common::parseDebugCommandlineArgument({ argv, argv + argc });
+
     qInstallMessageHandler(
         // The first message handler is used for Qt error messages that show up before
         // the main window is initialized
@@ -99,13 +101,6 @@ int main(int argc, char** argv) {
 
     MainWindow mw;
 
-    qInstallMessageHandler(
-        // Now that the log is enabled and available, we can pipe all Qt messages to that
-        [](QtMsgType, const QMessageLogContext&, const QString& msg) {
-            Log("Qt", msg.toLocal8Bit().constData());
-        }
-    );
-
     std::string_view configurationFile = "config-tray.json";
     std::string absPath = std::filesystem::absolute(configurationFile).string();
     if (!std::filesystem::exists(configurationFile)) {
@@ -121,23 +116,36 @@ int main(int argc, char** argv) {
     common::Log::initialize(
         "tray",
         config.logFile,
+        logDebug,
         [&mw](std::string msg) { mw.log(std::move(msg)); }
+    );
+
+    Debug("Initialization", "Finished loading configuration file");
+
+    qInstallMessageHandler(
+        // Now that the log is enabled and available, we can pipe all Qt messages to that
+        [](QtMsgType, const QMessageLogContext&, const QString& msg) {
+            Log("Qt", msg.toLocal8Bit().constData());
+        }
     );
 
 #ifdef QT_DEBUG
     config.showWindow = true;
 #endif // QT_DEBUG
 
-    if (config.showWindow) {
+    if (config.showWindow || logDebug) {
+        Debug("Initialization", "Showing main window");
         mw.show();
     }
     else {
+        Debug("Initialization", "Hiding main window");
         mw.hide();
     }
 
     mw.setPort(config.port);
 
     if (config.logRotation.has_value()) {
+        Debug("Initialization", "Enabling log rotation");
         const bool keepLog = config.logRotation->keepPrevious;
         const std::chrono::hours freq = config.logRotation->frequency;
 
@@ -145,12 +153,16 @@ int main(int argc, char** argv) {
         timer->setTimerType(Qt::VeryCoarseTimer);
         QObject::connect(
             timer, &QTimer::timeout,
-            [keepLog]() { common::Log::ref().performLogRotation(keepLog); }
+            [keepLog]() {
+                Debug("Logging", "Performing log rotation");
+                common::Log::ref().performLogRotation(keepLog);
+            }
         );
         timer->start(std::chrono::duration_cast<std::chrono::milliseconds>(freq));
     }
 
     SocketHandler socketHandler(config.port, config.secret);
+
     ProcessHandler processHandler;
 
     QObject::connect(

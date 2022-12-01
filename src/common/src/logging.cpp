@@ -109,11 +109,16 @@ namespace common {
 
 Log* Log::_log;
 
-void Log::initialize(std::string application, bool createLogFile,
+bool parseDebugCommandlineArgument(std::vector<std::string> args) {
+    auto it = std::find(args.begin(), args.end(), "--debug");
+    return it != args.end();
+}
+
+void Log::initialize(std::string application, bool createLogFile, bool shouldLogDebug,
                      std::function<void(std::string)> loggingFunction)
 {
     assert(!application.empty());
-    _log = new Log(std::move(application), createLogFile);
+    _log = new Log(std::move(application), createLogFile, shouldLogDebug);
     _log->_loggingFunction = std::move(loggingFunction);
 }
 
@@ -122,7 +127,9 @@ Log& Log::ref() {
     return *_log;
 }
 
-Log::Log(std::string componentName, bool createLogFile) {
+Log::Log(std::string componentName, bool createLogFile, bool shouldLogDebug)
+    : _shouldLogDebug(shouldLogDebug)
+{
     assert(!componentName.empty());
     if (createLogFile) {
         _filePath = fmt::format("{}{}{}", LogPrefix, componentName, LogPostfix);
@@ -152,6 +159,12 @@ void Log::logMessage(std::string category, std::string message) {
 #endif
 }
 
+void Log::logDebugMessage(std::string category, std::string message) {
+    if (_shouldLogDebug) {
+        logMessage(std::move(category), "{Debug} " + message);
+    }
+}
+
 void Log::performLogRotation(bool keepLog) {
     if (_filePath.empty()) {
         return;
@@ -171,7 +184,3 @@ void Log::performLogRotation(bool keepLog) {
 }
 
 } // namespace common
-
-void Log(std::string category, std::string msg) {
-    common::Log::ref().logMessage(std::move(category), std::move(msg));
-}

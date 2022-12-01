@@ -40,7 +40,39 @@
 #include <mutex>
 #include <string>
 
+/**
+ * This method is a shortcut for a more convenient logging. Calling this function is
+ * equivalent to calling <code>common::Log::ref().logMessage(msg)</code>.
+ *
+ * \param category The category/type of the message to be logged
+ * \param message The message that is to be logged and passed to the Log::logMessage
+ *        function
+ */
+void Log(std::string category, std::string message);
+
+/**
+ * This method is a shortcut for a more convenient debug logging. Calling this function is
+ * equivalent to calling <code>common::Log::ref().logDebugMessage(msg)</code>, which means
+ * that if the Log was created not accepting debug messages, this function will not do any
+ * work.
+ *
+ * \param category The category/type of the message to be logged
+ * \param message The message that is to be logged and passed to the Log::logMessage
+ *        function
+ */
+void Debug(std::string category, std::string message);
+
 namespace common {
+
+/**
+ * This function returns \c true iff the commandline `--debug` was passed through the list
+ * of commandline arguments.  If the parameter does not occur, \c false is returned.
+ *
+ * \param The list of commandline arguments. The best way to generate this from the
+ *        standard argc+argv construct is through: `{ argv, argv + argc }`
+ * \return \c true if `--debug` occurred in the commandline arguments, \c false otherwise
+ */
+bool parseDebugCommandlineArgument(std::vector<std::string> args);
 
 /**
  * This static class provides the ability to log information to both the console and a
@@ -59,11 +91,13 @@ public:
      *        unique(ish) names for the log.
      * \param createLogFile Determines whether all log messages should also be printed
      *        to file
+     * \param shouldLogDebug Determines whether debug-style messages should be logged or
+     *        ignored
      * \param loggingFunction This callback function is called whenever a message is
      *        logged
      */
-    static void initialize(std::string application,
-        bool createLogFile, std::function<void(std::string)> loggingFunction);
+    static void initialize(std::string application, bool createLogFile,
+        bool shouldLogDebug, std::function<void(std::string)> loggingFunction);
 
     /**
      * Returns the static reference to the Log instance.
@@ -78,9 +112,20 @@ public:
      * as to the console using the \c qDebug macro. Every content to the file is flushed
      * immediately.
      *
+     * \param category The category/type of the messages
      * \param message The message that is to be logged
      */
     void logMessage(std::string category, std::string message);
+
+    /**
+     * Logs a debug message with the Log. If the Log was created accepting debug log
+     * messages, this message is both logged to the log file as well as to the console
+     * using the \c qDebug macro. Every content to the file is flushed immediately.
+     *
+     * \param category The category/type of the messages
+     * \param message The message that is to be logged
+     */
+    void logDebugMessage(std::string category, std::string message);
 
     /**
      * Performs a log rotation action. If \p keepLog is \c true, the old log file is saved
@@ -89,6 +134,7 @@ public:
      */
     void performLogRotation(bool keepLog);
 
+    friend void ::Debug(std::string category, std::string message);
 private:
     /**
      * Constructs a Log and opens the file for reading, overwriting any old content that
@@ -97,14 +143,18 @@ private:
      * \param application The name of the application that requested the log file
      * \param createLogFile Determines whether all log messages should also be printed
      *        to file
+     * \param shouldLogDebug If this is set to \c true, debug messages will also be logged
+     *        if it is \c false, these debug messages will be ignored
      */
-    Log(std::string application, bool createLogFile);
+    Log(std::string application, bool createLogFile, bool shouldLogDebug);
 
     /// Destructor the will close the file.
     ~Log();
 
     // The static Log that is returned in the Log::ref method.
     static Log* _log;
+
+    const bool _shouldLogDebug;
 
     /// Mutex that protects the access to the log file
     std::mutex _access;
@@ -118,13 +168,14 @@ private:
 
 } // namespace common
 
-/**
- * This method is a shortcut for a more convenient logging. Calling this function is
- * equivalent to calling <code>common::Log::ref().logMessage(msg)</code>.
- *
- * \param message The message that is to be logged and passed to the Log::logMessage
- *        function
- */
-void Log(std::string category, std::string message);
+inline void Log(std::string category, std::string message) {
+    common::Log::ref().logMessage(std::move(category), std::move(message));
+}
+
+inline void Debug(std::string category, std::string message) {
+    if (common::Log::ref()._shouldLogDebug) {
+        common::Log::ref().logDebugMessage(std::move(category), std::move(message));
+    }
+}
 
 #endif // __COMMON__LOGGING_H__

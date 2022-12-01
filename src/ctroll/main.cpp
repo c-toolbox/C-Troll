@@ -106,6 +106,8 @@ int main(int argc, char** argv) {
 
     Q_INIT_RESOURCE(resources);
 
+    const bool logDebug = common::parseDebugCommandlineArgument({ argv, argv + argc });
+
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that
         [](QtMsgType, const QMessageLogContext&, const QString& msg) {
@@ -124,7 +126,7 @@ int main(int argc, char** argv) {
     }
 
     try {
-        MainWindow mw;
+        MainWindow mw = MainWindow(logDebug);
         mw.show();
 
         QTimer* timer = new QTimer(&mw);

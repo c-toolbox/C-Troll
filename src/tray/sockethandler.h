@@ -52,6 +52,7 @@ public:
     };
 
     SocketHandler(int port, std::string secret);
+    ~SocketHandler();
 
     std::array<MessageLog, 3> lastMessages() const;
 

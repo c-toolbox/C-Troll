@@ -64,6 +64,9 @@ public:
         std::size_t dataHash = 0;
     };
 
+    ProcessHandler();
+    ~ProcessHandler();
+
 public slots:
     void newConnection();
     void handleSocketMessage(const nlohmann::json& message, const std::string& peer);

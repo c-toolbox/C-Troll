@@ -35,6 +35,7 @@
 #include "centralwidget.h"
 
 #include "apiversion.h"
+#include "logging.h"
 #include "version.h"
 #include <QGroupBox>
 #include <QVBoxLayout>
@@ -68,12 +69,15 @@ void CentralWidget::log(std::string msg) {
 }
 
 void CentralWidget::newConnection(const std::string& peerAddress) {
+    Debug("CentralWidget", fmt::format("Opened connection to {}", peerAddress));
     QLabel* label = new QLabel(QString::fromStdString(peerAddress));
     _connectionsLayout->addWidget(label);
     _connections[peerAddress] = label;
 }
 
 void CentralWidget::closedConnection(const std::string& peerAddress) {
+    Debug("CentralWidget", fmt::format("Closed connection to {}", peerAddress));
+
     const auto it = _connections.find(peerAddress);
     assert(it != _connections.end());
 
@@ -83,6 +87,10 @@ void CentralWidget::closedConnection(const std::string& peerAddress) {
 }
 
 void CentralWidget::newProcess(ProcessHandler::ProcessInfo process) {
+    Debug(
+        "CentralWidget",
+        fmt::format("New process: {}, {}", process.processId, process.executable)
+    );
     std::string text = fmt::format("{}: {}", process.processId, process.executable);
     QLabel* label = new QLabel(QString::fromStdString(text));
     _processesLayout->addWidget(label);
@@ -90,10 +98,15 @@ void CentralWidget::newProcess(ProcessHandler::ProcessInfo process) {
 }
 
 void CentralWidget::endedProcess(ProcessHandler::ProcessInfo process) {
+    Debug(
+        "CentralWidget",
+        fmt::format("Close process: {}, {}", process.processId, process.executable)
+    );
     const auto it = _processes.find(process.processId);
     // The processId might not exist yet if the process starting fails (for example if the
     // requested executable does not exist)
     if (it != _processes.end()) {
+        Debug("CentralWidget", "Found in list");
         it->second->deleteLater();
         _processesLayout->removeWidget(it->second);
         _processes.erase(it);

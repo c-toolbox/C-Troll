@@ -120,7 +120,7 @@ void ClusterConnectionHandler::initialize() {
             }
         }
     );
-    timer->start(2500);
+    timer->start(std::chrono::milliseconds(2500));
 }
 
 void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,

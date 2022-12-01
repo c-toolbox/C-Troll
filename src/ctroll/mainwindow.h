@@ -57,7 +57,7 @@ namespace programs { class ProgramsWidget; }
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
-    MainWindow();
+    MainWindow(bool shouldLogDebug);
 
 private slots:
     void handleTrayProcess(common::ProcessStatusMessage status);

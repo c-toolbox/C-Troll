@@ -58,7 +58,7 @@
 #include <string_view>
 #include <thread>
 
-MainWindow::MainWindow() {
+MainWindow::MainWindow(bool shouldLogDebug) {
     setWindowTitle("C-Troll");
 
     //
@@ -129,6 +129,7 @@ MainWindow::MainWindow() {
     common::Log::initialize(
         "ctroll",
         _config.logFile,
+        shouldLogDebug,
         [this](std::string msg) { log(std::move(msg)); }
     );
 
