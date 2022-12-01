@@ -41,6 +41,7 @@
 #include "sockethandler.h"
 #include <QApplication>
 #include <QMessageBox>
+#include <QSharedMemory>
 #include <QTimer>
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
@@ -48,8 +49,43 @@
 #include <iostream>
 #include <string_view>
 
+struct SharedMemoryMarker {
+    std::byte unused[32] = {};
+};
+
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
+    QApplication app(argc, argv);
+    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+
+    QSharedMemory mem("/Tray/Single-Instance-Marker");
+    bool ret = mem.create(sizeof(SharedMemoryMarker));
+    if (!ret) {
+        // Something went wrong with creating the memory
+        QSharedMemory::SharedMemoryError err = mem.error();
+        if (err == QSharedMemory::AlreadyExists) {
+            // Another instance of the Tray already runs on the computer and we need to
+            // signal that to the user and stop starting
+
+            QMessageBox::critical(
+                nullptr,
+                "Tray already running",
+                "Trying to start Tray application while it is already running"
+            );
+            exit(EXIT_FAILURE);
+        }
+        else {
+            QMessageBox::critical(
+                nullptr,
+                "Memory error",
+                QString::fromStdString(fmt::format(
+                    "Error creating shared memory: {}", mem.errorString().toStdString()
+                ))
+            );
+        }
+    }
+
+
 
     const bool logDebug = common::parseDebugCommandlineArgument({ argv, argv + argc });
 
@@ -88,8 +124,6 @@ int main(int argc, char** argv) {
     );
 
 
-    QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 
     {
         QFile file(":/qss/tray.qss");

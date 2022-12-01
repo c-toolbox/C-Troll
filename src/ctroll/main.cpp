@@ -44,26 +44,31 @@
 #include <fmt/format.h>
 #include <chrono>
 
-struct SharedMemory {
+struct SharedMemoryMarker {
     short majorVersion = -1;
     short minorVersion = -1;
     short patchVersion = -1;
     std::byte showWindowMarker = std::byte(0);
-    std::byte unused[28] = {};
+    std::byte unused[25] = {};
 };
 
 int main(int argc, char** argv) {
+    Q_INIT_RESOURCE(resources);
+
+    QApplication app(argc, argv);
+    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+
     QSharedMemory mem("/C-Troll/Single-Instance-Marker");
-    bool ret = mem.create(sizeof(SharedMemory));
+    bool ret = mem.create(sizeof(SharedMemoryMarker));
     if (!ret) {
         // Something went wrong with creating the memory
         QSharedMemory::SharedMemoryError err = mem.error();
         if (err == QSharedMemory::AlreadyExists) {
-            // Another instance of C-Troll already exists on the computer and we need to
+            // Another instance of C-Troll already run on the computer and we need to
             // signal to it to come to the front instead
             mem.attach();
             mem.lock();
-            SharedMemory* data = reinterpret_cast<SharedMemory*>(mem.data());
+            SharedMemoryMarker* data = reinterpret_cast<SharedMemoryMarker*>(mem.data());
             if (data->majorVersion != MajorVersion) {
                 QMessageBox::critical(
                     nullptr,
@@ -97,14 +102,13 @@ int main(int argc, char** argv) {
         // Creation of the SharedMemory block succeeded, so we are the first to start
         mem.attach();
         mem.lock();
-        SharedMemory* data = new (mem.data()) SharedMemory;
+        SharedMemoryMarker* data = new (mem.data()) SharedMemoryMarker;
         data->majorVersion = MajorVersion;
         data->minorVersion = MinorVersion;
         data->patchVersion = PatchVersion;
         mem.unlock();
     }
 
-    Q_INIT_RESOURCE(resources);
 
     const bool logDebug = common::parseDebugCommandlineArgument({ argv, argv + argc });
 
@@ -115,8 +119,6 @@ int main(int argc, char** argv) {
         }
     );
 
-    QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 
     {
         QFile file(":/qss/core.qss");
@@ -135,7 +137,7 @@ int main(int argc, char** argv) {
             timer, &QTimer::timeout,
             [&]() {
                 mem.attach();
-                SharedMemory* m = reinterpret_cast<SharedMemory*>(mem.data());
+                SharedMemoryMarker* m = reinterpret_cast<SharedMemoryMarker*>(mem.data());
                 if (m->showWindowMarker == std::byte(1)) {
                     mw.show();
                     mw.setWindowState(Qt::WindowState::WindowActive);
