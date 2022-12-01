@@ -100,8 +100,7 @@ private:
 
     QTextEdit _messageBox;
 
-    std::mutex _connectionMutex;
-    bool _hasShownDataHashMessage = false;
+    bool _shouldShowDataHashMessage = false;
 };
 
 #endif // __CTROLL__MAINWINDOW_H__

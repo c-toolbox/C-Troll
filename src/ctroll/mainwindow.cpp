@@ -293,6 +293,28 @@ MainWindow::MainWindow(bool shouldLogDebug) {
             this, &MainWindow::startCustomProgram
         );
     }
+
+    auto maybeShowDataHashMessage = [this]() {
+        if (_shouldShowDataHashMessage) {
+            constexpr const char* Text = "Received information from a tray about a "
+                "running process that was started from a controller with a different set "
+                "of configurations. Depending on what was changed this might lead to "
+                "very strange behavior";
+            QMessageBox::warning(this, "Different Data", Text);
+            Log("Warning", Text);
+            _shouldShowDataHashMessage = false;
+        }
+    };
+
+    // A permanently running timer that will check every 5 seconds if a new tray has
+    // connected and should show a message if the data hash has changed
+    QTimer* longTermTimer = new QTimer(this);
+    longTermTimer->setTimerType(Qt::VeryCoarseTimer);
+    connect(longTermTimer, &QTimer::timeout, maybeShowDataHashMessage);
+    longTermTimer->start(std::chrono::seconds(5));
+
+    // Don't want to wait 5 seconds for the first message, so we check once after 250ms
+    QTimer::singleShot(std::chrono::milliseconds(250), maybeShowDataHashMessage);
 }
 
 void MainWindow::log(std::string msg) {
@@ -323,8 +345,6 @@ void MainWindow::handleTrayProcess(common::ProcessStatusMessage status) {
 }
 
 void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
-    std::unique_lock lock(_connectionMutex);
-
     // We need to remove all negative process ids as these are custom programs that we
     // don't really care about
     status.processes.erase(
@@ -371,16 +391,9 @@ void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
             continue;
         }
 
-        if (pi.dataHash != data::dataHash() && !_hasShownDataHashMessage) {
-            constexpr const char* Text = "Received information from a tray about a "
-                "running process that was started from a controller with a different set "
-                "of configurations. Depending on what was changed this might lead to "
-                "very strange behavior";
-            QMessageBox::warning(this, "Different Data", Text);
-            Log("Warning", Text);
-            _hasShownDataHashMessage = true;
+        if (pi.dataHash != data::dataHash()) {
+            _shouldShowDataHashMessage = true;
         }
-
 
         std::unique_ptr<Process> process = std::make_unique<Process>(
             pid,
