@@ -74,6 +74,8 @@ private:
     bool hasNoProcessRunning() const;
     bool hasAllProcessesRunning() const;
 
+    std::string id() const;
+
     const Cluster* _cluster = nullptr;
     const Program::Configuration* _configuration = nullptr;
 

@@ -87,7 +87,7 @@ MainWindow::MainWindow(bool shouldLogDebug) {
 
     // The second menu item terminates the application
     QAction* quit = new QAction("Quit", this);
-    connect(quit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
+    connect(quit, &QAction::triggered, qApp, &QApplication::quit);
     menu->addAction(quit);
 
     // Set the context menu on the icon and show the application icon in the system tray
@@ -118,8 +118,7 @@ MainWindow::MainWindow(bool shouldLogDebug) {
         );
 
         nlohmann::json obj = Configuration();
-        std::ofstream file =
-            std::ofstream(BaseConfiguration::ConfigurationFile);
+        std::ofstream file = std::ofstream(BaseConfiguration::ConfigurationFile);
         file << obj.dump(2);
     }
     std::cout << fmt::format(

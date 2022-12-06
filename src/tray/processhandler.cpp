@@ -68,14 +68,18 @@ namespace {
         }
         throw std::logic_error("Unhandled case exception");
     }
+
+    void Debug(std::string msg) {
+        ::Debug("ProcessHandler", std::move(msg));
+    }
 } // namespace
 
 ProcessHandler::ProcessHandler() {
-    Debug("ProcessHandler", "Creating process handler");
+    Debug("Creating process handler");
 }
 
 ProcessHandler::~ProcessHandler() {
-    Debug("ProcessHandler", "Destroying process handler");
+    Debug("Destroying process handler");
 }
 
 void ProcessHandler::newConnection() {
@@ -99,15 +103,15 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                                          const std::string& peer)
 {
     try {
-        Debug("ProcessHandler", fmt::format("Received message: {}", message.dump(2)));
+        Debug(fmt::format("Received message: {}", message.dump(2)));
 
         const bool validMessage = common::isValidMessage(message);
         if (!validMessage) {
-            Debug("ProcessHandler", "Message was invalid");
+            Debug("Message was invalid");
             return;
         }
 
-        Debug("ProcessHandler", "Parsing base message");
+        Debug("Parsing base message");
         common::Message msg = message;
 
         if (common::isValidMessage<common::StartCommandMessage>(message)) {
@@ -119,14 +123,14 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
             const auto p = processIt(command.id);
             if (p == _processes.end()) {
                 // Not Found, create and run a process with it
-                Debug("ProcessHandler", "Creating new process for command");
+                Debug("Creating new process for command");
                 createAndRunProcessFromCommandMessage(command);
             }
             else {
                 // Found
                 // @TODO When would this be executed? We shouldn't be able to start a
                 // process twice with the same id?
-                Debug("ProcessHandler", "Starting existing process for command");
+                Debug("Starting existing process for command");
                 executeProcessWithCommandMessage(p->process, command);
             }
         }
@@ -141,12 +145,12 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                 // @TODO This should probably send a different message to inform the
                 // controller about this fact. It should not be possible to send a request
                 // to exit an application that is already running
-                Debug("ProcessHandler", "Process was not found");
+                Debug("Process was not found");
                 handlerErrorOccurred(QProcess::ProcessError::FailedToStart);
             }
             else {
                 // Found
-                Debug("ProcessHandler", "Terminating existing process");
+                Debug("Terminating existing process");
                 common::ProcessStatusMessage returnMsg;
                 // @TODO How does the terminate behave when the program is hanging? There
                 // seems to be a problem that a program is not correctly terminated in
@@ -157,7 +161,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                 const auto pIt = processIt(p->process);
 
                 if (pIt != _processes.end()) {
-                    Debug("ProcessHandler", "Found process");
+                    Debug("Found process");
                     returnMsg.processId = pIt->processId;
                     nlohmann::json j = returnMsg;
                     emit sendSocketMessage(j);
@@ -203,7 +207,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     const auto p = processIt(process);
     assert(p != _processes.end());
     if (p != _processes.end()) {
-        Debug("ProcessHandler", fmt::format("Found process {}", p->processId));
+        Debug(fmt::format("Found process {}", p->processId));
         common::ProcessStatusMessage msg;
         msg.processId = p->processId;
         msg.status = toTrayStatus(error);
@@ -213,7 +217,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
         // The FailedToStart error is handled differently since that is the one that will
         // not also lead to a `handleFinished` call
         if (error == QProcess::ProcessError::FailedToStart) {
-            Debug("ProcessHandler", fmt::format("Removing process {}", p->processId));
+            Debug(fmt::format("Removing process {}", p->processId));
             ProcessInfo info = *p;
             _processes.erase(p);
             emit closedProcess(info);
@@ -222,14 +226,14 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
 }
 
 void ProcessHandler::handleStarted() {
-    Debug("ProcessHandler", "Process started");
+    Debug("Process started");
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
 
     // Find specifc value in process map i.e. process
     auto p = processIt(process);
     assert(p != _processes.end());
     if (p != _processes.end()) {
-        Debug("ProcessHandler", fmt::format("Found process {}", p->processId));
+        Debug(fmt::format("Found process {}", p->processId));
 
         // Send out the TrayProcessStatus with the status string
         common::ProcessStatusMessage msg;
@@ -241,7 +245,7 @@ void ProcessHandler::handleStarted() {
 }
 
 void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
-    Debug("ProcessHandler", "Process finished");
+    Debug("Process finished");
     
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
 
@@ -249,7 +253,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     auto p = processIt(process);
     assert(p != _processes.end());
     if (p != _processes.end()) {
-        Debug("ProcessHandler", fmt::format("Found process {}", p->processId));
+        Debug(fmt::format("Found process {}", p->processId));
         
         common::ProcessStatusMessage msg;
         msg.processId = p->processId;
@@ -265,7 +269,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
 }
 
 void ProcessHandler::handleReadyReadStandardError() {
-    Debug("ProcessHandler", "Reading stderr message");
+    Debug("Reading stderr message");
     
     QProcess* proc = qobject_cast<QProcess*>(QObject::sender());
 
@@ -273,7 +277,7 @@ void ProcessHandler::handleReadyReadStandardError() {
     auto p = processIt(proc);
     assert(p != _processes.end());
     if (p != _processes.end()) {
-        Debug("ProcessHandler", fmt::format("Found process {}", p->processId));
+        Debug(fmt::format("Found process {}", p->processId));
         
         // Send out the TrayProcessLogMessage with the stderror key
         common::ProcessOutputMessage msg;
@@ -287,15 +291,12 @@ void ProcessHandler::handleReadyReadStandardError() {
 }
 
 void ProcessHandler::handleReadyReadStandardOutput() {
-    Debug("ProcessHandler", "Reading stdout message");
-    
     QProcess* proc = qobject_cast<QProcess*>(QObject::sender());
 
     // Find specifc value in process map i.e. process
     auto p = processIt(proc);
+    assert(p != _processes.end());
     if (p != _processes.end()) {
-        Debug("ProcessHandler", fmt::format("Found process {}", p->processId));
-        
         common::ProcessOutputMessage msg;
         msg.processId = p->processId;
         msg.message =
@@ -311,7 +312,7 @@ void ProcessHandler::handleReadyReadStandardOutput() {
 void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
                                                const common::StartCommandMessage& command)
 {
-    Debug("ProcessHandler", "Executing process");
+    Debug("Executing process");
 
     // Send out the TrayProcessStatus with the status "Started"
     common::ProcessStatusMessage msg;
@@ -342,7 +343,7 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
 
     // If the executable does not exist, the process might still be in the NotRunning
     // state. It also will have already triggered the `errorOccurred` message by that time
-    Debug("ProcessHandler", fmt::format("State: {}", static_cast<int>(process->state())));
+    Debug(fmt::format("State: {}", static_cast<int>(process->state())));
     if (process->state() != QProcess::ProcessState::NotRunning) {
         process->waitForStarted();
         const auto p = processIt(process);
@@ -354,7 +355,7 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
 void ProcessHandler::createAndRunProcessFromCommandMessage(
                                                    const common::StartCommandMessage& cmd)
 {
-    Debug("ProcessHandler", "Starting process");
+    Debug("Starting process");
     
     QProcess* proc = new QProcess(this);
 
@@ -407,16 +408,6 @@ std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::process
         _processes.cend(),
         [process](const ProcessInfo& proc) { return proc.process == process; }
     );
-
-    
-    Debug(
-        "ProcessHandler",
-        fmt::format(
-            "Process {} was {}",
-            process->program().toStdString(),
-            p != _processes.cend() ? "found" : "not found"
-        )
-    );
     return p;
 }
 
@@ -426,14 +417,6 @@ std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::process
         _processes.cbegin(),
         _processes.cend(),
         [id](const ProcessInfo& proc) { return proc.processId == id; }
-    );
-    Debug(
-        "ProcessHandler",
-        fmt::format(
-            "Process with id {} was {}",
-            id,
-            p != _processes.cend() ? "found" : "not found"
-        )
     );
     return p;
 }

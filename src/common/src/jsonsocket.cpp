@@ -39,6 +39,12 @@
 #include <QNetworkProxy>
 #include <fmt/format.h>
 
+namespace {
+    void Debug(std::string msg) {
+        ::Debug("JsonSocket", std::move(msg));
+    }
+} // namespace
+
 namespace common {
 
 JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, std::string secret)
@@ -61,7 +67,7 @@ JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, std::string secret)
 }
 
 void JsonSocket::connectToHost(const std::string& host, int port) {
-    Debug("JsonSocket", fmt::format("Connecting to {}:{}", host, port));
+    Debug(fmt::format("Connecting to {}:{}", host, port));
     _socket->connectToHost(QString::fromStdString(host), static_cast<quint16>(port));
 }
 
@@ -120,22 +126,17 @@ void JsonSocket::readToBuffer() {
 }
 
 void JsonSocket::parseBuffer() {
-    Debug("JsonSocket", "Parsing buffer");
-
     // If it is the first package to arrive, we extract the expected length of the message
     if (_payloadSize == -1) {
-        Debug("JsonSocket", "Extracting expected message size from buffer");
         const auto it = std::find(_buffer.cbegin(), _buffer.cend(), '#');
         if (it != _buffer.end()) {
             std::string sizeString(_buffer.cbegin(), it);
-            Debug("JsonSocket", fmt::format("Size is {}", sizeString));
             _payloadSize = std::stoi(sizeString);
             _buffer.erase(_buffer.begin(), it + 1);
         }
     }
 
     if (_payloadSize > 0 && (_payloadSize <= static_cast<int>(_buffer.size()))) {
-        Debug("JsonSocket", "Parsing full message");
         std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
         std::string json(data.data(), static_cast<size_t>(_payloadSize));
         _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);

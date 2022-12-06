@@ -49,6 +49,12 @@
 #include <iostream>
 #include <string_view>
 
+namespace {
+    void Debug(std::string msg) {
+        ::Debug("Initialization", std::move(msg));
+    }
+} // namespace
+
 struct SharedMemoryMarker {
     std::byte unused[32] = {};
 };
@@ -154,7 +160,7 @@ int main(int argc, char** argv) {
         [&mw](std::string msg) { mw.log(std::move(msg)); }
     );
 
-    Debug("Initialization", "Finished loading configuration file");
+    Debug("Finished loading configuration file");
 
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that
@@ -168,18 +174,18 @@ int main(int argc, char** argv) {
 #endif // QT_DEBUG
 
     if (config.showWindow || logDebug) {
-        Debug("Initialization", "Showing main window");
+        Debug("Showing main window");
         mw.show();
     }
     else {
-        Debug("Initialization", "Hiding main window");
+        Debug("Hiding main window");
         mw.hide();
     }
 
     mw.setPort(config.port);
 
     if (config.logRotation.has_value()) {
-        Debug("Initialization", "Enabling log rotation");
+        Debug("Enabling log rotation");
         const bool keepLog = config.logRotation->keepPrevious;
         const std::chrono::hours freq = config.logRotation->frequency;
 

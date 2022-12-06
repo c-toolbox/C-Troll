@@ -35,6 +35,7 @@
 #include "processwidget.h"
 
 #include "database.h"
+#include "logging.h"
 #include "processstatusmessage.h"
 #include <QGridLayout>
 #include <QGroupBox>
@@ -64,6 +65,10 @@ namespace {
             case Status::UnknownError:  return "UnknownError";
         }
         throw std::logic_error("Missing case label");
+    }
+
+    void Debug(std::string msg) {
+        ::Debug("ProcessWidget", std::move(msg));
     }
 } // namespace
 
@@ -309,13 +314,15 @@ ProcessesWidget::ProcessesWidget(const std::chrono::milliseconds& processTimeout
 }
 
 void ProcessesWidget::receivedProcessMessage(Node::ID, common::ProcessOutputMessage msg) {
-    Process::ID pid =  Process::ID(msg.processId);
+    Process::ID pid = Process::ID(msg.processId);
     const auto it = _widgets.find(pid);
     assert(it != _widgets.end());
     it->second->addMessage(std::move(msg));
 }
 
 void ProcessesWidget::processAdded(Process::ID processId) {
+    Debug(fmt::format("Adding process {}", processId.v));
+
     // The process has been created, but the widget did not exist yet
     ProcessWidget* w = new ProcessWidget(processId, _processTimeout);
     w->setMinimumWidth(width());
@@ -332,7 +339,6 @@ void ProcessesWidget::processAdded(Process::ID processId) {
 
 void ProcessesWidget::processUpdated(Process::ID processId) {
     const auto it = _widgets.find(processId);
-
     if (it == _widgets.end()) {
         // The only reason why the widget might not exist if:
         // 1. The process is part of a cluster
@@ -351,7 +357,6 @@ void ProcessesWidget::processUpdated(Process::ID processId) {
 
 void ProcessesWidget::processRemoved(Process::ID processId) {
     const auto it = _widgets.find(processId);
-
     if (it != _widgets.end()) {
         // We need to check this because there might be timer running in the background
         // that will try to remove a process while the user has removed the same process

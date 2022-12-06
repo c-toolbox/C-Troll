@@ -75,9 +75,13 @@ void ProgramButton::updateStatus() {
         std::mem_fn(&Node::isConnected)
     );
     setEnabled(allConnected);
+
+    Debug(id(), fmt::format("Update status. All connected: {}", allConnected));
 }
 
 void ProgramButton::processUpdated(Process::ID processId) {
+    Debug(id(), fmt::format("Update process {}", processId.v));
+
     const Process* process = data::findProcess(processId);
 
     auto it = std::find_if(
@@ -87,6 +91,7 @@ void ProgramButton::processUpdated(Process::ID processId) {
         }
     );
     if (it == _processes.end()) {
+        Debug(id(), "New process");
         // This is a brand new process, so it better be in a Starting status
 
         ProcessInfo info;
@@ -99,6 +104,7 @@ void ProgramButton::processUpdated(Process::ID processId) {
         _processes[process->nodeId] = info;
     }
     else {
+        Debug(id(), "Existing process");
         // This is a process that already exists and we should update it depending on the
         // status of the incoming process
         assert(it->second.processId.v == processId.v);
@@ -108,9 +114,15 @@ void ProgramButton::processUpdated(Process::ID processId) {
 }
 
 void ProgramButton::handleButtonPress() {
-    // This slot should only be invoked if either all processes are running, or no process
-    // are running
-    assert(hasNoProcessRunning() || hasAllProcessesRunning());
+    // This should only be called if either all processes or no process are running
+    assert(
+        (hasNoProcessRunning() || hasAllProcessesRunning()) &&
+        (hasNoProcessRunning() != hasAllProcessesRunning())
+    );
+
+    Debug(id(), "Handle button");
+    Debug(id(), fmt::format("  No process running: {}", hasNoProcessRunning()));
+    Debug(id(), fmt::format("  All processes running: {}", hasAllProcessesRunning()));
 
     if (hasNoProcessRunning()) {
         emit startProgram(_configuration->id);
@@ -118,20 +130,20 @@ void ProgramButton::handleButtonPress() {
         // We disable the button until we get another message back from the tray
         setEnabled(false);
     }
-    else if (hasAllProcessesRunning()) {
+    
+    if (hasAllProcessesRunning()) {
         emit stopProgram(_configuration->id);
 
         // We disable the button until we get another message back from the tray
         setEnabled(false);
     }
-    else {
-        // This slot should only be invoked if either all processes are running, or no
-        // process are running
-        assert(false);
-    }
 }
 
 void ProgramButton::updateButton() {
+    Debug(id(), "Update button");
+    Debug(id(), fmt::format("  No process running: {}", hasNoProcessRunning()));
+    Debug(id(), fmt::format("  All processes running: {}", hasAllProcessesRunning()));
+
     setEnabled(true);
 
     // If all processes don't exist or are in NormalExit/CrashExit/FailedToStart, we show
@@ -243,6 +255,10 @@ bool ProgramButton::hasAllProcessesRunning() const {
             return isProcessRunning(node->id);
         }
     );
+}
+
+std::string ProgramButton::id() const {
+    return fmt::format("Program Button ({}|{})", _cluster->name, _configuration->name);
 }
 
 
@@ -375,9 +391,12 @@ void ProgramWidget::updateStatus(Cluster::ID clusterId) {
 
 void ProgramWidget::processUpdated(Process::ID processId) {
     const Process* process = data::findProcess(processId);
+    assert(process);
     const auto it = _widgets.find(process->clusterId);
-    assert(it != _widgets.end());
-    it->second->processUpdated(processId);
+    // 'it' might be end() if a Tray has a running process whose program ID was removed
+    if (it != _widgets.end()) {
+        it->second->processUpdated(processId);
+    }
 }
 
 
@@ -431,9 +450,8 @@ void TagsWidget::addTag(std::string tag) {
 }
 
 void TagsWidget::removeTag(std::string tag) {
-    assert(_buttons.find(tag) != _buttons.end());
-
     auto it = _buttons.find(tag);
+    assert(it != _buttons.end());
     _layout->removeWidget(it->second);
     delete it->second;
     _buttons.erase(it);
@@ -631,6 +649,7 @@ QWidget* ProgramsWidget::createPrograms() {
     area->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     for (const Program* p : data::programs()) {
+        assert(p);
         ProgramWidget* w = new ProgramWidget(*p);
 
         connect(
@@ -668,6 +687,7 @@ QWidget* ProgramsWidget::createPrograms() {
 
 void ProgramsWidget::processUpdated(Process::ID processId) {
     const Process* process = data::findProcess(processId);
+    assert(process);
 
     const auto it = _widgets.find(process->programId);
     if (it != _widgets.cend()) {

@@ -38,6 +38,7 @@
 #include "jsonsocket.h"
 #include "logging.h"
 #include "message.h"
+#include <QMessageBox>
 #include <QTcpSocket>
 #include <fmt/format.h>
 #include <iostream>
@@ -71,18 +72,29 @@ namespace {
         );
 #endif
     }
+
+    void Debug(std::string msg) {
+        ::Debug("SocketHandler", std::move(msg));
+    }
+
 } // namespace
 
 SocketHandler::SocketHandler(int port, std::string secret)
     : _secret(std::move(secret))
 {
-    Debug("SocketHandler", "Creating socket handler");
+    Debug("Creating socket handler");
     Log("Status", fmt::format("Listening on port: {}", port));
 
     const bool success = _server.listen(QHostAddress::Any, static_cast<quint16>(port));
     if (!success) {
-        Log("Error", fmt::format("Creating socket to listen on port {} failed", port));
-        return;
+        std::string msg = fmt::format("Failed to listen on port {}", port);
+        QMessageBox::critical(
+            nullptr,
+            "Socket Creation",
+            QString::fromStdString(msg)
+        );
+        Log("Error", msg);
+        exit(EXIT_FAILURE);
     }
     connect(
         &_server, &QTcpServer::newConnection,
@@ -91,7 +103,7 @@ SocketHandler::SocketHandler(int port, std::string secret)
 }
 
 SocketHandler::~SocketHandler() {
-    Debug("SocketHandler", "Destroying socket handler");
+    Debug("Destroying socket handler");
 }
 
 std::array<SocketHandler::MessageLog, 3> SocketHandler::lastMessages() const {
@@ -99,7 +111,7 @@ std::array<SocketHandler::MessageLog, 3> SocketHandler::lastMessages() const {
 }
 
 void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* socket) {
-    Debug("SocketHandler", fmt::format("Received message: {}", message.dump(2)));
+    Debug(fmt::format("Received message: {}", message.dump(2)));
 
     common::Message msg = message;
     if (msg.secret == _secret) {
@@ -124,10 +136,7 @@ void SocketHandler::sendMessage(const nlohmann::json& message, bool printMessage
 }
 
 void SocketHandler::disconnected(common::JsonSocket* socket) {
-    Debug(
-        "SocketHandler",
-        fmt::format("Disconnected remote socket to {}", socket->peerAddress())
-    );
+    Debug(fmt::format("Disconnected remote socket to {}", socket->peerAddress()));
 
     auto ptr = std::find(_sockets.begin(), _sockets.end(), socket);
     if (ptr != _sockets.end()) {
@@ -138,7 +147,7 @@ void SocketHandler::disconnected(common::JsonSocket* socket) {
         emit closedConnection(socket->peerAddress());
     }
     else {
-        Debug("SocketHandler", "Could not find socket");
+        Debug("Could not find socket");
     }
 }
 
@@ -149,10 +158,7 @@ void SocketHandler::newConnectionEstablished() {
             _secret
         );
 
-        Debug(
-            "SocketHandler",
-            fmt::format("Creating new connection to {}", socket->peerAddress())
-        );
+        Debug(fmt::format("Creating new connection to {}", socket->peerAddress()));
 
         QObject::connect(
             socket, &common::JsonSocket::disconnected,

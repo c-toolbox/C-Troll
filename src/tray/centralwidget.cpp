@@ -41,6 +41,12 @@
 #include <QVBoxLayout>
 #include <fmt/format.h>
 
+namespace {
+    void Debug(std::string msg) {
+        ::Debug("CentralWidget", std::move(msg));
+    }
+} // namespace
+
 CentralWidget::CentralWidget() {
     QLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -69,14 +75,14 @@ void CentralWidget::log(std::string msg) {
 }
 
 void CentralWidget::newConnection(const std::string& peerAddress) {
-    Debug("CentralWidget", fmt::format("Opened connection to {}", peerAddress));
+    Debug(fmt::format("Opened connection to {}", peerAddress));
     QLabel* label = new QLabel(QString::fromStdString(peerAddress));
     _connectionsLayout->addWidget(label);
     _connections[peerAddress] = label;
 }
 
 void CentralWidget::closedConnection(const std::string& peerAddress) {
-    Debug("CentralWidget", fmt::format("Closed connection to {}", peerAddress));
+    Debug(fmt::format("Closed connection to {}", peerAddress));
 
     const auto it = _connections.find(peerAddress);
     assert(it != _connections.end());
@@ -87,10 +93,8 @@ void CentralWidget::closedConnection(const std::string& peerAddress) {
 }
 
 void CentralWidget::newProcess(ProcessHandler::ProcessInfo process) {
-    Debug(
-        "CentralWidget",
-        fmt::format("New process: {}, {}", process.processId, process.executable)
-    );
+    Debug(fmt::format("New process: {}, {}", process.processId, process.executable));
+
     std::string text = fmt::format("{}: {}", process.processId, process.executable);
     QLabel* label = new QLabel(QString::fromStdString(text));
     _processesLayout->addWidget(label);
@@ -98,15 +102,13 @@ void CentralWidget::newProcess(ProcessHandler::ProcessInfo process) {
 }
 
 void CentralWidget::endedProcess(ProcessHandler::ProcessInfo process) {
-    Debug(
-        "CentralWidget",
-        fmt::format("Close process: {}, {}", process.processId, process.executable)
-    );
+    Debug(fmt::format("Close process: {}, {}", process.processId, process.executable));
+
     const auto it = _processes.find(process.processId);
     // The processId might not exist yet if the process starting fails (for example if the
     // requested executable does not exist)
     if (it != _processes.end()) {
-        Debug("CentralWidget", "Found in list");
+        Debug("Found in list");
         it->second->deleteLater();
         _processesLayout->removeWidget(it->second);
         _processes.erase(it);

@@ -37,35 +37,31 @@
 #include "database.h"
 #include "program.h"
 #include "logging.h"
+#include <fmt/format.h>
 #include <assert.h>
 
 common::StartCommandMessage startProcessCommand(const Process& process) {
     const Program* program = data::findProgram(process.programId);
     assert(program);
+    const Program& prg = *program;
+
     const Program::Configuration* configuration = data::findConfigurationForProgram(
-        *program,
+        prg,
         process.configurationId
     );
     assert(configuration);
+    const Program::Configuration& conf = *configuration;
 
     common::StartCommandMessage t;
     t.id = process.id.v;
-    t.executable = program->executable;
-    t.workingDirectory = program->workingDirectory;
-
-    if (!program->commandlineParameters.empty()) {
-        t.commandlineParameters = program->commandlineParameters;
-    }
-    if (!configuration->parameters.empty()) {
-        t.commandlineParameters += ' ';
-        t.commandlineParameters += configuration->parameters;
-    }
-
+    t.executable = prg.executable;
+    t.workingDirectory = prg.workingDirectory;
+    t.commandlineParameters = prg.commandlineParameters + " " + conf.parameters;
     t.programId = process.programId.v;
     t.configurationId = process.configurationId.v;
     t.clusterId = process.clusterId.v;
     t.nodeId = process.nodeId.v;
-    t.forwardStdOutStdErr = program->shouldForwardMessages;
+    t.forwardStdOutStdErr = prg.shouldForwardMessages;
     t.dataHash = data::dataHash();
 
     return t;
@@ -109,4 +105,3 @@ Process::Process(ID id_, Program::ID programId_,
 void Process::setNextIdIfHigher(int id) {
     nextId = std::max(nextId, id);
 }
-

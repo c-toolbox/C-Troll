@@ -167,17 +167,18 @@ namespace {
 
         const Cluster* c = data::findCluster(cluster);
         const Program* p = data::findProgram(program);
-        if ((c == nullptr) || (p == nullptr)) {
-            return { c, p, nullptr };
-        }
-        const Program::Configuration* conf = data::findConfigurationForProgram(
-            *p,
-            configuration
-        );
-
+        const Program::Configuration* conf =
+            p != nullptr ? data::findConfigurationForProgram(*p, configuration) : nullptr;
         return { c, p, conf };
     }
 
+    void Debug(std::string msg) {
+        ::Debug("RestConnectionHandler", std::move(msg));
+    }
+
+    void Log(std::string msg) {
+        ::Log("REST", std::move(msg));
+    }
 } // namespace
 
 RestConnectionHandler::RestConnectionHandler(QObject* parent, int port,
@@ -211,6 +212,9 @@ RestConnectionHandler::RestConnectionHandler(QObject* parent, int port,
 void RestConnectionHandler::newConnectionEstablished() {
     while (_server.hasPendingConnections()) {
         QTcpSocket* socket = _server.nextPendingConnection();
+        Debug(fmt::format(
+            "New connection from {}", socket->peerAddress().toString().toStdString()
+        ));
 
         connect(
             socket, &QTcpSocket::disconnected,
@@ -260,15 +264,19 @@ std::map<std::string, std::string> parameters(QStringList tokens) {
 void RestConnectionHandler::handleNewConnection() {
     QTcpSocket* socket = dynamic_cast<QTcpSocket*>(QObject::sender());
     assert(socket);
-    assert(std::find(_sockets.begin(), _sockets.end(), socket) != _sockets.end());
+    Debug(fmt::format(
+        "Handling new message from {}", socket->peerAddress().toString().toStdString()
+    ));
 
     if (_acceptOnlyLoopbackConnection && !socket->peerAddress().isLoopback()) {
+        Debug("Rejecting due to not from a loopback");
         return;
     }
 
     QString content = socket->readAll();
     QStringList tokens = content.split(QRegularExpression("[ \r\n][ \r\n]*"));
     if (tokens.empty()) {
+        Debug("Rejecting due to no payload");
         sendResponse(*socket, Response::BadRequest);
         return;
     }
@@ -280,6 +288,7 @@ void RestConnectionHandler::handleNewConnection() {
     if (wantsAuth && (!(hasAuth && authCorrect))) {
         // We only want to check if we actually want authorization. If so we only want to
         // proceed if we have authorization and if it is correct
+        Debug("Rejecting due to bad authorization");
         sendResponse(*socket, Response::Unauthorized);
         return;
     }
@@ -291,6 +300,7 @@ void RestConnectionHandler::handleNewConnection() {
         Endpoint::Unknown;
 
     if (method == HttpMethod::Unknown) {
+        Debug("Rejecting due to unknown HTTP method");
         sendResponse(*socket, Response::BadRequest);
         return;
     }
@@ -396,7 +406,6 @@ void RestConnectionHandler::handleStartProgramMessage(QTcpSocket& socket,
                                               const Program::Configuration& configuration)
 {
     Log(
-        "REST",
         fmt::format(
             "Received command to start {} ({}) on {}",
             program.name, configuration.name, cluster.name
@@ -412,7 +421,6 @@ void RestConnectionHandler::handleStopProgramMessage(QTcpSocket& socket,
                                               const Program::Configuration& configuration)
 {
     Log(
-        "REST",
         fmt::format(
             "Received command to stop {} ({}) on {}",
             program.name, configuration.name, cluster.name
@@ -466,9 +474,12 @@ void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
 }
 
 void RestConnectionHandler::handleProgramInfoMessage(QTcpSocket& socket) {
+    Debug("Received command to send programs info message");
+
     std::vector<const Program*> programs = data::programs();
     nlohmann::json result = nlohmann::json::array();
     for (const Program* program : programs) {
+        assert(program);
         nlohmann::json p;
         p["name"] = program->name;
         p["tags"] = program->tags;
@@ -488,9 +499,12 @@ void RestConnectionHandler::handleProgramInfoMessage(QTcpSocket& socket) {
 }
 
 void RestConnectionHandler::handleClusterInfoMessage(QTcpSocket& socket) {
+    Debug("Received command to send clusters info message");
+
     std::vector<const Cluster*> clusters = data::clusters();
     nlohmann::json result = nlohmann::json::array();
     for (const Cluster* cluster : clusters) {
+        assert(cluster);
         if (cluster->isEnabled) {
             nlohmann::json c;
             c["name"] = cluster->name;
@@ -510,9 +524,12 @@ void RestConnectionHandler::handleClusterInfoMessage(QTcpSocket& socket) {
 }
 
 void RestConnectionHandler::handleNodeInfoMessage(QTcpSocket& socket) {
+    Debug("Received command to send nodes info message");
+
     std::vector<const Node*> nodes = data::nodes();
     nlohmann::json result = nlohmann::json::array();
     for (const Node* node : nodes) {
+        assert(node);
         nlohmann::json n;
         n["name"] = node->name;
         n["isConnected"] = node->isConnected;
@@ -523,6 +540,8 @@ void RestConnectionHandler::handleNodeInfoMessage(QTcpSocket& socket) {
 }
 
 void RestConnectionHandler::handleApiInfoMessage(QTcpSocket& socket) {
+    Debug("Received command to send API info message");
+
     nlohmann::json result;
     result["endpoints"] = nlohmann::json::array();
 
