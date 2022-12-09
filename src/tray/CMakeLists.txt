@@ -66,7 +66,7 @@ add_executable(Tray WIN32 MACOSX_BUNDLE
   ${HEADER_FILES}
   ${MOC_FILES}
   ${RESOURCE_FILES}
-  ${CMAKE_SOURCE_DIR}/resources/icon.rc
+  ${CMAKE_SOURCE_DIR}/resources/Tray.rc
 )
 target_link_libraries(Tray PRIVATE common Qt6::Core Qt6::Widgets Qt6::Network)
 qt_disable_unicode_defines(Tray)

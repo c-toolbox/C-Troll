@@ -32,18 +32,6 @@
 #                                                                                        #
 ##########################################################################################
 
-# find_package(Qt6 COMPONENTS Core Gui Network REQUIRED)
-#
-# set(RESOURCE_FILES "")
-# qt_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
-
-add_executable(Starter
-  main.cpp
-  # ${RESOURCE_FILES}
-  # ${CMAKE_SOURCE_DIR}/resources/icon.rc
-)
-# target_link_libraries(Starter PRIVATE common Qt6::Core Qt6::Gui Qt6::Network)
-# qt_disable_unicode_defines(Starter)
-# qt_finalize_target(Starter)
+add_executable(Starter main.cpp)
 target_include_directories(Starter PRIVATE ${PROJECT_SOURCE_DIR}/ext/cpp-httplib)
 target_link_libraries(Starter PRIVATE common)
