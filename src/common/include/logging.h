@@ -39,6 +39,7 @@
 #include <functional>
 #include <iostream>
 #include <mutex>
+#include <optional>
 #include <string>
 
 /**
@@ -74,6 +75,17 @@ namespace common {
  * \return \c true if `--debug` occurred in the commandline arguments, \c false otherwise
  */
 bool parseDebugCommandlineArgument(std::vector<std::string> args);
+
+/**
+ * This function returns the desired window position if `--pos` was provided to the
+ * application, or `std::nullopt` if the argument was not present.
+ *
+ * \param The list of commandline arguments. The best way to generate this from the
+ *        standard argc+argv construct is through: `{ argv, argv + argc }`
+ * \return Either `std::nullopt` if the commandline flag was not found or the pixel
+ *         position provided as arguments
+ */
+std::optional<std::pair<int, int>> parseLocationArgument(std::vector<std::string> args);
 
 /**
  * This static class provides the ability to log information to both the console and a

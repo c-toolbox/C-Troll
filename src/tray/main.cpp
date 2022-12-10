@@ -93,7 +93,9 @@ int main(int argc, char** argv) {
 
 
 
-    const bool logDebug = common::parseDebugCommandlineArgument({ argv, argv + argc });
+    std::vector<std::string> arg = { argv, argv + argc };
+    const bool logDebug = common::parseDebugCommandlineArgument(arg);
+    std::optional<std::pair<int, int>> pos = common::parseLocationArgument(arg);
 
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that
@@ -111,6 +113,9 @@ int main(int argc, char** argv) {
 
 
     MainWindow mw;
+    if (pos.has_value()) {
+        mw.move(pos->first, pos->second);
+    }
 
     std::string_view configurationFile = "config-tray.json";
     std::string absPath = std::filesystem::absolute(configurationFile).string();
