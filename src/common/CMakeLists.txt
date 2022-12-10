@@ -50,6 +50,7 @@ set(HEADER_FILES
   include/processoutputmessage.h
   include/processstatusmessage.h
   include/program.h
+  include/restartnodemessage.h
   include/startcommandmessage.h
   include/traystatusmessage.h
   include/typedid.h
@@ -71,6 +72,7 @@ set(SOURCE_FILES
   src/processoutputmessage.cpp
   src/processstatusmessage.cpp
   src/program.cpp
+  src/restartnodemessage.cpp
   src/startcommandmessage.cpp
   src/traystatusmessage.cpp
 )

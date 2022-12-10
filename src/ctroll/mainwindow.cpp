@@ -43,6 +43,7 @@
 #include "processwidget.h"
 #include "programwidget.h"
 #include "restconnectionhandler.h"
+#include "restartnodemessage.h"
 #include "settingswidget.h"
 #include "version.h"
 #include <QApplication>
@@ -83,7 +84,13 @@ MainWindow::MainWindow(bool shouldLogDebug)
 
     // The second menu item terminates the application
     QAction* quit = new QAction("Quit", this);
-    connect(quit, &QAction::triggered, qApp, &QApplication::quit);
+    connect(
+        quit, &QAction::triggered,
+        [this]() {
+            _isClosingApplication = true;
+            qApp->quit();
+        }
+    );
     menu->addAction(quit);
 
     // Set the context menu on the icon and show the application icon in the system tray
@@ -196,6 +203,14 @@ MainWindow::MainWindow(bool shouldLogDebug)
     );
     connect(_clustersWidget, &ClustersWidget::killTray, this, &MainWindow::killTray);
     connect(_clustersWidget, &ClustersWidget::killTrays, this, &MainWindow::killTrays);
+    connect(
+        _clustersWidget, &ClustersWidget::restartNode,
+        this, &MainWindow::restartNode
+    );
+    connect(
+        _clustersWidget, &ClustersWidget::restartNodes,
+        this, &MainWindow::restartNodes
+    );
 
     // Processes
     _processesWidget = new ProcessesWidget(_config.removalTimeout);
@@ -637,8 +652,58 @@ void MainWindow::killTrays(Cluster::ID id) const {
     }
 }
 
+void MainWindow::restartNode(Node::ID id) const {
+    Log("Sending", fmt::format("Send message to restart node {}", id.v));
+    const Node* node = data::findNode(id);
+    assert(node);
+
+    common::RestartNodeMessage command;
+    if (!node->secret.empty()) {
+        command.secret = node->secret;
+    }
+    nlohmann::json j = command;
+    _clusterConnectionHandler.sendMessage(*node, j);
+}
+
+void MainWindow::restartNodes(Cluster::ID id) const {
+    Log("Sending", fmt::format("Send message to restart nodes on {}", id.v));
+
+    std::vector<const Node*> nodes;
+    if (id.v == -1) {
+        // Send kill command to all clusters
+        for (const Cluster* cluster : data::clusters()) {
+            std::vector<const Node*> ns = data::findNodesForCluster(*cluster);
+            std::copy(ns.begin(), ns.end(), std::back_inserter(nodes));
+        }
+
+        // We have probably picked up a number of duplicates in this process as nodes can
+        // be specified in multiple clusters
+        std::sort(nodes.begin(), nodes.end());
+        nodes.erase(std::unique(nodes.begin(), nodes.end()), nodes.end());
+    }
+    else {
+        // We want to send the kill command only to the nodes of a specific cluster
+        const Cluster* cluster = data::findCluster(id);
+        nodes = data::findNodesForCluster(*cluster);
+    }
+
+    for (const Node* node : nodes) {
+        common::RestartNodeMessage command;
+        if (!node->secret.empty()) {
+            command.secret = node->secret;
+        }
+        nlohmann::json j = command;
+        _clusterConnectionHandler.sendMessage(*node, j);
+    }
+}
+
 // The method that handles the closing event of the application window
 void MainWindow::closeEvent(QCloseEvent* event) {
+    if (_isClosingApplication) {
+        // We are closing the appliation via the system tray, so we don't interfere
+        return;
+    }
+
     // If the window is visible, and the checkbox is checked, then the completion of the
     // application. Ignored, and the window simply hides that accompanied the
     // corresponding pop-up message

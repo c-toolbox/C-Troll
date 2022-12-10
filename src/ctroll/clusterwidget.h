@@ -73,6 +73,7 @@ public:
 signals:
     void killProcesses(Node::ID id);
     void killTray(Node::ID id);
+    void restartNode(Node::ID id);
 
 private:
     const Node::ID _nodeId;
@@ -80,6 +81,7 @@ private:
     ConnectionWidget* _connectionLabel = nullptr;
     QPushButton* _killProcesses = nullptr;
     QPushButton* _killTray = nullptr;
+    QPushButton* _restartNode = nullptr;
 };
 
 
@@ -98,6 +100,8 @@ signals:
     void killProcesses(Cluster::ID id);
     void killTray(Node::ID id);
     void killTrays(Cluster::ID id);
+    void restartNode(Node::ID id);
+    void restartNodes(Cluster::ID id);
 
 private:
     const Cluster::ID _clusterId;
@@ -105,6 +109,7 @@ private:
     ConnectionWidget* _connectionLabel = nullptr;
     QPushButton* _killProcesses = nullptr;
     QPushButton* _killTrays = nullptr;
+    QPushButton* _restartNodes = nullptr;
     std::map<Node::ID, NodeWidget*> _nodeWidgets;
 };
 
@@ -125,6 +130,8 @@ signals:
     void killProcesses(Cluster::ID id);
     void killTray(Node::ID id);
     void killTrays(Cluster::ID id);
+    void restartNode(Node::ID id);
+    void restartNodes(Cluster::ID id);
 
 private:
     std::map<Cluster::ID, ClusterWidget*> _clusterWidgets;

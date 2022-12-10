@@ -32,79 +32,19 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CTROLL__MAINWINDOW_H__
-#define __CTROLL__MAINWINDOW_H__
+#include "restartnodemessage.h"
 
-#include <QMainWindow>
+namespace common {
 
-#include "clusterconnectionhandler.h"
-#include "configuration.h"
-#include "logwidget.h"
-#include "process.h"
-#include <QCloseEvent>
-#include <QSystemTrayIcon>
-#include <QTextEdit>
-#include <memory>
-#include <mutex>
-#include <string>
+void to_json(nlohmann::json& j, const RestartNodeMessage& m) {
+    j[Message::KeyType] = RestartNodeMessage::Type;
+    j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeySecret] = m.secret;
+}
 
-class ClustersWidget;
-class ProcessesWidget;
-class RestConnectionHandler;
+void from_json(const nlohmann::json& j, RestartNodeMessage& m) {
+    validateMessage(j, RestartNodeMessage::Type);
+    from_json(j, static_cast<Message&>(m));
+}
 
-namespace programs { class ProgramsWidget; }
-
-class MainWindow : public QMainWindow {
-Q_OBJECT
-public:
-    MainWindow(bool shouldLogDebug);
-
-private slots:
-    void handleTrayProcess(common::ProcessStatusMessage status);
-    void handleTrayStatus(Node::ID, common::TrayStatusMessage status);
-    void handleInvalidAuth(Node::ID id, common::InvalidAuthMessage message);
-    void handleErrorMessage(Node::ID id, common::ErrorOccurredMessage message);
-
-    void stopProcess(Process::ID processId) const;
-
-    void iconActivated(QSystemTrayIcon::ActivationReason reason);
-
-protected:
-    void closeEvent(QCloseEvent* event);
-    void changeEvent(QEvent* event);
-
-private:
-    void startProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId);
-    void startCustomProgram(Node::ID nodeId, std::string executable,
-        std::string workingDir, std::string arguments);
-    void stopProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId) const;
-    void startProcess(Process::ID processId) const;
-    void killAllProcesses(Cluster::ID id) const;
-    void killAllProcesses(Node::ID id) const;
-    void killTray(Node::ID id) const;
-    void killTrays(Cluster::ID id) const;
-    void restartNode(Node::ID id) const;
-    void restartNodes(Cluster::ID id) const;
-
-    void log(std::string msg);
-
-    programs::ProgramsWidget* _programWidget = nullptr;
-    ClustersWidget* _clustersWidget = nullptr;
-    ProcessesWidget* _processesWidget = nullptr;
-    LogWidget _logWidget;
-
-    ClusterConnectionHandler _clusterConnectionHandler;
-    RestConnectionHandler* _restLoopbackHandler = nullptr;
-    RestConnectionHandler* _restGeneralHandler = nullptr;
-    Configuration _config;
-
-    QTextEdit _messageBox;
-    QSystemTrayIcon _trayIcon;
-
-    bool _isClosingApplication = false;
-    bool _shouldShowDataHashMessage = false;
-};
-
-#endif // __CTROLL__MAINWINDOW_H__
+} // namespace common

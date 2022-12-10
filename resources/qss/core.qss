@@ -163,6 +163,11 @@ ClusterWidget  QPushButton#killtrays:enabled {
   font-weight: bold;
 }
 
+ClusterWidget  QPushButton#restartnodes:enabled {
+  color: #f33e3e;
+  font-weight: bold;
+}
+
 NodeWidget  ConnectionWidget {
   min-width: 0.75em;
   max-width: 0.75em;
@@ -174,6 +179,11 @@ NodeWidget  ConnectionWidget[state="connected"] {
 }
 
 NodeWidget  QPushButton#killtray:enabled {
+  color: #f33e3e;
+  font-weight: bold;
+}
+
+NodeWidget  QPushButton#restartnode:enabled {
   color: #f33e3e;
   font-weight: bold;
 }

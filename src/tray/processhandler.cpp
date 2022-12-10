@@ -41,6 +41,7 @@
 #include "message.h"
 #include "processoutputmessage.h"
 #include "processstatusmessage.h"
+#include "restartnodemessage.h"
 #include "traystatusmessage.h"
 #include <fmt/format.h>
 #include <filesystem>
@@ -188,6 +189,15 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
             Log(fmt::format("Received [{}]", peer), message.dump());
 
             emit closeApplication();
+        }
+        else if (common::isValidMessage<common::RestartNodeMessage>(message)) {
+            Log(fmt::format("Received [{}]", peer), message.dump());
+
+#ifdef WIN32
+            QProcess::startDetached("shutdown", { "/r", "/t", "0" });
+#else
+            Log("Command not support on this operating system");
+#endif // WIN32
         }
     }
     catch (const std::exception& e) {

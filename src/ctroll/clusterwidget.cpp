@@ -132,7 +132,8 @@ NodeWidget::NodeWidget(const Node& node)
     _killTray = new QPushButton("Kill Tray");
     _killTray->setObjectName("killtray");
     _killTray->setToolTip("Kills the Tray application on this particular node");
-    connect(_killTray, &QPushButton::clicked,
+    connect(
+        _killTray, &QPushButton::clicked,
         [this, node]() {
             std::string text = fmt::format(
                 "Are you sure you want to kill the TRAY on '{}'?", node.name
@@ -155,6 +156,35 @@ NodeWidget::NodeWidget(const Node& node)
         }
     );
     bottomLayout->addWidget(_killTray);
+
+    _restartNode = new QPushButton("Restart node");
+    _restartNode->setObjectName("restartnode");
+    _restartNode->setToolTip("Restarts this particular node");
+    connect(
+        _restartNode, &QPushButton::clicked,
+        [this, node]() {
+            std::string text = fmt::format(
+                "Are you sure you want to restart '{}'?", node.name
+            );
+
+            QMessageBox box;
+            box.setText("Restart node");
+            box.setInformativeText(QString::fromStdString(text));
+            box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            box.setDefaultButton(QMessageBox::Ok);
+            int res = box.exec();
+            if (res == QMessageBox::Ok) {
+                box.setInformativeText(QString::fromStdString("AGAIN: " + text));
+                res = box.exec();
+
+                if (res == QMessageBox::Ok) {
+                    emit restartNode(node.id);
+                }
+            }
+        }
+    );
+    bottomLayout->addWidget(_restartNode);
+
     layout->addWidget(bottomRow);
 }
 
@@ -169,6 +199,7 @@ void NodeWidget::updateConnectionStatus() {
 
     _killProcesses->setEnabled(n->isConnected);
     _killTray->setEnabled(n->isConnected);
+    _restartNode->setEnabled(n->isConnected);
 }
 
 
@@ -199,6 +230,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
             this, QOverload<Node::ID>::of(&ClusterWidget::killProcesses)
         );
         connect(node, &NodeWidget::killTray, this, &ClusterWidget::killTray);
+        connect(node, &NodeWidget::restartNode, this, &ClusterWidget::restartNode);
         layout->addWidget(
             node,
             static_cast<int>(i) / Columns,
@@ -261,6 +293,33 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
     );
     btnLayout->addWidget(_killTrays);
 
+    _restartNodes = new QPushButton("Restart all nodes");
+    _restartNodes->setObjectName("restartnodes");
+    connect(
+        _restartNodes, &QPushButton::clicked,
+        [this, cluster]() {
+            std::string text = fmt::format(
+                "Are you sure you want restart all nodes of cluster '{}'?",
+                cluster.name
+            );
+
+            QMessageBox box;
+            box.setText("Restart Nodes Trays");
+            box.setInformativeText(QString::fromStdString(text));
+            box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            box.setDefaultButton(QMessageBox::Ok);
+            int res = box.exec();
+            if (res == QMessageBox::Ok) {
+                box.setInformativeText(QString::fromStdString("AGAIN: " + text));
+                res = box.exec();
+                if (res == QMessageBox::Ok) {
+                    emit restartNodes(cluster.id);
+                }
+            }
+        }
+    );
+    btnLayout->addWidget(_restartNodes);
+
     layout->addWidget(
         boxContainer,
         static_cast<int>(nodes.size()) / Columns + 1,
@@ -298,6 +357,7 @@ void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
     _connectionLabel->setStatus(status);
     _killProcesses->setEnabled(someConnected);
     _killTrays->setEnabled(someConnected);
+    _restartNodes->setEnabled(someConnected);
 }
 
 
@@ -313,19 +373,21 @@ ClustersWidget::ClustersWidget() {
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     for (const Cluster* c : data::clusters()) {
-        ClusterWidget* widget = new ClusterWidget(*c);
+        ClusterWidget* w = new ClusterWidget(*c);
         connect(
-            widget, QOverload<Node::ID>::of(&ClusterWidget::killProcesses),
+            w, QOverload<Node::ID>::of(&ClusterWidget::killProcesses),
             this, QOverload<Node::ID>::of(&ClustersWidget::killProcesses)
         );
         connect(
-            widget, QOverload<Cluster::ID>::of(&ClusterWidget::killProcesses),
+            w, QOverload<Cluster::ID>::of(&ClusterWidget::killProcesses),
             this, QOverload<Cluster::ID>::of(&ClustersWidget::killProcesses)
         );
-        connect(widget, &ClusterWidget::killTray, this, &ClustersWidget::killTray);
-        connect(widget, &ClusterWidget::killTrays, this, &ClustersWidget::killTrays);
-        _clusterWidgets[c->id] = widget;
-        contentLayout->addWidget(widget);
+        connect(w, &ClusterWidget::killTray, this, &ClustersWidget::killTray);
+        connect(w, &ClusterWidget::killTrays, this, &ClustersWidget::killTrays);
+        connect(w, &ClusterWidget::restartNode, this, &ClustersWidget::restartNode);
+        connect(w, &ClusterWidget::restartNodes, this, &ClustersWidget::restartNodes);
+        _clusterWidgets[c->id] = w;
+        contentLayout->addWidget(w);
     }
 
     contentLayout->addStretch();
