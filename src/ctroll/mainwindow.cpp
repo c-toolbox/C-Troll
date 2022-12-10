@@ -149,7 +149,7 @@ MainWindow::MainWindow(bool shouldLogDebug) {
         timer->setTimerType(Qt::VeryCoarseTimer);
         connect(
             timer, &QTimer::timeout,
-            [keepLog]() { common::Log::ref().performLogRotation(keepLog); }
+            [keepLog]() { common::Log::ref()->performLogRotation(keepLog); }
         );
         timer->start(std::chrono::duration_cast<std::chrono::milliseconds>(freq));
     }

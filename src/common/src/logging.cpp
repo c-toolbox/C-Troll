@@ -107,7 +107,7 @@ namespace {
 
 namespace common {
 
-Log* Log::_log;
+Log* Log::_log = nullptr;
 
 bool parseDebugCommandlineArgument(std::vector<std::string> args) {
     auto it = std::find(args.begin(), args.end(), "--debug");
@@ -122,9 +122,8 @@ void Log::initialize(std::string application, bool createLogFile, bool shouldLog
     _log->_loggingFunction = std::move(loggingFunction);
 }
 
-Log& Log::ref() {
-    assert(_log);
-    return *_log;
+Log* Log::ref() {
+    return _log;
 }
 
 Log::Log(std::string componentName, bool createLogFile, bool shouldLogDebug)
@@ -144,14 +143,19 @@ Log::~Log() {
 void Log::logMessage(std::string category, std::string message) {
     message = fmt::format("{}  ({}): {}", currentTime(), category, message);
 
-    // First the file
-    if (!_filePath.empty()) {
-        std::unique_lock lock(_access);
-        _file << message << '\n';
-        _file.flush();
-    }
+    if (_log) {
+        // First the file
+        if (!_log->_filePath.empty()) {
+            std::unique_lock lock(_log->_access);
+            _log->_file << message << '\n';
+            _log->_file.flush();
+        }
 
-    _loggingFunction(message);
+        _log->_loggingFunction(message);
+    }
+    else {
+        std::cout << message << '\n';
+    }
 
     // And if we are running in Visual Studio, this output, too
 #ifdef WIN32
@@ -160,9 +164,11 @@ void Log::logMessage(std::string category, std::string message) {
 }
 
 void Log::logDebugMessage(std::string category, std::string message) {
-    if (_shouldLogDebug) {
+    if (_log && _log->_shouldLogDebug) {
         logMessage(std::move(category), "{Debug} " + message);
     }
+
+    // No else case since we don't want to log debug messages before we have a log
 }
 
 void Log::performLogRotation(bool keepLog) {
@@ -181,6 +187,10 @@ void Log::performLogRotation(bool keepLog) {
     }
 
     _file = std::ofstream(_filePath, std::ofstream::trunc);
+}
+
+bool Log::shouldLogDebugMessage() const {
+    return _shouldLogDebug;
 }
 
 } // namespace common

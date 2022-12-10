@@ -37,6 +37,7 @@
 
 #include <fstream>
 #include <functional>
+#include <iostream>
 #include <mutex>
 #include <string>
 
@@ -105,7 +106,7 @@ public:
      * \return The static reference to the Log instance
      * \pre Log::initialize needs to be called before the first call to Log::ref
      */
-    static Log& ref();
+    static Log* ref();
 
     /**
      * Logs a message with the Log. This message is both logged to the log file as well
@@ -115,7 +116,7 @@ public:
      * \param category The category/type of the messages
      * \param message The message that is to be logged
      */
-    void logMessage(std::string category, std::string message);
+    static void logMessage(std::string category, std::string message);
 
     /**
      * Logs a debug message with the Log. If the Log was created accepting debug log
@@ -125,7 +126,7 @@ public:
      * \param category The category/type of the messages
      * \param message The message that is to be logged
      */
-    void logDebugMessage(std::string category, std::string message);
+    static void logDebugMessage(std::string category, std::string message);
 
     /**
      * Performs a log rotation action. If \p keepLog is \c true, the old log file is saved
@@ -134,7 +135,11 @@ public:
      */
     void performLogRotation(bool keepLog);
 
-    friend void ::Debug(std::string category, std::string message);
+    /**
+     * Returns \c true if debug messages should be logged
+     */
+    bool shouldLogDebugMessage() const;
+
 private:
     /**
      * Constructs a Log and opens the file for reading, overwriting any old content that
@@ -169,12 +174,12 @@ private:
 } // namespace common
 
 inline void Log(std::string category, std::string message) {
-    common::Log::ref().logMessage(std::move(category), std::move(message));
+    common::Log::logMessage(std::move(category), std::move(message));
 }
 
 inline void Debug(std::string category, std::string message) {
-    if (common::Log::ref()._shouldLogDebug) {
-        common::Log::ref().logDebugMessage(std::move(category), std::move(message));
+    if (common::Log::ref()->shouldLogDebugMessage()) {
+        common::Log::logDebugMessage(std::move(category), std::move(message));
     }
 }
 

@@ -96,40 +96,11 @@ int main(int argc, char** argv) {
     const bool logDebug = common::parseDebugCommandlineArgument({ argv, argv + argc });
 
     qInstallMessageHandler(
-        // The first message handler is used for Qt error messages that show up before
-        // the main window is initialized
-        [](QtMsgType type, const QMessageLogContext& context, const QString& msg) {
-            QByteArray localMsg = msg.toLocal8Bit();
-            switch (type) {
-                case QtDebugMsg:
-                    std::cerr << "Debug: ";
-                    break;
-                case QtInfoMsg:
-                    std::cerr << "Info: ";
-                    break;
-                case QtWarningMsg:
-                    std::cerr << "Warning: ";
-                    break;
-                case QtCriticalMsg:
-                    std::cerr << "Critical: ";
-                    break;
-                case QtFatalMsg:
-                    std::cerr << "Fatal: ";
-                    break;
-            }
-
-            std::cerr << fmt::format(
-                "{} ({}: {}, {})\n",
-                std::string(localMsg.constData()),
-                context.file ? std::string(context.file) : "",
-                context.line,
-                context.function ? std::string(context.function) : ""
-            );
-            std::cerr.flush();
+        // Now that the log is enabled and available, we can pipe all Qt messages to that
+        [](QtMsgType, const QMessageLogContext&, const QString& msg) {
+            Log("Qt", msg.toLocal8Bit().constData());
         }
     );
-
-
 
     {
         QFile file(":/qss/tray.qss");
@@ -159,15 +130,7 @@ int main(int argc, char** argv) {
         logDebug,
         [&mw](std::string msg) { mw.log(std::move(msg)); }
     );
-
     Debug("Finished loading configuration file");
-
-    qInstallMessageHandler(
-        // Now that the log is enabled and available, we can pipe all Qt messages to that
-        [](QtMsgType, const QMessageLogContext&, const QString& msg) {
-            Log("Qt", msg.toLocal8Bit().constData());
-        }
-    );
 
 #ifdef QT_DEBUG
     config.showWindow = true;
@@ -195,7 +158,7 @@ int main(int argc, char** argv) {
             timer, &QTimer::timeout,
             [keepLog]() {
                 Debug("Logging", "Performing log rotation");
-                common::Log::ref().performLogRotation(keepLog);
+                common::Log::ref()->performLogRotation(keepLog);
             }
         );
         timer->start(std::chrono::duration_cast<std::chrono::milliseconds>(freq));
