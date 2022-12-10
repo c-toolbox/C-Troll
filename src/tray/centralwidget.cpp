@@ -74,6 +74,10 @@ void CentralWidget::log(std::string msg) {
     _messageBox->ensureCursorVisible();
 }
 
+bool CentralWidget::hasConnections() const {
+    return !_connections.empty();
+}
+
 void CentralWidget::newConnection(const std::string& peerAddress) {
     Debug(fmt::format("Opened connection to {}", peerAddress));
     QLabel* label = new QLabel(QString::fromStdString(peerAddress));

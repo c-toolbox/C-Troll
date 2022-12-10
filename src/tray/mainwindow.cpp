@@ -53,10 +53,8 @@ MainWindow::MainWindow() {
 
     // Initialize the tray icon, set the icon of a set of system icons,
     // as well as set a tooltip
-    QSystemTrayIcon* trayIcon = new QSystemTrayIcon(
-        QIcon(":/images/C_transparent_bw.png"), this
-    );
-    trayIcon->setToolTip("C-Troll Tray");
+    _trayIcon = new QSystemTrayIcon(QIcon(":/images/tray_offline_cog.png"), this);
+    _trayIcon->setToolTip("C-Troll Tray");
 
     // After that create a context menu of two items
     QMenu* menu = new QMenu(this);
@@ -71,12 +69,12 @@ MainWindow::MainWindow() {
     menu->addAction(quit);
 
     // Set the context menu on the icon and show the application icon in the system tray
-    trayIcon->setContextMenu(menu);
-    trayIcon->show();
+    _trayIcon->setContextMenu(menu);
+    _trayIcon->show();
 
     // Also connect clicking on the icon to the signal processor of this press
-    connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
-    connect(qApp, &QCoreApplication::aboutToQuit, trayIcon, &QSystemTrayIcon::hide);
+    connect(_trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
+    connect(qApp, &QCoreApplication::aboutToQuit, _trayIcon, &QSystemTrayIcon::hide);
 }
 
 void MainWindow::setPort(int port) {
@@ -89,10 +87,14 @@ void MainWindow::log(std::string msg) {
 
 void MainWindow::newConnection(const std::string& peerAddress) {
     _centralWidget->newConnection(peerAddress);
+
+    updateTrayIcon();
 }
 
 void MainWindow::closedConnection(const std::string& peerAddress) {
     _centralWidget->closedConnection(peerAddress);
+
+    updateTrayIcon();
 }
 
 void MainWindow::newProcess(ProcessHandler::ProcessInfo process) {
@@ -137,4 +139,11 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason) {
             showNormal(); // Bring the window to the front
         }
     }
+}
+
+void MainWindow::updateTrayIcon() {
+    constexpr const char Offline[] = ":/images/tray_offline_cog.png";
+    constexpr const char Online[] = ":/images/tray_online_cog.png";
+
+    _trayIcon->setIcon(QIcon(_centralWidget->hasConnections() ? Online : Offline));
 }

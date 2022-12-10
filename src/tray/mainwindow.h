@@ -69,7 +69,10 @@ private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
+    void updateTrayIcon();
+
     CentralWidget* _centralWidget;
+    QSystemTrayIcon* _trayIcon;
 };
 
 #endif // __TRAY__MAINWINDOW_H__

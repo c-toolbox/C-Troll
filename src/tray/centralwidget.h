@@ -50,6 +50,8 @@ public:
     void setPort(int port);
     void log(std::string msg);
 
+    bool hasConnections() const;
+
 public slots:
     void newConnection(const std::string& peerAddress);
     void closedConnection(const std::string& peerAddress);
