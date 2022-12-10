@@ -99,6 +99,7 @@ private:
     Configuration _config;
 
     QTextEdit _messageBox;
+    QSystemTrayIcon _trayIcon;
 
     bool _shouldShowDataHashMessage = false;
 };

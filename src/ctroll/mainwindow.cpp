@@ -58,7 +58,9 @@
 #include <string_view>
 #include <thread>
 
-MainWindow::MainWindow(bool shouldLogDebug) {
+MainWindow::MainWindow(bool shouldLogDebug)
+    : _trayIcon(QIcon(":/images/C_transparent.png"), this)
+{
     setWindowTitle("C-Troll");
 
     //
@@ -70,13 +72,7 @@ MainWindow::MainWindow(bool shouldLogDebug) {
         }
     );
 
-    // Initialize the tray icon, set the icon of a set of system icons,
-    // as well as set a tooltip
-    QSystemTrayIcon* trayIcon = new QSystemTrayIcon(
-        QIcon(":/images/C_transparent.png"),
-        this
-    );
-    trayIcon->setToolTip("C-Troll");
+    _trayIcon.setToolTip("C-Troll");
 
     // After that create a context menu of two items
     QMenu* menu = new QMenu(this);
@@ -91,12 +87,12 @@ MainWindow::MainWindow(bool shouldLogDebug) {
     menu->addAction(quit);
 
     // Set the context menu on the icon and show the application icon in the system tray
-    trayIcon->setContextMenu(menu);
-    trayIcon->show();
+    _trayIcon.setContextMenu(menu);
+    _trayIcon.show();
 
     // Also connect clicking on the icon to the signal processor of this press
-    connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
-    connect(qApp, &QCoreApplication::aboutToQuit, trayIcon, &QSystemTrayIcon::hide);
+    connect(&_trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
+    connect(qApp, &QCoreApplication::aboutToQuit, &_trayIcon, &QSystemTrayIcon::hide);
 
     //
     // Set up the container widgets
@@ -649,6 +645,13 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     if (isVisible()) {
         event->ignore();
         hide();
+
+        _trayIcon.showMessage(
+            "C-Troll",
+            "C-Troll is still running in the background",
+            QSystemTrayIcon::Information,
+            1000
+        );
     }
 }
 
