@@ -49,13 +49,14 @@ class QPushButton;
 class ConnectionWidget : public QWidget {
 Q_OBJECT
 public:
-    enum class ConnectionStatus {
+    enum class Status {
         Connected = 0,
+        ConnectedButInvalid, ///< If a port is listening, but it is not the tray
         PartiallyConnected,
         Disconnected
     };
 
-    void setStatus(ConnectionStatus status);
+    void setStatus(Status status);
     void paintEvent(QPaintEvent*);
 };
 

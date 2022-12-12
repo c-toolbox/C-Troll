@@ -154,6 +154,16 @@ std::vector<const Node*> findNodesForCluster(const Cluster& cluster) {
     return nodes;
 }
 
+void setNodeConnecting(Node::ID id, bool connected) {
+    const auto it = std::find_if(
+        gNodes.cbegin(), gNodes.cend(),
+        [id](const std::unique_ptr<Node>& n) { return n->id == id; }
+    );
+    if (it != gNodes.end()) {
+        (*it)->isConnecting = connected;
+    }
+}
+
 void setNodeConnected(Node::ID id, bool connected) {
     const auto it = std::find_if(
         gNodes.cbegin(), gNodes.cend(),

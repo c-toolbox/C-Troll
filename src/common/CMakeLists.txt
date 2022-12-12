@@ -52,6 +52,7 @@ set(HEADER_FILES
   include/program.h
   include/restartnodemessage.h
   include/startcommandmessage.h
+  include/trayconnectedmessage.h
   include/traystatusmessage.h
   include/typedid.h
 )
@@ -74,6 +75,7 @@ set(SOURCE_FILES
   src/program.cpp
   src/restartnodemessage.cpp
   src/startcommandmessage.cpp
+  src/trayconnectedmessage.cpp
   src/traystatusmessage.cpp
 )
 

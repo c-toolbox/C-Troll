@@ -188,6 +188,10 @@ NodeWidget  QPushButton#restartnode:enabled {
   font-weight: bold;
 }
 
+ConnectionWidget[state="connected invalid"] {
+  background: #ff9933;
+}
+
 ConnectionWidget[state="partially connected"] {
   background: #aaaa33;
 }

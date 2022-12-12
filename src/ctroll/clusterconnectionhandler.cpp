@@ -37,6 +37,7 @@
 #include "database.h"
 #include "logging.h"
 #include "node.h"
+#include "trayconnectedmessage.h"
 #include <QTimer>
 #include <fmt/format.h>
 #include <assert.h>
@@ -135,13 +136,13 @@ void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
     const Node* node = data::findNode(nodeId);
     assert(node);
 
-    const bool isConnected = state == QAbstractSocket::SocketState::ConnectedState;
+    const bool isConnected = (state == QAbstractSocket::SocketState::ConnectedState);
     if (node->isConnected != isConnected) {
         Log(
             fmt::format("Socket State Change [{}:{}]", node->ipAddress, node->port),
             std::string(stateToString(state))
         );
-        data::setNodeConnected(nodeId, isConnected);
+        data::setNodeConnecting(nodeId, isConnected);
     }
 
     std::vector<const Cluster*> clusters = data::findClusterForNode(*node);
@@ -153,6 +154,8 @@ void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
 void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID nodeId) {
     const auto it = _sockets.find(nodeId);
     assert(it != _sockets.end());
+    assert(data::findNode(nodeId)->isConnecting || data::findNode(nodeId)->isConnected);
+
 #ifdef QT_DEBUG
     const Node* node = data::findNode(nodeId);
     assert(node);
@@ -173,6 +176,17 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
     else if (common::isValidMessage<common::TrayStatusMessage>(message)) {
         common::TrayStatusMessage status = message;
         emit receivedTrayStatus(nodeId, status);
+    }
+    else if (common::isValidMessage<common::TrayConnectedMessage>(message)) {
+        assert(data::findNode(nodeId)->isConnecting);
+        assert(!data::findNode(nodeId)->isConnected);
+        data::setNodeConnecting(nodeId, false);
+        data::setNodeConnected(nodeId, true);
+
+        std::vector<const Cluster*> clusters = data::findClusterForNode(*node);
+        for (const Cluster* cluster : clusters) {
+            emit connectedStatusChanged(cluster->id, node->id);
+        }
     }
     else if (common::isValidMessage<common::InvalidAuthMessage>(message)) {
         common::InvalidAuthMessage msg = message;

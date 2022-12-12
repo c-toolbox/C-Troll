@@ -38,6 +38,7 @@
 #include "jsonsocket.h"
 #include "logging.h"
 #include "message.h"
+#include "trayconnectedmessage.h"
 #include <QMessageBox>
 #include <QTcpSocket>
 #include <fmt/format.h>
@@ -193,6 +194,12 @@ void SocketHandler::newConnectionEstablished() {
 
         _sockets.push_back(socket);
         Log("Status", fmt::format("Socket connected from {}", socket->peerAddress()));
+
+        common::TrayConnectedMessage msg;
+        Log(fmt::format(
+            "Sending [{}]", socket->peerAddress()), nlohmann::json(msg).dump()
+        );
+        socket->write(msg);
 
         emit newConnection(socket->peerAddress());
     }

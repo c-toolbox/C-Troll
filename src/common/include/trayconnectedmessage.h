@@ -32,53 +32,23 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __COMMON__NODE_H__
-#define __COMMON__NODE_H__
+#ifndef __COMMON__TRAYCONNECTEDMESSAGE_H__
+#define __COMMON__TRAYCONNECTEDMESSAGE_H__
 
-#include "typedid.h"
+#include "message.h"
+
 #include <nlohmann/json.hpp>
+#include <string_view>
 
-/**
- * This struct contains information about individual computer nodes of the cluster.
- * Each node has a human-readable \m name, an \m ipAddress, and a \m port on which the
- * Tray application is listening.
- */
-struct Node {
-    using ID = TypedId<int, struct NodeTag>;
+namespace common {
 
-    /// Unique identifier for the cluster node
-    ID id{ -1 };
-
-    /// The human readable name of the computer node
-    std::string name;
-    /// The IP address at which the computer is reachable; this can also be a hostname
-    std::string ipAddress;
-    /// The port on which the Tray application on that computer is listening
-    int port = -1;
-    /// The secret that is sent to the tray application for authentication
-    std::string secret;
-    /// A user-friendly description that potentially better identifies the node
-    std::string description;
-
-
-    /// A flag representing whether the node is being connected to, but hasn't received
-    /// the ultimate connected message yet
-    bool isConnecting = false;
-    /// A flag representing whether the node is connected or not
-    bool isConnected = false;
+struct TrayConnectedMessage : public Message {
+    static constexpr std::string_view Type = "TrayConnectedMessage";
 };
 
-void from_json(const nlohmann::json& j, Node& n);
-void to_json(nlohmann::json& j, const Node& n);
+void to_json(nlohmann::json& j, const TrayConnectedMessage& m);
+void from_json(const nlohmann::json& j, TrayConnectedMessage& m);
 
-/**
- * This method walks the passed \p directory and looks for all <code>*.json</code>
- * files in it. Any \c JSON file in it will be interpreted as a node configuration and
- * returned.
- *
- * \param directory The directory that is walked in search for <code>*.json</code> files
- * \return A list of all Nodes%s that were found by walking the \p directory
- */
-std::vector<Node> loadNodesFromDirectory(std::string_view directory);
+} // namespace common
 
-#endif // __COMMON__NODE_H__
+#endif // __COMMON__TRAYCONNECTEDMESSAGE_H__

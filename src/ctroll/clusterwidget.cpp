@@ -47,12 +47,13 @@
 #include <QVBoxLayout>
 #include <fmt/format.h>
 
-void ConnectionWidget::setStatus(ConnectionStatus status) {
-    std::string string = [](ConnectionStatus s) {
+void ConnectionWidget::setStatus(Status status) {
+    std::string string = [](Status s) {
         switch (s) {
-            case ConnectionStatus::Connected:          return "connected";
-            case ConnectionStatus::PartiallyConnected: return "partially connected";
-            case ConnectionStatus::Disconnected:       return "disconnected";
+            case Status::Connected:           return "connected";
+            case Status::ConnectedButInvalid: return "connected invalid";
+            case Status::PartiallyConnected:  return "partially connected";
+            case Status::Disconnected:        return "disconnected";
         }
         throw std::logic_error("Missing case label");
     }(status);
@@ -91,11 +92,16 @@ NodeWidget::NodeWidget(const Node& node)
     topLayout->setContentsMargins(0, 0, 0, 0);
 
     _connectionLabel = new ConnectionWidget;
-    _connectionLabel->setStatus(
-        node.isConnected ?
-        ConnectionWidget::ConnectionStatus::Connected :
-        ConnectionWidget::ConnectionStatus::Disconnected
-    );
+    assert(!(node.isConnecting && node.isConnected));
+    if (node.isConnecting) {
+        _connectionLabel->setStatus(ConnectionWidget::Status::ConnectedButInvalid);
+    }
+    else if (node.isConnected) {
+        _connectionLabel->setStatus(ConnectionWidget::Status::Connected);
+    }
+    else {
+        _connectionLabel->setStatus(ConnectionWidget::Status::Disconnected);
+    }
     topLayout->addWidget(_connectionLabel);
 
     QLabel* ip = new QLabel(QString::fromStdString(node.ipAddress));
@@ -191,11 +197,15 @@ NodeWidget::NodeWidget(const Node& node)
 void NodeWidget::updateConnectionStatus() {
     const Node* n = data::findNode(_nodeId);
     assert(n);
-    _connectionLabel->setStatus(
-        n->isConnected ?
-        ConnectionWidget::ConnectionStatus::Connected :
-        ConnectionWidget::ConnectionStatus::Disconnected
-    );
+    if (n->isConnecting) {
+        _connectionLabel->setStatus(ConnectionWidget::Status::ConnectedButInvalid);
+    }
+    else if (n->isConnected) {
+        _connectionLabel->setStatus(ConnectionWidget::Status::Connected);
+    }
+    else {
+        _connectionLabel->setStatus(ConnectionWidget::Status::Disconnected);
+    }
 
     _killProcesses->setEnabled(n->isConnected);
     _killTray->setEnabled(n->isConnected);
@@ -217,7 +227,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
     layout->setContentsMargins(5, 5, 5, 5);
 
     _connectionLabel = new ConnectionWidget;
-    _connectionLabel->setStatus(ConnectionWidget::ConnectionStatus::Disconnected);
+    _connectionLabel->setStatus(ConnectionWidget::Status::Disconnected);
     layout->addWidget(_connectionLabel);
 
     std::vector<const Node*> nodes = data::findNodesForCluster(cluster);
@@ -347,12 +357,12 @@ void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
         nodes.cbegin(), nodes.cend(), std::mem_fn(&Node::isConnected)
     );
 
-    ConnectionWidget::ConnectionStatus status =
+    ConnectionWidget::Status status =
         allConnected ?
-        ConnectionWidget::ConnectionStatus::Connected :
+        ConnectionWidget::Status::Connected :
             someConnected ?
-            ConnectionWidget::ConnectionStatus::PartiallyConnected :
-            ConnectionWidget::ConnectionStatus::Disconnected;
+            ConnectionWidget::Status::PartiallyConnected :
+            ConnectionWidget::Status::Disconnected;
 
     _connectionLabel->setStatus(status);
     _killProcesses->setEnabled(someConnected);
