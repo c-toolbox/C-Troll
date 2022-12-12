@@ -35,14 +35,8 @@
 #include "processhandler.h"
 
 #include <QMetaEnum>
-#include "killallmessage.h"
-#include "killtraymessage.h"
 #include "logging.h"
-#include "message.h"
-#include "processoutputmessage.h"
-#include "processstatusmessage.h"
-#include "restartnodemessage.h"
-#include "traystatusmessage.h"
+#include "messages.h"
 #include <fmt/format.h>
 #include <filesystem>
 #include <functional>

@@ -35,11 +35,9 @@
 #ifndef __CTROLL__PROCESS_H__
 #define __CTROLL__PROCESS_H__
 
-#include "exitcommandmessage.h"
+#include "messages.h"
 #include "node.h"
-#include "processstatusmessage.h"
 #include "program.h"
-#include "startcommandmessage.h"
 #include "typedid.h"
 
 struct Process {

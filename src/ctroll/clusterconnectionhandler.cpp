@@ -36,8 +36,8 @@
 
 #include "database.h"
 #include "logging.h"
+#include "messages.h"
 #include "node.h"
-#include "trayconnectedmessage.h"
 #include <QTimer>
 #include <fmt/format.h>
 #include <assert.h>

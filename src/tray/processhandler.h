@@ -37,8 +37,7 @@
 
 #include <QObject>
 
-#include "exitcommandmessage.h"
-#include "startcommandmessage.h"
+#include "messages.h"
 #include <QFloat16>
 #include <QProcess>
 #include <nlohmann/json.hpp>

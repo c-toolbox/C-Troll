@@ -34,7 +34,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 
-#include "processoutputmessage.h"
+#include "messages/processoutputmessage.h"
 #include <nlohmann/json.hpp>
 
 TEST_CASE("(ProcessOutput) Default Ctor", "[ProcessOutput]") {

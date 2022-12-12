@@ -32,90 +32,28 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CTROLL__PROCESSWIDGET_H__
-#define __CTROLL__PROCESSWIDGET_H__
+#include "messages/erroroccurredmessage.h"
 
-#include <QWidget>
+namespace {
+    constexpr std::string_view KeyError = "error";
+    constexpr std::string_view KeyLastMessages = "lastMessages";
+} // namespace
 
-#include "messages.h"
-#include "process.h"
-#include <chrono>
-#include <map>
+namespace common {
 
-class QBoxLayout;
-class QLabel;
-class QGridLayout;
-class QPlainTextEdit;
-class QPushButton;
-class QScrollArea;
-class QTimer;
+void to_json(nlohmann::json& j, const ErrorOccurredMessage& m) {
+    j[Message::KeyType] = ErrorOccurredMessage::Type;
+    j[Message::KeyVersion] = m.CurrentVersion;
+    j[KeyError] = m.error;
+    j[KeyLastMessages] = m.lastMessages;
+}
 
-class ProcessWidget : public QWidget {
-Q_OBJECT
-public:
-    ProcessWidget(Process::ID processId, const std::chrono::milliseconds& timeout);
-    ~ProcessWidget();
+void from_json(const nlohmann::json& j, ErrorOccurredMessage& m) {
+    validateMessage(j, ErrorOccurredMessage::Type);
+    from_json(j, static_cast<Message&>(m));
 
-    void addToLayout(QGridLayout* layout, int row);
-    void removeFromLayout(QGridLayout* layout);
+    j.at(KeyError).get_to(m.error);
+    j.at(KeyLastMessages).get_to(m.lastMessages);
+}
 
-    void updateStatus();
-    void addMessage(common::ProcessOutputMessage message);
-
-signals:
-    void remove(Process::ID processId);
-    void kill(Process::ID processId);
-
-private:
-    QWidget* createMessageContainer();
-
-    const Process::ID _processId;
-    const std::chrono::milliseconds& _timeout;
-
-    QLabel* _programInfo = nullptr;
-    QLabel* _configurationInfo = nullptr;
-    QLabel* _clusterInfo = nullptr;
-    QLabel* _nodeInfo = nullptr;
-    QLabel* _processIdInfo = nullptr;
-
-    QLabel* _status = nullptr;
-    QPushButton* _showOutput = nullptr;
-    QPushButton* _killProcess = nullptr;
-    QPushButton* _remove = nullptr;
-
-
-    QWidget* _messageContainer = nullptr;
-    QPlainTextEdit* _messages = nullptr;
-    QPlainTextEdit* _errorMessages = nullptr;
-
-    QTimer* _removalTimer = nullptr;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-class ProcessesWidget : public QWidget {
-Q_OBJECT
-public:
-    ProcessesWidget(const std::chrono::milliseconds& processTimeout);
-
-    void processAdded(Process::ID processId);
-    void processUpdated(Process::ID processId);
-    void processRemoved(Process::ID processId);
-
-public slots:
-    void receivedProcessMessage(Node::ID node, common::ProcessOutputMessage message);
-
-signals:
-    void killProcess(Process::ID processId);
-    void killAllProcesses();
-
-private:
-    QGridLayout* _contentLayout = nullptr;
-
-    const std::chrono::milliseconds& _processTimeout;
-    std::map<Process::ID, ProcessWidget*> _widgets;
-};
-
-#endif // __CTROLL__PROCESSWIDGET_H__
+} // namespace common

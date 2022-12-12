@@ -34,7 +34,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 
-#include "startcommandmessage.h"
+#include "messages/startcommandmessage.h"
 #include <nlohmann/json.hpp>
 
 TEST_CASE("(StartCommand) Default Ctor", "[StartCommand]") {

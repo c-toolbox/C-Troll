@@ -36,7 +36,7 @@
 
 #include "database.h"
 #include "logging.h"
-#include "processstatusmessage.h"
+#include "messages.h"
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>

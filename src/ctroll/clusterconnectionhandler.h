@@ -38,13 +38,9 @@
 #include <QObject>
 
 #include "cluster.h"
-#include "erroroccurredmessage.h"
-#include "invalidauthmessage.h"
 #include "jsonsocket.h"
+#include "messages.h"
 #include "node.h"
-#include "processoutputmessage.h"
-#include "processstatusmessage.h"
-#include "traystatusmessage.h"
 #include <QAbstractSocket>
 #include <map>
 #include <memory>

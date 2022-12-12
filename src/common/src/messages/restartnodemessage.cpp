@@ -32,28 +32,19 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "erroroccurredmessage.h"
-
-namespace {
-    constexpr std::string_view KeyError = "error";
-    constexpr std::string_view KeyLastMessages = "lastMessages";
-} // namespace
+#include "messages/restartnodemessage.h"
 
 namespace common {
 
-void to_json(nlohmann::json& j, const ErrorOccurredMessage& m) {
-    j[Message::KeyType] = ErrorOccurredMessage::Type;
+void to_json(nlohmann::json& j, const RestartNodeMessage& m) {
+    j[Message::KeyType] = RestartNodeMessage::Type;
     j[Message::KeyVersion] = m.CurrentVersion;
-    j[KeyError] = m.error;
-    j[KeyLastMessages] = m.lastMessages;
+    j[Message::KeySecret] = m.secret;
 }
 
-void from_json(const nlohmann::json& j, ErrorOccurredMessage& m) {
-    validateMessage(j, ErrorOccurredMessage::Type);
+void from_json(const nlohmann::json& j, RestartNodeMessage& m) {
+    validateMessage(j, RestartNodeMessage::Type);
     from_json(j, static_cast<Message&>(m));
-
-    j.at(KeyError).get_to(m.error);
-    j.at(KeyLastMessages).get_to(m.lastMessages);
 }
 
 } // namespace common

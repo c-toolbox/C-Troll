@@ -32,7 +32,7 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "invalidauthmessage.h"
+#include "messages/invalidauthmessage.h"
 
 namespace common {
 

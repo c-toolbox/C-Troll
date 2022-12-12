@@ -32,50 +32,51 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "traystatusmessage.h"
+#include "messages/processoutputmessage.h"
+
+#include "logging.h"
+#include <fmt/format.h>
 
 namespace {
-    constexpr std::string_view KeyProcesses = "processes";
-
-    constexpr std::string_view KeyProcessId = "processId";
-    constexpr std::string_view KeyProgramId = "programId";
-    constexpr std::string_view KeyConfigurationId = "configurationId";
-    constexpr std::string_view KeyClusterId = "clusterId";
-    constexpr std::string_view KeyNodeId = "nodeId";
-    constexpr std::string_view KeyDataHash = "datahash";
+    constexpr std::string_view KeyIdentifier = "processId";
+    constexpr std::string_view KeyMessage = "message";
+    constexpr std::string_view KeyOutputType = "outputType";
 } // namespace
 
 namespace common {
 
-void to_json(nlohmann::json& j, const TrayStatusMessage::ProcessInfo& p) {
-    j[KeyProcessId] = p.processId;
-    j[KeyProgramId] = p.programId;
-    j[KeyConfigurationId] = p.configurationId;
-    j[KeyClusterId] = p.clusterId;
-    j[KeyNodeId] = p.nodeId;
-    j[KeyDataHash] = p.dataHash;
-}
+void to_json(nlohmann::json& j, const ProcessOutputMessage& m) {
+    std::string t = [](ProcessOutputMessage::OutputType type) {
+        switch (type) {
+            case ProcessOutputMessage::OutputType::StdOut: return "stdout";
+            case ProcessOutputMessage::OutputType::StdErr: return "stderr";
+        }
+        throw std::logic_error("Missing case label");
+    }(m.outputType);
 
-void from_json(const nlohmann::json & j, TrayStatusMessage::ProcessInfo& p) {
-    j.at(KeyProcessId).get_to(p.processId);
-    j.at(KeyProgramId).get_to(p.programId);
-    j.at(KeyConfigurationId).get_to(p.configurationId);
-    j.at(KeyClusterId).get_to(p.clusterId);
-    j.at(KeyNodeId).get_to(p.nodeId);
-    j.at(KeyDataHash).get_to(p.dataHash);
-}
-
-void to_json(nlohmann::json& j, const TrayStatusMessage& m) {
-    j[Message::KeyType] = TrayStatusMessage::Type;
+    j[Message::KeyType] = ProcessOutputMessage::Type;
     j[Message::KeyVersion] = m.CurrentVersion;
-    j[KeyProcesses] = m.processes;
+    j[KeyIdentifier] = m.processId;
+    j[KeyMessage] = m.message;
+    j[KeyOutputType] = t;
 }
 
-void from_json(const nlohmann::json& j, TrayStatusMessage& m) {
-    validateMessage(j, TrayStatusMessage::Type);
+void from_json(const nlohmann::json& j, ProcessOutputMessage& m) {
+    validateMessage(j, ProcessOutputMessage::Type);
     from_json(j, static_cast<Message&>(m));
 
-    j.at(KeyProcesses).get_to(m.processes);
+    j.at(KeyIdentifier).get_to(m.processId);
+    j.at(KeyMessage).get_to(m.message);
+    std::string type = j.at(KeyOutputType).get<std::string>();
+    if (type == "stdout") {
+        m.outputType = ProcessOutputMessage::OutputType::StdOut;
+    }
+    else if (type == "stderr") {
+        m.outputType = ProcessOutputMessage::OutputType::StdErr;
+    }
+    else {
+        throw std::runtime_error(fmt::format("Unknown output type '{}'", type));
+    }
 }
 
-} // namespace
+} // namespace common

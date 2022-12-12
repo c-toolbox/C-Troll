@@ -33,10 +33,10 @@
  ****************************************************************************************/
 
 #include "configuration.h"
-#include "erroroccurredmessage.h"
 #include "jsonload.h"
 #include "logging.h"
 #include "mainwindow.h"
+#include "messages.h"
 #include "processhandler.h"
 #include "sockethandler.h"
 #include <QApplication>

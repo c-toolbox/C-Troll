@@ -34,7 +34,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 
-#include "processstatusmessage.h"
+#include "messages/processstatusmessage.h"
 #include <nlohmann/json.hpp>
 
 TEST_CASE("(ProcessStatus) Default Ctor", "[ProcessStatus]") {

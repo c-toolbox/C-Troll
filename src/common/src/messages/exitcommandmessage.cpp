@@ -32,51 +32,25 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "processoutputmessage.h"
-
-#include "logging.h"
-#include <fmt/format.h>
+#include "messages/exitcommandmessage.h"
 
 namespace {
-    constexpr std::string_view KeyIdentifier = "processId";
-    constexpr std::string_view KeyMessage = "message";
-    constexpr std::string_view KeyOutputType = "outputType";
+    constexpr std::string_view KeyId = "id";
 } // namespace
 
 namespace common {
 
-void to_json(nlohmann::json& j, const ProcessOutputMessage& m) {
-    std::string t = [](ProcessOutputMessage::OutputType type) {
-        switch (type) {
-            case ProcessOutputMessage::OutputType::StdOut: return "stdout";
-            case ProcessOutputMessage::OutputType::StdErr: return "stderr";
-        }
-        throw std::logic_error("Missing case label");
-    }(m.outputType);
-
-    j[Message::KeyType] = ProcessOutputMessage::Type;
+void to_json(nlohmann::json& j, const ExitCommandMessage& m) {
+    j[Message::KeyType] = ExitCommandMessage::Type;
     j[Message::KeyVersion] = m.CurrentVersion;
-    j[KeyIdentifier] = m.processId;
-    j[KeyMessage] = m.message;
-    j[KeyOutputType] = t;
+    j[Message::KeySecret] = m.secret;
+    j[KeyId] = m.id;
 }
 
-void from_json(const nlohmann::json& j, ProcessOutputMessage& m) {
-    validateMessage(j, ProcessOutputMessage::Type);
+void from_json(const nlohmann::json& j, ExitCommandMessage& m) {
+    validateMessage(j, ExitCommandMessage::Type);
     from_json(j, static_cast<Message&>(m));
-
-    j.at(KeyIdentifier).get_to(m.processId);
-    j.at(KeyMessage).get_to(m.message);
-    std::string type = j.at(KeyOutputType).get<std::string>();
-    if (type == "stdout") {
-        m.outputType = ProcessOutputMessage::OutputType::StdOut;
-    }
-    else if (type == "stderr") {
-        m.outputType = ProcessOutputMessage::OutputType::StdErr;
-    }
-    else {
-        throw std::runtime_error(fmt::format("Unknown output type '{}'", type));
-    }
+    j.at(KeyId).get_to(m.id);
 }
 
 } // namespace common

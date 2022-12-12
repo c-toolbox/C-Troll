@@ -32,36 +32,19 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "message.h"
-
-#include <fmt/format.h>
-#include <string>
+#include "messages/killtraymessage.h"
 
 namespace common {
 
-void validateMessage(const nlohmann::json& message, std::string_view expectedType) {
-    // Sanity checks
-    const std::string type = message.at(Message::KeyType).get<std::string>();
-    if (type != expectedType) {
-        throw std::logic_error(fmt::format(
-            "Validation failed. Expected type '{}', got '{}'", expectedType, type
-        ));
-    }
-
-    const int version = message.at(Message::KeyVersion).get<int>();
-    if (version != Message::CurrentVersion) {
-        throw std::runtime_error(fmt::format(
-            "Mismatching version number. Expected {} got {}",
-            Message::CurrentVersion, version
-        ));
-    }
+void to_json(nlohmann::json& j, const KillTrayMessage& m) {
+    j[Message::KeyType] = KillTrayMessage::Type;
+    j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeySecret] = m.secret;
 }
 
-void from_json(const nlohmann::json& message, Message& m) {
-    message.at(Message::KeyType).get_to(m.type);
-    if (message.find(Message::KeySecret) != message.end()) {
-        message[Message::KeySecret].get_to(m.secret);
-    }
+void from_json(const nlohmann::json& j, KillTrayMessage& m) {
+    validateMessage(j, KillTrayMessage::Type);
+    from_json(j, static_cast<Message&>(m));
 }
 
 } // namespace common

@@ -32,19 +32,65 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "restartnodemessage.h"
+#include "messages/startcommandmessage.h"
+
+namespace {
+    constexpr std::string_view KeyId = "id";
+    constexpr std::string_view KeyForwardOutErr = "forwardOutErr";
+    constexpr std::string_view KeyExecutable = "executable";
+    constexpr std::string_view KeyWorkingDirectory = "workingDirectory";
+    constexpr std::string_view KeyCommandlineArguments = "commandlineArguments";
+
+    constexpr std::string_view KeyProgramId = "programId";
+    constexpr std::string_view KeyConfigurationId = "configurationId";
+    constexpr std::string_view KeyClusterId = "clusterId";
+    constexpr std::string_view KeyNodeId = "nodeId";
+    constexpr std::string_view KeyDataHash = "datahash";
+} // namespace
 
 namespace common {
 
-void to_json(nlohmann::json& j, const RestartNodeMessage& m) {
-    j[Message::KeyType] = RestartNodeMessage::Type;
+void to_json(nlohmann::json& j, const StartCommandMessage& m) {
+    j[Message::KeyType] = StartCommandMessage::Type;
     j[Message::KeyVersion] = m.CurrentVersion;
     j[Message::KeySecret] = m.secret;
+    j[KeyId] = m.id;
+    if (m.forwardStdOutStdErr) {
+        j[KeyForwardOutErr] = m.forwardStdOutStdErr;
+    }
+    j[KeyExecutable] = m.executable;
+    j[KeyWorkingDirectory] = m.workingDirectory;
+    if (!m.commandlineParameters.empty()) {
+        j[KeyCommandlineArguments] = m.commandlineParameters;
+    }
+    j[KeyProgramId] = m.programId;
+    j[KeyConfigurationId] = m.configurationId;
+    j[KeyClusterId] = m.clusterId;
+    j[KeyNodeId] = m.nodeId;
+    j[KeyDataHash] = m.dataHash;
 }
 
-void from_json(const nlohmann::json& j, RestartNodeMessage& m) {
-    validateMessage(j, RestartNodeMessage::Type);
+void from_json(const nlohmann::json& j, StartCommandMessage& m) {
+    validateMessage(j, StartCommandMessage::Type);
     from_json(j, static_cast<Message&>(m));
+
+    j.at(KeyId).get_to(m.id);
+    if (j.find(KeyForwardOutErr) != j.end()) {
+        j[KeyForwardOutErr].get_to(m.forwardStdOutStdErr);
+    }
+
+    j.at(KeyExecutable).get_to(m.executable);
+    j.at(KeyWorkingDirectory).get_to(m.workingDirectory);
+
+    if (j.find(KeyCommandlineArguments) != j.end()) {
+        j.at(KeyCommandlineArguments).get_to(m.commandlineParameters);
+    }
+
+    j.at(KeyProgramId).get_to(m.programId);
+    j.at(KeyConfigurationId).get_to(m.configurationId);
+    j.at(KeyClusterId).get_to(m.clusterId);
+    j.at(KeyNodeId).get_to(m.nodeId);
+    j.at(KeyDataHash).get_to(m.dataHash);
 }
 
 } // namespace common

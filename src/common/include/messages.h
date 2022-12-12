@@ -32,19 +32,21 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "killallmessage.h"
+#ifndef __COMMON__MESSAGES_H__
+#define __COMMON__MESSAGES_H__
 
-namespace common {
+#include "messages/message.h"
 
-void to_json(nlohmann::json& j, const KillAllMessage& m) {
-    j[Message::KeyType] = KillAllMessage::Type;
-    j[Message::KeyVersion] = m.CurrentVersion;
-    j[Message::KeySecret] = m.secret;
-}
+#include "messages/erroroccurredmessage.h"
+#include "messages/exitcommandmessage.h"
+#include "messages/invalidauthmessage.h"
+#include "messages/killallmessage.h"
+#include "messages/killtraymessage.h"
+#include "messages/processoutputmessage.h"
+#include "messages/processstatusmessage.h"
+#include "messages/restartnodemessage.h"
+#include "messages/startcommandmessage.h"
+#include "messages/trayconnectedmessage.h"
+#include "messages/traystatusmessage.h"
 
-void from_json(const nlohmann::json& j, KillAllMessage& m) {
-    validateMessage(j, KillAllMessage::Type);
-    from_json(j, static_cast<Message&>(m));
-}
-
-} // namespace common
+#endif // __COMMON__MESSAGES_H__

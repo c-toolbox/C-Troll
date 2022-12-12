@@ -33,50 +33,52 @@
 ##########################################################################################
 
 set(HEADER_FILES
+  include/messages/erroroccurredmessage.h
+  include/messages/exitcommandmessage.h
+  include/messages/invalidauthmessage.h
+  include/messages/killallmessage.h
+  include/messages/killtraymessage.h
+  include/messages/message.h
+  include/messages/processoutputmessage.h
+  include/messages/processstatusmessage.h
+  include/messages/restartnodemessage.h
+  include/messages/startcommandmessage.h
+  include/messages/trayconnectedmessage.h
+  include/messages/traystatusmessage.h
   include/apiversion.h
   include/baseconfiguration.h
   include/cluster.h
-  include/erroroccurredmessage.h
-  include/exitcommandmessage.h
-  include/invalidauthmessage.h
   include/jsonload.h
   include/jsonsocket.h
-  include/killallmessage.h
-  include/killtraymessage.h
   include/logconfiguration.h
   include/logging.h
-  include/message.h
+  include/messages.h
   include/node.h
-  include/processoutputmessage.h
-  include/processstatusmessage.h
   include/program.h
-  include/restartnodemessage.h
-  include/startcommandmessage.h
-  include/trayconnectedmessage.h
-  include/traystatusmessage.h
   include/typedid.h
 )
 
 set(SOURCE_FILES
+  src/messages/erroroccurredmessage.cpp
+  src/messages/exitcommandmessage.cpp
+  src/messages/invalidauthmessage.cpp
+  src/messages/killallmessage.cpp
+  src/messages/killtraymessage.cpp
+  src/messages/message.cpp
+  src/messages/processoutputmessage.cpp
+  src/messages/processstatusmessage.cpp
+  src/messages/restartnodemessage.cpp
+  src/messages/startcommandmessage.cpp
+  src/messages/trayconnectedmessage.cpp
+  src/messages/traystatusmessage.cpp
+
   src/baseconfiguration.cpp
   src/cluster.cpp
-  src/erroroccurredmessage.cpp
-  src/exitcommandmessage.cpp
-  src/invalidauthmessage.cpp
   src/jsonsocket.cpp
-  src/killallmessage.cpp
-  src/killtraymessage.cpp
   src/logconfiguration.cpp
   src/logging.cpp
-  src/message.cpp
   src/node.cpp
-  src/processoutputmessage.cpp
-  src/processstatusmessage.cpp
   src/program.cpp
-  src/restartnodemessage.cpp
-  src/startcommandmessage.cpp
-  src/trayconnectedmessage.cpp
-  src/traystatusmessage.cpp
 )
 
 set(MOC_FILES "")

@@ -32,25 +32,81 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "exitcommandmessage.h"
+#include "messages/processstatusmessage.h"
+
+#include <fmt/format.h>
 
 namespace {
-    constexpr std::string_view KeyId = "id";
+    constexpr const char* KeyProcessId = "processId";
+    constexpr const char* KeyStatus = "status";
+
+    std::string_view fromStatus(common::ProcessStatusMessage::Status status) {
+        using PSM = common::ProcessStatusMessage;
+        switch (status) {
+            case PSM::Status::Unknown: return "Unknown";
+            case PSM::Status::Starting: return "Starting";
+            case PSM::Status::Running: return "Running";
+            case PSM::Status::NormalExit: return "NormalExit";
+            case PSM::Status::CrashExit: return "CrashExit";
+            case PSM::Status::FailedToStart: return "FailedToStart";
+            case PSM::Status::TimedOut: return "TimedOut";
+            case PSM::Status::WriteError: return "WriteError";
+            case PSM::Status::ReadError: return "ReadError";
+            case PSM::Status::UnknownError: return "UnknownError";
+        }
+        throw std::logic_error("Unhandled case label");
+    }
+
+    common::ProcessStatusMessage::Status toStatus(std::string_view status) {
+        if (status == "Unknown") {
+            return common::ProcessStatusMessage::Status::Unknown;
+        }
+        else if (status == "Starting") {
+            return common::ProcessStatusMessage::Status::Starting;
+        }
+        else if (status == "Running") {
+            return common::ProcessStatusMessage::Status::Running;
+        }
+        else if (status == "NormalExit") {
+            return common::ProcessStatusMessage::Status::NormalExit;
+        }
+        else if (status == "CrashExit") {
+            return common::ProcessStatusMessage::Status::CrashExit;
+        }
+        else if (status == "FailedToStart") {
+            return common::ProcessStatusMessage::Status::FailedToStart;
+        }
+        else if (status == "TimedOut") {
+            return common::ProcessStatusMessage::Status::TimedOut;
+        }
+        else if (status == "WriteError") {
+            return common::ProcessStatusMessage::Status::WriteError;
+        }
+        else if (status == "ReadError") {
+            return common::ProcessStatusMessage::Status::ReadError;
+        }
+        else {
+            throw std::runtime_error("Unknown status");
+        }
+    }
 } // namespace
 
 namespace common {
 
-void to_json(nlohmann::json& j, const ExitCommandMessage& m) {
-    j[Message::KeyType] = ExitCommandMessage::Type;
+void to_json(nlohmann::json& j, const ProcessStatusMessage& m) {
+    j[Message::KeyType] = ProcessStatusMessage::Type;
     j[Message::KeyVersion] = m.CurrentVersion;
-    j[Message::KeySecret] = m.secret;
-    j[KeyId] = m.id;
+    j[KeyProcessId] = m.processId;
+    j[KeyStatus] = fromStatus(m.status);
 }
 
-void from_json(const nlohmann::json& j, ExitCommandMessage& m) {
-    validateMessage(j, ExitCommandMessage::Type);
+void from_json(const nlohmann::json& j, ProcessStatusMessage& m) {
+    validateMessage(j, ProcessStatusMessage::Type);
     from_json(j, static_cast<Message&>(m));
-    j.at(KeyId).get_to(m.id);
+
+    j.at(KeyProcessId).get_to(m.processId);
+    std::string status = j.at(KeyStatus).get<std::string>();
+    m.status = toStatus(status);
 }
 
 } // namespace common

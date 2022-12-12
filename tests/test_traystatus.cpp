@@ -34,7 +34,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 
-#include "traystatusmessage.h"
+#include "messages/traystatusmessage.h"
 #include <nlohmann/json.hpp>
 
 TEST_CASE("(TrayStatusMessage) Default Ctor", "[TrayStatusMessage]") {

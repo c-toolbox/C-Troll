@@ -38,12 +38,10 @@
 #include "clusterwidget.h"
 #include "database.h"
 #include "jsonload.h"
-#include "killallmessage.h"
-#include "killtraymessage.h"
+#include "messages.h"
 #include "processwidget.h"
 #include "programwidget.h"
 #include "restconnectionhandler.h"
-#include "restartnodemessage.h"
 #include "settingswidget.h"
 #include "version.h"
 #include <QApplication>

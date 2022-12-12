@@ -34,7 +34,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 
-#include "killallmessage.h"
+#include "messages/killallmessage.h"
 #include <nlohmann/json.hpp>
 
 TEST_CASE("(KillAll) Default Ctor", "[KillAll]") {

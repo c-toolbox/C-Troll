@@ -32,19 +32,18 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "trayconnectedmessage.h"
-
-#include <fmt/format.h>
+#include "messages/killallmessage.h"
 
 namespace common {
 
-void to_json(nlohmann::json& j, const TrayConnectedMessage& m) {
-    j[Message::KeyType] = TrayConnectedMessage::Type;
+void to_json(nlohmann::json& j, const KillAllMessage& m) {
+    j[Message::KeyType] = KillAllMessage::Type;
     j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeySecret] = m.secret;
 }
 
-void from_json(const nlohmann::json& j, TrayConnectedMessage& m) {
-    validateMessage(j, TrayConnectedMessage::Type);
+void from_json(const nlohmann::json& j, KillAllMessage& m) {
+    validateMessage(j, KillAllMessage::Type);
     from_json(j, static_cast<Message&>(m));
 }
 
