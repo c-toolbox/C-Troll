@@ -196,7 +196,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
 #ifdef WIN32
             QProcess::startDetached("shutdown", { "/r", "/t", "0" });
 #else
-            Log("Command not support on this operating system");
+            Log("ProcessHandler", "Command not support on this operating system");
 #endif // WIN32
         }
     }
