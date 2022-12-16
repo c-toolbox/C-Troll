@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
     common::Log::initialize("editor", false, logDebug, [](const std::string&) {});
 
     QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+    app.setWindowIcon(QIcon(":/images/editor.png"));
 
     {
         QFile file(":/qss/editor.qss");

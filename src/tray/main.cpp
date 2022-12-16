@@ -62,7 +62,7 @@ struct SharedMemoryMarker {
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
     QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+    app.setWindowIcon(QIcon(":/images/tray_cog.png"));
 
     QSharedMemory mem("/Tray/Single-Instance-Marker");
     bool ret = mem.create(sizeof(SharedMemoryMarker));
