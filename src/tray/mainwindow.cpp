@@ -34,7 +34,6 @@
 
 #include "mainwindow.h"
 
-#include "apiversion.h"
 #include "centralwidget.h"
 #include "version.h"
 #include <fmt/format.h>

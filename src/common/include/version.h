@@ -32,13 +32,66 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __TRAY__VERSION_H__
-#define __TRAY__VERSION_H__
+#ifndef __COMMON__VERSION_H__
+#define __COMMON__VERSION_H__
 
-constexpr int MajorVersion = 1;
-constexpr int MinorVersion = 0;
-constexpr int PatchVersion = 0;
+#include <string_view>
 
-constexpr const char* Version = "1.0.0";
+// The overall version of the applications. This version number should be updated
+// according to the following rules. The overarching design is that applications of
+// the same major version should be able to interoperate, but applications of different
+// major version do not have to be able to interoperate. This should be the case for both
+// C-Troll <-> C-Troll interaction but also for C-Troll <-> Editor interactions across
+// different version numbers.
+//
+// Update to major version
+//   - A change was introduced that requires any change to existing configuration files
+//   - The major version of the API version was increased
+//   - Any user-facing functionality that existed before has been removed
+//
+// Update the minor version
+//   - A new feature was added to the applications that does not require user intervention
+//     for their existing files
+//   - The minor version of the API was increased
+//
+// Update to the patch version
+//   - For bugfixes only
+//   - If the patch version of the API was increased
 
-#endif // __TRAY__VERSION_H__
+
+namespace application {
+    constexpr int MajorVersion = 2;
+    constexpr int MinorVersion = 0;
+    constexpr int PatchVersion = 0;
+
+    constexpr std::string_view Version = "2.0.0";
+} // namespace application
+
+
+// This is the version of the JSON based socket API and its messages that are used to
+// communicate between C-Troll and the Tray. This version number should be updated
+// according to the following rules. 
+//
+// Update to major version
+//   - A new required message was added
+//   - A previously existing message was removed
+//   - The format of a previously existing message was changed making the new message
+//     not readable with the previous version
+//
+// Update to minor version
+//   - A new optional message was added
+//   - The format of an existing message was changed but the message is still readable
+//     with the previous version
+//
+// Update to patch version
+//   - For bugfixes only
+
+namespace api {
+    constexpr int MajorVersion = 2;
+    constexpr int MinorVersion = 0;
+    constexpr int PatchVersion = 0;
+
+    constexpr std::string_view Version = "2.0.0";
+} // namespace api
+
+#endif // __COMMON__VERSION_H__

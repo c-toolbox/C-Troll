@@ -34,7 +34,6 @@
 
 #include "centralwidget.h"
 
-#include "apiversion.h"
 #include "logging.h"
 #include "version.h"
 #include <QGroupBox>
@@ -126,7 +125,7 @@ QWidget* CentralWidget::createInfoWidget() {
     infoLayout->setContentsMargins(5, 1, 5, 5);
     info->setLayout(infoLayout);
 
-    std::string trayVer = fmt::format("Tray Version: {}", Version);
+    std::string trayVer = fmt::format("Tray Version: {}", application::Version);
     infoLayout->addWidget(new QLabel(QString::fromStdString(trayVer)));
 
     infoLayout->addStretch();

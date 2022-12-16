@@ -38,9 +38,9 @@
 
 namespace common {
 
-void to_json(nlohmann::json& j, const TrayConnectedMessage& m) {
+void to_json(nlohmann::json& j, const TrayConnectedMessage&) {
     j[Message::KeyType] = TrayConnectedMessage::Type;
-    j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
 }
 
 void from_json(const nlohmann::json& j, TrayConnectedMessage& m) {

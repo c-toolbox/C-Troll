@@ -41,7 +41,6 @@ set(HEADER_FILES
   programdialog.h
   removebutton.h
   spacer.h
-  version.h
 )
 
 set(SOURCE_FILES

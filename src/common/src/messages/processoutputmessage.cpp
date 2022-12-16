@@ -55,7 +55,7 @@ void to_json(nlohmann::json& j, const ProcessOutputMessage& m) {
     }(m.outputType);
 
     j[Message::KeyType] = ProcessOutputMessage::Type;
-    j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
     j[KeyIdentifier] = m.processId;
     j[KeyMessage] = m.message;
     j[KeyOutputType] = t;

@@ -35,7 +35,9 @@
 #ifndef __COMMON__MESSAGE_H__
 #define __COMMON__MESSAGE_H__
 
+#include "version.h"
 #include <nlohmann/json.hpp>
+#include <array>
 #include <string_view>
 
 namespace common {
@@ -45,9 +47,6 @@ struct Message {
     static constexpr std::string_view KeyVersion = "version";
     static constexpr std::string_view KeySecret = "secret";
 
-    /// The version of the API that should be increased with breaking changes
-    static constexpr const int CurrentVersion = 2;
-
     /// A string representing the type of payload contained in this Message
     std::string type;
 
@@ -56,6 +55,8 @@ struct Message {
     /// to the main application, this value is ignored
     std::string secret;
 };
+
+using ApiVersion = std::array<int, 3>;
 
 /**
  * This function verifies whether the provided \p message is actually containing message
@@ -74,8 +75,8 @@ template <typename T = void>
         return false;
     }
 
-    const int version = message.at(Message::KeyVersion).get<int>();
-    if (version != Message::CurrentVersion) {
+    const ApiVersion version = message.at(Message::KeyVersion).get<ApiVersion>();
+    if (version[0] != api::MajorVersion) {
         return false;
     }
     if constexpr (std::is_same_v<T, void>) {

@@ -34,7 +34,6 @@
 
 #include "logwidget.h"
 
-#include "apiversion.h"
 #include "version.h"
 #include <QHBoxLayout>
 #include <QLabel>
@@ -54,7 +53,7 @@ LogWidget::LogWidget() {
     m.setBottom(10);
     versionLayout->setContentsMargins(m);
 
-    std::string coreVer = fmt::format("Core Version: {}", Version);
+    std::string coreVer = fmt::format("Core Version: {}", application::Version);
     versionLayout->addWidget(new QLabel(QString::fromStdString(coreVer)));
 
     versionLayout->addStretch();

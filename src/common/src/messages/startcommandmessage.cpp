@@ -52,7 +52,7 @@ namespace common {
 
 void to_json(nlohmann::json& j, const StartCommandMessage& m) {
     j[Message::KeyType] = StartCommandMessage::Type;
-    j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
     j[Message::KeySecret] = m.secret;
     j[KeyId] = m.id;
     if (m.forwardStdOutStdErr) {

@@ -67,7 +67,7 @@ void from_json(const nlohmann::json & j, TrayStatusMessage::ProcessInfo& p) {
 
 void to_json(nlohmann::json& j, const TrayStatusMessage& m) {
     j[Message::KeyType] = TrayStatusMessage::Type;
-    j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
     j[KeyProcesses] = m.processes;
 }
 

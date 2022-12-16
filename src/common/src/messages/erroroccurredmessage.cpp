@@ -43,7 +43,7 @@ namespace common {
 
 void to_json(nlohmann::json& j, const ErrorOccurredMessage& m) {
     j[Message::KeyType] = ErrorOccurredMessage::Type;
-    j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
     j[KeyError] = m.error;
     j[KeyLastMessages] = m.lastMessages;
 }

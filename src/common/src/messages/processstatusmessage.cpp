@@ -95,7 +95,7 @@ namespace common {
 
 void to_json(nlohmann::json& j, const ProcessStatusMessage& m) {
     j[Message::KeyType] = ProcessStatusMessage::Type;
-    j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
     j[KeyProcessId] = m.processId;
     j[KeyStatus] = fromStatus(m.status);
 }

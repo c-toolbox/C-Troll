@@ -60,7 +60,6 @@ set(SOURCE_FILES
   programwidget.cpp
   restconnectionhandler.cpp
   settingswidget.cpp
-  version.h
 )
 
 find_package(Qt6 COMPONENTS Core Gui Network Widgets REQUIRED)

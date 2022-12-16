@@ -45,7 +45,6 @@ set(HEADER_FILES
   include/messages/startcommandmessage.h
   include/messages/trayconnectedmessage.h
   include/messages/traystatusmessage.h
-  include/apiversion.h
   include/baseconfiguration.h
   include/cluster.h
   include/jsonload.h
@@ -56,6 +55,7 @@ set(HEADER_FILES
   include/node.h
   include/program.h
   include/typedid.h
+  include/version.h
 )
 
 set(SOURCE_FILES

@@ -38,7 +38,6 @@ set(HEADER_FILES
   mainwindow.h
   processhandler.h
   sockethandler.h
-  version.h
 )
 
 set(SOURCE_FILES

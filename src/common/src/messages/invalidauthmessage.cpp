@@ -36,9 +36,9 @@
 
 namespace common {
 
-void to_json(nlohmann::json& j, const InvalidAuthMessage& m) {
+void to_json(nlohmann::json& j, const InvalidAuthMessage&) {
     j[Message::KeyType] = InvalidAuthMessage::Type;
-    j[Message::KeyVersion] = m.CurrentVersion;
+    j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
 }
 
 void from_json(const nlohmann::json& j, InvalidAuthMessage& m) {

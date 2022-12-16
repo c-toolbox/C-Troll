@@ -346,8 +346,10 @@ void ProcessesWidget::processUpdated(Process::ID processId) {
         // 3. The QTimer above ran out and the widget was destroyed
         // 4. We are restarting the process
 
-        const Process* p = data::findProcess(processId);
-        assert(p->status == common::ProcessStatusMessage::Status::Starting);
+        assert(
+            data::findProcess(processId)->status ==
+            common::ProcessStatusMessage::Status::Starting
+        );
         processAdded(processId);
     }
     else {

@@ -48,11 +48,11 @@ void validateMessage(const nlohmann::json& message, std::string_view expectedTyp
         ));
     }
 
-    const int version = message.at(Message::KeyVersion).get<int>();
-    if (version != Message::CurrentVersion) {
+    const ApiVersion version = message.at(Message::KeyVersion).get<ApiVersion>();
+    if (version[0] != api::MajorVersion) {
         throw std::runtime_error(fmt::format(
-            "Mismatching version number. Expected {} got {}",
-            Message::CurrentVersion, version
+            "Mismatching version number. Expected {} got {}.{}.{}",
+            api::MajorVersion, version[0], version[1], version[2]
         ));
     }
 }
