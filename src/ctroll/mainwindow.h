@@ -42,6 +42,7 @@
 #include "logwidget.h"
 #include "process.h"
 #include <QCloseEvent>
+#include <QFileSystemWatcher>
 #include <QSystemTrayIcon>
 #include <QTextEdit>
 #include <memory>
@@ -100,11 +101,11 @@ private:
     RestConnectionHandler* _restGeneralHandler = nullptr;
     Configuration _config;
 
-    QTextEdit _messageBox;
     QSystemTrayIcon _trayIcon;
+    QFileSystemWatcher _watcher;
 
     bool _isClosingApplication = false;
-    bool _shouldShowDataHashMessage = false;
+    bool _shouldShowDifferentDataHashMessage = false;
 };
 
 #endif // __CTROLL__MAINWINDOW_H__

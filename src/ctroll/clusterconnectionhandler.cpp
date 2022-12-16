@@ -157,14 +157,18 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
     assert(data::findNode(nodeId)->isConnecting || data::findNode(nodeId)->isConnected);
 
 #ifdef QT_DEBUG
-    const Node* node = data::findNode(nodeId);
-    assert(node);
+    assert(data::findNode(nodeId));
     std::string content = common::isValidMessage<common::ProcessOutputMessage>(message) ?
         std::string(common::ProcessOutputMessage::Type) :
         message.dump();
 
     Log(
-        fmt::format("Received [{}:{} ({})]", node->ipAddress, node->port, node->name),
+        fmt::format(
+            "Received [{}:{} ({})]",
+            data::findNode(nodeId)->ipAddress,
+            data::findNode(nodeId)->port,
+            data::findNode(nodeId)->name
+        ),
         content
     );
 #endif // QT_DEBUG
@@ -178,8 +182,9 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
         emit receivedTrayStatus(nodeId, status);
     }
     else if (common::isValidMessage<common::TrayConnectedMessage>(message)) {
-        assert(data::findNode(nodeId)->isConnecting);
-        assert(!data::findNode(nodeId)->isConnected);
+        const Node* node = data::findNode(nodeId);
+        assert(node->isConnecting);
+        assert(!node->isConnected);
         data::setNodeConnecting(nodeId, false);
         data::setNodeConnected(nodeId, true);
 

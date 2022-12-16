@@ -34,7 +34,6 @@
 
 #include "mainwindow.h"
 
-#include "apiversion.h"
 #include "clusterwidget.h"
 #include "database.h"
 #include "jsonload.h"
@@ -302,15 +301,15 @@ MainWindow::MainWindow(bool shouldLogDebug)
         );
     }
 
-    auto maybeShowDataHashMessage = [this]() {
-        if (_shouldShowDataHashMessage) {
+    auto maybeShowMessages = [this]() {
+        if (_shouldShowDifferentDataHashMessage) {
             constexpr const char* Text = "Received information from a tray about a "
                 "running process that was started from a controller with a different set "
                 "of configurations. Depending on what was changed this might lead to "
                 "very strange behavior";
-            QMessageBox::warning(this, "Different Data", Text);
+            _trayIcon.showMessage("Different Data", Text, QSystemTrayIcon::Warning);
             Log("Warning", Text);
-            _shouldShowDataHashMessage = false;
+            _shouldShowDifferentDataHashMessage = false;
         }
     };
 
@@ -318,11 +317,60 @@ MainWindow::MainWindow(bool shouldLogDebug)
     // connected and should show a message if the data hash has changed
     QTimer* longTermTimer = new QTimer(this);
     longTermTimer->setTimerType(Qt::VeryCoarseTimer);
-    connect(longTermTimer, &QTimer::timeout, maybeShowDataHashMessage);
+    connect(longTermTimer, &QTimer::timeout, maybeShowMessages);
     longTermTimer->start(std::chrono::seconds(5));
 
     // Don't want to wait 5 seconds for the first message, so we check once after 250ms
-    QTimer::singleShot(std::chrono::milliseconds(250), maybeShowDataHashMessage);
+    QTimer::singleShot(std::chrono::milliseconds(250), maybeShowMessages);
+
+    // Notify the user if configuration files have changed
+    _watcher.addPaths({
+        QString::fromStdString(_config.applicationPath),
+        QString::fromStdString(_config.clusterPath),
+        QString::fromStdString(_config.nodePath)
+    });
+
+    auto watchAllFilesInFolder = [this](std::string path) {
+        QDirIterator it(
+            QString::fromStdString(path),
+            QStringList() << "*.json",
+            QDir::Files,
+            QDirIterator::Subdirectories
+        );
+        while (it.hasNext()) {
+            _watcher.addPath(it.next());
+        }
+    };
+    watchAllFilesInFolder(_config.applicationPath);
+    watchAllFilesInFolder(_config.clusterPath);
+    watchAllFilesInFolder(_config.nodePath);
+
+    connect(
+        &_watcher, &QFileSystemWatcher::directoryChanged,
+        [this, watchAllFilesInFolder](const QString& path) {
+            constexpr const char* Text = "The data files on disk have changed. This "
+                "change is not reflected until C-Troll is restarted.";
+            _trayIcon.showMessage("New Data", Text);
+            Log("Info", Text);
+
+            watchAllFilesInFolder(path.toStdString());
+        }
+    );
+    connect(
+        &_watcher, &QFileSystemWatcher::fileChanged,
+        [this](const QString& path) {
+            if (!_watcher.files().contains(path) && QFile(path).exists()) {
+                // The file was deleted, but has been recreated directly again, in which
+                // case we have to continue watching it
+                _watcher.addPath(path);
+            }
+
+            constexpr const char* Text = "The data files on disk have changed. This "
+                "change is not reflected until C-Troll is restarted.";
+            Log("Info", Text);
+            _trayIcon.showMessage("New Data", Text);
+        }
+    );
 }
 
 void MainWindow::log(std::string msg) {
@@ -400,7 +448,7 @@ void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
         }
 
         if (pi.dataHash != data::dataHash()) {
-            _shouldShowDataHashMessage = true;
+            _shouldShowDifferentDataHashMessage = true;
         }
 
         std::unique_ptr<Process> process = std::make_unique<Process>(
