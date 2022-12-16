@@ -7,7 +7,7 @@
     <file>images/tray_offline_cog.png</file>
     <file>images/tray_online_cog.png</file>
     <file>images/x.png</file>
-    <file>qss/core.qss</file>
+    <file>qss/c-troll.qss</file>
     <file>qss/editor.qss</file>
     <file>qss/tray.qss</file>
   </qresource>

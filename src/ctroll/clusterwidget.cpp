@@ -109,7 +109,7 @@ NodeWidget::NodeWidget(const Node& node)
     layout->addWidget(topRow);
 
     QWidget* bottomRow = new QWidget;
-    QBoxLayout* bottomLayout = new QHBoxLayout(bottomRow);
+    QGridLayout* bottomLayout = new QGridLayout(bottomRow);
     bottomLayout->setContentsMargins(0, 0, 0, 0);
 
     _killProcesses = new QPushButton("Kill processes");
@@ -133,7 +133,7 @@ NodeWidget::NodeWidget(const Node& node)
             }
         }
     );
-    bottomLayout->addWidget(_killProcesses);
+    bottomLayout->addWidget(_killProcesses, 0, 0);
 
     _killTray = new QPushButton("Kill Tray");
     _killTray->setObjectName("killtray");
@@ -161,7 +161,7 @@ NodeWidget::NodeWidget(const Node& node)
             }
         }
     );
-    bottomLayout->addWidget(_killTray);
+    bottomLayout->addWidget(_killTray, 0, 1);
 
     _restartNode = new QPushButton("Restart node");
     _restartNode->setObjectName("restartnode");
@@ -189,7 +189,7 @@ NodeWidget::NodeWidget(const Node& node)
             }
         }
     );
-    bottomLayout->addWidget(_restartNode);
+    bottomLayout->addWidget(_restartNode, 1, 0, 1, 2);
 
     layout->addWidget(bottomRow);
 }
@@ -228,7 +228,6 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
 
     _connectionLabel = new ConnectionWidget;
     _connectionLabel->setStatus(ConnectionWidget::Status::Disconnected);
-    layout->addWidget(_connectionLabel);
 
     std::vector<const Node*> nodes = data::findNodesForCluster(cluster);
     static constexpr const int Columns = 5;
@@ -250,7 +249,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
     }
 
     QWidget* boxContainer = new QWidget;
-    QBoxLayout* btnLayout = new QHBoxLayout(boxContainer);
+    QGridLayout* btnLayout = new QGridLayout(boxContainer);
     btnLayout->setContentsMargins(0, 0, 0, 0);
 
     _killProcesses = new QPushButton("Kill all processes");
@@ -274,7 +273,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
             }
         }
     );
-    btnLayout->addWidget(_killProcesses);
+    btnLayout->addWidget(_killProcesses, 0, 0);
 
     _killTrays = new QPushButton("Kill all trays");
     _killTrays->setObjectName("killtrays");
@@ -301,7 +300,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
             }
         }
     );
-    btnLayout->addWidget(_killTrays);
+    btnLayout->addWidget(_killTrays, 0, 1);
 
     _restartNodes = new QPushButton("Restart all nodes");
     _restartNodes->setObjectName("restartnodes");
@@ -328,11 +327,13 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
             }
         }
     );
-    btnLayout->addWidget(_restartNodes);
+    btnLayout->addWidget(_restartNodes, 1, 0, 1, 2);
+
+    layout->setRowMinimumHeight(static_cast<int>(nodes.size()) / Columns + 1, 5);
 
     layout->addWidget(
         boxContainer,
-        static_cast<int>(nodes.size()) / Columns + 1,
+        static_cast<int>(nodes.size()) / Columns + 2,
         0,
         1,
         Columns
@@ -380,6 +381,7 @@ ClustersWidget::ClustersWidget() {
     setWidget(content);
     QBoxLayout* contentLayout = new QVBoxLayout(content);
     contentLayout->setContentsMargins(10, 2, 2, 2);
+    contentLayout->setSpacing(20);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     for (const Cluster* c : data::clusters()) {

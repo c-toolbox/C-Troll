@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
 
 
     {
-        QFile file(":/qss/core.qss");
+        QFile file(":/qss/c-troll.qss");
         file.open(QFile::ReadOnly);
         QString styleSheet = QLatin1String(file.readAll());
         app.setStyleSheet(styleSheet);
