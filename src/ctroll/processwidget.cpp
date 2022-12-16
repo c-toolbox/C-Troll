@@ -133,7 +133,7 @@ ProcessWidget::ProcessWidget(Process::ID processId,
                 const int res = box.exec();
 
                 if (res == QMessageBox::Ok) {
-                    _killProcess->setEnabled(false);
+                    updateStatus();
                     emit kill(_processId);
                 }
             }
@@ -250,6 +250,11 @@ void ProcessWidget::updateStatus() {
         // Start a timer to automatically remove a process if it exited normally
         _removalTimer->start(_timeout);
     }
+
+    const bool isKillable = p->status == common::ProcessStatusMessage::Status::Starting ||
+                            p->status == common::ProcessStatusMessage::Status::Running;
+    _killProcess->setEnabled(isKillable);
+
 
     // The user should only be able to remove the process entry if the process has
     // finished in some state
