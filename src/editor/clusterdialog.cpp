@@ -189,9 +189,18 @@ void ClusterDialog::addNewNode() {
         list.push_back(QString::fromStdString(node.name));
     }
 
-    QString n = QInputDialog::getItem(this, "Add Node", "Select the node to add", list);
+    bool ok;
+    QString n = QInputDialog::getItem(
+        this,
+        "Add Node",
+        "Select the node to add",
+        list,
+        0,
+        true,
+        &ok
+    );
 
-    if (!n.isEmpty()) {
+    if (ok) {
         _nodes->addItem(new QLabel(n));
         updateSaveButton();
     }

@@ -367,14 +367,18 @@ std::string ProgramDialog::selectCluster() {
         list.push_back(QString::fromStdString(cluster.name));
     }
 
+    bool ok;
     QString selected = QInputDialog::getItem(
         this,
         "Add Cluster",
         "Select the cluster to add",
-        list
+        list,
+        0,
+        true,
+        &ok
     );
 
-    return !selected.isEmpty() ? selected.toStdString() : "";
+    return ok ? selected.toStdString() : "";
 }
 
 void ProgramDialog::updateSaveButton() {
