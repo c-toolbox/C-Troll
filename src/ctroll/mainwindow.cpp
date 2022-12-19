@@ -630,6 +630,10 @@ void MainWindow::killAllProcesses(Cluster::ID id) const {
     }
 
     for (const Node* node : nodes) {
+        if (!node->isConnected) {
+            continue;
+        }
+
         common::KillAllMessage command;
         if (!node->secret.empty()) {
             command.secret = node->secret;
