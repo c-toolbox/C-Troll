@@ -174,6 +174,17 @@ void setNodeConnected(Node::ID id, bool connected) {
     }
 }
 
+void setNodeDisconnecting(Node::ID id) {
+    const auto it = std::find_if(
+        gNodes.cbegin(), gNodes.cend(),
+        [id](const std::unique_ptr<Node>& n) { return n->id == id; }
+    );
+    if (it != gNodes.end()) {
+        (*it)->isConnecting = false;
+        (*it)->isConnected = false;
+    }
+}
+
 const Program* findProgram(Program::ID id) {
     const auto it = std::find_if(
         gPrograms.cbegin(), gPrograms.cend(),

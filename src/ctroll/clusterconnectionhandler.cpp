@@ -127,22 +127,26 @@ void ClusterConnectionHandler::initialize() {
 void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
                                                        QAbstractSocket::SocketState state)
 {
-    if (state != QAbstractSocket::SocketState::UnconnectedState &&
-        state != QAbstractSocket::SocketState::ConnectedState)
+    if (state != QAbstractSocket::SocketState::ConnectedState &&
+        state != QAbstractSocket::SocketState::ClosingState)
     {
+        // These are the only two states we are interested in
         return;
     }
 
     const Node* node = data::findNode(nodeId);
     assert(node);
 
-    const bool isConnected = (state == QAbstractSocket::SocketState::ConnectedState);
-    if (node->isConnected != isConnected) {
-        Log(
-            fmt::format("Socket State Change [{}:{}]", node->ipAddress, node->port),
-            std::string(stateToString(state))
-        );
-        data::setNodeConnecting(nodeId, isConnected);
+    Log(
+        fmt::format("Socket State Change [{}:{}]", node->ipAddress, node->port),
+        std::string(stateToString(state))
+    );
+
+    if (state == QAbstractSocket::SocketState::ConnectedState) {
+        data::setNodeConnecting(nodeId, true);
+    }
+    else if (state == QAbstractSocket::SocketState::ClosingState) {
+        data::setNodeDisconnecting(nodeId);
     }
 
     std::vector<const Cluster*> clusters = data::findClusterForNode(*node);

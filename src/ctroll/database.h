@@ -63,6 +63,7 @@ const Node* findNode(std::string_view name);
 std::vector<const Node*> findNodesForCluster(const Cluster& cluster);
 void setNodeConnecting(Node::ID id, bool connected);
 void setNodeConnected(Node::ID id, bool connected);
+void setNodeDisconnecting(Node::ID id);
 
 const Program* findProgram(Program::ID id);
 const Program* findProgram(std::string_view name);
