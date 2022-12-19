@@ -164,8 +164,13 @@ ClusterWidget  QPushButton#killtrays:enabled {
 }
 
 ClusterWidget  QPushButton#restartnodes:enabled {
-  color: #f33e3e;
+  background-color: #932525;
+  color: #dddddd;
   font-weight: bold;
+}
+
+ClusterWidget  QPushButton#restartnodes:hover {
+  background-color: #b32525;
 }
 
 NodeWidget  ConnectionWidget {
