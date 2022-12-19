@@ -153,7 +153,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                 // @TODO How does the terminate behave when the program is hanging? There
                 // seems to be a problem that a program is not correctly terminated in
                 // those cases
-                p->process->terminate();
+                p->process->kill();
                 returnMsg.status = common::ProcessStatusMessage::Status::NormalExit;
                 // Find specifc value in process map i.e. process
                 const auto pIt = processIt(p->process);
@@ -171,11 +171,13 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
             }
         }
         else if (common::isValidMessage<common::KillAllMessage>(message)) {
-            Log(fmt::format("Received [{}]", peer), message.dump());
+            Log(fmt::format("Received [{}]: {}", peer, message.dump()));
 
-            for (const ProcessInfo& p : _processes) {
-                Log("Killing", fmt::format("Process {}", p.processId));
+            for (ProcessInfo& p : _processes) {
+                Log(fmt::format("Killing process {}", p.processId));
 
+                p.wasUserTerminated = true;
+                p.process->kill();
                 p.process->close();
                 p.process->deleteLater();
             }
@@ -204,13 +206,20 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
 }
 
 void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
-    std::string err = QMetaEnum::fromType<QProcess::ProcessError>().valueToKey(error);
-    Log("Process Error", err);
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
 
     // Find specifc value in process map i.e. process
     const auto p = processIt(process);
-    assert(p != _processes.end());
+    if (p->wasUserTerminated && error == QProcess::Crashed) {
+        // If the processe was terminated on behest of the user, than this error message
+        // is going to be the error that tells us that the program "crashed", which we
+        // don't want to sent to the UI as it would be confusing. If the user wanted to
+        // terminate the process, they wouldn't expect it to show up as crashed instead
+        return;
+    }
+
+    std::string err = QMetaEnum::fromType<QProcess::ProcessError>().valueToKey(error);
+    Log("Process Error", err);
     if (p != _processes.end()) {
         Debug(fmt::format("Found process {}", p->processId));
         common::ProcessStatusMessage msg;
@@ -255,14 +264,21 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     // Find specifc value in process map i.e. process
     auto p = processIt(process);
     assert(p != _processes.end());
+
     if (p != _processes.end()) {
         Debug(fmt::format("Found process {}", p->processId));
         
         common::ProcessStatusMessage msg;
         msg.processId = p->processId;
-        msg.status = toTrayStatus(exitStatus);
-        nlohmann::json j = msg;
-        emit sendSocketMessage(j);
+        if (p->wasUserTerminated) {
+            // If the user terminated the process it will report back an exitStatus of
+            // 'CrashExit', which does not really convey the write reason to the user
+            msg.status = common::ProcessStatusMessage::Status::NormalExit;
+        }
+        else {
+            msg.status = toTrayStatus(exitStatus);
+        }
+        emit sendSocketMessage(msg);
 
         // Remove this process from the list as we consider it finished
         ProcessInfo info = *p;
