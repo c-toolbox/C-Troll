@@ -67,6 +67,10 @@ namespace {
     void Debug(std::string msg) {
         ::Debug("ProcessHandler", std::move(msg));
     }
+
+    void Log(std::string msg) {
+        ::Log("ProcessHandler", std::move(msg));
+    }
 } // namespace
 
 ProcessHandler::ProcessHandler() {
@@ -90,8 +94,7 @@ void ProcessHandler::newConnection() {
         msg.processes.push_back(std::move(pi));
     }
 
-    nlohmann::json j = msg;
-    emit sendSocketMessage(j);
+    emit sendSocketMessage(msg);
 }
 
 void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
@@ -111,7 +114,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
 
         if (common::isValidMessage<common::StartCommandMessage>(message)) {
             common::StartCommandMessage command = message;
-            Log(fmt::format("Received [{}]", peer), message.dump());
+            Log(fmt::format("Received [{}]: {}", peer, message.dump()));
 
             // Check if the identifier of traycommand already is tied to a process
             // We don't allow the same id for multiple processes
@@ -131,7 +134,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
         }
         else if (common::isValidMessage<common::ExitCommandMessage>(message)) {
             common::ExitCommandMessage command = message;
-            Log(fmt::format("Received [{}]", peer), message.dump());
+            Log(fmt::format("Received [{}]: {}", peer, message.dump()));
 
             // Check if the identifier of traycommand already is tied to a process
             // We don't allow the same id for multiple processes
@@ -158,8 +161,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                 if (pIt != _processes.end()) {
                     Debug("Found process");
                     returnMsg.processId = pIt->processId;
-                    nlohmann::json j = returnMsg;
-                    emit sendSocketMessage(j);
+                    emit sendSocketMessage(returnMsg);
 
                     // Remove this process from the list as we consider it finished
                     ProcessInfo info = *pIt;
@@ -180,12 +182,12 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
             _processes.clear();
         }
         else if (common::isValidMessage<common::KillTrayMessage>(message)) {
-            Log(fmt::format("Received [{}]", peer), message.dump());
+            Log(fmt::format("Received [{}]: {}", peer, message.dump()));
 
             emit closeApplication();
         }
         else if (common::isValidMessage<common::RestartNodeMessage>(message)) {
-            Log(fmt::format("Received [{}]", peer), message.dump());
+            Log(fmt::format("Received [{}]: {}", peer, message.dump()));
 
 #ifdef WIN32
             QProcess::startDetached("shutdown", { "/r", "/t", "0" });
@@ -195,10 +197,9 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
         }
     }
     catch (const std::exception& e) {
-        Log(
-            "handleSocketMessage",
-            fmt::format("Caught exception {} with message: {}", e.what(), message.dump())
-        );
+        Log(fmt::format(
+            "Caught exception {} with message: {}", e.what(), message.dump()
+        ));
     }
 }
 
@@ -215,8 +216,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
         common::ProcessStatusMessage msg;
         msg.processId = p->processId;
         msg.status = toTrayStatus(error);
-        nlohmann::json j = msg;
-        emit sendSocketMessage(j);
+        emit sendSocketMessage(msg);
 
         // The FailedToStart error is handled differently since that is the one that will
         // not also lead to a `handleFinished` call
@@ -243,8 +243,7 @@ void ProcessHandler::handleStarted() {
         common::ProcessStatusMessage msg;
         msg.processId = p->processId;
         msg.status = common::ProcessStatusMessage::Status::Running;
-        nlohmann::json j = msg;
-        emit sendSocketMessage(j);
+        emit sendSocketMessage(msg);
     }
 }
 
@@ -289,8 +288,7 @@ void ProcessHandler::handleReadyReadStandardError() {
         msg.outputType = common::ProcessOutputMessage::OutputType::StdErr;
         msg.message =
             QString::fromLatin1(proc->readAllStandardError()).toLocal8Bit().constData();
-        nlohmann::json j = msg;
-        emit sendSocketMessage(j);
+        emit sendSocketMessage(msg);
     }
 }
 
@@ -306,10 +304,9 @@ void ProcessHandler::handleReadyReadStandardOutput() {
         msg.message =
             QString::fromLatin1(proc->readAllStandardOutput()).toLocal8Bit().constData();
         msg.outputType = common::ProcessOutputMessage::OutputType::StdOut;
-        nlohmann::json j = msg;
 
         // We don't need to print every console message to the log of the tray application
-        emit sendSocketMessage(j, false);
+        emit sendSocketMessage(msg, false);
     }
 }
 
@@ -322,8 +319,7 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
     common::ProcessStatusMessage msg;
     msg.processId = command.id;
     msg.status = common::ProcessStatusMessage::Status::Starting;
-    nlohmann::json j = msg;
-    emit sendSocketMessage(j);
+    emit sendSocketMessage(msg);
 
     if (!command.workingDirectory.empty()) {
         process->setWorkingDirectory(QString::fromStdString(command.workingDirectory));

@@ -590,8 +590,7 @@ void MainWindow::startProcess(Process::ID processId) const {
         command.secret = node->secret;
     }
 
-    nlohmann::json j = command;
-    _clusterConnectionHandler.sendMessage(*node, j);
+    _clusterConnectionHandler.sendMessage(*node, command);
 }
 
 void MainWindow::stopProcess(Process::ID processId) const {
@@ -605,8 +604,7 @@ void MainWindow::stopProcess(Process::ID processId) const {
         command.secret = node->secret;
     }
 
-    nlohmann::json j = command;
-    _clusterConnectionHandler.sendMessage(*node, j);
+    _clusterConnectionHandler.sendMessage(*node, command);
 }
 
 void MainWindow::killAllProcesses(Cluster::ID id) const {
@@ -636,8 +634,7 @@ void MainWindow::killAllProcesses(Cluster::ID id) const {
         if (!node->secret.empty()) {
             command.secret = node->secret;
         }
-        nlohmann::json j = command;
-        _clusterConnectionHandler.sendMessage(*node, j);
+        _clusterConnectionHandler.sendMessage(*node, command);
     }
 }
 
@@ -649,8 +646,7 @@ void MainWindow::killAllProcesses(Node::ID id) const {
     if (!node->secret.empty()) {
         command.secret = node->secret;
     }
-    nlohmann::json j = command;
-    _clusterConnectionHandler.sendMessage(*node, j);
+    _clusterConnectionHandler.sendMessage(*node, command);
 }
 
 void MainWindow::killTray(Node::ID id) const {
@@ -662,8 +658,7 @@ void MainWindow::killTray(Node::ID id) const {
     if (!node->secret.empty()) {
         command.secret = node->secret;
     }
-    nlohmann::json j = command;
-    _clusterConnectionHandler.sendMessage(*node, j);
+    _clusterConnectionHandler.sendMessage(*node, command);
 }
 
 void MainWindow::killTrays(Cluster::ID id) const {
@@ -693,8 +688,7 @@ void MainWindow::killTrays(Cluster::ID id) const {
         if (!node->secret.empty()) {
             command.secret = node->secret;
         }
-        nlohmann::json j = command;
-        _clusterConnectionHandler.sendMessage(*node, j);
+        _clusterConnectionHandler.sendMessage(*node, command);
     }
 }
 
@@ -707,8 +701,7 @@ void MainWindow::restartNode(Node::ID id) const {
     if (!node->secret.empty()) {
         command.secret = node->secret;
     }
-    nlohmann::json j = command;
-    _clusterConnectionHandler.sendMessage(*node, j);
+    _clusterConnectionHandler.sendMessage(*node, command);
 }
 
 void MainWindow::restartNodes(Cluster::ID id) const {
@@ -738,8 +731,7 @@ void MainWindow::restartNodes(Cluster::ID id) const {
         if (!node->secret.empty()) {
             command.secret = node->secret;
         }
-        nlohmann::json j = command;
-        _clusterConnectionHandler.sendMessage(*node, j);
+        _clusterConnectionHandler.sendMessage(*node, command);
     }
 }
 

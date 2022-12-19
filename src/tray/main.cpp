@@ -233,8 +233,7 @@ int main(int argc, char** argv) {
                 Log("Msg", msg);
             }
 
-            nlohmann::json j = message;
-            socketHandler.sendMessage(j);
+            socketHandler.sendMessage(message);
         }
         catch (...) {
             Log("Leaked Exception", "Unknown error");
@@ -249,8 +248,7 @@ int main(int argc, char** argv) {
                 message.lastMessages.push_back(msg);
                 Log("Msg", msg);
             }
-            nlohmann::json j = message;
-            socketHandler.sendMessage(j);
+            socketHandler.sendMessage(message);
         }
     }
 
