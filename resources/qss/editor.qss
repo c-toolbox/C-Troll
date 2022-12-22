@@ -11,11 +11,9 @@
 QToolTip {
   background-color: #454545;
   color: #efefef;
-  border: 2px solid #202020;
-  border-radius: 3px;
+  border: 2pt solid #202020;
 
-  padding: 5px;
-
+  padding: 1pt;
   font-size: 10pt;
 }
 
@@ -48,8 +46,6 @@ QPushButton {
 
   padding-left: 25%;
   padding-right: 25%;
-  padding-top: 5%;
-  padding-bottom: 5%;
 }
 
 QPushButton:disabled {
@@ -63,7 +59,7 @@ QLineEdit:hover  {
 }
 
 QSpinBox:hover, QComboBox, QComboBox:hover {
-  border: 1px outset #acacac;
+  border: 2px outset #acacac;
 }
 
 QSpinBox:disabled {
@@ -89,52 +85,46 @@ QComboBox:down-arrow {
   image: url(:/images/arrow_down.png);
   width: 1em;
   height: 1em;
-  /* width: 50px; */
-  /* height: 50px; */
 }
 
 QPushButton:hover {
-    background-color: #3f3f3f;
-}
-
-QTreeView::branch {
-    border-color: #efefef;
+  background-color: #3f3f3f;
 }
 
 QTreeView {
-    background: #202020;
+  background: #282828;
 }
 
 AddButton {
-    min-height: 1.5em;
-    max-height: 1.5em;
-    min-width: 1.5em;
-    max-width: 1.5em;
-    color: #32c432;
+  min-height: 1.5em;
+  max-height: 1.5em;
+  min-width: 1.5em;
+  max-width: 1.5em;
+  color: #32c432;
 
-    padding: 0px 0px 0px 0px;
-    font-weight: bold;
+  padding: 0px 0px 0px 0px;
+  font-weight: bold;
 }
 
 AddButton:hover {
-    color: #2cdd2c;
-    background-color: #124712;
+  color: #2cdd2c;
+  background-color: #124712;
 }
 
 RemoveButton {
-    min-height: 1.25em;
-    max-height: 1.25em;
-    min-width: 1.25em;
-    max-width: 1.25em;
-    color: #e22929;
+  min-height: 1.25em;
+  max-height: 1.25em;
+  min-width: 1.25em;
+  max-width: 1.25em;
+  color: #e22929;
 
-    padding: 0px 0px 0px 0px;
-    font-weight: bold;
+  padding: 0px 0px 0px 0px;
+  font-weight: bold;
 }
 
 RemoveButton:hover {
-    color: #ff1717;
-    background-color: #440e0e;
+  color: #ff1717;
+  background-color: #440e0e;
 }
 
 
@@ -146,7 +136,11 @@ ClusterDialog  QLineEdit {
 }
 
 ClusterDialog  QScrollArea {
-    min-height: 15em;
+  min-height: 15em;
+}
+
+ClusterDialog  DynamicList  QWidget {
+  background-color: #282828;
 }
 
 /*
@@ -158,4 +152,8 @@ ProgramDialog > QWidget > QLineEdit {
 
 ProgramDialog  QScrollArea {
   min-height: 7.5em;
+}
+
+ProgramDialog QScrollArea QWidget {
+  background: #282828;
 }

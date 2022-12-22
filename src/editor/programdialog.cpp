@@ -81,168 +81,166 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     , _programPath(std::move(programPath))
     , _clusterPath(std::move(clusterPath))
 {
-    setWindowTitle(QString::fromStdString(fmt::format("Program: ", _programPath)));
+    setWindowTitle(QString::fromStdString(fmt::format("Program: {}", _programPath)));
 
     QBoxLayout* layout = new QVBoxLayout(this);
 
+    QWidget* edit = new QWidget;
+    QGridLayout* editLayout = new QGridLayout(edit);
+    editLayout->setContentsMargins(0, 0, 0, 0);
+
+    editLayout->addWidget(new QLabel("Name:"), 0, 0);
+    _name = new QLineEdit;
+    _name->setToolTip("The name of this program");
+    editLayout->addWidget(_name, 0, 1);
+
+    editLayout->addWidget(new QLabel("Executable:"), 1, 0);
+    _executable = new QLineEdit;
+    _executable->setToolTip(
+        "The command that will be executed when this program is started"
+    );
+    editLayout->addWidget(_executable, 1, 1);
+
+    editLayout->addWidget(new QLabel("Commandline Parameters:"), 2, 0);
+    _commandLineParameters = new QLineEdit;
+    _commandLineParameters->setPlaceholderText("optional");
+    _commandLineParameters->setToolTip(
+        "Global commandline parameters that will be added to the command regardless "
+        "of the configuration that was selected"
+    );
+    editLayout->addWidget(_commandLineParameters, 2, 1);
+
+    editLayout->addWidget(new QLabel("Working Directory:"), 3, 0);
+    _workingDirectory = new QLineEdit;
+    _workingDirectory->setPlaceholderText("optional");
+    _workingDirectory->setToolTip("The directory in which the program will run");
+    editLayout->addWidget(_workingDirectory, 3, 1);
+
+    editLayout->addWidget(new QLabel("Forward Messages:"), 4, 0);
+    _shouldForwardMessages = new QCheckBox;
+    _shouldForwardMessages->setToolTip(
+        "If this is enabled, all console messages from the executable will be sent "
+        "back to C-Troll"
+    );
+    editLayout->addWidget(_shouldForwardMessages, 4, 1);
+
+    editLayout->addWidget(new QLabel("Delay"), 5, 0);
+    QWidget* delayContainer = new QWidget;
+    QBoxLayout* delayLayout = new QHBoxLayout(delayContainer);
+    delayLayout->setContentsMargins(0, 0, 0, 0);
+    delayLayout->setSpacing(0);
+    _hasDelay = new QCheckBox("Enabled");
+    _hasDelay->setToolTip(
+        "If this is enabled, each program in a cluster will be started with a delay"
+    );
+    connect(
+        _hasDelay, &QCheckBox::clicked,
+        [this]() { _delay->setEnabled(_hasDelay->isChecked()); }
+    );
+    delayLayout->addWidget(_hasDelay);
+    _delay = new QSpinBox;
+    _delay->setToolTip("The delay in milliseconds that is added between programs");
+    _delay->setMinimum(0);
+    _delay->setMaximum(std::numeric_limits<int>::max());
+    delayLayout->addWidget(_delay);
+    editLayout->addWidget(delayContainer, 5, 1);
+
+    editLayout->addWidget(new QLabel("Description:"), 6, 0);
+    _description = new QLineEdit;
+    _description->setToolTip("Additional information for the user about the program");
+    _description->setPlaceholderText("optional");
+    editLayout->addWidget(_description, 6, 1);
+
+    editLayout->addWidget(new Spacer, 7, 0, 1, 2);
+
     {
-        QWidget* edit = new QWidget;
-        QGridLayout* editLayout = new QGridLayout(edit);
-        editLayout->setContentsMargins(0, 0, 0, 0);
+        // Configurations
 
-        editLayout->addWidget(new QLabel("Name:"), 0, 0);
-        _name = new QLineEdit;
-        _name->setToolTip("The name of this program");
-        editLayout->addWidget(_name, 0, 1);
+        editLayout->addWidget(new QLabel("Configurations"), 8, 0);
 
-        editLayout->addWidget(new QLabel("Executable:"), 1, 0);
-        _executable = new QLineEdit;
-        _executable->setToolTip(
-            "The command that will be executed when this program is started"
+        QPushButton* newConfiguration = new AddButton;
+        connect(
+            newConfiguration, &QPushButton::clicked,
+            [this]() {
+                Configuration* config = new Configuration;
+                connect(
+                    config->name, &QLineEdit::textChanged,
+                    this, &ProgramDialog::updateSaveButton
+                );
+                _configurations->addItem(config);
+                config->name->setFocus();
+                updateSaveButton();
+            }
         );
-        editLayout->addWidget(_executable, 1, 1);
+        editLayout->addWidget(newConfiguration, 8, 1, Qt::AlignRight);
 
-        editLayout->addWidget(new QLabel("Commandline Parameters:"), 2, 0);
-        _commandLineParameters = new QLineEdit;
-        _commandLineParameters->setPlaceholderText("optional");
-        _commandLineParameters->setToolTip(
-            "Global commandline parameters that will be added to the command regardless "
-            "of the configuration that was selected"
-        );
-        editLayout->addWidget(_commandLineParameters, 2, 1);
-
-        editLayout->addWidget(new QLabel("Working Directory:"), 3, 0);
-        _workingDirectory = new QLineEdit;
-        _workingDirectory->setPlaceholderText("optional");
-        _workingDirectory->setToolTip("The directory in which the program will run");
-        editLayout->addWidget(_workingDirectory, 3, 1);
-
-        editLayout->addWidget(new QLabel("Forward Messages:"), 4, 0);
-        _shouldForwardMessages = new QCheckBox;
-        _shouldForwardMessages->setToolTip(
-            "If this is enabled, all console messages from the executable will be sent "
-            "back to C-Troll"
-        );
-        editLayout->addWidget(_shouldForwardMessages, 4, 1);
-
-        editLayout->addWidget(new QLabel("Delay"), 5, 0);
-        QWidget* delayContainer = new QWidget;
-        QBoxLayout* delayLayout = new QHBoxLayout(delayContainer);
-        delayLayout->setContentsMargins(0, 0, 0, 0);
-        delayLayout->setSpacing(0);
-        _hasDelay = new QCheckBox("Enabled");
-        _hasDelay->setToolTip(
-            "If this is enabled, each program in a cluster will be started with a delay"
+        _configurations = new DynamicList;
+        _configurations->setToolTip(
+            "A list of all configurations that are available for this program"
         );
         connect(
-            _hasDelay, &QCheckBox::clicked,
-            [this]() { _delay->setEnabled(_hasDelay->isChecked()); }
+            _configurations, &DynamicList::updated,
+            this, &ProgramDialog::updateSaveButton
         );
-        delayLayout->addWidget(_hasDelay);
-        _delay = new QSpinBox;
-        _delay->setToolTip("The delay in milliseconds that is added between programs");
-        _delay->setMinimum(0);
-        _delay->setMaximum(std::numeric_limits<int>::max());
-        delayLayout->addWidget(_delay);
-        editLayout->addWidget(delayContainer, 5, 1);
-
-        editLayout->addWidget(new QLabel("Description:"), 6, 0);
-        _description = new QLineEdit;
-        _description->setToolTip("Additional information for the user about the program");
-        _description->setPlaceholderText("optional");
-        editLayout->addWidget(_description, 6, 1);
-
-        editLayout->addWidget(new Spacer, 7, 0, 1, 2);
-
-        {
-            // Tags
-            editLayout->addWidget(new QLabel("Tags"), 8, 0);
-
-            QPushButton* t = new AddButton;
-            connect(
-                t, &QPushButton::clicked,
-                [this]() {
-                    QLineEdit* tag = new QLineEdit;
-                    _tags->addItem(tag);
-                    tag->setFocus();
-                    updateSaveButton();
-                }
-            );
-            editLayout->addWidget(t, 8, 1, Qt::AlignRight);
-
-            _tags = new DynamicList;
-            _tags->setToolTip("A list of all tags that this program is associated with");
-            connect(_tags, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
-
-            editLayout->addWidget(_tags, 9, 0, 1, 2);
-        }
-
-        editLayout->addWidget(new Spacer, 10, 0, 1, 2);
-
-        {
-            // Configurations
-
-            editLayout->addWidget(new QLabel("Configurations"), 11, 0);
-
-            QPushButton* newConfiguration = new AddButton;
-            connect(
-                newConfiguration, &QPushButton::clicked,
-                [this]() {
-                    Configuration* config = new Configuration;
-                    connect(
-                        config->name, &QLineEdit::textChanged,
-                        this, &ProgramDialog::updateSaveButton
-                    );
-                    _configurations->addItem(config);
-                    config->name->setFocus();
-                    updateSaveButton();
-                }
-            );
-            editLayout->addWidget(newConfiguration, 11, 1, Qt::AlignRight);
-
-            _configurations = new DynamicList;
-            _configurations->setToolTip(
-                "A list of all configurations that are available for this program"
-            );
-            connect(
-                _configurations, &DynamicList::updated,
-                this, &ProgramDialog::updateSaveButton
-            );
-            editLayout->addWidget(_configurations, 12, 0, 1, 2);
-        }
-
-        editLayout->addWidget(new Spacer, 13, 0, 1, 2);
-
-        {
-            // Clusters
-
-            editLayout->addWidget(new QLabel("Clusters"), 14, 0);
-
-            QPushButton* newCluster = new AddButton;
-            connect(
-                newCluster, &QPushButton::clicked,
-                [this]() {
-                    std::string name = selectCluster();
-                    if (!name.empty()) {
-                        QLabel* cluster = new QLabel(QString::fromStdString(name));
-                        _clusters->addItem(cluster);
-                        updateSaveButton();
-                    }
-                }
-            );
-            editLayout->addWidget(newCluster, 14, 1, Qt::AlignRight);
-
-            _clusters = new DynamicList;
-            _clusters->setToolTip("The list of clusters on which the program can be run");
-            connect(
-                _clusters, &DynamicList::updated,
-                this, &ProgramDialog::updateSaveButton
-            );
-            editLayout->addWidget(_clusters, 15, 0, 1, 2);
-        }
-
-        layout->addWidget(edit);
+        editLayout->addWidget(_configurations, 9, 0, 1, 2);
     }
+
+    editLayout->addWidget(new Spacer, 10, 0, 1, 2);
+
+    {
+        // Clusters
+
+        editLayout->addWidget(new QLabel("Clusters"), 11, 0);
+
+        QPushButton* newCluster = new AddButton;
+        connect(
+            newCluster, &QPushButton::clicked,
+            [this]() {
+                std::string name = selectCluster();
+                if (!name.empty()) {
+                    QLabel* cluster = new QLabel(QString::fromStdString(name));
+                    _clusters->addItem(cluster);
+                    updateSaveButton();
+                }
+            }
+        );
+        editLayout->addWidget(newCluster, 11, 1, Qt::AlignRight);
+
+        _clusters = new DynamicList;
+        _clusters->setToolTip("The list of clusters on which the program can be run");
+        connect(
+            _clusters, &DynamicList::updated,
+            this, &ProgramDialog::updateSaveButton
+        );
+        editLayout->addWidget(_clusters, 12, 0, 1, 2);
+    }
+    
+    editLayout->addWidget(new Spacer, 13, 0, 1, 2);
+
+    {
+        // Tags
+        editLayout->addWidget(new QLabel("Tags (optional)"), 14, 0);
+
+        QPushButton* t = new AddButton;
+        connect(
+            t, &QPushButton::clicked,
+            [this]() {
+                QLineEdit* tag = new QLineEdit;
+        _tags->addItem(tag);
+        tag->setFocus();
+        updateSaveButton();
+            }
+        );
+        editLayout->addWidget(t, 14, 1, Qt::AlignRight);
+
+        _tags = new DynamicList;
+        _tags->setToolTip("A list of all tags that this program is associated with");
+        connect(_tags, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
+
+        editLayout->addWidget(_tags, 15, 0, 1, 2);
+    }
+
+    layout->addWidget(edit);
 
 
     QDialogButtonBox* box = new QDialogButtonBox(
@@ -301,8 +299,26 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             }
         }
     }
+    else {
+        // If it doesn't exist, we want to create at least a default configuration to
+        // minimize the effort the user has to put in to create a basic configuration
+        Configuration* config = new Configuration;
+        config->name->setText("default");
+        connect(
+            config->name, &QLineEdit::textChanged,
+            this, &ProgramDialog::updateSaveButton
+        );
+        _configurations->addItem(config);
+    }
 
     updateSaveButton();
+}
+
+void ProgramDialog::setExecutableInformation(std::filesystem::path path) {
+    std::string fullPath = path.string();
+    std::string filename = path.filename().string();
+    _name->setText(QString::fromStdString(filename));
+    _executable->setText(QString::fromStdString(fullPath));
 }
 
 void ProgramDialog::save() {

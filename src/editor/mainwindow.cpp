@@ -42,11 +42,16 @@
 #include <QFileSystemModel>
 #include <QGridLayout>
 #include <QLabel>
+#include <QMimeData>
 #include <QPushButton>
 #include <QTreeView>
 #include <QWidget>
 #include <fmt/format.h>
+#include <filesystem>
 #include <functional>
+
+#include <Windows.h>
+#include <iostream>
 
 namespace {
     QTreeView* createTreeView(const std::string& folder,
@@ -90,6 +95,7 @@ MainWindow::MainWindow(std::string applicationPath, std::string clusterPath,
     , _nodePath(std::move(nodePath))
 {
     setWindowTitle("Editor");
+    setAcceptDrops(true);
 
     QWidget* center = new QWidget;
     QGridLayout* layout = new QGridLayout(center);
@@ -166,6 +172,24 @@ MainWindow::MainWindow(std::string applicationPath, std::string clusterPath,
         version->setObjectName("version");
         layout->addWidget(version, 3, 0, 1, 3, Qt::AlignLeft);
     }
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent* event) {
+    std::filesystem::path p = event->mimeData()->text().toStdString();
+
+    if (p.extension() == ".exe") {
+        event->acceptProposedAction();
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent* event) {
+    std::filesystem::path p = event->mimeData()->text().toStdString();
+    std::filesystem::path configPath = _applicationPath / p.filename();
+    configPath.replace_extension(".json");
+    
+    ProgramDialog dialog = ProgramDialog(this, configPath.string(), _clusterPath);
+    dialog.setExecutableInformation(std::filesystem::absolute(p));
+    dialog.exec();
 }
 
 std::string MainWindow::newFilePath(const std::string& path) {

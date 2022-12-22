@@ -39,6 +39,7 @@
 
 #include "dynamiclist.h"
 #include <QWidget>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -61,6 +62,8 @@ public:
     };
 
     ProgramDialog(QWidget* parent, std::string programPath, std::string clusterPath);
+
+    void setExecutableInformation(std::filesystem::path path);
 
 private slots:
     void save();

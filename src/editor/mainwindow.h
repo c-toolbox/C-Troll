@@ -35,6 +35,8 @@
 #ifndef __EDITOR__MAINWINDOW_H__
 #define __EDITOR__MAINWINDOW_H__
 
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QMainWindow>
 
 #include <string>
@@ -46,6 +48,9 @@ public:
         std::string nodePath);
 
 private:
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
+    
     std::string newFilePath(const std::string& path);
 
     void editNode(std::string path);
