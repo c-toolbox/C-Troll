@@ -74,7 +74,7 @@ MainWindow  QTabBar::tab {
 }
 
 MainWindow  QTabBar::tab:hover {
-  background-color: #353535;
+  background-color: #404040;
 }
 
 MainWindow  QTabBar::tab:selected {
@@ -237,8 +237,13 @@ ProcessesWidget  QPushButton#kill {
   color: #dddddd;
 }
 
+ProcessesWidget  QPushButton#kill:hover {
+  background-color: #b02017;
+}
+
 ProcessesWidget  QPushButton#kill:disabled {
-  background-color: #555555;
+  background-color: #606060;
+  color: #a0a0a0;
 }
 
 ProcessesWidget  QPushButton#removeprocess {
@@ -246,8 +251,13 @@ ProcessesWidget  QPushButton#removeprocess {
   color: #dddddd;
 }
 
+ProcessesWidget  QPushButton#removeprocess:hover {
+  background-color: #8e8825
+}
+
 ProcessesWidget  QPushButton#removeprocess:disabled {
-  background-color: #555555;
+  background-color: #606060;
+  color: #a0a0a0;
 }
 
 /*
