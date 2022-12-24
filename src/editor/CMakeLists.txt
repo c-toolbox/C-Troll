@@ -70,7 +70,7 @@ qt_wrap_cpp(
 set(RESOURCE_FILES "")
 qt_add_resources(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
 
-add_executable(Editor WIN32 MACOSX_BUNDLE
+add_executable(Editor WIN32
   ${SOURCE_FILES}
   ${HEADER_FILES}
   ${MOC_FILES}

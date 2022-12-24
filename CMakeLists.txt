@@ -38,14 +38,10 @@ project(C-Troll)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
-# Qt
-# Unfortunately, we have to set this value manually; sigh
-# In the future, if the Qt version is updated, just add to this variable ---abock
-if (APPLE)
-  set(CMAKE_PREFIX_PATH
-    "~/Qt/6.2.3/macos/lib/cmake"
-  )
+if (NOT (WIN32 AND MSVC))
+  message(FATAL_ERROR "C-Troll only supports Visual Studio on Windows")
 endif ()
+
 
 find_package(Qt6 COMPONENTS Core Gui Network Widgets REQUIRED)
 

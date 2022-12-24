@@ -40,18 +40,12 @@
 #include <QMessageBox>
 #include <QTcpSocket>
 #include <fmt/format.h>
+#include <Windows.h>
 #include <iostream>
 #include <memory>
 
-#ifdef WIN32
-#include <Windows.h>
-#else
-#include <sys/time.h>
-#endif
-
 namespace {
     std::string currentTime() {
-#ifdef WIN32
         SYSTEMTIME t = {};
         GetLocalTime(&t);
 
@@ -59,17 +53,6 @@ namespace {
             "{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0<3}",
             t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, t.wMilliseconds
         );
-#else
-        struct timeval t;
-        gettimeofday(&t, nullptr);
-        tm* m = gmtime(&t.tv_sec);
-
-        return fmt::format(
-            "{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0<3}",
-            m->tm_year, m->tm_mon, m->tm_mday,
-            m->tm_hour, m->tm_min, m->tm_sec, t.tv_usec / 1000
-        );
-#endif
     }
 
     void Debug(std::string msg) {

@@ -191,11 +191,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
         else if (common::isValidMessage<common::RestartNodeMessage>(message)) {
             Log(fmt::format("Received [{}]: {}", peer, message.dump()));
 
-#ifdef WIN32
             QProcess::startDetached("shutdown", { "/r", "/t", "0" });
-#else
-            Log("ProcessHandler", "Command not support on this operating system");
-#endif // WIN32
         }
     }
     catch (const std::exception& e) {
