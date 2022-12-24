@@ -38,7 +38,8 @@ target_compile_features(project_options INTERFACE cxx_std_20)
 target_compile_options(project_options INTERFACE
   /MP
   /permissive-
-  /W4 # Baseline reasonable warnings
+  /EHsc   # Exception handling
+  /W4     # Baseline reasonable warnings
   /w14242 # 'identfier': conversion from 'type1' to 'type1', possible loss of data
   /w14254 # 'operator': conversion from 'type1:field_bits' to
           # 'type2:field_bits', possible loss of data

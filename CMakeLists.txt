@@ -32,7 +32,7 @@
 #                                                                                        #
 ##########################################################################################
 
-cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
 
 project(C-Troll)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
