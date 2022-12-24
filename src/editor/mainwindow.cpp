@@ -186,9 +186,16 @@ void MainWindow::dropEvent(QDropEvent* event) {
     std::filesystem::path p = event->mimeData()->text().toStdString();
     std::filesystem::path configPath = _applicationPath / p.filename();
     configPath.replace_extension(".json");
-    
+
     ProgramDialog dialog = ProgramDialog(this, configPath.string(), _clusterPath);
-    dialog.setExecutableInformation(std::filesystem::absolute(p));
+    
+    std::string exe = p.string();
+    if (exe.starts_with("file:///")) {
+        using namespace std::string_view_literals;
+        exe = exe.substr("file:///"sv.size());
+    }
+    dialog.setExecutableInformation(exe);
+    
     dialog.exec();
 }
 

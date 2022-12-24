@@ -316,7 +316,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
 
 void ProgramDialog::setExecutableInformation(std::filesystem::path path) {
     std::string fullPath = path.string();
-    std::string filename = path.filename().string();
+    std::string filename = path.filename().replace_extension("").string();
     _name->setText(QString::fromStdString(filename));
     _executable->setText(QString::fromStdString(fullPath));
 }
