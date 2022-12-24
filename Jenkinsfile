@@ -1,13 +1,7 @@
 def checkoutGit() {
   def url = 'https://github.com/c-toolbox/C-Troll';
   def branch = env.BRANCH_NAME
-
-  if (isUnix()) {
-    sh "git clone --recursive --depth 1 ${url} --branch ${branch} --single-branch ."
-  }
-  else {
-    bat "git clone --recursive --depth 1 ${url} --branch ${branch} --single-branch ."
-  }
+  bat "git clone --recursive --depth 1 ${url} --branch ${branch} --single-branch ."
 }
 
 def createDirectory(dir) {
@@ -33,90 +27,6 @@ parallel tools: {
     }
     cleanWs()
   } // node('tools')
-},
-linux_gcc_make: { // linux-gcc/build(make)
-  if (env.USE_BUILD_OS_LINUX == 'true') {
-    node('linux-gcc') {
-      stage('linux-gcc-make/scm') {
-        deleteDir();
-        checkoutGit();
-      }
-      stage('linux-gcc-make/build') {
-        cmakeBuild([
-          buildDir: 'build-make',
-          generator: 'Unix Makefiles',
-          installation: "InSearchPath",
-          steps: [[ args: "-- -j6", withCmake: true ]]
-        ])
-        recordIssues(
-          id: 'linux-gcc-make',
-          tool: gcc()
-        )
-      }
-      cleanWs()
-    } // node('linux' && 'gcc')
-  }
-},
-linux_gcc_ninja: { // linux-gcc/build(ninja)
-  if (env.USE_BUILD_OS_LINUX == 'true') {
-    node('linux-gcc') {
-      stage('linux-gcc-ninja/scm') {
-        deleteDir();
-        checkoutGit();
-      }
-      stage('linux-gcc-ninja/build') {
-        cmakeBuild([
-          buildDir: 'build-ninja',
-          generator: 'Ninja',
-          installation: "InSearchPath",
-          steps: [[ args: "-- -j6", withCmake: true ]]
-        ])
-      }
-      cleanWs()
-    } // node('linux' && 'gcc')
-  }
-},
-linux_clang_make: { // linux-clang/build(make)
-  if (env.USE_BUILD_OS_LINUX == 'true') {
-    node('linux-clang') {
-      stage('linux-clang-make/scm') {
-        deleteDir();
-        checkoutGit();
-      }
-      stage('linux-clang-make/build') {
-        cmakeBuild([
-          buildDir: 'build-make',
-          generator: 'Unix Makefiles',
-          installation: "InSearchPath",
-          steps: [[ args: "-- -j6", withCmake: true ]]
-        ])
-        recordIssues(
-          id: 'linux-clang-make',
-          tool: clang()
-        )
-      }
-      cleanWs()
-    } // node('linux' && 'clang')
-  }
-},
-linux_clang_ninja: { // linux-clang/build(ninja)
-  if (env.USE_BUILD_OS_LINUX == 'true') {
-    node('linux-clang') {
-      stage('linux-clang-ninja/scm') {
-        deleteDir();
-        checkoutGit();
-      }
-      stage('linux-clang-ninja/build') {
-        cmakeBuild([
-          buildDir: 'build-ninja',
-          generator: 'Ninja',
-          installation: "InSearchPath",
-          steps: [[ args: "-- -j6", withCmake: true ]]
-        ])
-      }
-      cleanWs()
-    } // node('linux' && 'clang')
-  }
 },
 windows_msvc: { // windows/build(msvc)
   if (env.USE_BUILD_OS_WINDOWS == 'true') {
@@ -162,50 +72,5 @@ windows_ninja: { // windows/build(msvc)
       }
       cleanWs()
     } // node('windows')
-  }
-},
-macos_make: { // macos/build(make)
-  if (env.USE_BUILD_OS_MACOS == 'true') {
-    node('macos') {
-      stage('macos-make/scm') {
-        deleteDir();
-        checkoutGit();
-      }
-      stage('macos-make/build') {
-        cmakeBuild([
-          buildDir: 'build-make',
-          generator: 'Unix Makefiles',
-          installation: "InSearchPath",
-          steps: [[ args: "-- -j6", withCmake: true ]]
-        ])
-        // For some reason this raises an error
-        // ID clang is already used by another action: io.jenkins.plugins.analysis.core.model.ResultAction for Clang (LLVM based)
-        // even though we give it a unique ID
-        // recordIssues(
-        //   id: 'macos-clang',
-        //   tool: clang()
-        // )
-      }
-      cleanWs()
-    } // node('macos')
-  }
-},
-macos_xcode: { // macos_xcode
-  if (env.USE_BUILD_OS_MACOS == 'true') {
-    node('macos') {
-      stage('macos-xcode/scm') {
-        deleteDir();
-        checkoutGit();
-      }
-      stage('macos-xcode/build') {
-        cmakeBuild([
-          buildDir: 'build-xcode',
-          generator: 'Xcode',
-          installation: "InSearchPath",
-          steps: [[ args: "-- -quiet -parallelizeTargets -jobs 6", withCmake: true ]]
-        ])
-      }
-      cleanWs()
-    } // node('macos')
   }
 }

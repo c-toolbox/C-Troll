@@ -35,54 +35,29 @@
 #include "logging.h"
 
 #include <fmt/format.h>
+#include <Windows.h>
 #include <assert.h>
 #include <filesystem>
 
-#ifdef WIN32
-#include <Windows.h>
-#else
-#include <sys/time.h>
-#endif
 
 namespace {
     constexpr std::string_view LogPrefix = "log_";
     constexpr std::string_view LogPostfix = ".txt";
 
     std::string currentTime() {
-#ifdef WIN32
         SYSTEMTIME t = {};
         GetLocalTime(&t);
 
         return fmt::format(
             "{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0<3}",
-            t.wYear, t.wMonth, t.wDay,
-            t.wHour, t.wMinute, t.wSecond, t.wMilliseconds
+            t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, t.wMilliseconds
         );
-#else
-        struct timeval t;
-        gettimeofday(&t, nullptr);
-        tm* m = gmtime(&t.tv_sec);
-
-        return fmt::format(
-            "{:0>2}:{:0>2}:{:0>2}.{:0<3}",
-            m->tm_hour, m->tm_min, m->tm_sec, t.tv_usec / 1000
-        );
-#endif
     }
 
     std::string currentDate() {
-#ifdef WIN32
         SYSTEMTIME t = {};
         GetLocalTime(&t);
-
         return fmt::format("{:0>4}-{:0>2}-{:0>2}", t.wYear, t.wMonth, t.wDay);
-#else
-        struct timeval t;
-        gettimeofday(&t, nullptr);
-        tm* m = gmtime(&t.tv_sec);
-
-        return fmt::format("{:0>4}-{:0>2}-{:0>2}", m->tm_year, m->tm_mon, m->tm_mday);
-#endif
     }
 
     std::string nextFreeFilename(std::string_view path) {
@@ -173,9 +148,7 @@ void Log::logMessage(std::string category, std::string message) {
     }
 
     // And if we are running in Visual Studio, this output, too
-#ifdef WIN32
     OutputDebugString((message + '\n').c_str());
-#endif
 }
 
 void Log::logDebugMessage(std::string category, std::string message) {
