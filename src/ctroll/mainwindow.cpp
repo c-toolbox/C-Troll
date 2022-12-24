@@ -56,7 +56,7 @@
 #include <string_view>
 #include <thread>
 
-MainWindow::MainWindow(bool shouldLogDebug)
+MainWindow::MainWindow(bool shouldLogDebug, std::vector<std::string> defaultTags)
     : _trayIcon(QIcon(":/images/C_transparent.png"), this)
 {
     setWindowTitle("C-Troll");
@@ -158,6 +158,33 @@ MainWindow::MainWindow(bool shouldLogDebug)
     // Create the widgets
     // Programs
     _programWidget = new programs::ProgramsWidget;
+
+    std::set<std::string> allTags = data::findTags();
+    bool anyMissingTags = std::any_of(
+        defaultTags.begin(),
+        defaultTags.end(),
+        [&allTags](std::string tag) { return allTags.find(tag) == allTags.end(); }
+    );
+    if (anyMissingTags) {
+        Log(
+            "Status",
+            "Started C-Troll with default tags, one of which did not exist. Removing the "
+            "ones that did not exist"
+        );
+
+        defaultTags.erase(
+            std::remove_if(
+                defaultTags.begin(),
+                defaultTags.end(),
+                [&allTags](std::string tag) { return allTags.find(tag) == allTags.end(); }
+            ),
+            defaultTags.end()
+        );
+    }
+
+    if (!defaultTags.empty()) {
+        _programWidget->selectTags(defaultTags);
+    }
     connect(
         _programWidget, &programs::ProgramsWidget::startProgram,
         this, &MainWindow::startProgram

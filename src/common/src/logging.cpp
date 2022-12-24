@@ -39,7 +39,6 @@
 #include <assert.h>
 #include <filesystem>
 
-
 namespace {
     constexpr std::string_view LogPrefix = "log_";
     constexpr std::string_view LogPostfix = ".txt";
@@ -83,26 +82,6 @@ namespace {
 namespace common {
 
 Log* Log::_log = nullptr;
-
-bool parseDebugCommandlineArgument(std::vector<std::string> args) {
-    auto it = std::find(args.begin(), args.end(), "--debug");
-    return it != args.end();
-}
-
-std::optional<std::pair<int, int>> parseLocationArgument(std::vector<std::string> args) {
-    auto it = std::find(args.begin(), args.end(), "--pos");
-    if (it == args.end()) {
-        return std::nullopt;
-    }
-    else {
-        if ((it+1) == args.end() || (it+2) == args.end()) {
-            throw std::runtime_error("Provided too few parameters for --pos argument");
-        }
-        const int x = std::stoi(*(it + 1));
-        const int y = std::stoi(*(it + 2));
-        return std::pair(x, y);
-    }
-}
 
 void Log::initialize(std::string application, bool createLogFile, bool shouldLogDebug,
                      std::function<void(std::string)> loggingFunction)

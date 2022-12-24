@@ -617,7 +617,7 @@ QWidget* ProgramsWidget::createControls() {
             _selectedTags->addTag(tag);
 
             std::vector<std::string> tags = _selectedTags->tags();
-            emit tagsPicked(tags);
+            tagsPicked(tags);
         }
     );
     layout->addWidget(_availableTags, 3);
@@ -630,7 +630,7 @@ QWidget* ProgramsWidget::createControls() {
             _availableTags->addTag(tag);
 
             std::vector<std::string> tags = _selectedTags->tags();
-            emit tagsPicked(tags);
+            tagsPicked(tags);
         }
     );
     layout->addWidget(_selectedTags, 1);
@@ -693,6 +693,24 @@ void ProgramsWidget::processUpdated(Process::ID processId) {
     if (it != _widgets.cend()) {
         it->second->processUpdated(processId);
     }
+}
+
+void ProgramsWidget::selectTags(std::vector<std::string> tags) {
+    // Check that all that want to be picked also exist
+    assert(
+        std::all_of(
+            tags.begin(),
+            tags.end(), [allTags = data::findTags()](std::string tag) {
+                return allTags.find(tag) != allTags.end();
+            }
+        )
+    );
+
+    for (std::string tag : tags) {
+        _availableTags->removeTag(tag);
+        _selectedTags->addTag(tag);
+    }
+    tagsPicked(tags);
 }
 
 void ProgramsWidget::connectedStatusChanged(Cluster::ID cluster, Node::ID) {

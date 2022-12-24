@@ -195,12 +195,13 @@ public:
     ProgramsWidget();
 
     void processUpdated(Process::ID processId);
+    
+    void selectTags(std::vector<std::string> tags);
 
 public slots:
     void connectedStatusChanged(Cluster::ID cluster, Node::ID node);
 
 private slots:
-    void tagsPicked(std::vector<std::string> tags);
     void searchUpdated(std::string text);
 
 signals:
@@ -218,6 +219,7 @@ private:
     QWidget* createControls();
     QWidget* createPrograms();
 
+    void tagsPicked(std::vector<std::string> tags);
     void updatedVisibilityState();
 
     TagsWidget* _availableTags = nullptr;

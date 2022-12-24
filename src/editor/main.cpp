@@ -33,6 +33,7 @@
  ****************************************************************************************/
 
 #include "baseconfiguration.h"
+#include "commandlineparsing.h"
 #include "jsonload.h"
 #include "logging.h"
 #include "mainwindow.h"
@@ -47,9 +48,9 @@
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
 
-    std::vector<std::string> arg = { argv, argv + argc };
-    const bool logDebug = common::parseDebugCommandlineArgument(arg);
-    std::optional<std::pair<int, int>> pos = common::parseLocationArgument(arg);
+    std::vector<std::string> args = { argv, argv + argc };
+    const bool logDebug = common::parseDebugCommandlineArgument(args);
+    std::optional<std::pair<int, int>> pos = common::parseLocationArgument(args);
 
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that

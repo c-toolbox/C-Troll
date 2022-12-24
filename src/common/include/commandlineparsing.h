@@ -32,80 +32,36 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CTROLL__MAINWINDOW_H__
-#define __CTROLL__MAINWINDOW_H__
+#ifndef __COMMON__COMMANDLINEPARSING_H__
+#define __COMMON__COMMANDLINEPARSING_H__
 
-#include <QMainWindow>
-
-#include "clusterconnectionhandler.h"
-#include "configuration.h"
-#include "logwidget.h"
-#include "process.h"
-#include <QCloseEvent>
-#include <QFileSystemWatcher>
-#include <QSystemTrayIcon>
-#include <QTextEdit>
-#include <memory>
-#include <mutex>
+#include <optional>
 #include <string>
+#include <vector>
 
-class ClustersWidget;
-class ProcessesWidget;
-class RestConnectionHandler;
+namespace common {
 
-namespace programs { class ProgramsWidget; }
+/**
+ * This function returns \c true iff the commandline `--debug` was passed through the list
+ * of commandline arguments.  If the parameter does not occur, \c false is returned.
+ *
+ * \param The list of commandline arguments. The best way to generate this from the
+ *        standard argc+argv construct is through: `{ argv, argv + argc }`
+ * \return \c true if `--debug` occurred in the commandline arguments, \c false otherwise
+ */
+bool parseDebugCommandlineArgument(std::vector<std::string> args);
 
-class MainWindow : public QMainWindow {
-Q_OBJECT
-public:
-    MainWindow(bool shouldLogDebug, std::vector<std::string> defaultTags);
+/**
+ * This function returns the desired window position if `--pos` was provided to the
+ * application, or `std::nullopt` if the argument was not present.
+ *
+ * \param The list of commandline arguments. The best way to generate this from the
+ *        standard argc+argv construct is through: `{ argv, argv + argc }`
+ * \return Either `std::nullopt` if the commandline flag was not found or the pixel
+ *         position provided as arguments
+ */
+std::optional<std::pair<int, int>> parseLocationArgument(std::vector<std::string> args);
 
-private slots:
-    void handleTrayProcess(common::ProcessStatusMessage status);
-    void handleTrayStatus(Node::ID, common::TrayStatusMessage status);
-    void handleInvalidAuth(Node::ID id, common::InvalidAuthMessage message);
-    void handleErrorMessage(Node::ID id, common::ErrorOccurredMessage message);
+} // namespace common
 
-    void stopProcess(Process::ID processId) const;
-
-    void iconActivated(QSystemTrayIcon::ActivationReason reason);
-
-protected:
-    void closeEvent(QCloseEvent* event);
-    void changeEvent(QEvent* event);
-
-private:
-    void startProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId);
-    void startCustomProgram(Node::ID nodeId, std::string executable,
-        std::string workingDir, std::string arguments);
-    void stopProgram(Cluster::ID clusterId, Program::ID programId,
-        Program::Configuration::ID configurationId) const;
-    void startProcess(Process::ID processId) const;
-    void killAllProcesses(Cluster::ID id) const;
-    void killAllProcesses(Node::ID id) const;
-    void killTray(Node::ID id) const;
-    void killTrays(Cluster::ID id) const;
-    void restartNode(Node::ID id) const;
-    void restartNodes(Cluster::ID id) const;
-
-    void log(std::string msg);
-
-    programs::ProgramsWidget* _programWidget = nullptr;
-    ClustersWidget* _clustersWidget = nullptr;
-    ProcessesWidget* _processesWidget = nullptr;
-    LogWidget _logWidget;
-
-    ClusterConnectionHandler _clusterConnectionHandler;
-    RestConnectionHandler* _restLoopbackHandler = nullptr;
-    RestConnectionHandler* _restGeneralHandler = nullptr;
-    Configuration _config;
-
-    QSystemTrayIcon _trayIcon;
-    QFileSystemWatcher _watcher;
-
-    bool _isClosingApplication = false;
-    bool _shouldShowDifferentDataHashMessage = false;
-};
-
-#endif // __CTROLL__MAINWINDOW_H__
+#endif // __COMMON__COMMANDLINEPARSING_H__

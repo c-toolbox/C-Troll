@@ -32,6 +32,7 @@
  *                                                                                       *
  ****************************************************************************************/
 
+#include "commandlineparsing.h"
 #include "logging.h"
 #include "mainwindow.h"
 #include "version.h"
@@ -43,6 +44,26 @@
 #include <QTimer>
 #include <fmt/format.h>
 #include <chrono>
+
+namespace {
+    std::vector<std::string> tokenizeString(const std::string& input, char separator) {
+        size_t separatorPos = input.find(separator);
+        if (separatorPos == std::string::npos) {
+            return { input };
+        }
+        else {
+            std::vector<std::string> res;
+            size_t prevSeparator = 0;
+            while (separatorPos != std::string::npos) {
+                res.push_back(input.substr(prevSeparator, separatorPos - prevSeparator));
+                prevSeparator = separatorPos + 1;
+                separatorPos = input.find(separator, separatorPos + 1);
+            }
+            res.push_back(input.substr(prevSeparator));
+            return res;
+        }
+    }
+} // namespace
 
 struct SharedMemoryMarker {
     short majorVersion = -1;
@@ -114,9 +135,29 @@ int main(int argc, char** argv) {
     }
 
 
-    std::vector<std::string> arg = { argv, argv + argc };
-    const bool logDebug = common::parseDebugCommandlineArgument(arg);
-    std::optional<std::pair<int, int>> pos = common::parseLocationArgument(arg);
+    std::vector<std::string> args = { argv, argv + argc };
+    const bool logDebug = common::parseDebugCommandlineArgument(args);
+    std::optional<std::pair<int, int>> pos = common::parseLocationArgument(args);
+
+    std::vector<std::string> defaultTags;
+    {
+        auto it = std::find(args.begin(), args.end(), "--tags");
+        if (it != args.end()) {
+            // The rest of the commandline argument is a comma-separated list of tags
+            std::string allTags = std::accumulate(
+                it + 1,
+                args.end(),
+                std::string(),
+                [](std::string lhs, std::string rhs) {
+                    return std::move(lhs) + " " + std::move(rhs);
+                }
+            );
+            // We have an empty character at the beginning we need to remove
+            allTags = allTags.substr(1);
+
+            defaultTags = tokenizeString(allTags, ',');
+        }
+    }
 
     qInstallMessageHandler(
         // Now that the log is enabled and available, we can pipe all Qt messages to that
@@ -134,7 +175,7 @@ int main(int argc, char** argv) {
     }
 
     try {
-        MainWindow mw = MainWindow(logDebug);
+        MainWindow mw = MainWindow(logDebug, defaultTags);
         if (pos.has_value()) {
             mw.move(pos->first, pos->second);
         }

@@ -53,6 +53,7 @@ set(HEADER_FILES
   include/logging.h
   include/messages.h
   include/node.h
+  include/commandlineparsing.h
   include/program.h
   include/typedid.h
   include/version.h
@@ -78,6 +79,7 @@ set(SOURCE_FILES
   src/logconfiguration.cpp
   src/logging.cpp
   src/node.cpp
+  src/commandlineparsing.cpp
   src/program.cpp
 )
 
