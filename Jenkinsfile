@@ -1,7 +1,13 @@
 def checkoutGit() {
   def url = 'https://github.com/c-toolbox/C-Troll';
   def branch = env.BRANCH_NAME
-  bat "git clone --recursive --depth 1 ${url} --branch ${branch} --single-branch ."
+
+  if (isUnix()) {
+    sh "git clone --recursive --depth 1 ${url} --branch ${branch} --single-branch ."
+  }
+  else {
+    bat "git clone --recursive --depth 1 ${url} --branch ${branch} --single-branch ."
+  }
 }
 
 def createDirectory(dir) {
