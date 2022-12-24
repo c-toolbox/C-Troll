@@ -116,15 +116,22 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     _workingDirectory->setToolTip("The directory in which the program will run");
     editLayout->addWidget(_workingDirectory, 3, 1);
 
-    editLayout->addWidget(new QLabel("Forward Messages:"), 4, 0);
+    editLayout->addWidget(new QLabel("Enabled:"), 4, 0);
+    _isEnabled = new QCheckBox;
+    _isEnabled->setToolTip(
+        "If this is disabled, this program will not be listed in the C-Troll application"
+    );
+    editLayout->addWidget(_isEnabled), 4, 1;
+
+    editLayout->addWidget(new QLabel("Forward Messages:"), 5, 0);
     _shouldForwardMessages = new QCheckBox;
     _shouldForwardMessages->setToolTip(
         "If this is enabled, all console messages from the executable will be sent "
         "back to C-Troll"
     );
-    editLayout->addWidget(_shouldForwardMessages, 4, 1);
+    editLayout->addWidget(_shouldForwardMessages, 5, 1);
 
-    editLayout->addWidget(new QLabel("Delay"), 5, 0);
+    editLayout->addWidget(new QLabel("Delay"), 6, 0);
     QWidget* delayContainer = new QWidget;
     QBoxLayout* delayLayout = new QHBoxLayout(delayContainer);
     delayLayout->setContentsMargins(0, 0, 0, 0);
@@ -143,20 +150,20 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     _delay->setMinimum(0);
     _delay->setMaximum(std::numeric_limits<int>::max());
     delayLayout->addWidget(_delay);
-    editLayout->addWidget(delayContainer, 5, 1);
+    editLayout->addWidget(delayContainer, 6, 1);
 
-    editLayout->addWidget(new QLabel("Description:"), 6, 0);
+    editLayout->addWidget(new QLabel("Description:"), 7, 0);
     _description = new QLineEdit;
     _description->setToolTip("Additional information for the user about the program");
     _description->setPlaceholderText("optional");
-    editLayout->addWidget(_description, 6, 1);
+    editLayout->addWidget(_description, 7, 1);
 
-    editLayout->addWidget(new Spacer, 7, 0, 1, 2);
+    editLayout->addWidget(new Spacer, 8, 0, 1, 2);
 
     {
         // Configurations
 
-        editLayout->addWidget(new QLabel("Configurations"), 8, 0);
+        editLayout->addWidget(new QLabel("Configurations"), 9, 0);
 
         QPushButton* newConfiguration = new AddButton;
         connect(
@@ -172,7 +179,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 updateSaveButton();
             }
         );
-        editLayout->addWidget(newConfiguration, 8, 1, Qt::AlignRight);
+        editLayout->addWidget(newConfiguration, 9, 1, Qt::AlignRight);
 
         _configurations = new DynamicList;
         _configurations->setToolTip(
@@ -182,15 +189,15 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             _configurations, &DynamicList::updated,
             this, &ProgramDialog::updateSaveButton
         );
-        editLayout->addWidget(_configurations, 9, 0, 1, 2);
+        editLayout->addWidget(_configurations, 10, 0, 1, 2);
     }
 
-    editLayout->addWidget(new Spacer, 10, 0, 1, 2);
+    editLayout->addWidget(new Spacer, 11, 0, 1, 2);
 
     {
         // Clusters
 
-        editLayout->addWidget(new QLabel("Clusters"), 11, 0);
+        editLayout->addWidget(new QLabel("Clusters"), 12, 0);
 
         QPushButton* newCluster = new AddButton;
         connect(
@@ -204,7 +211,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 }
             }
         );
-        editLayout->addWidget(newCluster, 11, 1, Qt::AlignRight);
+        editLayout->addWidget(newCluster, 12, 1, Qt::AlignRight);
 
         _clusters = new DynamicList;
         _clusters->setToolTip("The list of clusters on which the program can be run");
@@ -212,14 +219,14 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             _clusters, &DynamicList::updated,
             this, &ProgramDialog::updateSaveButton
         );
-        editLayout->addWidget(_clusters, 12, 0, 1, 2);
+        editLayout->addWidget(_clusters, 13, 0, 1, 2);
     }
     
-    editLayout->addWidget(new Spacer, 13, 0, 1, 2);
+    editLayout->addWidget(new Spacer, 14, 0, 1, 2);
 
     {
         // Tags
-        editLayout->addWidget(new QLabel("Tags (optional)"), 14, 0);
+        editLayout->addWidget(new QLabel("Tags (optional)"), 15, 0);
 
         QPushButton* t = new AddButton;
         connect(
@@ -231,13 +238,13 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
         updateSaveButton();
             }
         );
-        editLayout->addWidget(t, 14, 1, Qt::AlignRight);
+        editLayout->addWidget(t, 15, 1, Qt::AlignRight);
 
         _tags = new DynamicList;
         _tags->setToolTip("A list of all tags that this program is associated with");
         connect(_tags, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
 
-        editLayout->addWidget(_tags, 15, 0, 1, 2);
+        editLayout->addWidget(_tags, 16, 0, 1, 2);
     }
 
     layout->addWidget(edit);
@@ -264,6 +271,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             QString::fromStdString(program.commandlineParameters)
         );
         _workingDirectory->setText(QString::fromStdString(program.workingDirectory));
+        _isEnabled->setChecked(program.isEnabled);
         _shouldForwardMessages->setChecked(program.shouldForwardMessages);
         _hasDelay->setChecked(program.delay.has_value());
         if (program.delay.has_value()) {
@@ -327,6 +335,7 @@ void ProgramDialog::save() {
     program.executable = _executable->text().toStdString();
     program.commandlineParameters = _commandLineParameters->text().toStdString();
     program.workingDirectory = _workingDirectory->text().toStdString();
+    program.isEnabled = _isEnabled->isChecked();
     program.shouldForwardMessages = _shouldForwardMessages->isChecked();
     if (_hasDelay->isChecked()) {
         program.delay = std::chrono::milliseconds(_delay->value());

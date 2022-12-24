@@ -73,7 +73,9 @@ std::vector<const Program*> programs() {
     std::vector<const Program*> programs;
     for (const std::unique_ptr<Program>& p : gPrograms) {
         assert(p.get());
-        programs.push_back(p.get());
+        if (p->isEnabled) {
+            programs.push_back(p.get());
+        }
     }
     return programs;
 }

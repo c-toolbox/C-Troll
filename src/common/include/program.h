@@ -74,6 +74,8 @@ struct Program {
     std::string workingDirectory;
     /// If this is set to 'true', child processes will forward the Std and error streams
     bool shouldForwardMessages = false;
+    /// A flag showing whether this Program is enabled or disabled
+    bool isEnabled = true;
     /// An optional delay that is introduced between startup of individual instances
     std::optional<std::chrono::milliseconds> delay;
     /// A list of tags that are associated with this Program

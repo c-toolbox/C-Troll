@@ -79,6 +79,7 @@ private:
     QLineEdit* _executable = nullptr;
     QLineEdit* _commandLineParameters = nullptr;
     QLineEdit* _workingDirectory = nullptr;
+    QCheckBox* _isEnabled = nullptr;
     QCheckBox* _shouldForwardMessages = nullptr;
 
     QCheckBox* _hasDelay = nullptr;
