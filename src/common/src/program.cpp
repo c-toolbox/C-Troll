@@ -56,6 +56,9 @@ namespace {
     constexpr std::string_view KeyConfigurationName = "name";
     constexpr std::string_view KeyConfigurationParameters = "parameters";
     constexpr std::string_view KeyConfigurationDescription = "description";
+
+    constexpr std::string_view KeyClusterName = "name";
+    constexpr std::string_view KeyClusterParameters = "parameters";
 } // namespace
 
 void from_json(const nlohmann::json& j, Program::Configuration& p) {
@@ -72,6 +75,20 @@ void to_json(nlohmann::json& j, const Program::Configuration& p) {
     j[KeyConfigurationName] = p.name;
     j[KeyConfigurationParameters] = p.parameters;
     j[KeyConfigurationDescription] = p.description;
+}
+
+void from_json(const nlohmann::json& j, Program::Cluster& c) {
+    j.at(KeyClusterName).get_to(c.name);
+    if (j.find(KeyClusterParameters) != j.end()) {
+        j[KeyClusterParameters].get_to(c.parameters);
+    }
+}
+
+void to_json(nlohmann::json& j, const Program::Cluster& c) {
+    j[KeyClusterName] = c.name;
+    if (!c.parameters.empty()) {
+        j[KeyClusterParameters] = c.parameters;
+    }
 }
 
 void from_json(const nlohmann::json& j, Program& p) {

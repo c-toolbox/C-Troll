@@ -150,6 +150,12 @@ ProgramDialog > QWidget > QLineEdit {
   min-width: 30em;
 }
 
+ProgramDialog > QWidget > QLabel#information-label {
+  font-size: 9pt;
+  font-style: italic;
+  /* color: #ff00ff; */
+}
+
 ProgramDialog  QScrollArea {
   min-height: 7.5em;
 }

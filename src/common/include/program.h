@@ -60,6 +60,14 @@ struct Program {
         std::string description;
     };
 
+    struct Cluster {
+        /// The name of the cluster
+        std::string name;
+
+        /// The commandline arguments that are specific for this cluster
+        std::string parameters;
+    };
+
     using ID = TypedId<int, struct ProgramTag>;
 
     /// A unique identifier
@@ -85,12 +93,14 @@ struct Program {
     /// List of all configurations
     std::vector<Configuration> configurations;
     /// List of all clusters
-    std::vector<std::string> clusters;
+    std::vector<Cluster> clusters;
 };
 
 std::vector<Program> loadProgramsFromDirectory(std::string_view directory);
 
 void from_json(const nlohmann::json& j, Program& p);
 void to_json(nlohmann::json& j, const Program& p);
+
+bool operator==(const Program::Cluster& lhs, const Program::Cluster& rhs);
 
 #endif // __COMMON__PROGRAM_H__

@@ -52,11 +52,22 @@ common::StartCommandMessage startProcessCommand(const Process& process) {
     assert(configuration);
     const Program::Configuration& conf = *configuration;
 
+    const Cluster* cluster = data::findCluster(process.clusterId);
+    assert(cluster);
+    auto it = std::find_if(
+        program->clusters.begin(),
+        program->clusters.end(),
+        [cluster](const Program::Cluster& c) { return c.name == cluster->name; }
+    );
+    assert(it != program->clusters.end());
+
     common::StartCommandMessage t;
     t.id = process.id.v;
     t.executable = prg.executable;
     t.workingDirectory = prg.workingDirectory;
-    t.commandlineParameters = prg.commandlineParameters + " " + conf.parameters;
+    t.commandlineParameters = fmt::format(
+        "{} {} {}", prg.commandlineParameters, conf.parameters, it->parameters
+    );
     t.programId = process.programId.v;
     t.configurationId = process.configurationId.v;
     t.clusterId = process.clusterId.v;

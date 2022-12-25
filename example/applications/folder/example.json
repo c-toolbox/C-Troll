@@ -20,7 +20,7 @@
     }
   ],
   "clusters": [
-    "Local",
-    "Mega Cluster"
+    { "name": "Local", "parameters": "--extra --params" },
+    { "name": "Mega Cluster", "parameters": "--more --extra --param" }
   ]
 }

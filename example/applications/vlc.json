@@ -14,8 +14,8 @@
     }
   ],
   "clusters": [
-    "Local",
-    "Local+Office",
-    "Local+Home"
+    { "name": "Local" },
+    { "name": "Local+Office" },
+    { "name": "Local+Home" }
   ]
 }

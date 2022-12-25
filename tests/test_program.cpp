@@ -217,8 +217,8 @@ TEST_CASE("(Program) configurations", "[Program]") {
 
 TEST_CASE("(Program) clusters", "[Program]") {
     Program msg;
-    msg.clusters.push_back("foo");
-    msg.clusters.push_back("bar");
+    msg.clusters.push_back({ "foo", "abc" });
+    msg.clusters.push_back({ "bar", "" });
 
 
     nlohmann::json j1;

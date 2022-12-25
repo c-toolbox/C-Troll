@@ -111,10 +111,10 @@ const Cluster* findCluster(std::string_view name) {
 
 std::vector<const Cluster*> findClustersForProgram(const Program& program) {
     std::vector<const Cluster*> clusters;
-    for (const std::string& clusterName : program.clusters) {
-        const Cluster* cluster = findCluster(clusterName);
-        assert(cluster);
-        clusters.push_back(cluster);
+    for (const Program::Cluster& cluster: program.clusters) {
+        const Cluster* c = findCluster(cluster.name);
+        assert(c);
+        clusters.push_back(c);
     }
     return clusters;
 }
@@ -414,11 +414,12 @@ void loadData(std::string_view programPath, std::string_view clusterPath,
             ));
         }
 
-        for (const std::string& cluster : program.clusters) {
-            const Cluster* c = data::findCluster(cluster);
+        for (const Program::Cluster& cluster : program.clusters) {
+            const Cluster* c = data::findCluster(cluster.name);
             if (!c) {
-                std::string message = fmt::format("Could not find cluster '{}'", cluster);
-                throw std::runtime_error(message);
+                throw std::runtime_error(fmt::format(
+                    "Could not find cluster '{}'", cluster.name
+                ));
             }
         }
 
@@ -481,9 +482,10 @@ void loadData(std::string_view programPath, std::string_view clusterPath,
             addHash(std::hash<std::string>()(conf.name));
             addHash(std::hash<std::string>()(conf.parameters));
         }
-        for (const std::string& clusterName : program->clusters) {
-            const Cluster* cluster = findCluster(clusterName);
-            addHash(std::hash<int>()(cluster->id.v));
+        for (const Program::Cluster& cluster : program->clusters) {
+            const Cluster* c = findCluster(cluster.name);
+            addHash(std::hash<int>()(c->id.v));
+            addHash(std::hash<std::string>()(cluster.parameters));
         }
     }
 

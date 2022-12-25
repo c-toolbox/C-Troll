@@ -53,12 +53,19 @@ class QSpinBox;
 class ProgramDialog : public QDialog {
 Q_OBJECT
 public:
-    struct Configuration : QWidget {
-        Configuration();
+    struct ConfigurationWidget : QWidget {
+        ConfigurationWidget();
 
         QLineEdit* name = nullptr;
         QLineEdit* parameters = nullptr;
         QLineEdit* description = nullptr;
+    };
+
+    struct ClusterWidget : QWidget {
+        ClusterWidget(std::string cluster, std::string parameters);
+
+        QLabel* label = nullptr;
+        QLineEdit* arguments = nullptr;
     };
 
     ProgramDialog(QWidget* parent, std::string programPath, std::string clusterPath);

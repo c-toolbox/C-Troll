@@ -488,9 +488,10 @@ void RestConnectionHandler::handleProgramInfoMessage(QTcpSocket& socket) {
             p["configurations"].push_back(conf.name);
         }
         p["clusters"] = nlohmann::json::array();
-        for (const std::string& clusterName : program->clusters) {
-            const Cluster* cluster = data::findCluster(clusterName);
-            p["clusters"].push_back(cluster->name);
+        for (const Program::Cluster& cluster : program->clusters) {
+            const Cluster* c = data::findCluster(cluster.name);
+            p["clusters"].push_back(c->name);
+
         }
         result.push_back(p);
     }

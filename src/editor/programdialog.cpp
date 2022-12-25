@@ -53,22 +53,40 @@
 #include <QVBoxLayout>
 #include <filesystem>
 
-ProgramDialog::Configuration::Configuration() {
+ProgramDialog::ConfigurationWidget::ConfigurationWidget() {
     QBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     name = new QLineEdit;
     name->setToolTip("The user-facing name of this configuration");
     layout->addWidget(name);
+    layout->setStretch(0, 2);
 
     parameters = new QLineEdit;
     parameters->setToolTip("Additional commandline parameters that are passed");
     parameters->setPlaceholderText("optional");
     layout->addWidget(parameters);
+    //layout->setStretch(0, 2);
 
     description = new QLineEdit;
     description->setToolTip("Additional user information about this configuration");
     description->setPlaceholderText("optional");
     layout->addWidget(description);
+}
+
+ProgramDialog::ClusterWidget::ClusterWidget(std::string cluster, std::string parameters) {
+    QBoxLayout* layout = new QHBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    
+    label = new QLabel(QString::fromStdString(cluster));
+    layout->addWidget(label);
+    layout->setStretch(0, 3);
+
+    arguments = new QLineEdit;
+    arguments->setText(QString::fromStdString(parameters));
+    arguments->setToolTip("Additional commandline parameters that are passed");
+    arguments->setPlaceholderText("optional");
+    layout->addWidget(arguments);
+    layout->setStretch(1, 2);
 }
 
 bool operator==(const Cluster& c, const std::string& name) {
@@ -158,18 +176,27 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     _description->setPlaceholderText("optional");
     editLayout->addWidget(_description, 7, 1);
 
-    editLayout->addWidget(new Spacer, 8, 0, 1, 2);
+    QLabel* parametersLabel = new QLabel(
+        "The complete arguments for the program are constructed in the following order:\n"
+        "1. the global parameters provided above;  2. the configuration-specific "
+        "parameters;  3. the cluster-specific parameters."
+    );
+    parametersLabel->setWordWrap(true);
+    parametersLabel->setObjectName("information-label");
+    editLayout->addWidget(parametersLabel, 8, 0, 1, 2);
+
+    editLayout->addWidget(new Spacer, 9, 0, 1, 2);
 
     {
         // Configurations
 
-        editLayout->addWidget(new QLabel("Configurations"), 9, 0);
+        editLayout->addWidget(new QLabel("Configurations"), 10, 0);
 
         QPushButton* newConfiguration = new AddButton;
         connect(
             newConfiguration, &QPushButton::clicked,
             [this]() {
-                Configuration* config = new Configuration;
+                ConfigurationWidget* config = new ConfigurationWidget;
                 connect(
                     config->name, &QLineEdit::textChanged,
                     this, &ProgramDialog::updateSaveButton
@@ -179,7 +206,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 updateSaveButton();
             }
         );
-        editLayout->addWidget(newConfiguration, 9, 1, Qt::AlignRight);
+        editLayout->addWidget(newConfiguration, 10, 1, Qt::AlignRight);
 
         _configurations = new DynamicList;
         _configurations->setToolTip(
@@ -189,15 +216,15 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             _configurations, &DynamicList::updated,
             this, &ProgramDialog::updateSaveButton
         );
-        editLayout->addWidget(_configurations, 10, 0, 1, 2);
+        editLayout->addWidget(_configurations, 11, 0, 1, 2);
     }
 
-    editLayout->addWidget(new Spacer, 11, 0, 1, 2);
+    editLayout->addWidget(new Spacer, 12, 0, 1, 2);
 
     {
         // Clusters
 
-        editLayout->addWidget(new QLabel("Clusters"), 12, 0);
+        editLayout->addWidget(new QLabel("Clusters"), 13, 0);
 
         QPushButton* newCluster = new AddButton;
         connect(
@@ -205,13 +232,13 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             [this]() {
                 std::string name = selectCluster();
                 if (!name.empty()) {
-                    QLabel* cluster = new QLabel(QString::fromStdString(name));
+                    ClusterWidget* cluster = new ClusterWidget(name, "");
                     _clusters->addItem(cluster);
                     updateSaveButton();
                 }
             }
         );
-        editLayout->addWidget(newCluster, 12, 1, Qt::AlignRight);
+        editLayout->addWidget(newCluster, 13, 1, Qt::AlignRight);
 
         _clusters = new DynamicList;
         _clusters->setToolTip("The list of clusters on which the program can be run");
@@ -219,32 +246,32 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             _clusters, &DynamicList::updated,
             this, &ProgramDialog::updateSaveButton
         );
-        editLayout->addWidget(_clusters, 13, 0, 1, 2);
+        editLayout->addWidget(_clusters, 14, 0, 1, 2);
     }
     
-    editLayout->addWidget(new Spacer, 14, 0, 1, 2);
+    editLayout->addWidget(new Spacer, 15, 0, 1, 2);
 
     {
         // Tags
-        editLayout->addWidget(new QLabel("Tags (optional)"), 15, 0);
+        editLayout->addWidget(new QLabel("Tags (optional)"), 16, 0);
 
         QPushButton* t = new AddButton;
         connect(
             t, &QPushButton::clicked,
             [this]() {
                 QLineEdit* tag = new QLineEdit;
-        _tags->addItem(tag);
-        tag->setFocus();
-        updateSaveButton();
+                _tags->addItem(tag);
+                tag->setFocus();
+                updateSaveButton();
             }
         );
-        editLayout->addWidget(t, 15, 1, Qt::AlignRight);
+        editLayout->addWidget(t, 16, 1, Qt::AlignRight);
 
         _tags = new DynamicList;
         _tags->setToolTip("A list of all tags that this program is associated with");
         connect(_tags, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
 
-        editLayout->addWidget(_tags, 16, 0, 1, 2);
+        editLayout->addWidget(_tags, 17, 0, 1, 2);
     }
 
     layout->addWidget(edit);
@@ -283,7 +310,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             _tags->addItem(t);
         }
         for (const Program::Configuration& configuration : program.configurations) {
-            Configuration* config = new Configuration;
+            ConfigurationWidget* config = new ConfigurationWidget;
             connect(
                 config->name, &QLineEdit::textChanged,
                 this, &ProgramDialog::updateSaveButton
@@ -296,21 +323,27 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             );
             _configurations->addItem(config);
         }
-        for (const std::string& cluster : program.clusters) {
-            QLabel* clusterLabel = new QLabel(QString::fromStdString(cluster));
-            _clusters->addItem(clusterLabel);
+        for (const Program::Cluster& cluster : program.clusters) {
+            ClusterWidget* c = new ClusterWidget(cluster.name, cluster.parameters);
+            _clusters->addItem(c);
 
-            const auto it = std::find(clusters.cbegin(), clusters.cend(), cluster);
+            const auto it = std::find_if(
+                clusters.cbegin(),
+                clusters.cend(),
+                [cluster](const Cluster& c) {
+                    return c.name == cluster.name;
+                }
+            );
             if (it == clusters.end()) {
-                clusterLabel->setObjectName("invalid");
-                clusterLabel->setToolTip("Could not find cluster in clusters folder");
+                c->setObjectName("invalid");
+                c->setToolTip("Could not find cluster in clusters folder");
             }
         }
     }
     else {
         // If it doesn't exist, we want to create at least a default configuration to
         // minimize the effort the user has to put in to create a basic configuration
-        Configuration* config = new Configuration;
+        ConfigurationWidget* config = new ConfigurationWidget;
         config->name->setText("default");
         connect(
             config->name, &QLineEdit::textChanged,
@@ -344,15 +377,18 @@ void ProgramDialog::save() {
     for (QLineEdit* tag : _tags->items<QLineEdit>()) {
         program.tags.push_back(tag->text().toStdString());
     }
-    for (Configuration* configuration : _configurations->items<Configuration>()) {
+    for (ConfigurationWidget* conf : _configurations->items<ConfigurationWidget>()) {
         Program::Configuration c;
-        c.name = configuration->name->text().toStdString();
-        c.parameters = configuration->parameters->text().toStdString();
-        c.description = configuration->description->text().toStdString();
+        c.name = conf->name->text().toStdString();
+        c.parameters = conf->parameters->text().toStdString();
+        c.description = conf->description->text().toStdString();
         program.configurations.push_back(c);
     }
-    for (QLabel* cluster : _clusters->items<QLabel>()) {
-        program.clusters.push_back(cluster->text().toStdString());
+    for (ClusterWidget* cluster : _clusters->items<ClusterWidget>()) {
+        Program::Cluster c;
+        c.name = cluster->label->text().toStdString();
+        c.parameters = cluster->arguments->text().toStdString();
+        program.clusters.push_back(c);
     }
 
     common::saveToJson(_programPath, program);
@@ -367,12 +403,16 @@ bool operator==(QLabel* name, const Cluster& cluster) {
 std::string ProgramDialog::selectCluster() {
     std::vector<Cluster> clusters = common::loadJsonFromDirectory<Cluster>(_clusterPath);
 
-    std::vector<QLabel*> currClusters = _clusters->items<QLabel>();
+    std::vector<ClusterWidget*> currClusters = _clusters->items<ClusterWidget>();
         clusters.erase(
         std::remove_if(
             clusters.begin(), clusters.end(),
             [&currClusters](const Cluster& c) {
-                const auto it = std::find(currClusters.cbegin(), currClusters.cend(), c);
+                const auto it = std::find_if(
+                    currClusters.cbegin(),
+                    currClusters.cend(),
+                    [c](ClusterWidget* cw) { return cw->label == c; }
+                );
                 return it != currClusters.cend();
             }
         ),
@@ -407,14 +447,14 @@ std::string ProgramDialog::selectCluster() {
 }
 
 void ProgramDialog::updateSaveButton() {
-    std::vector<Configuration*> configurations = _configurations->items<Configuration>();
+    std::vector<ConfigurationWidget*> configurations = _configurations->items<ConfigurationWidget>();
     const bool confHasName = std::all_of(
         configurations.cbegin(), configurations.cend(),
-        [](Configuration* config) { return !config->name->text().isEmpty(); }
+        [](ConfigurationWidget* config) { return !config->name->text().isEmpty(); }
     );
 
     _saveButton->setEnabled(
         !_name->text().isEmpty() && !_executable->text().isEmpty() &&
-        !_clusters->items<QLabel>().empty() && confHasName
+        !_clusters->items<ClusterWidget>().empty() && confHasName
     );
 }

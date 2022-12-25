@@ -1,8 +1,8 @@
 {
-  "name": "Application name",
-  "executable": "executable name",
+  "name": "Test name",
+  "executable": "test.exe",
   "commandlineParameters": "--",
-  "workingDirectory": "working directory",
+  "workingDirectory": "test working directory",
   "tags": [
     "test2"
   ],
@@ -17,7 +17,7 @@
     }
   ],
   "clusters": [
-    "Local",
-    "Mega Cluster"
+    { "name": "Local" },
+    { "name": "Mega Cluster" }
   ]
 }

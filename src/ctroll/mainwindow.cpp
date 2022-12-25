@@ -533,14 +533,9 @@ void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
     assert(p);
     for (const std::string& nodeName : cluster->nodes) {
         const Node* node = data::findNode(nodeName);
-        auto process = std::make_unique<Process>(
-            programId,
-            configId,
-            clusterId,
-            node->id
-        );
-        Process::ID id = process->id;
-        data::addProcess(std::move(process));
+        auto proc = std::make_unique<Process>(programId, configId, clusterId, node->id);
+        Process::ID id = proc->id;
+        data::addProcess(std::move(proc));
 
         startProcess(id);
         _processesWidget->processAdded(id);
