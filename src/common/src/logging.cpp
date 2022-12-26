@@ -160,4 +160,8 @@ bool Log::shouldLogDebugMessage() const {
     return _shouldLogDebug;
 }
 
+void Log::setLoggingFunction(std::function<void(std::string)> loggingFunction) {
+    _loggingFunction = std::move(loggingFunction);
+}
+
 } // namespace common

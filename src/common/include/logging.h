@@ -89,7 +89,8 @@ public:
      *        logged
      */
     static void initialize(std::string application, bool createLogFile,
-        bool shouldLogDebug, std::function<void(std::string)> loggingFunction);
+        bool shouldLogDebug,
+        std::function<void(std::string)> loggingFunction = [](std::string) {});
 
     /**
      * Returns the static reference to the Log instance.
@@ -130,6 +131,11 @@ public:
      * Returns \c true if debug messages should be logged
      */
     bool shouldLogDebugMessage() const;
+
+    /**
+     * Sets a logging function that will get called whenever a message should be logged.
+     */
+    void setLoggingFunction(std::function<void(std::string)> loggingFunction);
 
 private:
     /**

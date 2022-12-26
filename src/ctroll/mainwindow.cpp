@@ -35,6 +35,7 @@
 #include "mainwindow.h"
 
 #include "clusterwidget.h"
+#include "configuration.h"
 #include "database.h"
 #include "jsonload.h"
 #include "messages.h"
@@ -56,8 +57,9 @@
 #include <string_view>
 #include <thread>
 
-MainWindow::MainWindow(bool shouldLogDebug, std::vector<std::string> defaultTags)
+MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration config)
     : _trayIcon(QIcon(":/images/C_transparent.png"), this)
+    , _config(std::move(config))
 {
     setWindowTitle("C-Troll");
 
@@ -109,33 +111,9 @@ MainWindow::MainWindow(bool shouldLogDebug, std::vector<std::string> defaultTags
     tabWidget->setTabPosition(QTabWidget::West);
     layout->addWidget(tabWidget);
 
-    //
-    // Load the configuration
-    if (!std::filesystem::exists(BaseConfiguration::ConfigurationFile)) {
-        std::cout << fmt::format(
-            "Creating new configuration at '{}'\n",
-            BaseConfiguration::ConfigurationFile
-        );
-
-        nlohmann::json obj = Configuration();
-        std::ofstream file = std::ofstream(BaseConfiguration::ConfigurationFile);
-        file << obj.dump(2);
-    }
-    std::cout << fmt::format(
-        "Loading configuration '{}'\n", BaseConfiguration::ConfigurationFile
-    );
-
-    _config = common::loadFromJson<Configuration>(
-        BaseConfiguration::ConfigurationFile,
-        validation::loadValidator(":/schema/application/ctroll.schema.json")
-    );
-    common::Log::initialize(
-        "ctroll",
-        _config.logFile,
-        shouldLogDebug,
+    common::Log::ref()->setLoggingFunction(
         [this](std::string msg) { log(std::move(msg)); }
     );
-
 
     //
     // Load the data
@@ -287,10 +265,7 @@ MainWindow::MainWindow(bool shouldLogDebug, std::vector<std::string> defaultTags
     tabWidget->addTab(_clustersWidget, "Clusters");
     tabWidget->addTab(_processesWidget, "Processes");
     tabWidget->addTab(&_logWidget, "Log");
-    tabWidget->addTab(
-        new SettingsWidget(_config, BaseConfiguration::ConfigurationFile),
-        "Settings"
-    );
+    tabWidget->addTab(new SettingsWidget(_config, "config.json"), "Settings");
 
     _clusterConnectionHandler.initialize();
 

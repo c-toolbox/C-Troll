@@ -33,6 +33,8 @@
  ****************************************************************************************/
 
 #include "commandlineparsing.h"
+#include "configuration.h"
+#include "jsonload.h"
 #include "logging.h"
 #include "mainwindow.h"
 #include "version.h"
@@ -172,8 +174,29 @@ int main(int argc, char** argv) {
         app.setStyleSheet(styleSheet);
     }
 
+    //
+    // Load the configuration
+    if (!std::filesystem::exists("config.json")) {
+        std::cout << "Creating new configuration at 'config.json'\n";
+
+        nlohmann::json obj = Configuration();
+        std::ofstream file = std::ofstream("config.json");
+        file << obj.dump(2);
+    }
+    std::cout << "Loading configuration 'config.json'\n";
+
+    Configuration config = common::loadFromJson<Configuration>(
+        "config.json",
+        validation::loadValidator(":/schema/application/ctroll.schema.json")
+    );
+    common::Log::initialize(
+        "ctroll",
+        config.logFile,
+        logDebug
+    );
+
     try {
-        MainWindow mw = MainWindow(logDebug, defaultTags);
+        MainWindow mw = MainWindow(defaultTags, config);
         if (pos.has_value()) {
             mw.move(pos->first, pos->second);
         }

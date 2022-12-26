@@ -40,8 +40,6 @@ namespace {
     constexpr std::string_view KeyNodePath = "nodePath";
 } // namespace
 
-std::string BaseConfiguration::ConfigurationFile = "config.json";
-
 void to_json(nlohmann::json& j, const BaseConfiguration& c) {
     j[KeyApplicationPath] = c.applicationPath;
     j[KeyClusterPath] = c.clusterPath;

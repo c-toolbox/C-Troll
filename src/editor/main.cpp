@@ -71,10 +71,10 @@ int main(int argc, char** argv) {
     }
 
     BaseConfiguration config;
-    if (std::filesystem::exists(BaseConfiguration::ConfigurationFile)) {
+    if (std::filesystem::exists("config.json")) {
         try {
             config = common::loadFromJson<BaseConfiguration>(
-                BaseConfiguration::ConfigurationFile,
+                "config.json",
                 validation::loadValidator(":/schema/application/editor.schema.json")
             );
         }
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
         QAbstractButton* clicked = box.clickedButton();
 
         if (clicked == create) {
-            common::saveToJson(BaseConfiguration::ConfigurationFile, config);
+            common::saveToJson("config.json", config);
             std::filesystem::create_directory(config.applicationPath);
             std::filesystem::create_directory(config.clusterPath);
             std::filesystem::create_directory(config.nodePath);
