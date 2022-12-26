@@ -134,6 +134,21 @@ std::pair<std::vector<T>, bool> loadJsonFromDirectory(std::string_view directory
     return { res, loadingSucceeded };
 }
 
+template <typename Conf>
+Conf loadConfiguration(std::string config, std::string schema) {
+    if (!std::filesystem::exists(config)) {
+        ::Log("Loading", fmt::format("Creating new configuration at {}", config));
+
+        nlohmann::json obj = Conf();
+        std::ofstream file = std::ofstream(config);
+        file << obj.dump(2);
+    }
+    ::Log("Loading", fmt::format("Loading configuration {}", config));
+
+    Conf conf = common::loadFromJson<Conf>(config, validation::loadValidator(schema));
+    return conf;
+}
+
 } // namespace common
 
 #endif // __COMMON__JSONLOAD_H__

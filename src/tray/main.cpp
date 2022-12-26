@@ -98,11 +98,7 @@ int main(int argc, char** argv) {
     const bool logDebug = common::parseDebugCommandlineArgument(args);
     std::optional<std::pair<int, int>> pos = common::parseLocationArgument(args);
 
-    qInstallMessageHandler(
-        [](QtMsgType, const QMessageLogContext&, const QString& msg) {
-            Log("Qt", msg.toLocal8Bit().constData());
-        }
-    );
+    qInstallMessageHandler(QtLogFunction);
 
     {
         QFile file(":/qss/tray.qss");
@@ -117,29 +113,22 @@ int main(int argc, char** argv) {
         mw.move(pos->first, pos->second);
     }
 
-    std::string_view configurationFile = "config-tray.json";
-    std::string absPath = std::filesystem::absolute(configurationFile).string();
-    if (!std::filesystem::exists(configurationFile)) {
-        std::cout << fmt::format("Creating new configuration at '{}'", absPath) << '\n';
-
-        nlohmann::json obj = Configuration();
-        std::ofstream file(absPath);
-        file << obj.dump(2);
-    }
-
-    std::cout << fmt::format("Loading configuration file from '{}'", absPath) << '\n';
-
-    Configuration config;
+    Configuration config; 
     try {
-        config = common::loadFromJson<Configuration>(
-            absPath,
-            validation::loadValidator(":/schema/application/tray.schema.json")
+        config = common::loadConfiguration<Configuration>(
+            "config-tray.json",
+            ":/schema/application/tray.schema.json"
         );
     }
-    catch (const std::exception& e) {
-        QMessageBox::critical(nullptr, "Exception", e.what());
+    catch (const std::runtime_error& err) {
+        QMessageBox::critical(
+            nullptr,
+            "Configuration error",
+            QString::fromStdString(err.what())
+        );
         exit(EXIT_FAILURE);
     }
+
     common::Log::initialize(
         "tray",
         config.logFile,

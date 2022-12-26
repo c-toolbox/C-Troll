@@ -52,11 +52,7 @@ int main(int argc, char** argv) {
     const bool logDebug = common::parseDebugCommandlineArgument(args);
     std::optional<std::pair<int, int>> pos = common::parseLocationArgument(args);
 
-    qInstallMessageHandler(
-        [](QtMsgType, const QMessageLogContext&, const QString& msg) {
-            Log("Qt", msg.toLocal8Bit().constData());
-        }
-    );
+    qInstallMessageHandler(QtLogFunction);
 
     common::Log::initialize("editor", false, logDebug, [](const std::string&) {});
 
@@ -71,67 +67,21 @@ int main(int argc, char** argv) {
     }
 
     BaseConfiguration config;
-    if (std::filesystem::exists("config.json")) {
-        try {
-            config = common::loadFromJson<BaseConfiguration>(
-                "config.json",
-                validation::loadValidator(":/schema/application/editor.schema.json")
-            );
-        }
-        catch (const std::exception& e) {
-            QMessageBox::critical(nullptr, "Exception", e.what());
-            exit(EXIT_FAILURE);
-        }
-    }
-    else {
-        QMessageBox box;
-        box.setText("Configuration File");
-        box.setInformativeText(
-            "Could not detect 'config.json' file. Either select the location of an "
-            "existing configuration file, or create a new one"
+    try {
+        config = common::loadConfiguration<BaseConfiguration>(
+            "config.json",
+            ":/schema/application/editor.schema.json"
         );
-        QPushButton* create = box.addButton("Create", QMessageBox::ButtonRole::YesRole);
-        QPushButton* search = box.addButton("Search", QMessageBox::ButtonRole::NoRole);
-        QPushButton* cancel = box.addButton("Cancel", QMessageBox::ButtonRole::ResetRole);
-        box.setDefaultButton(create);
-        box.exec();
-        QAbstractButton* clicked = box.clickedButton();
-
-        if (clicked == create) {
-            common::saveToJson("config.json", config);
-            std::filesystem::create_directory(config.applicationPath);
-            std::filesystem::create_directory(config.clusterPath);
-            std::filesystem::create_directory(config.nodePath);
-        }
-        else if (clicked == search) {
-            try {
-                QString s = QFileDialog::getOpenFileName(nullptr, "Select config file");
-                if (s.isEmpty()) {
-                    Q_CLEANUP_RESOURCE(resources);
-                    return EXIT_SUCCESS;
-                }
-                QDir::setCurrent(QFileInfo(s).absoluteDir().path());
-                config = common::loadFromJson<BaseConfiguration>(s.toStdString());
-            }
-            catch (const std::exception& e) {
-                QMessageBox::critical(nullptr, "Exception", e.what());
-                Q_CLEANUP_RESOURCE(resources);
-                return EXIT_FAILURE;
-            }
-            catch (...) {
-                QMessageBox::critical(nullptr, "Exception", "Unknown error");
-                Q_CLEANUP_RESOURCE(resources);
-                return EXIT_FAILURE;
-            }
-        }
-        else if (clicked == cancel) {
-            Q_CLEANUP_RESOURCE(resources);
-            return EXIT_SUCCESS;
-        }
-        else {
-            throw std::logic_error("Unknown if/else statement case");
-        }
     }
+    catch (const std::runtime_error& err) {
+        QMessageBox::critical(
+            nullptr,
+            "Configuration error",
+            QString::fromStdString(err.what())
+        );
+        exit(EXIT_FAILURE);
+    }
+
     if (!std::filesystem::exists(config.applicationPath)) {
         QMessageBox::critical(
             nullptr,

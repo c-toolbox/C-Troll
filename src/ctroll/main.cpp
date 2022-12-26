@@ -48,6 +48,14 @@
 #include <chrono>
 
 namespace {
+    struct SharedMemoryMarker {
+        short majorVersion = -1;
+        short minorVersion = -1;
+        short patchVersion = -1;
+        std::byte showWindowMarker = std::byte(0);
+        std::byte unused[25] = {};
+    };
+
     std::vector<std::string> tokenizeString(const std::string& input, char separator) {
         size_t separatorPos = input.find(separator);
         if (separatorPos == std::string::npos) {
@@ -65,15 +73,29 @@ namespace {
             return res;
         }
     }
-} // namespace
 
-struct SharedMemoryMarker {
-    short majorVersion = -1;
-    short minorVersion = -1;
-    short patchVersion = -1;
-    std::byte showWindowMarker = std::byte(0);
-    std::byte unused[25] = {};
-};
+    std::vector<std::string> parseTagsArgument(const std::vector<std::string>& args) {
+        auto it = std::find(args.begin(), args.end(), "--tags");
+        if (it != args.end()) {
+            // The rest of the commandline argument is a comma-separated list of tags
+            std::string allTags = std::accumulate(
+                it + 1,
+                args.end(),
+                std::string(),
+                [](std::string lhs, std::string rhs) {
+                    return std::move(lhs) + " " + std::move(rhs);
+                }
+            );
+            // We have an empty character at the beginning we need to remove
+            allTags = allTags.substr(1);
+
+            return tokenizeString(allTags, ',');
+        }
+        else {
+            return std::vector<std::string>();
+        }
+    }
+} // namespace
 
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
@@ -81,6 +103,8 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 
+    //
+    // Handle shared memory
     QSharedMemory mem("/C-Troll/Single-Instance-Marker");
     bool ret = mem.create(sizeof(SharedMemoryMarker));
     if (!ret) {
@@ -91,7 +115,7 @@ int main(int argc, char** argv) {
             // signal to it to come to the front instead
             mem.attach();
             mem.lock();
-            SharedMemoryMarker* data = reinterpret_cast<SharedMemoryMarker*>(mem.data());
+            auto data = reinterpret_cast<SharedMemoryMarker*>(mem.data());
             if (data->majorVersion != application::MajorVersion) {
                 QMessageBox::critical(
                     nullptr,
@@ -120,7 +144,8 @@ int main(int argc, char** argv) {
                 nullptr,
                 "Memory error",
                 QString::fromStdString(fmt::format(
-                    "Error creating shared memory: {}", mem.errorString().toStdString()
+                    "Error creating shared memory: {}",
+                    mem.errorString().toStdString()
                 ))
             );
         }
@@ -136,36 +161,12 @@ int main(int argc, char** argv) {
         mem.unlock();
     }
 
-
     std::vector<std::string> args = { argv, argv + argc };
     const bool logDebug = common::parseDebugCommandlineArgument(args);
     std::optional<std::pair<int, int>> pos = common::parseLocationArgument(args);
+    std::vector<std::string> defaultTags = parseTagsArgument(args);
 
-    std::vector<std::string> defaultTags;
-    {
-        auto it = std::find(args.begin(), args.end(), "--tags");
-        if (it != args.end()) {
-            // The rest of the commandline argument is a comma-separated list of tags
-            std::string allTags = std::accumulate(
-                it + 1,
-                args.end(),
-                std::string(),
-                [](std::string lhs, std::string rhs) {
-                    return std::move(lhs) + " " + std::move(rhs);
-                }
-            );
-            // We have an empty character at the beginning we need to remove
-            allTags = allTags.substr(1);
-
-            defaultTags = tokenizeString(allTags, ',');
-        }
-    }
-
-    qInstallMessageHandler(
-        [](QtMsgType, const QMessageLogContext&, const QString& msg) {
-            Log("Qt", msg.toLocal8Bit().constData());
-        }
-    );
+    qInstallMessageHandler(QtLogFunction);
 
     {
         QFile file(":/qss/c-troll.qss");
@@ -174,26 +175,24 @@ int main(int argc, char** argv) {
         app.setStyleSheet(styleSheet);
     }
 
-    //
-    // Load the configuration
-    if (!std::filesystem::exists("config.json")) {
-        std::cout << "Creating new configuration at 'config.json'\n";
-
-        nlohmann::json obj = Configuration();
-        std::ofstream file = std::ofstream("config.json");
-        file << obj.dump(2);
+    Configuration config;
+    try {
+        config = common::loadConfiguration<Configuration>(
+            "config.json",
+            ":/schema/application/ctroll.schema.json"
+            );
     }
-    std::cout << "Loading configuration 'config.json'\n";
+    catch (const std::runtime_error& err) {
+        QMessageBox::critical(
+            nullptr,
+            "Configuration error",
+            QString::fromStdString(err.what())
+        );
+        exit(EXIT_FAILURE);
+    }
 
-    Configuration config = common::loadFromJson<Configuration>(
-        "config.json",
-        validation::loadValidator(":/schema/application/ctroll.schema.json")
-    );
-    common::Log::initialize(
-        "ctroll",
-        config.logFile,
-        logDebug
-    );
+    common::Log::initialize("ctroll", config.logFile, logDebug);
+
 
     try {
         MainWindow mw = MainWindow(defaultTags, config);

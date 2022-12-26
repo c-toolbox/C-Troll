@@ -35,6 +35,7 @@
 #ifndef __COMMON__LOGGING_H__
 #define __COMMON__LOGGING_H__
 
+#include <QString>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -63,6 +64,13 @@ void Log(std::string category, std::string message);
  *        function
  */
 void Debug(std::string category, std::string message);
+
+/**
+ * A logging function suitable to be passed to the qInstallMessageHandler to redirect Qt
+ * log messages to our built-in functionality. See the Qt documentation for explanations
+ * of the parameters
+ */
+void QtLogFunction(QtMsgType, const QMessageLogContext&, const QString& msg);
 
 namespace common {
 
@@ -169,6 +177,10 @@ private:
 };
 
 } // namespace common
+
+inline void QtLogFunction(QtMsgType, const QMessageLogContext&, const QString& msg) {
+    Log("Qt", msg.toLocal8Bit().constData());
+}
 
 inline void Log(std::string category, std::string message) {
     common::Log::logMessage(std::move(category), std::move(message));
