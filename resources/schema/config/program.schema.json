@@ -22,14 +22,12 @@
     "commandlineParameters": {
       "type": "string",
       "title": "Commandline Parameters",
-      "description": "General commandline parameters that are added to the execution regardless of the configuration or the cluster that is selected",
-      "minLength": 1
+      "description": "General commandline parameters that are added to the execution regardless of the configuration or the cluster that is selected"
     },
     "workingDirectory": {
       "type": "string",
       "title": "Working Directory",
-      "description": "The working directory from which the executable will be started. If this value is not provided the working directory is the location of the executable",
-      "minLength": 1
+      "description": "The working directory from which the executable will be started. If this value is not provided or it is the empty string, the working directory is the location of the executable"
     },
     "clusters": {
       "type": "array",
@@ -49,8 +47,7 @@
           "parameters": {
             "type": "string",
             "title": "Parameters",
-            "description": "Additional commandline arguments that are only added when starting the program on this cluster",
-            "minLength": 1
+            "description": "Additional commandline arguments that are only added when starting the program on this cluster"
           }
         },
         "required": [ "name" ]
@@ -108,14 +105,12 @@
           "parameters": {
             "type": "string",
             "title": "Parameters",
-            "description": "Additional commandline parameters that are only added when this configuration is chosen",
-            "minLength": 1
+            "description": "Additional commandline parameters that are only added when this configuration is chosen"
           },
           "description": {
             "type": "string",
             "title": "Description",
-            "description": "A human-readable description of the configuration. This information is not used directly, but presented to the user instead",
-            "minLength": 1
+            "description": "A human-readable description of the configuration. This information is not used directly, but presented to the user instead"
           }
         },
         "required": [ "name" ]

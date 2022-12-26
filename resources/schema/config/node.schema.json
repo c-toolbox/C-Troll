@@ -29,8 +29,7 @@
     "secret": {
       "type": "string",
       "title": "Secret",
-      "description": "A secret message that is sent with all connections to the configured node. If the Tray has been configured to require a secret, this must be the same as the secret in the Tray's configuration",
-      "minLength": 1
+      "description": "A secret message that is sent with all connections to the configured node. If the Tray has been configured to require a secret, this must be the same as the secret in the Tray's configuration. An empty secret is the same as if this key had not been provided at all."
     },
     "description": {
       "type": "string",

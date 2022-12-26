@@ -17,8 +17,7 @@
     "secret": {
       "type": "string",
       "title": "Secret",
-      "description": "A secret message that C-Troll has to end along with every message to ensure that only authorized C-Troll applications are allowed to talk to this Tray",
-      "minLength": 1
+      "description": "A secret message that C-Troll has to end along with every message to ensure that only authorized C-Troll applications are allowed to talk to this Tray. Providing an empty string is the same as not providing this key."
     },
     "showWindow": {
       "type": "boolean",

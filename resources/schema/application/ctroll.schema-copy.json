@@ -13,14 +13,12 @@
         "username": {
           "type": "string",
           "title": "Username",
-          "description": "The username that should be provided when making a REST request. If this value and the 'password' are not provided, anyone can use the API",
-          "minLength": 1
+          "description": "The username that should be provided when making a REST request. If this value and the 'password' are not provided, anyone can use the API. Providing an empty string is the same as not providing this key."
         },
         "password": {
           "type": "string",
           "title": "Password",
-          "description": "The password that should be provided when making a REST request. If this value and the 'username' are not provided, anyone can use the API",
-          "minLength": 1
+          "description": "The password that should be provided when making a REST request. If this value and the 'username' are not provided, anyone can use the API. Providing an empty string is the same as not providing this key."
         },
         "port": {
           "type": "integer",
