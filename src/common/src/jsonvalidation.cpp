@@ -32,94 +32,41 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "node.h"
+#include "jsonvalidation.h"
 
-#include "jsonload.h"
-#include "logging.h"
-#include <fmt/format.h>
-#include <assert.h>
-#include <filesystem>
-#include <set>
-#include <string_view>
+#include <nlohmann/json-schema.hpp>
+#include <QFile>
 
 namespace {
-    constexpr std::string_view KeyName = "name";
-    constexpr std::string_view KeyIpAddress = "ip";
-    constexpr std::string_view KeyPort = "port";
-    constexpr std::string_view KeySecret = "secret";
-    constexpr std::string_view KeyDescription = "description";
+    //nlohmann::json_schema::json_validator ApplicationCTroll
 } // namespace
 
-void from_json(const nlohmann::json& j, Node& n) {
-    j.at(KeyName).get_to(n.name);
-    j.at(KeyIpAddress).get_to(n.ipAddress);
-    j.at(KeyPort).get_to(n.port);
-    if (j.find(KeySecret) != j.end()) {
-        j[KeySecret].get_to(n.secret);
+namespace validation {
+
+void ErrorHandler::error(const nlohmann::json::json_pointer& ptr,
+                         const nlohmann::json& instance, const std::string& msg)
+{
+    nlohmann::json_schema::basic_error_handler::error(ptr, instance, msg);
+    path = ptr.to_string();
+    if (path.empty()) {
+        path = "/";
     }
-    if (j.find(KeyDescription) != j.end()) {
-        j[KeyDescription].get_to(n.description);
-    }
+    message = msg;
 }
 
-void to_json(nlohmann::json& j, const Node& n) {
-    j[KeyName] = n.name;
-    j[KeyIpAddress] = n.ipAddress;
-    j[KeyPort] = n.port;
-    j[KeySecret] = n.secret;
-    j[KeyDescription] = n.description;
+JsonError::JsonError(ErrorHandler handler)
+    : std::runtime_error(fmt::format("Error at {}: {}", handler.path, handler.message))
+    , path(std::move(handler.path))
+    , message(std::move(handler.message))
+{}
+
+nlohmann::json_schema::json_validator loadValidator(std::string path) {
+    QFile file = QFile(QString::fromStdString(path));
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    QByteArray ba = file.readAll();
+    std::string content = std::string(ba.constData(), ba.length());
+    nlohmann::json schema = nlohmann::json::parse(content);
+    return nlohmann::json_schema::json_validator(schema);
 }
 
-std::pair<std::vector<Node>, bool> loadNodesFromDirectory(std::string_view directory) {
-    std::pair<std::vector<Node>, bool> res = common::loadJsonFromDirectory<Node>(
-        directory,
-        validation::loadValidator(":/schema/config/node.schema.json")
-    );
-
-    std::vector<Node> nodes = res.first;
-
-    // Check for duplicates
-    std::sort(
-        nodes.begin(), nodes.end(),
-        [](const Node& lhs, const Node& rhs) { return lhs.name < rhs.name; }
-    );
-    const auto it = std::adjacent_find(
-        nodes.begin(), nodes.end(),
-        [](const Node& lhs, const Node& rhs) { return lhs.name == rhs.name; }
-    );
-    if (it != nodes.end()) {
-        throw std::runtime_error(fmt::format("Duplicate node name '{}' found", it->name));
-    }
-
-    for (const Node& node : nodes) {
-        std::string text = fmt::format(
-            "(id: {}, name : \"{}\", ipAddress: \"{}\", port: {}, description: {}, "
-            "isConnected: {} )",
-            node.id.v, node.name, node.ipAddress, node.port, node.description,
-            node.isConnected
-        );
-
-        if (node.name.empty()) {
-            throw std::runtime_error(fmt::format("Found node without a name: {}", text));
-        }
-        if (node.ipAddress.empty()) {
-            throw std::runtime_error(
-                fmt::format("Found node without an IP address: {}", text)
-            );
-        }
-
-        if (node.port <= 0 || node.port >= 65536) {
-            throw std::runtime_error(
-                fmt::format("Found node with invalid port: {}", text)
-            );
-        }
-    }
-
-    // Inject the unique identifiers into the nodes
-    int id = 0;
-    for (Node& node : nodes) {
-        node.id = id;
-        id++;
-    }
-    return { nodes, res.second };
-}
+} // namespace validation

@@ -73,9 +73,16 @@ int main(int argc, char** argv) {
 
     BaseConfiguration config;
     if (std::filesystem::exists(BaseConfiguration::ConfigurationFile)) {
-        config = common::loadFromJson<BaseConfiguration>(
-            BaseConfiguration::ConfigurationFile
-        );
+        try {
+            config = common::loadFromJson<BaseConfiguration>(
+                BaseConfiguration::ConfigurationFile,
+                validation::loadValidator(":/schema/application/editor.schema.json")
+            );
+        }
+        catch (const std::exception& e) {
+            QMessageBox::critical(nullptr, "Exception", e.what());
+            exit(EXIT_FAILURE);
+        }
     }
     else {
         QMessageBox box;

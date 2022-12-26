@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+
+  "$id": "https://github.com/c-toolbox/C-Troll/resources/schema/config/cluster.schema.json",
+  "title": "Cluster configuration file",
+  "description": "A schema file that describes a cluster that is the recipient of application startup commands.",
+
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Cluster name",
+      "description": "The name of the cluster that this configuration adds. A name must be unique among all of the cluster configurations that are loaded",
+      "minLength": 1
+    },
+    "enabled": {
+      "type": "boolean",
+      "title": "Is Enabled",
+      "description": "This signals to C-Troll whether the cluster configured is currently active or not. It is not possible to send any commands to a disable cluster and they will not show up in the list, behaving the same as if this configuration file does not exist."
+    },
+    "nodes": {
+      "type": "array",
+      "title": "Nodes",
+      "description": "The list of node names that belong to this cluster",
+      "items": {
+        "type": "string",
+        "title": "Node",
+        "description": "A node defined in the node configuration files",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "description": {
+      "type": "string",
+      "title": "Description",
+      "description": "A human-readable description of the cluster. This information is not used directly, but presented to the user instead"
+    }
+  },
+  "required": [ "name", "nodes" ]
+}

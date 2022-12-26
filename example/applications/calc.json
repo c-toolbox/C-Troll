@@ -5,9 +5,7 @@
   ],
   "configurations": [
     {
-      "description": "",
-      "name": "Default",
-      "parameters": ""
+      "name": "Default"
     }
   ],
   "enabled": true,

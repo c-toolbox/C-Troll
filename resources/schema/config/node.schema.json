@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+
+  "$id": "https://github.com/c-toolbox/C-Troll/resources/schema/config/node.schema.json",
+  "title": "Node configuration file",
+  "description": "A schema file that describes an individual node that is part of a cluster.",
+
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Node name",
+      "description": "The name of the node that this configuration adds. A name must be unique among all of the node configurations that are loaded",
+      "minLength": 1
+    },
+    "ip": {
+      "type": "string",
+      "title": "IP or Hostname",
+      "description": "The IP or the hostname at which the C-Troll application can reach the Tray configured through this configuration file",
+      "minLength": 1
+    },
+    "port": {
+      "type": "integer",
+      "title": "Port",
+      "description": "The port on which the Tray at the provided IP/hostname is listening for connections",
+      "exclusiveMinimum": 0,
+      "exclusiveMaximum": 65536
+    },
+    "secret": {
+      "type": "string",
+      "title": "Secret",
+      "description": "A secret message that is sent with all connections to the configured node. If the Tray has been configured to require a secret, this must be the same as the secret in the Tray's configuration",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "title": "Description",
+      "description": "A human-readable description of the node. This information is not used directly, but presented to the user instead"
+    }
+  },
+  "required": [ "name", "ip", "port" ]
+}

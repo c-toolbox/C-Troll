@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+
+  "$id": "https://github.com/c-toolbox/C-Troll/resources/schema/application/editor.schema.json",
+  "title": "Editor configuration file",
+  "description": "A schema file that describes the config.json used for initializing the Editor application.",
+
+  "type": "object",
+  "properties": {
+    "applicationPath": {
+      "type": "string",
+      "title": "Applications folder",
+      "description": "The path to the folder where the application JSON files are located"
+    },
+    "clusterPath": {
+      "type": "string",
+      "title": "Clusters folder",
+      "description": "The path to the folder where the cluster JSON files are located"
+    },
+    "nodePath": {
+      "type": "string",
+      "title": "Nodes folder",
+      "description": "The path to the folder where the node JSON files are located"
+    }
+  },
+  "required": [ "applicationPath", "clusterPath", "nodePath" ]
+}

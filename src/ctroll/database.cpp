@@ -34,6 +34,7 @@
 
 #include "database.h"
 
+#include <jsonvalidation.h>
 #include <QObject>
 #include <fmt/format.h>
 #include <random>
@@ -322,21 +323,42 @@ void setTagColors(std::vector<Color> colors) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-void loadData(std::string_view programPath, std::string_view clusterPath,
+bool loadData(std::string_view programPath, std::string_view clusterPath,
               std::string_view nodePath)
 {
+    bool loadingSucceeded = true;
+
     //
     //  Nodes
     //
     gNodes.clear();
-    std::vector<Node> nodes = loadNodesFromDirectory(nodePath);
+    
+    std::vector<Node> nodes;
+    try {
+        std::pair<std::vector<Node>, bool> res = loadNodesFromDirectory(nodePath);
+        nodes = res.first;
+        loadingSucceeded &= res.second;
+    }
+    catch (const std::runtime_error&) {
+        loadingSucceeded = false;
+    }
     for (Node& node : nodes) {
         std::unique_ptr<Node> n = std::make_unique<Node>(std::move(node));
         gNodes.push_back(std::move(n));
     }
 
     gClusters.clear();
-    std::vector<Cluster> clusters = loadClustersFromDirectory(clusterPath);
+    std::vector<Cluster> clusters;
+    try {
+        std::pair<std::vector<Cluster>, bool> res = loadClustersFromDirectory(
+            clusterPath
+        );
+        clusters = res.first;
+        loadingSucceeded &= res.second;
+    }
+    catch (const std::runtime_error&) {
+        loadingSucceeded = false;
+    }
 
     //
     //  Clusters
@@ -386,8 +408,17 @@ void loadData(std::string_view programPath, std::string_view clusterPath,
     //  Programs
     //
     gPrograms.clear();
-    std::vector<Program> programs = loadProgramsFromDirectory(programPath);
-
+    std::vector<Program> programs;
+    try {
+        std::pair<std::vector<Program>, bool> res = loadProgramsFromDirectory(
+            programPath
+        );
+        programs = res.first;
+        loadingSucceeded &= res.second;
+    }
+    catch (const std::runtime_error&) {
+        loadingSucceeded = false;
+    }
 
     for (Program& program : programs) {
         if (program.name.empty()) {
@@ -490,6 +521,8 @@ void loadData(std::string_view programPath, std::string_view clusterPath,
     }
 
     gDataHash = hash;
+
+    return loadingSucceeded;
 }
 
 std::size_t dataHash() {

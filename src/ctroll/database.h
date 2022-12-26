@@ -83,7 +83,7 @@ void setProcessStatus(Process::ID id, common::ProcessStatusMessage::Status statu
 Color colorForTag(std::string_view tag);
 void setTagColors(std::vector<Color> colors);
 
-void loadData(std::string_view programPath, std::string_view clusterPath,
+[[nodiscard]] bool loadData(std::string_view programPath, std::string_view clusterPath,
     std::string_view nodePath);
 
 std::size_t dataHash();

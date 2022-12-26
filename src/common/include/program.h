@@ -96,11 +96,12 @@ struct Program {
     std::vector<Cluster> clusters;
 };
 
-std::vector<Program> loadProgramsFromDirectory(std::string_view directory);
+std::pair<std::vector<Program>, bool> loadProgramsFromDirectory(
+    std::string_view directory);
 
 void from_json(const nlohmann::json& j, Program& p);
 void to_json(nlohmann::json& j, const Program& p);
 
-bool operator==(const Program::Cluster& lhs, const Program::Cluster& rhs);
+//bool operator==(const Program::Cluster& lhs, const Program::Cluster& rhs);
 
 #endif // __COMMON__PROGRAM_H__

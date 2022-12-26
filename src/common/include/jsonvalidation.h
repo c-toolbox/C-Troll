@@ -32,94 +32,32 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "node.h"
+#ifndef __COMMON__JSONVALIDATION_H__
+#define __COMMON__JSONVALIDATION_H__
 
-#include "jsonload.h"
-#include "logging.h"
 #include <fmt/format.h>
-#include <assert.h>
-#include <filesystem>
-#include <set>
-#include <string_view>
+#include <nlohmann/json.hpp>
+#include <nlohmann/json-schema.hpp>
 
-namespace {
-    constexpr std::string_view KeyName = "name";
-    constexpr std::string_view KeyIpAddress = "ip";
-    constexpr std::string_view KeyPort = "port";
-    constexpr std::string_view KeySecret = "secret";
-    constexpr std::string_view KeyDescription = "description";
-} // namespace
+namespace validation {
 
-void from_json(const nlohmann::json& j, Node& n) {
-    j.at(KeyName).get_to(n.name);
-    j.at(KeyIpAddress).get_to(n.ipAddress);
-    j.at(KeyPort).get_to(n.port);
-    if (j.find(KeySecret) != j.end()) {
-        j[KeySecret].get_to(n.secret);
-    }
-    if (j.find(KeyDescription) != j.end()) {
-        j[KeyDescription].get_to(n.description);
-    }
-}
+struct ErrorHandler : public nlohmann::json_schema::basic_error_handler {
+    void error(const nlohmann::json::json_pointer& ptr,
+        const nlohmann::json& instance, const std::string& msg) override;
 
-void to_json(nlohmann::json& j, const Node& n) {
-    j[KeyName] = n.name;
-    j[KeyIpAddress] = n.ipAddress;
-    j[KeyPort] = n.port;
-    j[KeySecret] = n.secret;
-    j[KeyDescription] = n.description;
-}
+    std::string path;
+    std::string message;
+};
 
-std::pair<std::vector<Node>, bool> loadNodesFromDirectory(std::string_view directory) {
-    std::pair<std::vector<Node>, bool> res = common::loadJsonFromDirectory<Node>(
-        directory,
-        validation::loadValidator(":/schema/config/node.schema.json")
-    );
+struct JsonError : public std::runtime_error {
+    explicit JsonError(ErrorHandler handler);
 
-    std::vector<Node> nodes = res.first;
+    const std::string path;
+    const std::string message;
+};
 
-    // Check for duplicates
-    std::sort(
-        nodes.begin(), nodes.end(),
-        [](const Node& lhs, const Node& rhs) { return lhs.name < rhs.name; }
-    );
-    const auto it = std::adjacent_find(
-        nodes.begin(), nodes.end(),
-        [](const Node& lhs, const Node& rhs) { return lhs.name == rhs.name; }
-    );
-    if (it != nodes.end()) {
-        throw std::runtime_error(fmt::format("Duplicate node name '{}' found", it->name));
-    }
+nlohmann::json_schema::json_validator loadValidator(std::string path);
 
-    for (const Node& node : nodes) {
-        std::string text = fmt::format(
-            "(id: {}, name : \"{}\", ipAddress: \"{}\", port: {}, description: {}, "
-            "isConnected: {} )",
-            node.id.v, node.name, node.ipAddress, node.port, node.description,
-            node.isConnected
-        );
+} // namespace validation
 
-        if (node.name.empty()) {
-            throw std::runtime_error(fmt::format("Found node without a name: {}", text));
-        }
-        if (node.ipAddress.empty()) {
-            throw std::runtime_error(
-                fmt::format("Found node without an IP address: {}", text)
-            );
-        }
-
-        if (node.port <= 0 || node.port >= 65536) {
-            throw std::runtime_error(
-                fmt::format("Found node with invalid port: {}", text)
-            );
-        }
-    }
-
-    // Inject the unique identifiers into the nodes
-    int id = 0;
-    for (Node& node : nodes) {
-        node.id = id;
-        id++;
-    }
-    return { nodes, res.second };
-}
+#endif // __COMMON__JSONVALIDATION_H__

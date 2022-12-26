@@ -151,12 +151,17 @@ void to_json(nlohmann::json& j, const Program& p) {
     j[KeyClusters] = p.clusters;
 }
 
-std::vector<Program> loadProgramsFromDirectory(std::string_view directory) {
-    std::vector<Program> programs = common::loadJsonFromDirectory<Program>(directory);
+std::pair<std::vector<Program>, bool> loadProgramsFromDirectory(
+                                                               std::string_view directory)
+{
+    std::pair<std::vector<Program>, bool> res = common::loadJsonFromDirectory<Program>(
+        directory,
+        validation::loadValidator(":/schema/config/program.schema.json")
+    );
 
     // Inject the unique identifiers into the nodes
     int programId = 0;
-    for (Program& program : programs) {
+    for (Program& program : res.first) {
         program.id = programId;
         programId++;
 
@@ -167,5 +172,5 @@ std::vector<Program> loadProgramsFromDirectory(std::string_view directory) {
         }
     }
 
-    return programs;
+    return res;
 }

@@ -129,7 +129,18 @@ int main(int argc, char** argv) {
     }
 
     std::cout << fmt::format("Loading configuration file from '{}'", absPath) << '\n';
-    Configuration config = common::loadFromJson<Configuration>(absPath);
+
+    Configuration config;
+    try {
+        config = common::loadFromJson<Configuration>(
+            absPath,
+            validation::loadValidator(":/schema/application/tray.schema.json")
+        );
+    }
+    catch (const std::exception& e) {
+        QMessageBox::critical(nullptr, "Exception", e.what());
+        exit(EXIT_FAILURE);
+    }
     common::Log::initialize(
         "tray",
         config.logFile,

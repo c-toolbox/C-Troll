@@ -124,7 +124,11 @@ MainWindow::MainWindow(bool shouldLogDebug, std::vector<std::string> defaultTags
     std::cout << fmt::format(
         "Loading configuration '{}'\n", BaseConfiguration::ConfigurationFile
     );
-    _config = common::loadFromJson<Configuration>(BaseConfiguration::ConfigurationFile);
+
+    _config = common::loadFromJson<Configuration>(
+        BaseConfiguration::ConfigurationFile,
+        validation::loadValidator(":/schema/application/ctroll.schema.json")
+    );
     common::Log::initialize(
         "ctroll",
         _config.logFile,
@@ -138,7 +142,18 @@ MainWindow::MainWindow(bool shouldLogDebug, std::vector<std::string> defaultTags
     Log("Status", fmt::format("Loading programs from '{}'", _config.applicationPath));
     Log("Status", fmt::format("Loading nodes from '{}'", _config.nodePath));
     Log("Status", fmt::format("Loading clusters from '{}'", _config.clusterPath));
-    data::loadData(_config.applicationPath, _config.clusterPath, _config.nodePath);
+    bool success = data::loadData(
+        _config.applicationPath,
+        _config.clusterPath,
+        _config.nodePath
+    );
+    if (!success) {
+        QMessageBox::critical(
+            nullptr,
+            "Error loading",
+            "Error occured while loading data, inspect the Log for detailed information"
+        );
+    }
     data::setTagColors(_config.tagColors);
 
     if (_config.logRotation.has_value()) {

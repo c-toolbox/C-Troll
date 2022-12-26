@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+
+  "$id": "https://github.com/c-toolbox/C-Troll/resources/schema/config/program.schema.json",
+  "title": "Program configuration file",
+  "description": "A schema file that describes a program can be started on a cluster",
+
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Program name",
+      "description": "The name of the program that this configuration adds. A name must be unique among all of the program configurations that are loaded",
+      "minLength": 1
+    },
+    "executable": {
+      "type": "string",
+      "title": "Executable",
+      "description": "The path to the executable that is started whenever this program should be executed on a cluster",
+      "minLength": 1
+    },
+    "commandlineParameters": {
+      "type": "string",
+      "title": "Commandline Parameters",
+      "description": "General commandline parameters that are added to the execution regardless of the configuration or the cluster that is selected",
+      "minLength": 1
+    },
+    "workingDirectory": {
+      "type": "string",
+      "title": "Working Directory",
+      "description": "The working directory from which the executable will be started. If this value is not provided the working directory is the location of the executable",
+      "minLength": 1
+    },
+    "clusters": {
+      "type": "array",
+      "title": "Clusters",
+      "description": "The list of clusters on which this program can be executed. Each entry in this list shoul be the name of a valid cluster defined in a separate cluster configuration",
+      "items": {
+        "type": "object",
+        "title": "Cluster",
+        "description": "A cluster on which this program can be executed",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name of the cluster on which the program can be executed",
+            "minLength": 1
+          },
+          "parameters": {
+            "type": "string",
+            "title": "Parameters",
+            "description": "Additional commandline arguments that are only added when starting the program on this cluster",
+            "minLength": 1
+          }
+        },
+        "required": [ "name" ]
+      },
+      "uniqueItems": true
+    },
+    "tags": {
+      "type": "array",
+      "title": "Tags",
+      "description": "A list of tags associated to this program",
+      "items": {
+        "type": "string",
+        "title": "Tag",
+        "description": "A single tag associated with the program",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "description": {
+      "type": "string",
+      "title": "Description",
+      "description": "A human-readable description of the program. This information is not used directly, but presented to the user instead"
+    },
+    "shouldForwardMessages": {
+      "type": "boolean",
+      "title": "Should Forward Console Messages",
+      "description": "If this value is set to true, the process started on each node of the cluster will forward its console messages back to the C-Troll application make it possible to view them in a central location"
+    },
+    "enabled": {
+      "type": "boolean",
+      "title": "Is Enabled",
+      "description": "This signals to C-Troll whether the program configured is currently active or not. It is not possible start a disabled program and they will not show up in the list, behaving the same as if this configuration file does not exist."
+    },
+    "delay": {
+      "type": "integer",
+      "title": "Startup Delay",
+      "description": "A delay in milliseconds that is added between starting the application on the nodes of a cluster.",
+      "minimum": 0
+    },
+    "configurations": {
+      "type": "array",
+      "title": "Configurations",
+      "description": "A list of different alternative configurations for the same program",
+      "items": {
+        "type": "object",
+        "title": "Configuration",
+        "description": "An individual description for this program",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name of the configuration. Two configurations for the same program must not use the same name",
+            "minLength": 1
+          },
+          "parameters": {
+            "type": "string",
+            "title": "Parameters",
+            "description": "Additional commandline parameters that are only added when this configuration is chosen",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "A human-readable description of the configuration. This information is not used directly, but presented to the user instead",
+            "minLength": 1
+          }
+        },
+        "required": [ "name" ]
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [ "name", "executable", "clusters" ]
+}

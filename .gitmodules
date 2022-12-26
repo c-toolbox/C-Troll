@@ -10,3 +10,6 @@
 [submodule "ext/cpp-httplib"]
 	path = ext/cpp-httplib
 	url = https://github.com/yhirose/cpp-httplib.git
+[submodule "ext/json-schema-validator"]
+	path = ext/json-schema-validator
+	url = https://github.com/pboettch/json-schema-validator

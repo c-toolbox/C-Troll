@@ -49,6 +49,7 @@ set(HEADER_FILES
   include/cluster.h
   include/jsonload.h
   include/jsonsocket.h
+  include/jsonvalidation.h
   include/logconfiguration.h
   include/logging.h
   include/messages.h
@@ -76,6 +77,7 @@ set(SOURCE_FILES
   src/baseconfiguration.cpp
   src/cluster.cpp
   src/jsonsocket.cpp
+  src/jsonvalidation.cpp
   src/logconfiguration.cpp
   src/logging.cpp
   src/node.cpp
@@ -89,6 +91,7 @@ qt_wrap_cpp(
   include/jsonsocket.h
 )
 
+
 add_library(common
   ${SOURCE_FILES}
   ${HEADER_FILES}
@@ -97,5 +100,5 @@ add_library(common
 )
 
 target_include_directories(common PUBLIC "include")
-target_link_libraries(common PUBLIC project_options fmt nlohmann_json Qt::Core Qt::Widgets Qt::Network simplecrypt)
+target_link_libraries(common PUBLIC project_options fmt nlohmann_json nlohmann_json_schema_validator Qt::Core Qt::Widgets Qt::Network simplecrypt)
 qt_disable_unicode_defines(common)

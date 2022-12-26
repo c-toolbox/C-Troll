@@ -70,8 +70,10 @@ void to_json(nlohmann::json& j, const Cluster& c);
  * and returned.
  * \param directory The directory that is walked in search for <code>*.json</code>
  * files
- * \return A list of all Cluster%s that were found by walking the \p directory
+ * \return A list of all Cluster%s that were found by walking the \p directory, the second
+ *         parameter is true if all files loaded successfully
  */
-std::vector<Cluster> loadClustersFromDirectory(std::string_view directory);
+std::pair<std::vector<Cluster>, bool> loadClustersFromDirectory(
+    std::string_view directory);
 
 #endif // __COMMON__CLUSTER_H__

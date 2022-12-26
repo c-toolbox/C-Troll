@@ -35,11 +35,14 @@
 #ifndef __COMMON__JSONLOAD_H__
 #define __COMMON__JSONLOAD_H__
 
+#include "jsonvalidation.h"
 #include "logging.h"
 #include <QDirIterator>
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json-schema.hpp>
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -58,10 +61,21 @@ namespace common {
  * \return A constructed object T that is initialized from the JSON file \p jsonFile
  */
 template <typename T>
-T loadFromJson(std::string_view jsonFile) {
+T loadFromJson(std::string_view jsonFile,
+     const std::optional<nlohmann::json_schema::json_validator>& validator = std::nullopt)
+{
     std::ifstream f = std::ifstream(std::string(jsonFile));
     nlohmann::json obj;
     f >> obj;
+
+    if (validator.has_value()) {
+        validation::ErrorHandler err;
+        validator->validate(obj, err);
+        if (err) {
+            throw validation::JsonError(std::move(err));
+        }
+    }
+
     return T(obj);
 }
 
@@ -86,36 +100,38 @@ void saveToJson(std::string_view filename, const T& value) {
  * \return A list of \tparam T objects that was created from JSON files in \p directory
  */
 template <typename T>
-std::vector<T> loadJsonFromDirectory(std::string_view directory) {
+std::pair<std::vector<T>, bool> loadJsonFromDirectory(std::string_view directory,
+     const std::optional<nlohmann::json_schema::json_validator>& validator = std::nullopt)
+{
     namespace fs = std::filesystem;
     if (!fs::is_directory(directory)) {
         throw std::runtime_error(fmt::format("Could not find directory '{}'", directory));
     }
 
     std::vector<T> res;
-
+    bool loadingSucceeded = true;
     for (const fs::directory_entry& p : fs::recursive_directory_iterator(directory)) {
-        if (!p.is_regular_file()) {
-            continue;
-        }
-
-        const fs::path ext = p.path().extension();
-        if (ext != ".json") {
+        if (!p.is_regular_file() || p.path().extension() != ".json") {
             continue;
         }
 
         const std::string file = p.path().string();
         ::Log("Status", fmt::format("Loading file '{}'", file));
         try {
-            T obj = common::loadFromJson<T>(file);
+            T obj = common::loadFromJson<T>(file, validator);
             res.push_back(std::move(obj));
+        }
+        catch (const validation::JsonError& e) {
+            ::Log("Error", fmt::format("Failed to load file '{}': {}", file, e.what()));
+            loadingSucceeded = false;
         }
         catch (const std::runtime_error& e) {
             ::Log("Error",fmt::format("Failed to load file '{}': {}", file, e.what()));
+            loadingSucceeded = false;
         }
     }
 
-    return res;
+    return { res, loadingSucceeded };
 }
 
 } // namespace common

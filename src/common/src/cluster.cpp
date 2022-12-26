@@ -67,15 +67,20 @@ void to_json(nlohmann::json& j, const Cluster& c) {
     j[KeyNodes] = c.nodes;
 }
 
-std::vector<Cluster> loadClustersFromDirectory(std::string_view directory) {
-    std::vector<Cluster> clusters = common::loadJsonFromDirectory<Cluster>(directory);
+std::pair<std::vector<Cluster>, bool> loadClustersFromDirectory(
+                                                               std::string_view directory)
+{
+    std::pair<std::vector<Cluster>, bool> res = common::loadJsonFromDirectory<Cluster>(
+        directory,
+        validation::loadValidator(":/schema/config/cluster.schema.json")
+    );
 
     // Inject the unique identifiers into the nodes
     int id = 0;
-    for (Cluster& cluster : clusters) {
+    for (Cluster& cluster : res.first) {
         cluster.id = id;
         id++;
     }
 
-    return clusters;
+    return res;
 }

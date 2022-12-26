@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+
+  "$id": "https://github.com/c-toolbox/C-Troll/resources/schema/application/tray.schema.json",
+  "title": "Tray configuration file",
+  "description": "A schema file that describes the config-tray.json used for initializing the Tray application.",
+
+  "type": "object",
+  "properties": {
+    "port": {
+      "type": "integer",
+      "title": "Port",
+      "description": "The port on which the Tray should listen for incoming connections",
+      "exclusiveMinimum": 0,
+      "exclusiveMaximum": 65536
+    },
+    "secret": {
+      "type": "string",
+      "title": "Secret",
+      "description": "A secret message that C-Troll has to end along with every message to ensure that only authorized C-Troll applications are allowed to talk to this Tray",
+      "minLength": 1
+    },
+    "showWindow": {
+      "type": "boolean",
+      "title": "Show Window",
+      "description": "Determines whether the main window of the Tray application should be shown on startup or if the application should minimize to the system tray immediately"
+    },
+    "logFile": {
+      "type": "boolean",
+      "title": "Log File",
+      "description": "Determines whether C-Troll should write the log messages to a file or not"
+    },
+    "logRotation": {
+      "type": "object",
+      "title": "Log Rotation",
+      "description": "Contains information about whether a log rotation should be performed and in which intervals.",
+      "properties": {
+        "frequency": {
+          "type": "integer",
+          "title": "Rotation Frequency",
+          "description": "The frequency in which the log rotation should be performed, provided in hours",
+          "minimum": 0
+        },
+        "keepPrevious": {
+          "type": "boolean",
+          "title": "Should keep previous file",
+          "description": "Determines whether the previous log file should be kept after the rotation or deleted"
+        }
+      }
+    }
+  },
+  "required": [ "port" ]
+}

@@ -7,6 +7,12 @@
     <file>images/tray_offline_cog.png</file>
     <file>images/tray_online_cog.png</file>
     <file>images/x.png</file>
+    <file>schema/application/ctroll.schema.json</file>
+    <file>schema/application/editor.schema.json</file>
+    <file>schema/application/tray.schema.json</file>
+    <file>schema/config/cluster.schema.json</file>
+    <file>schema/config/node.schema.json</file>
+    <file>schema/config/program.schema.json</file>
     <file>qss/c-troll.qss</file>
     <file>qss/editor.qss</file>
     <file>qss/tray.qss</file>

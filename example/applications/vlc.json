@@ -5,8 +5,7 @@
   "tags": [ "test" ],
   "configurations": [
     {
-      "name": "Default",
-      "parameters": ""
+      "name": "Default"
     },
     {
       "name": "Fancy",
