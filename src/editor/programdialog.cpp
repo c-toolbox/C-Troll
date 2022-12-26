@@ -288,9 +288,8 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
 
     if (std::filesystem::exists(_programPath)) {
         Program program = common::loadFromJson<Program>(_programPath);
-        std::vector<Cluster> clusters = common::loadJsonFromDirectory<Cluster>(
-            _clusterPath
-        );
+        std::pair<std::vector<Cluster>, bool> clusters =
+            common::loadJsonFromDirectory<Cluster>(_clusterPath);
 
         _name->setText(QString::fromStdString(program.name));
         _executable->setText(QString::fromStdString(program.executable));
@@ -328,13 +327,13 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             _clusters->addItem(c);
 
             const auto it = std::find_if(
-                clusters.cbegin(),
-                clusters.cend(),
+                clusters.first.cbegin(),
+                clusters.first.cend(),
                 [cluster](const Cluster& c) {
                     return c.name == cluster.name;
                 }
             );
-            if (it == clusters.end()) {
+            if (it == clusters.first.end()) {
                 c->setObjectName("invalid");
                 c->setToolTip("Could not find cluster in clusters folder");
             }
@@ -401,12 +400,13 @@ bool operator==(QLabel* name, const Cluster& cluster) {
 }
 
 std::string ProgramDialog::selectCluster() {
-    std::vector<Cluster> clusters = common::loadJsonFromDirectory<Cluster>(_clusterPath);
+    std::pair<std::vector<Cluster>, bool> clusters =
+        common::loadJsonFromDirectory<Cluster>(_clusterPath);
 
     std::vector<ClusterWidget*> currClusters = _clusters->items<ClusterWidget>();
-        clusters.erase(
+        clusters.first.erase(
         std::remove_if(
-            clusters.begin(), clusters.end(),
+            clusters.first.begin(), clusters.first.end(),
             [&currClusters](const Cluster& c) {
                 const auto it = std::find_if(
                     currClusters.cbegin(),
@@ -416,10 +416,10 @@ std::string ProgramDialog::selectCluster() {
                 return it != currClusters.cend();
             }
         ),
-        clusters.end()
+        clusters.first.end()
     );
 
-    if (clusters.empty()) {
+    if (clusters.first.empty()) {
         QMessageBox::information(
             this,
             "Add clusters",
@@ -428,7 +428,7 @@ std::string ProgramDialog::selectCluster() {
     }
 
     QStringList list;
-    for (const Cluster& cluster : clusters) {
+    for (const Cluster& cluster : clusters.first) {
         list.push_back(QString::fromStdString(cluster.name));
     }
 

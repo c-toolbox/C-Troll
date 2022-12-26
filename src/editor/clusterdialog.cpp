@@ -121,7 +121,8 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
 
     if (std::filesystem::exists(_clusterPath)) {
         Cluster cluster = common::loadFromJson<Cluster>(_clusterPath);
-        std::vector<Node> nodes = common::loadJsonFromDirectory<Node>(_nodePath);
+        std::pair<std::vector<Node>, bool> nodes =
+            common::loadJsonFromDirectory<Node>(_nodePath);
 
         _name->setText(QString::fromStdString(cluster.name));
         _enabled->setChecked(cluster.isEnabled);
@@ -130,8 +131,8 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
             QLabel* nodeLabel = new QLabel(QString::fromStdString(node));
             _nodes->addItem(nodeLabel);
 
-            const auto it = std::find(nodes.cbegin(), nodes.cend(), node);
-            if (it == nodes.cend()) {
+            const auto it = std::find(nodes.first.cbegin(), nodes.first.cend(), node);
+            if (it == nodes.first.cend()) {
                 nodeLabel->setObjectName("invalid");
                 nodeLabel->setToolTip("Could not find node in nodes folder");
             }
@@ -163,29 +164,30 @@ bool operator==(QLabel* name, const Node& node) {
 }
 
 void ClusterDialog::addNewNode() {
-    std::vector<Node> nodes = common::loadJsonFromDirectory<Node>(_nodePath);
+    std::pair<std::vector<Node>, bool> nodes =
+        common::loadJsonFromDirectory<Node>(_nodePath);
 
     // Remove the nodes that have already been added
     std::vector<QLabel*> currentNodes = _nodes->items<QLabel>();
-    nodes.erase(
+    nodes.first.erase(
         std::remove_if(
-            nodes.begin(), nodes.end(),
+            nodes.first.begin(), nodes.first.end(),
             [&currentNodes](const Node& n) {
                 const auto it = std::find(currentNodes.cbegin(), currentNodes.cend(), n);
                 return it != currentNodes.cend();
             }
         ),
-        nodes.end()
+        nodes.first.end()
     );
 
-    if (nodes.empty()) {
+    if (nodes.first.empty()) {
         QMessageBox::information(this, "Add node", "No available nodes left to add");
         return;
     }
 
 
     QStringList list;
-    for (const Node& node : nodes) {
+    for (const Node& node : nodes.first) {
         list.push_back(QString::fromStdString(node.name));
     }
 
