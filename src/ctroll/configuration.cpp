@@ -50,10 +50,6 @@ namespace {
     constexpr std::string_view KeyRestPassword = "password";
     constexpr std::string_view KeyRestPort = "port";
     constexpr std::string_view KeyRestAllowCustomPrograms = "allowCustomPrograms";
-
-    // Legacy
-    constexpr std::string_view KeyRest = "rest"; // should be mapped to restGeneral
-
 } // namespace
 
 void to_json(nlohmann::json& j, const Configuration& c) {
@@ -160,10 +156,8 @@ void from_json(const nlohmann::json& j, Configuration& c) {
         c.restLoopback = r;
     }
 
-    // @VER2: Remove KeyRest and only allow KeyRestGeneral
-    if (j.find(KeyRest) != j.end() || j.find(KeyRestGeneral) != j.end()) {
-        const nlohmann::json& rest =
-            j.find(KeyRest) != j.end() ? j[KeyRest] : j[KeyRestGeneral];
+    if (j.find(KeyRestGeneral) != j.end()) {
+        const nlohmann::json& rest = j[KeyRestGeneral];
 
         Configuration::Rest r;
         if (rest.find(KeyRestUsername) != rest.end()) {
