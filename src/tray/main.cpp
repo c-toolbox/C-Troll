@@ -99,7 +99,6 @@ int main(int argc, char** argv) {
     std::optional<std::pair<int, int>> pos = common::parseLocationArgument(args);
 
     qInstallMessageHandler(
-        // Now that the log is enabled and available, we can pipe all Qt messages to that
         [](QtMsgType, const QMessageLogContext&, const QString& msg) {
             Log("Qt", msg.toLocal8Bit().constData());
         }
@@ -107,7 +106,7 @@ int main(int argc, char** argv) {
 
     {
         QFile file(":/qss/tray.qss");
-        file.open(QFile::ReadOnly);
+        file.open(QFile::ReadOnly | QFile::Text);
         QString styleSheet = QLatin1String(file.readAll());
         app.setStyleSheet(styleSheet);
     }

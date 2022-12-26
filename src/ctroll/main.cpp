@@ -160,16 +160,14 @@ int main(int argc, char** argv) {
     }
 
     qInstallMessageHandler(
-        // Now that the log is enabled and available, we can pipe all Qt messages to that
         [](QtMsgType, const QMessageLogContext&, const QString& msg) {
             Log("Qt", msg.toLocal8Bit().constData());
         }
     );
 
-
     {
         QFile file(":/qss/c-troll.qss");
-        file.open(QFile::ReadOnly);
+        file.open(QFile::ReadOnly | QFile::Text);
         QString styleSheet = QLatin1String(file.readAll());
         app.setStyleSheet(styleSheet);
     }
