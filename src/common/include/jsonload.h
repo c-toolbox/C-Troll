@@ -145,8 +145,12 @@ Conf loadConfiguration(std::string config, std::string schema) {
     }
     ::Log("Loading", fmt::format("Loading configuration {}", config));
 
-    Conf conf = common::loadFromJson<Conf>(config, validation::loadValidator(schema));
-    return conf;
+    if (schema.empty()) {
+        return common::loadFromJson<Conf>(config);
+    }
+    else {
+        return common::loadFromJson<Conf>(config, validation::loadValidator(schema));
+    }
 }
 
 } // namespace common
