@@ -314,6 +314,7 @@ ProcessesWidget::ProcessesWidget(const std::chrono::milliseconds& processTimeout
     _contentLayout->setRowStretch(1, 1);
 
     QPushButton* killAll = new QPushButton("Kill all processses");
+    killAll->setObjectName("kill");
     connect(killAll, &QPushButton::clicked, this, &ProcessesWidget::killAllProcesses);
     layout->addWidget(killAll);
 }
