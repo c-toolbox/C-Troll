@@ -180,7 +180,7 @@ int main(int argc, char** argv) {
         config = common::loadConfiguration<Configuration>(
             "config.json",
             ":/schema/application/ctroll.schema.json"
-            );
+        );
     }
     catch (const std::runtime_error& err) {
         QMessageBox::critical(

@@ -27,7 +27,7 @@
     "logFile": {
       "type": "boolean",
       "title": "Log File",
-      "description": "Determines whether C-Troll should write the log messages to a file or not"
+      "description": "Determines whether the Tray should write the log messages to a file or not"
     },
     "logRotation": {
       "type": "object",
