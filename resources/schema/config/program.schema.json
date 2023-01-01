@@ -34,7 +34,7 @@
       "title": "Clusters",
       "description": "The list of clusters on which this program can be executed. Each entry in this list shoul be the name of a valid cluster defined in a separate cluster configuration",
       "items": {
-        "type": "object",
+        "type": [ "object", "string" ],
         "title": "Cluster",
         "description": "A cluster on which this program can be executed",
         "properties": {
