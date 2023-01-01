@@ -78,10 +78,10 @@ NodeDialog::NodeDialog(QWidget* parent, std::string path)
 
         editLayout->addWidget(new QLabel("Port:"), 2, 0);
         _port = new QSpinBox;
-        _port->setValue(5000);
         _port->setToolTip("The port at which the Tray of the node is accessible");
         _port->setMinimum(1);
-        _port->setMaximum(std::numeric_limits<int>::max());
+        _port->setMaximum(65535);
+        _port->setValue(5000);
         editLayout->addWidget(_port, 2, 1);
 
         editLayout->addWidget(new QLabel("Secret:"), 3, 0);
