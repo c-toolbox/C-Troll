@@ -47,6 +47,7 @@
 #include <QApplication>
 #include <QMenu>
 #include <QMessageBox>
+#include <QProcess>
 #include <QTabBar>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -521,6 +522,16 @@ void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
 
     const Program* p = data::findProgram(programId);
     assert(p);
+
+    // If the program has a preStart script, we need to execute it first and wait until it
+    // is finished
+    if (!p->preStart.empty()) {
+        Log("Program", "Starting pre-start script");
+        QProcess proc;
+        proc.start(QString::fromStdString(p->preStart));
+        proc.waitForFinished(-1);
+    }
+
     for (const std::string& nodeName : cluster->nodes) {
         const Node* node = data::findNode(nodeName);
         auto proc = std::make_unique<Process>(programId, configId, clusterId, node->id);

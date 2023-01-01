@@ -51,6 +51,7 @@ namespace {
     constexpr std::string_view KeySendConsole = "shouldForwardMessages";
     constexpr std::string_view KeyEnabled = "enabled";
     constexpr std::string_view KeyDelay = "delay";
+    constexpr std::string_view KeyPreStart = "prestart";
     constexpr std::string_view KeyConfigurations = "configurations";
 
     constexpr std::string_view KeyConfigurationName = "name";
@@ -116,6 +117,9 @@ void from_json(const nlohmann::json& j, Program& p) {
         const unsigned int delay = j.at(KeyDelay).get<unsigned int>();
         p.delay = std::chrono::milliseconds(delay);
     }
+    if (j.find(KeyPreStart) != j.end()) {
+        j.at(KeyPreStart).get_to(p.preStart);
+    }
     if (j.find(KeyConfigurations) != j.end()) {
         j.at(KeyConfigurations).get_to(p.configurations);
     }
@@ -158,6 +162,9 @@ void to_json(nlohmann::json& j, const Program& p) {
     j[KeyEnabled] = p.isEnabled;
     if (p.delay.has_value()) {
         j[KeyDelay] = p.delay->count();
+    }
+    if (!p.preStart.empty()) {
+        j[KeyPreStart] = p.preStart;
     }
     j[KeyConfigurations] = p.configurations;
     j[KeyClusters] = p.clusters;

@@ -92,6 +92,7 @@ private:
     QCheckBox* _hasDelay = nullptr;
     QSpinBox* _delay = nullptr;
 
+    QLineEdit* _preStart = nullptr;
     QLineEdit* _description = nullptr;
 
     DynamicList* _tags = nullptr;

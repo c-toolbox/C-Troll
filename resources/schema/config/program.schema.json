@@ -71,6 +71,11 @@
       "title": "Description",
       "description": "A human-readable description of the program. This information is not used directly, but presented to the user instead"
     },
+    "preStart": {
+      "type": "string",
+      "title": "Pre-Start Script",
+      "description": "A script that gets executed on the C-Troll computer before this program starts"
+    },
     "shouldForwardMessages": {
       "type": "boolean",
       "title": "Should Forward Console Messages",

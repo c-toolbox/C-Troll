@@ -86,6 +86,9 @@ struct Program {
     bool isEnabled = true;
     /// An optional delay that is introduced between startup of individual instances
     std::optional<std::chrono::milliseconds> delay;
+    /// An optional application that gets executed on the C-Troll computer before this
+    /// program is started
+    std::string preStart;
     /// A list of tags that are associated with this Program
     std::vector<std::string> tags;
     /// A user-friendly description that potentially better identifies the whole program
