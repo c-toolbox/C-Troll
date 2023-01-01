@@ -153,7 +153,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                 // @TODO How does the terminate behave when the program is hanging? There
                 // seems to be a problem that a program is not correctly terminated in
                 // those cases
-                p->process->kill();
+                p->process->terminate();
                 returnMsg.status = common::ProcessStatusMessage::Status::NormalExit;
                 // Find specifc value in process map i.e. process
                 const auto pIt = processIt(p->process);
@@ -259,8 +259,8 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
 
     // Find specifc value in process map i.e. process
     auto p = processIt(process);
-    assert(p != _processes.end());
-
+    // p might be .end() if we caused the process to be killed which also removes it from
+    // the _processes list immediately before the handleFinished function can be called
     if (p != _processes.end()) {
         Debug(fmt::format("Found process {}", p->processId));
         
