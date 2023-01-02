@@ -37,7 +37,7 @@
 #include "cluster.h"
 #include <nlohmann/json.hpp>
 
-TEST_CASE("(Cluster) Default Ctor", "[Cluster]") {
+TEST_CASE("Cluster Default Ctor", "[Cluster]") {
     Cluster msg;
 
 
@@ -46,77 +46,72 @@ TEST_CASE("(Cluster) Default Ctor", "[Cluster]") {
 
     Cluster msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Cluster) id", "[Cluster]") {
-    Cluster msg;
-    msg.id = 13;
-
-
-    nlohmann::json j1;
-    to_json(j1, msg);
-
-    Cluster msgDeserialize;
-    from_json(j1, msgDeserialize);
-    nlohmann::json j2;
-    to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
-}
-
-TEST_CASE("(Cluster) name", "[Cluster]") {
+TEST_CASE("Cluster.name", "[Cluster]") {
     Cluster msg;
     msg.name = "foobar";
-
+    
 
     nlohmann::json j1;
     to_json(j1, msg);
 
     Cluster msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.name == "foobar");
+    
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Cluster) isEnabled", "[Cluster]") {
+TEST_CASE("Cluster.isEnabled", "[Cluster]") {
     Cluster msg;
     msg.isEnabled = false;
-
+    
 
     nlohmann::json j1;
     to_json(j1, msg);
 
     Cluster msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.isEnabled == false);
+
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Cluster) description", "[Cluster]") {
+TEST_CASE("Cluster.description", "[Cluster]") {
     Cluster msg;
     msg.description = "foobar";
-
+    
 
     nlohmann::json j1;
     to_json(j1, msg);
 
     Cluster msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.description == "foobar");
+
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Cluster) nodes", "[Cluster]") {
+TEST_CASE("Cluster.nodes", "[Cluster]") {
     Cluster msg;
     msg.nodes.push_back("foo");
     msg.nodes.push_back("bar");
@@ -127,8 +122,13 @@ TEST_CASE("(Cluster) nodes", "[Cluster]") {
 
     Cluster msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    REQUIRE(msgDeserialize.nodes.size() == 2);
+    CHECK(msgDeserialize.nodes[0] == "foo");
+    CHECK(msgDeserialize.nodes[1] == "bar");
+
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }

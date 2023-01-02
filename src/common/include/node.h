@@ -66,6 +66,8 @@ struct Node {
     bool isConnecting = false;
     /// A flag representing whether the node is connected or not
     bool isConnected = false;
+
+    auto operator<=>(const Node& rhs) const = default;
 };
 
 void from_json(const nlohmann::json& j, Node& n);

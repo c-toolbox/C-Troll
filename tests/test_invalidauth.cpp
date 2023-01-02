@@ -32,22 +32,36 @@
  *                                                                                       *
  ****************************************************************************************/
 
+#include "catch2/catch_test_macros.hpp"
+
 #include "messages/invalidauthmessage.h"
+#include <nlohmann/json.hpp>
 
-namespace common {
+TEST_CASE("InvalidAuthMessage Default Ctor", "[InvalidAuthMessage]") {
+    common::InvalidAuthMessage msg;
 
-InvalidAuthMessage::InvalidAuthMessage()
-    : Message(std::string(InvalidAuthMessage::Type))
-{}
 
-void to_json(nlohmann::json& j, const InvalidAuthMessage&) {
-    j[Message::KeyType] = InvalidAuthMessage::Type;
-    j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    common::InvalidAuthMessage msgDeserialize;
+    from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
 }
 
-void from_json(const nlohmann::json& j, InvalidAuthMessage& m) {
-    validateMessage(j, InvalidAuthMessage::Type);
-    from_json(j, static_cast<Message&>(m));
-}
+TEST_CASE("InvalidAuthMessage Correct Type", "[InvalidAuthMessage]") {
+    common::InvalidAuthMessage msg;
+    CHECK(msg.type == common::InvalidAuthMessage::Type);
 
-} // namespace common
+    nlohmann::json j;
+    to_json(j, msg);
+
+    common::InvalidAuthMessage msgDeserialize;
+    from_json(j, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.type == common::InvalidAuthMessage::Type);
+}

@@ -37,7 +37,7 @@
 #include "messages/message.h"
 #include <nlohmann/json.hpp>
 
-TEST_CASE("(Message) Default Ctor", "[Message]") {
+TEST_CASE("Message Default Ctor", "[Message]") {
     nlohmann::json j = {
         { common::Message::KeyType, "" },
         { common::Message::KeySecret, "" }
@@ -45,30 +45,26 @@ TEST_CASE("(Message) Default Ctor", "[Message]") {
 
     common::Message msg;
 
-    common::Message msg2;
-    from_json(j, msg2);
-
-    REQUIRE(msg.type == msg2.type);
-    REQUIRE(msg.secret == msg2.secret);
+    common::Message msgDeserialize;
+    from_json(j, msgDeserialize);
+    CHECK(msg == msgDeserialize);
 }
 
-TEST_CASE("(Message) Type", "[Message]") {
+TEST_CASE("Message Type", "[Message]") {
     nlohmann::json j = {
         { common::Message::KeyType, "abc" },
         { common::Message::KeySecret, "" }
     };
 
-    common::Message msg;
-    msg.type = "abc";
+    common::Message msg("abc");
 
-    common::Message msg2;
-    from_json(j, msg2);
-
-    REQUIRE(msg.type == msg2.type);
-    REQUIRE(msg.secret == msg2.secret);
+    common::Message msgDeserialize;
+    from_json(j, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msg.type == "abc");
 }
 
-TEST_CASE("(Message) Secret", "[Message]") {
+TEST_CASE("Message.secret", "[Message]") {
     nlohmann::json j = {
         { common::Message::KeyType, "" },
         { common::Message::KeySecret, "abc" }
@@ -77,14 +73,13 @@ TEST_CASE("(Message) Secret", "[Message]") {
     common::Message msg;
     msg.secret = "abc";
 
-    common::Message msg2;
-    from_json(j, msg2);
-
-    REQUIRE(msg.type == msg2.type);
-    REQUIRE(msg.secret == msg2.secret);
+    common::Message msgDeserialize;
+    from_json(j, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.secret == "abc");
 }
 
-TEST_CASE("(Message) Type & Secret", "[Message]") {
+TEST_CASE("Message full", "[Message]") {
     nlohmann::json j = {
         { common::Message::KeyType, "abc" },
         { common::Message::KeySecret, "def" }
@@ -94,9 +89,9 @@ TEST_CASE("(Message) Type & Secret", "[Message]") {
     msg.type = "abc";
     msg.secret = "def";
 
-    common::Message msg2;
-    from_json(j, msg2);
-
-    REQUIRE(msg.type == msg2.type);
-    REQUIRE(msg.secret == msg2.secret);
+    common::Message msgDeserialize;
+    from_json(j, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.type == "abc");
+    CHECK(msgDeserialize.secret == "def");
 }

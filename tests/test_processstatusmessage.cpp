@@ -37,7 +37,7 @@
 #include "messages/processstatusmessage.h"
 #include <nlohmann/json.hpp>
 
-TEST_CASE("(ProcessStatus) Default Ctor", "[ProcessStatus]") {
+TEST_CASE("ProcessStatusMessage Default Ctor", "[ProcessStatusMessage]") {
     common::ProcessStatusMessage msg;
 
 
@@ -46,14 +46,16 @@ TEST_CASE("(ProcessStatus) Default Ctor", "[ProcessStatus]") {
 
     common::ProcessStatusMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessStatus) Correct Type", "[ProcessStatus]") {
+TEST_CASE("ProcessStatusMessage Correct Type", "[ProcessStatusMessage]") {
     common::ProcessStatusMessage msg;
+    CHECK(msg.type == common::ProcessStatusMessage::Type);
 
 
     nlohmann::json j;
@@ -61,11 +63,10 @@ TEST_CASE("(ProcessStatus) Correct Type", "[ProcessStatus]") {
 
     common::ProcessStatusMessage msgDeserialize;
     from_json(j, msgDeserialize);
-
-    REQUIRE(msgDeserialize.type == common::ProcessStatusMessage::Type);
+    CHECK(msgDeserialize.type == common::ProcessStatusMessage::Type);
 }
 
-TEST_CASE("(ProcessStatus) processId", "[ProcessStatus]") {
+TEST_CASE("ProcessStatusMessage.processId", "[ProcessStatusMessage]") {
     common::ProcessStatusMessage msg;
     msg.processId = 13;
 
@@ -75,13 +76,15 @@ TEST_CASE("(ProcessStatus) processId", "[ProcessStatus]") {
 
     common::ProcessStatusMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.processId == 13);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessStatus) Status Starting", "[ProcessStatus]") {
+TEST_CASE("ProcessStatusMessage.status = Starting", "[ProcessStatusMessage]") {
     common::ProcessStatusMessage msg;
     msg.status = common::ProcessStatusMessage::Status::Starting;
 
@@ -91,13 +94,15 @@ TEST_CASE("(ProcessStatus) Status Starting", "[ProcessStatus]") {
 
     common::ProcessStatusMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.status == common::ProcessStatusMessage::Status::Starting);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessStatus) Status Running", "[ProcessStatus]") {
+TEST_CASE("ProcessStatusMessage.status = Running", "[ProcessStatusMessage]") {
     common::ProcessStatusMessage msg;
     msg.status = common::ProcessStatusMessage::Status::Running;
 
@@ -107,13 +112,15 @@ TEST_CASE("(ProcessStatus) Status Running", "[ProcessStatus]") {
 
     common::ProcessStatusMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.status == common::ProcessStatusMessage::Status::Running);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessStatus) Status NormalExit", "[ProcessStatus]") {
+TEST_CASE("ProcessStatusMessage.status = NormalExit", "[ProcessStatusMessage]") {
     common::ProcessStatusMessage msg;
     msg.status = common::ProcessStatusMessage::Status::NormalExit;
 
@@ -123,13 +130,15 @@ TEST_CASE("(ProcessStatus) Status NormalExit", "[ProcessStatus]") {
 
     common::ProcessStatusMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.status == common::ProcessStatusMessage::Status::NormalExit);
+    
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessStatus) Status CrashExit", "[ProcessStatus]") {
+TEST_CASE("ProcessStatusMessage.status = CrashExit", "[ProcessStatusMessage]") {
     common::ProcessStatusMessage msg;
     msg.status = common::ProcessStatusMessage::Status::CrashExit;
 
@@ -139,13 +148,15 @@ TEST_CASE("(ProcessStatus) Status CrashExit", "[ProcessStatus]") {
 
     common::ProcessStatusMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.status == common::ProcessStatusMessage::Status::CrashExit);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessStatus) Status FailedToStart", "[ProcessStatus]") {
+TEST_CASE("ProcessStatusMessage.status = FailedToStart", "[ProcessStatusMessage]") {
     common::ProcessStatusMessage msg;
     msg.status = common::ProcessStatusMessage::Status::FailedToStart;
 
@@ -155,13 +166,15 @@ TEST_CASE("(ProcessStatus) Status FailedToStart", "[ProcessStatus]") {
 
     common::ProcessStatusMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.status == common::ProcessStatusMessage::Status::FailedToStart);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessStatus) Status TimedOut", "[ProcessStatus]") {
+TEST_CASE("ProcessStatusMessage.status = TimedOut", "[ProcessStatusMessage]") {
     common::ProcessStatusMessage msg;
     msg.status = common::ProcessStatusMessage::Status::TimedOut;
 
@@ -171,13 +184,15 @@ TEST_CASE("(ProcessStatus) Status TimedOut", "[ProcessStatus]") {
 
     common::ProcessStatusMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.status == common::ProcessStatusMessage::Status::TimedOut);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessStatus) Status WriteError", "[ProcessStatus]") {
+TEST_CASE("ProcessStatusMessage.status = WriteError", "[ProcessStatusMessage]") {
     common::ProcessStatusMessage msg;
     msg.status = common::ProcessStatusMessage::Status::WriteError;
 
@@ -187,13 +202,15 @@ TEST_CASE("(ProcessStatus) Status WriteError", "[ProcessStatus]") {
 
     common::ProcessStatusMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.status == common::ProcessStatusMessage::Status::WriteError);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessStatus) Status ReadError", "[ProcessStatus]") {
+TEST_CASE("ProcessStatusMessage.status = ReadError", "[ProcessStatusMessage]") {
     common::ProcessStatusMessage msg;
     msg.status = common::ProcessStatusMessage::Status::ReadError;
 
@@ -203,18 +220,32 @@ TEST_CASE("(ProcessStatus) Status ReadError", "[ProcessStatus]") {
 
     common::ProcessStatusMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.status == common::ProcessStatusMessage::Status::ReadError);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessStatus) Wrong Status", "[ProcessStatus]") {
+TEST_CASE("ProcessStatusMessage.status = UnknownError", "[ProcessStatusMessage]") {
+    common::ProcessStatusMessage msg;
+    msg.status = common::ProcessStatusMessage::Status::UnknownError;
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    common::ProcessStatusMessage msgDeserialize;
+    CHECK_THROWS(from_json(j1, msgDeserialize));
+}
+
+TEST_CASE("ProcessStatusMessage.status wrong", "[ProcessStatusMessage]") {
     common::ProcessStatusMessage msg;
     nlohmann::json j;
     to_json(j, msg);
 
     j["status"] = "foobar";
     common::ProcessStatusMessage msgDeserialize;
-    REQUIRE_THROWS(from_json(j, msgDeserialize));
+    CHECK_THROWS(from_json(j, msgDeserialize));
 }

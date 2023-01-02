@@ -37,7 +37,7 @@
 #include "messages/startcommandmessage.h"
 #include <nlohmann/json.hpp>
 
-TEST_CASE("(StartCommand) Default Ctor", "[StartCommand]") {
+TEST_CASE("StartCommand Default Ctor", "[StartCommand]") {
     common::StartCommandMessage msg;
 
 
@@ -46,14 +46,16 @@ TEST_CASE("(StartCommand) Default Ctor", "[StartCommand]") {
 
     common::StartCommandMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(StartCommand) Correct Type", "[StartCommand]") {
+TEST_CASE("StartCommand Correct Type", "[StartCommand]") {
     common::StartCommandMessage msg;
+    CHECK(msg.type == common::StartCommandMessage::Type);
 
 
     nlohmann::json j;
@@ -61,11 +63,11 @@ TEST_CASE("(StartCommand) Correct Type", "[StartCommand]") {
 
     common::StartCommandMessage msgDeserialize;
     from_json(j, msgDeserialize);
-
-    REQUIRE(msgDeserialize.type == common::StartCommandMessage::Type);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.type == common::StartCommandMessage::Type);
 }
 
-TEST_CASE("(StartCommand) id", "[StartCommand]") {
+TEST_CASE("StartCommand.id", "[StartCommand]") {
     common::StartCommandMessage msg;
     msg.id = 13;
 
@@ -75,13 +77,15 @@ TEST_CASE("(StartCommand) id", "[StartCommand]") {
 
     common::StartCommandMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.id == 13);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(StartCommand) executable", "[StartCommand]") {
+TEST_CASE("StartCommand.executable", "[StartCommand]") {
     common::StartCommandMessage msg;
     msg.executable = "abc";
 
@@ -91,13 +95,15 @@ TEST_CASE("(StartCommand) executable", "[StartCommand]") {
 
     common::StartCommandMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.executable == "abc");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(StartCommand) workingDirectory", "[StartCommand]") {
+TEST_CASE("StartCommand.workingDirectory", "[StartCommand]") {
     common::StartCommandMessage msg;
     msg.workingDirectory = "abc";
 
@@ -107,13 +113,15 @@ TEST_CASE("(StartCommand) workingDirectory", "[StartCommand]") {
 
     common::StartCommandMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.workingDirectory == "abc");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(StartCommand) commandlineParameters", "[StartCommand]") {
+TEST_CASE("StartCommand.commandlineParameters", "[StartCommand]") {
     common::StartCommandMessage msg;
     msg.commandlineParameters = "abc";
 
@@ -123,13 +131,15 @@ TEST_CASE("(StartCommand) commandlineParameters", "[StartCommand]") {
 
     common::StartCommandMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.commandlineParameters == "abc");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(StartCommand) forwardStdOutStdErr", "[StartCommand]") {
+TEST_CASE("StartCommand.forwardStdOutStdErr", "[StartCommand]") {
     common::StartCommandMessage msg;
     msg.forwardStdOutStdErr = true;
 
@@ -139,13 +149,15 @@ TEST_CASE("(StartCommand) forwardStdOutStdErr", "[StartCommand]") {
 
     common::StartCommandMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.forwardStdOutStdErr == true);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(StartCommand) programId", "[StartCommand]") {
+TEST_CASE("StartCommand.programId", "[StartCommand]") {
     common::StartCommandMessage msg;
     msg.programId = 13;
 
@@ -155,13 +167,15 @@ TEST_CASE("(StartCommand) programId", "[StartCommand]") {
 
     common::StartCommandMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.programId == 13);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(StartCommand) configurationId", "[StartCommand]") {
+TEST_CASE("StartCommand.configurationId", "[StartCommand]") {
     common::StartCommandMessage msg;
     msg.configurationId = 13;
 
@@ -171,13 +185,15 @@ TEST_CASE("(StartCommand) configurationId", "[StartCommand]") {
 
     common::StartCommandMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.configurationId == 13);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(StartCommand) clusterId", "[StartCommand]") {
+TEST_CASE("StartCommand.clusterId", "[StartCommand]") {
     common::StartCommandMessage msg;
     msg.clusterId = 13;
 
@@ -187,13 +203,15 @@ TEST_CASE("(StartCommand) clusterId", "[StartCommand]") {
 
     common::StartCommandMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.clusterId == 13);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(StartCommand) nodeId", "[StartCommand]") {
+TEST_CASE("StartCommand.nodeId", "[StartCommand]") {
     common::StartCommandMessage msg;
     msg.nodeId = 13;
 
@@ -203,13 +221,15 @@ TEST_CASE("(StartCommand) nodeId", "[StartCommand]") {
 
     common::StartCommandMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.nodeId == 13);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(StartCommand) dataHash", "[StartCommand]") {
+TEST_CASE("StartCommand.dataHash", "[StartCommand]") {
     common::StartCommandMessage msg;
     msg.dataHash = 13;
 
@@ -219,8 +239,46 @@ TEST_CASE("(StartCommand) dataHash", "[StartCommand]") {
 
     common::StartCommandMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.dataHash == 13);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
+}
 
-    REQUIRE(j1 == j2);
+TEST_CASE("StartCommand full", "[StartCommand]") {
+    common::StartCommandMessage msg;
+    msg.id = 13;
+    msg.executable = "abc";
+    msg.workingDirectory = "def";
+    msg.commandlineParameters = "ghi";
+    msg.forwardStdOutStdErr = true;
+    msg.programId = 13;
+    msg.configurationId = 14;
+    msg.clusterId = 15;
+    msg.nodeId = 16;
+    msg.dataHash = 17;
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    common::StartCommandMessage msgDeserialize;
+    from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.id == 13);
+    CHECK(msgDeserialize.executable == "abc");
+    CHECK(msgDeserialize.workingDirectory == "def");
+    CHECK(msgDeserialize.commandlineParameters == "ghi");
+    CHECK(msgDeserialize.forwardStdOutStdErr == true);
+    CHECK(msgDeserialize.programId == 13);
+    CHECK(msgDeserialize.configurationId == 14);
+    CHECK(msgDeserialize.clusterId == 15);
+    CHECK(msgDeserialize.nodeId == 16);
+    CHECK(msgDeserialize.dataHash == 17);
+
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
 }

@@ -110,8 +110,6 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
         }
 
         Debug("Parsing base message");
-        common::Message msg = message;
-
         if (common::isValidMessage<common::StartCommandMessage>(message)) {
             common::StartCommandMessage command = message;
             Log(fmt::format("Received [{}]: {}", peer, message.dump()));

@@ -59,6 +59,8 @@ struct Cluster {
 
     /// A list of all nodes belonging to this cluster
     std::vector<std::string> nodes;
+
+    auto operator<=>(const Cluster& rhs) const = default;
 };
 
 void from_json(const nlohmann::json& j, Cluster& c);

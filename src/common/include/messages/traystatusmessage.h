@@ -46,6 +46,8 @@ namespace common {
 struct TrayStatusMessage : public Message {
     static constexpr std::string_view Type = "TrayStatusMessage";
 
+    TrayStatusMessage();
+
     struct ProcessInfo {
         int processId;
         int programId;
@@ -53,9 +55,13 @@ struct TrayStatusMessage : public Message {
         int clusterId;
         int nodeId;
         std::size_t dataHash;
+      
+        auto operator<=>(const ProcessInfo& rhs) const = default;
     };
 
     std::vector<ProcessInfo> processes;
+
+    auto operator<=>(const TrayStatusMessage& rhs) const = default;
 };
 
 void to_json(nlohmann::json& j, const TrayStatusMessage& m);

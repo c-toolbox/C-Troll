@@ -37,7 +37,7 @@
 #include "messages/exitcommandmessage.h"
 #include <nlohmann/json.hpp>
 
-TEST_CASE("(ExitCommand) Default Ctor", "[ExitCommand]") {
+TEST_CASE("ExitCommandMessage Default Ctor", "[ExitCommandMessage]") {
     common::ExitCommandMessage msg;
 
 
@@ -49,23 +49,23 @@ TEST_CASE("(ExitCommand) Default Ctor", "[ExitCommand]") {
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
 
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ExitCommand) Correct Type", "[ExitCommand]") {
+TEST_CASE("ExitCommandMessage Correct Type", "[ExitCommandMessage]") {
     common::ExitCommandMessage msg;
-
+    CHECK(msg.type == common::ExitCommandMessage::Type);
 
     nlohmann::json j;
     to_json(j, msg);
 
     common::ExitCommandMessage msgDeserialize;
     from_json(j, msgDeserialize);
-
-    REQUIRE(msgDeserialize.type == common::ExitCommandMessage::Type);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.type == common::ExitCommandMessage::Type);
 }
 
-TEST_CASE("(ExitCommand) id", "[ExitCommand]") {
+TEST_CASE("ExitCommandMessage.id", "[ExitCommandMessage]") {
     common::ExitCommandMessage msg;
     msg.id = 13;
 
@@ -78,5 +78,5 @@ TEST_CASE("(ExitCommand) id", "[ExitCommand]") {
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
 
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }

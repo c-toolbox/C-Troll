@@ -37,7 +37,7 @@
 #include "messages/processoutputmessage.h"
 #include <nlohmann/json.hpp>
 
-TEST_CASE("(ProcessOutput) Default Ctor", "[ProcessOutput]") {
+TEST_CASE("ProcessOutputMessage Default Ctor", "[ProcessOutputMessage]") {
     common::ProcessOutputMessage msg;
 
 
@@ -46,26 +46,27 @@ TEST_CASE("(ProcessOutput) Default Ctor", "[ProcessOutput]") {
 
     common::ProcessOutputMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessOutput) Correct Type", "[ProcessOutput]") {
+TEST_CASE("ProcessOutputMessage Correct Type", "[ProcessOutputMessage]") {
     common::ProcessOutputMessage msg;
-
+    CHECK(msg.type == common::ProcessOutputMessage::Type);
 
     nlohmann::json j;
     to_json(j, msg);
 
     common::ProcessOutputMessage msgDeserialize;
     from_json(j, msgDeserialize);
-
-    REQUIRE(msgDeserialize.type == common::ProcessOutputMessage::Type);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.type == common::ProcessOutputMessage::Type);
 }
 
-TEST_CASE("(ProcessOutput) processId", "[ProcessOutput]") {
+TEST_CASE("ProcessOutputMessage.processId", "[ProcessOutputMessage]") {
     common::ProcessOutputMessage msg;
     msg.processId = 13;
 
@@ -75,13 +76,15 @@ TEST_CASE("(ProcessOutput) processId", "[ProcessOutput]") {
 
     common::ProcessOutputMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.processId == 13);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessOutput) message", "[ProcessOutput]") {
+TEST_CASE("ProcessOutputMessage.message", "[ProcessOutputMessage]") {
     common::ProcessOutputMessage msg;
     msg.message = "abc";
 
@@ -91,13 +94,15 @@ TEST_CASE("(ProcessOutput) message", "[ProcessOutput]") {
 
     common::ProcessOutputMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.message == "abc");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessOutput) outputType stdout", "[ProcessOutput]") {
+TEST_CASE("ProcessOutputMessage.outputType = stdout", "[ProcessOutputMessage]") {
     common::ProcessOutputMessage msg;
     msg.outputType = common::ProcessOutputMessage::OutputType::StdOut;
 
@@ -107,13 +112,15 @@ TEST_CASE("(ProcessOutput) outputType stdout", "[ProcessOutput]") {
 
     common::ProcessOutputMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.outputType == common::ProcessOutputMessage::OutputType::StdOut);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessOutput) outputType stderr", "[ProcessOutput]") {
+TEST_CASE("ProcessOutputMessage.outputType stderr", "[ProcessOutputMessage]") {
     common::ProcessOutputMessage msg;
     msg.outputType = common::ProcessOutputMessage::OutputType::StdErr;
 
@@ -123,18 +130,20 @@ TEST_CASE("(ProcessOutput) outputType stderr", "[ProcessOutput]") {
 
     common::ProcessOutputMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.outputType == common::ProcessOutputMessage::OutputType::StdErr);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ProcessOutput) Wrong outputType", "[ProcessOutput]") {
+TEST_CASE("ProcessOutputMessage.outputType wrong", "[ProcessOutputMessage]") {
     common::ProcessOutputMessage msg;
     nlohmann::json j;
     to_json(j, msg);
 
     j["outputType"] = "foobar";
     common::ProcessOutputMessage msgDeserialize;
-    REQUIRE_THROWS(from_json(j, msgDeserialize));
+    CHECK_THROWS(from_json(j, msgDeserialize));
 }

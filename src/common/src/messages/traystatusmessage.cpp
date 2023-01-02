@@ -47,6 +47,10 @@ namespace {
 
 namespace common {
 
+TrayStatusMessage::TrayStatusMessage()
+    : Message(std::string(TrayStatusMessage::Type))
+{}
+
 void to_json(nlohmann::json& j, const TrayStatusMessage::ProcessInfo& p) {
     j[KeyProcessId] = p.processId;
     j[KeyProgramId] = p.programId;

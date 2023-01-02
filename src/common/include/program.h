@@ -58,6 +58,9 @@ struct Program {
 
         /// A user-friendly description that better identifies this configuration
         std::string description;
+
+        auto operator<=>(const Configuration& rhs) const = default;
+
     };
 
     struct Cluster {
@@ -66,6 +69,8 @@ struct Program {
 
         /// The commandline arguments that are specific for this cluster
         std::string parameters;
+
+        auto operator<=>(const Cluster& rhs) const = default;
     };
 
     using ID = TypedId<int, struct ProgramTag>;
@@ -97,6 +102,8 @@ struct Program {
     std::vector<Configuration> configurations;
     /// List of all clusters
     std::vector<Cluster> clusters;
+
+    auto operator<=>(const Program& rhs) const = default;
 };
 
 std::pair<std::vector<Program>, bool> loadProgramsFromDirectory(

@@ -47,6 +47,10 @@ struct Message {
     static constexpr std::string_view KeyVersion = "version";
     static constexpr std::string_view KeySecret = "secret";
 
+    Message() = default;
+    explicit Message(std::string type);
+    auto operator<=>(const Message& rhs) const = default;
+
     /// A string representing the type of payload contained in this Message
     std::string type;
 

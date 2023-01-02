@@ -37,7 +37,7 @@
 #include "messages/traystatusmessage.h"
 #include <nlohmann/json.hpp>
 
-TEST_CASE("(TrayStatusMessage) Default Ctor", "[TrayStatusMessage]") {
+TEST_CASE("TrayStatusMessage Default Ctor", "[TrayStatusMessage]") {
     common::TrayStatusMessage msg;
 
 
@@ -48,12 +48,12 @@ TEST_CASE("(TrayStatusMessage) Default Ctor", "[TrayStatusMessage]") {
     from_json(j1, msgDeserialize);
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(TrayStatusMessage) Correct Type", "[TrayStatusMessage]") {
+TEST_CASE("TrayStatusMessage Correct Type", "[TrayStatusMessage]") {
     common::TrayStatusMessage msg;
+    CHECK(msg.type == common::TrayStatusMessage::Type);
 
 
     nlohmann::json j;
@@ -61,13 +61,14 @@ TEST_CASE("(TrayStatusMessage) Correct Type", "[TrayStatusMessage]") {
 
     common::TrayStatusMessage msgDeserialize;
     from_json(j, msgDeserialize);
-
-    REQUIRE(msgDeserialize.type == common::TrayStatusMessage::Type);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.type == common::TrayStatusMessage::Type);
 }
 
 TEST_CASE("(TrayStatusMessage) processes", "[TrayStatusMessage]") {
     common::TrayStatusMessage msg;
     msg.processes.push_back({ 1, 2, 3, 4, 5, 6 });
+    msg.processes.push_back({ 7, 8, 9, 10, 11, 12 });
 
 
     nlohmann::json j1;
@@ -75,8 +76,22 @@ TEST_CASE("(TrayStatusMessage) processes", "[TrayStatusMessage]") {
 
     common::TrayStatusMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    REQUIRE(msgDeserialize.processes.size() == 2);
+    CHECK(msgDeserialize.processes[0].processId == 1);
+    CHECK(msgDeserialize.processes[0].programId == 2);
+    CHECK(msgDeserialize.processes[0].configurationId == 3);
+    CHECK(msgDeserialize.processes[0].clusterId == 4);
+    CHECK(msgDeserialize.processes[0].nodeId == 5);
+    CHECK(msgDeserialize.processes[0].dataHash == 6);
+    CHECK(msgDeserialize.processes[1].processId == 7);
+    CHECK(msgDeserialize.processes[1].programId == 8);
+    CHECK(msgDeserialize.processes[1].configurationId == 9);
+    CHECK(msgDeserialize.processes[1].clusterId == 10);
+    CHECK(msgDeserialize.processes[1].nodeId == 11);
+    CHECK(msgDeserialize.processes[1].dataHash == 12);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }

@@ -44,6 +44,10 @@ namespace common {
 
 struct TrayConnectedMessage : public Message {
     static constexpr std::string_view Type = "TrayConnectedMessage";
+
+    TrayConnectedMessage();
+
+    auto operator<=>(const TrayConnectedMessage& rhs) const = default;
 };
 
 void to_json(nlohmann::json& j, const TrayConnectedMessage& m);

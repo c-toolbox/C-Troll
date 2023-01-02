@@ -37,7 +37,7 @@
 #include "node.h"
 #include <nlohmann/json.hpp>
 
-TEST_CASE("(Node) Default Ctor", "[Node]") {
+TEST_CASE("Node Default Ctor", "[Node]") {
     Node msg;
 
 
@@ -46,29 +46,14 @@ TEST_CASE("(Node) Default Ctor", "[Node]") {
 
     Node msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Node) id", "[Node]") {
-    Node msg;
-    msg.id = 13;
-
-
-    nlohmann::json j1;
-    to_json(j1, msg);
-
-    Node msgDeserialize;
-    from_json(j1, msgDeserialize);
-    nlohmann::json j2;
-    to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
-}
-
-TEST_CASE("(Node) name", "[Node]") {
+TEST_CASE("Node.name", "[Node]") {
     Node msg;
     msg.name = "foobar";
 
@@ -78,10 +63,12 @@ TEST_CASE("(Node) name", "[Node]") {
 
     Node msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.name == "foobar");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
 TEST_CASE("(Node) ipAddress", "[Node]") {
@@ -94,10 +81,12 @@ TEST_CASE("(Node) ipAddress", "[Node]") {
 
     Node msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.ipAddress == "foobar");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
 TEST_CASE("(Node) port", "[Node]") {
@@ -110,10 +99,12 @@ TEST_CASE("(Node) port", "[Node]") {
 
     Node msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.port == 13);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
 TEST_CASE("(Node) secret", "[Node]") {
@@ -126,10 +117,12 @@ TEST_CASE("(Node) secret", "[Node]") {
 
     Node msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.secret == "foobar");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
 TEST_CASE("(Node) description", "[Node]") {
@@ -142,8 +135,10 @@ TEST_CASE("(Node) description", "[Node]") {
 
     Node msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.description == "foobar");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }

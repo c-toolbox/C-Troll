@@ -45,6 +45,10 @@ namespace {
 
 namespace common {
 
+ProcessOutputMessage::ProcessOutputMessage()
+    : Message(std::string(ProcessOutputMessage::Type))
+{}
+
 void to_json(nlohmann::json& j, const ProcessOutputMessage& m) {
     std::string t = [](ProcessOutputMessage::OutputType type) {
         switch (type) {

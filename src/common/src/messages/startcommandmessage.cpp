@@ -50,6 +50,10 @@ namespace {
 
 namespace common {
 
+StartCommandMessage::StartCommandMessage()
+    : Message(std::string(StartCommandMessage::Type))
+{}
+
 void to_json(nlohmann::json& j, const StartCommandMessage& m) {
     j[Message::KeyType] = StartCommandMessage::Type;
     j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };

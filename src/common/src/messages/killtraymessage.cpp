@@ -36,6 +36,10 @@
 
 namespace common {
 
+KillTrayMessage::KillTrayMessage()
+    : Message(std::string(KillTrayMessage::Type))
+{}
+
 void to_json(nlohmann::json& j, const KillTrayMessage& m) {
     j[Message::KeyType] = KillTrayMessage::Type;
     j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };

@@ -137,14 +137,16 @@ void from_json(const nlohmann::json& j, Program& p) {
     // For backwards-compatibility with v1, we still support the option to provide the
     // clusters as an array of strings, in which case we have to manually wrap them
     nlohmann::json::array_t it = j.at(KeyClusters);
-    if (it[0].is_object()) {
-        j.at(KeyClusters).get_to(p.clusters);
-    }
-    else {
-        std::vector<std::string> clusters;
-        j.at(KeyClusters).get_to(clusters);
-        for (std::string cluster : clusters) {
-            p.clusters.push_back({ .name = std::move(cluster) });
+    if (!it.empty()) {
+        if (it[0].is_object()) {
+            j.at(KeyClusters).get_to(p.clusters);
+        }
+        else {
+            std::vector<std::string> clusters;
+            j.at(KeyClusters).get_to(clusters);
+            for (std::string cluster : clusters) {
+                p.clusters.push_back({ .name = std::move(cluster) });
+            }
         }
     }
 }

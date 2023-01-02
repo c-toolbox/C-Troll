@@ -38,6 +38,10 @@
 
 namespace common {
 
+TrayConnectedMessage::TrayConnectedMessage()
+    : Message(std::string(TrayConnectedMessage::Type))
+{}
+
 void to_json(nlohmann::json& j, const TrayConnectedMessage&) {
     j[Message::KeyType] = TrayConnectedMessage::Type;
     j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };

@@ -41,6 +41,10 @@ namespace {
 
 namespace common {
 
+ErrorOccurredMessage::ErrorOccurredMessage()
+    : Message(std::string(ErrorOccurredMessage::Type))
+{}
+
 void to_json(nlohmann::json& j, const ErrorOccurredMessage& m) {
     j[Message::KeyType] = ErrorOccurredMessage::Type;
     j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };

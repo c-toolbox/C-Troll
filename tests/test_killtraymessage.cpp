@@ -37,7 +37,7 @@
 #include "messages/killtraymessage.h"
 #include <nlohmann/json.hpp>
 
-TEST_CASE("(KillTrayMessage) Default Ctor", "[KillTrayMessage]") {
+TEST_CASE("KillTrayMessage Default Ctor", "[KillTrayMessage]") {
     common::KillTrayMessage msg;
 
 
@@ -46,21 +46,22 @@ TEST_CASE("(KillTrayMessage) Default Ctor", "[KillTrayMessage]") {
 
     common::KillTrayMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(KillTrayMessage) Correct Type", "[KillTrayMessage]") {
+TEST_CASE("KillTrayMessage Correct Type", "[KillTrayMessage]") {
     common::KillTrayMessage msg;
-
+    CHECK(msg.type == common::KillTrayMessage::Type);
 
     nlohmann::json j;
     to_json(j, msg);
 
     common::KillTrayMessage msgDeserialize;
     from_json(j, msgDeserialize);
-
-    REQUIRE(msgDeserialize.type == common::KillTrayMessage::Type);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.type == common::KillTrayMessage::Type);
 }

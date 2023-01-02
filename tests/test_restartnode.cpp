@@ -32,22 +32,36 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "messages/invalidauthmessage.h"
+#include "catch2/catch_test_macros.hpp"
 
-namespace common {
+#include "messages/restartnodemessage.h"
+#include <nlohmann/json.hpp>
 
-InvalidAuthMessage::InvalidAuthMessage()
-    : Message(std::string(InvalidAuthMessage::Type))
-{}
+TEST_CASE("RestartNodeMessage Default Ctor", "[RestartNodeMessage]") {
+    common::RestartNodeMessage msg;
 
-void to_json(nlohmann::json& j, const InvalidAuthMessage&) {
-    j[Message::KeyType] = InvalidAuthMessage::Type;
-    j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    common::RestartNodeMessage msgDeserialize;
+    from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
 }
 
-void from_json(const nlohmann::json& j, InvalidAuthMessage& m) {
-    validateMessage(j, InvalidAuthMessage::Type);
-    from_json(j, static_cast<Message&>(m));
-}
+TEST_CASE("RestartNodeMessage Correct Type", "[RestartNodeMessage]") {
+    common::RestartNodeMessage msg;
+    CHECK(msg.type == common::RestartNodeMessage::Type);
 
-} // namespace common
+    nlohmann::json j;
+    to_json(j, msg);
+
+    common::RestartNodeMessage msgDeserialize;
+    from_json(j, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.type == common::RestartNodeMessage::Type);
+}

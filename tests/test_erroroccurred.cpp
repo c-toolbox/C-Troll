@@ -37,7 +37,7 @@
 #include "messages/erroroccurredmessage.h"
 #include <nlohmann/json.hpp>
 
-TEST_CASE("(ErrorOccurred) Default Ctor", "[ErrorOccurred]") {
+TEST_CASE("ErrorOccurred Default Ctor", "[ErrorOccurred]") {
     common::ErrorOccurredMessage msg;
 
 
@@ -46,14 +46,16 @@ TEST_CASE("(ErrorOccurred) Default Ctor", "[ErrorOccurred]") {
 
     common::ErrorOccurredMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ErrorOccurred) Correct Type", "[ErrorOccurred]") {
+TEST_CASE("ErrorOccurred Correct Type", "[ErrorOccurred]") {
     common::ErrorOccurredMessage msg;
+    CHECK(msg.type == common::ErrorOccurredMessage::Type);
 
 
     nlohmann::json j;
@@ -61,11 +63,11 @@ TEST_CASE("(ErrorOccurred) Correct Type", "[ErrorOccurred]") {
 
     common::ErrorOccurredMessage msgDeserialize;
     from_json(j, msgDeserialize);
-
-    REQUIRE(msgDeserialize.type == common::ErrorOccurredMessage::Type);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.type == common::ErrorOccurredMessage::Type);
 }
 
-TEST_CASE("(ErrorOccurred) error", "[ErrorOccurred]") {
+TEST_CASE("ErrorOccurred.error", "[ErrorOccurred]") {
     common::ErrorOccurredMessage msg;
     msg.error = "foobar";
 
@@ -75,13 +77,15 @@ TEST_CASE("(ErrorOccurred) error", "[ErrorOccurred]") {
 
     common::ErrorOccurredMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.error == "foobar");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(ErrorOccurred) lastMessages", "[ErrorOccurred]") {
+TEST_CASE("ErrorOccurred.lastMessages", "[ErrorOccurred]") {
     common::ErrorOccurredMessage msg;
     msg.lastMessages.push_back("foo");
     msg.lastMessages.push_back("bar");
@@ -92,8 +96,35 @@ TEST_CASE("(ErrorOccurred) lastMessages", "[ErrorOccurred]") {
 
     common::ErrorOccurredMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    REQUIRE(msgDeserialize.lastMessages.size() == 2);
+    CHECK(msgDeserialize.lastMessages[0] == "foo");
+    CHECK(msgDeserialize.lastMessages[1] == "bar");
+    
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
+}
 
-    REQUIRE(j1 == j2);
+TEST_CASE("ErrorOccurred full", "[ErrorOccurred]") {
+    common::ErrorOccurredMessage msg;
+    msg.error = "foobar";
+    msg.lastMessages.push_back("foo");
+    msg.lastMessages.push_back("bar");
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    common::ErrorOccurredMessage msgDeserialize;
+    from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.error == "foobar");
+    REQUIRE(msgDeserialize.lastMessages.size() == 2);
+    CHECK(msgDeserialize.lastMessages[0] == "foo");
+    CHECK(msgDeserialize.lastMessages[1] == "bar");
+
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
 }

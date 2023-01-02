@@ -47,6 +47,8 @@ namespace common {
 struct StartCommandMessage : public Message {
     static constexpr std::string_view Type = "StartCommandMessage";
 
+    StartCommandMessage();
+
     /// The unique identifier for the process that will be created
     int id = -1;
     /// The name of the executable
@@ -65,6 +67,8 @@ struct StartCommandMessage : public Message {
     int clusterId = -1;
     int nodeId = -1;
     std::size_t dataHash = 0;
+
+    auto operator<=>(const StartCommandMessage& rhs) const = default;
 };
 
 void to_json(nlohmann::json& j, const StartCommandMessage& m);

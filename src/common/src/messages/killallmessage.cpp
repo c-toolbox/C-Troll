@@ -36,6 +36,10 @@
 
 namespace common {
 
+KillAllMessage::KillAllMessage()
+    : Message(std::string(KillAllMessage::Type))
+{}
+
 void to_json(nlohmann::json& j, const KillAllMessage& m) {
     j[Message::KeyType] = KillAllMessage::Type;
     j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };

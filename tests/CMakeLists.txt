@@ -33,17 +33,23 @@
 ##########################################################################################
 
 add_executable(UnitTest
+  # Configurations
   test_cluster.cpp
+  test_node.cpp
+  test_program.cpp
+
+  # Messages
   test_erroroccurred.cpp
   test_exitcommand.cpp
+  test_invalidauth.cpp
   test_killall.cpp
   test_killtraymessage.cpp
   test_message.cpp
-  test_node.cpp
   test_processoutput.cpp
   test_processstatusmessage.cpp
-  test_program.cpp
+  test_restartnode.cpp
   test_startcommandmessage.cpp
+  test_trayconnectedmessage.cpp
   test_traystatus.cpp
 )
 target_include_directories(UnitTest PUBLIC ${CMAKE_SOURCE_DIR}/ext/catch2/single_include)

@@ -37,7 +37,7 @@
 #include "messages/killallmessage.h"
 #include <nlohmann/json.hpp>
 
-TEST_CASE("(KillAll) Default Ctor", "[KillAll]") {
+TEST_CASE("KillAllMessage Default Ctor", "[KillAllMessage]") {
     common::KillAllMessage msg;
 
 
@@ -46,21 +46,22 @@ TEST_CASE("(KillAll) Default Ctor", "[KillAll]") {
 
     common::KillAllMessage msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(KillAll) Correct Type", "[KillAll]") {
+TEST_CASE("KillAllMessage Correct Type", "[KillAllMessage]") {
     common::KillAllMessage msg;
-
+    CHECK(msg.type == common::KillAllMessage::Type);
 
     nlohmann::json j;
     to_json(j, msg);
 
     common::KillAllMessage msgDeserialize;
     from_json(j, msgDeserialize);
-
-    REQUIRE(msgDeserialize.type == common::KillAllMessage::Type);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.type == common::KillAllMessage::Type);
 }

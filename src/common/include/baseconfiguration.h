@@ -45,6 +45,8 @@ struct BaseConfiguration {
     std::string clusterPath = "clusters";
     /// The path that contains the JSON objects describing the available nodes
     std::string nodePath = "nodes";
+
+    auto operator<=>(const BaseConfiguration& rhs) const = default;
 };
 
 void to_json(nlohmann::json& j, const BaseConfiguration& c);

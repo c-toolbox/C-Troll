@@ -43,6 +43,10 @@ namespace common {
 
 struct InvalidAuthMessage : public Message {
     static constexpr std::string_view Type = "InvalidAuthMessage";
+
+    InvalidAuthMessage();
+
+    auto operator<=>(const InvalidAuthMessage& rhs) const = default;
 };
 
 void to_json(nlohmann::json& j, const InvalidAuthMessage& m);

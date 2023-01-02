@@ -32,22 +32,37 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#include "messages/invalidauthmessage.h"
+#include "catch2/catch_test_macros.hpp"
 
-namespace common {
+#include "messages/trayconnectedmessage.h"
+#include <nlohmann/json.hpp>
 
-InvalidAuthMessage::InvalidAuthMessage()
-    : Message(std::string(InvalidAuthMessage::Type))
-{}
+TEST_CASE("TrayConnectedMessage Default Ctor", "[TrayConnectedMessage]") {
+    common::TrayConnectedMessage msg;
 
-void to_json(nlohmann::json& j, const InvalidAuthMessage&) {
-    j[Message::KeyType] = InvalidAuthMessage::Type;
-    j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    common::TrayConnectedMessage msgDeserialize;
+    from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
 }
 
-void from_json(const nlohmann::json& j, InvalidAuthMessage& m) {
-    validateMessage(j, InvalidAuthMessage::Type);
-    from_json(j, static_cast<Message&>(m));
-}
+TEST_CASE("TrayConnectedMessage Correct Type", "[TrayConnectedMessage]") {
+    common::TrayConnectedMessage msg;
+    CHECK(msg.type == common::TrayConnectedMessage::Type);
 
-} // namespace common
+
+    nlohmann::json j;
+    to_json(j, msg);
+
+    common::TrayConnectedMessage msgDeserialize;
+    from_json(j, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.type == common::TrayConnectedMessage::Type);
+}

@@ -93,6 +93,10 @@ namespace {
 
 namespace common {
 
+ProcessStatusMessage::ProcessStatusMessage()
+    : Message(std::string(ProcessStatusMessage::Type))
+{}
+
 void to_json(nlohmann::json& j, const ProcessStatusMessage& m) {
     j[Message::KeyType] = ProcessStatusMessage::Type;
     j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };

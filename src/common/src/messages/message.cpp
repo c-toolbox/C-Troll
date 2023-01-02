@@ -39,6 +39,10 @@
 
 namespace common {
 
+Message::Message(std::string type_)
+    : type(std::move(type_))
+{}
+
 void validateMessage(const nlohmann::json& message, std::string_view expectedType) {
     // Sanity checks
     const std::string type = message.at(Message::KeyType).get<std::string>();

@@ -37,7 +37,7 @@
 #include "program.h"
 #include <nlohmann/json.hpp>
 
-TEST_CASE("(Program) Default Ctor", "[Program]") {
+TEST_CASE("Program Default Ctor", "[Program]") {
     Program msg;
 
 
@@ -46,29 +46,14 @@ TEST_CASE("(Program) Default Ctor", "[Program]") {
 
     Program msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Program) id", "[Program]") {
-    Program msg;
-    msg.id = 13;
-
-
-    nlohmann::json j1;
-    to_json(j1, msg);
-
-    Program msgDeserialize;
-    from_json(j1, msgDeserialize);
-    nlohmann::json j2;
-    to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
-}
-
-TEST_CASE("(Program) name", "[Program]") {
+TEST_CASE("Program.name", "[Program]") {
     Program msg;
     msg.name = "foobar";
 
@@ -78,13 +63,15 @@ TEST_CASE("(Program) name", "[Program]") {
 
     Program msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.name == "foobar");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Program) executable", "[Program]") {
+TEST_CASE("Program.executable", "[Program]") {
     Program msg;
     msg.executable = "foobar";
 
@@ -94,13 +81,15 @@ TEST_CASE("(Program) executable", "[Program]") {
 
     Program msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.executable == "foobar");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Program) commandlineParameters", "[Program]") {
+TEST_CASE("Program.commandlineParameters", "[Program]") {
     Program msg;
     msg.commandlineParameters = "foobar";
 
@@ -110,13 +99,15 @@ TEST_CASE("(Program) commandlineParameters", "[Program]") {
 
     Program msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.commandlineParameters == "foobar");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Program) workingDirectory", "[Program]") {
+TEST_CASE("Program.workingDirectory", "[Program]") {
     Program msg;
     msg.workingDirectory = "foobar";
 
@@ -126,13 +117,15 @@ TEST_CASE("(Program) workingDirectory", "[Program]") {
 
     Program msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.workingDirectory == "foobar");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Program) shouldForwardMessages", "[Program]") {
+TEST_CASE("Program.shouldForwardMessages", "[Program]") {
     Program msg;
     msg.shouldForwardMessages = true;
 
@@ -142,13 +135,15 @@ TEST_CASE("(Program) shouldForwardMessages", "[Program]") {
 
     Program msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.shouldForwardMessages == true);
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Program) delay", "[Program]") {
+TEST_CASE("Program.delay", "[Program]") {
     Program msg;
     msg.delay = std::chrono::milliseconds(13);
 
@@ -158,13 +153,15 @@ TEST_CASE("(Program) delay", "[Program]") {
 
     Program msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.delay == std::chrono::milliseconds(13));
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Program) tags", "[Program]") {
+TEST_CASE("Program.tags", "[Program]") {
     Program msg;
     msg.tags.push_back("foo");
     msg.tags.push_back("bar");
@@ -175,13 +172,17 @@ TEST_CASE("(Program) tags", "[Program]") {
 
     Program msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    REQUIRE(msgDeserialize.tags.size() == 2);
+    CHECK(msgDeserialize.tags[0] == "foo");
+    CHECK(msgDeserialize.tags[1] == "bar");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Program) description", "[Program]") {
+TEST_CASE("Program.description", "[Program]") {
     Program msg;
     msg.description = "foobar";
 
@@ -191,16 +192,21 @@ TEST_CASE("(Program) description", "[Program]") {
 
     Program msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.description == "foobar");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Program) configurations", "[Program]") {
+TEST_CASE("Program.configurations", "[Program]") {
     Program msg;
     msg.configurations.push_back({
         Program::Configuration::ID(13), "foo", "bar", "baz"
+    });
+    msg.configurations.push_back({
+        Program::Configuration::ID(17), "fooz", "barz", "bazz"
     });
 
 
@@ -209,13 +215,85 @@ TEST_CASE("(Program) configurations", "[Program]") {
 
     Program msgDeserialize;
     from_json(j1, msgDeserialize);
+    // IDs are not serialized but bork up the equality check here, so we patch manually
+    REQUIRE(msgDeserialize.configurations.size() == 2);
+    msgDeserialize.configurations[0].id = Program::Configuration::ID(13);
+    msgDeserialize.configurations[1].id = Program::Configuration::ID(17);
+
+    CHECK(msg == msgDeserialize);
+    REQUIRE(msgDeserialize.configurations.size() == 2);
+    CHECK(msgDeserialize.configurations[0].name == "foo");
+    CHECK(msgDeserialize.configurations[0].parameters == "bar");
+    CHECK(msgDeserialize.configurations[0].description == "baz");
+    CHECK(msgDeserialize.configurations[1].name == "fooz");
+    CHECK(msgDeserialize.configurations[1].parameters == "barz");
+    CHECK(msgDeserialize.configurations[1].description == "bazz");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }
 
-TEST_CASE("(Program) clusters", "[Program]") {
+TEST_CASE("Program.clusters", "[Program]") {
+    Program msg;
+    msg.name = "foobar";
+    msg.executable = "foobar";
+    msg.commandlineParameters = "foobar";
+    msg.workingDirectory = "foobar";
+    msg.shouldForwardMessages = true;
+    msg.delay = std::chrono::milliseconds(13);
+    msg.tags.push_back("foo");
+    msg.tags.push_back("bar");
+    msg.description = "foobar";
+    msg.configurations.push_back({
+        Program::Configuration::ID(13), "foo", "bar", "baz"
+    });
+    msg.configurations.push_back({
+        Program::Configuration::ID(17), "fooz", "barz", "bazz"
+    });
+    msg.clusters.push_back({ "foo", "abc" });
+    msg.clusters.push_back({ "bar", "" });
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Program msgDeserialize;
+    from_json(j1, msgDeserialize);
+    // IDs are not serialized but bork up the equality check here, so we patch manually
+    REQUIRE(msgDeserialize.configurations.size() == 2);
+    msgDeserialize.configurations[0].id = Program::Configuration::ID(13);
+    msgDeserialize.configurations[1].id = Program::Configuration::ID(17);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.name == "foobar");
+    CHECK(msgDeserialize.executable == "foobar");
+    CHECK(msgDeserialize.commandlineParameters == "foobar");
+    CHECK(msgDeserialize.workingDirectory == "foobar");
+    CHECK(msgDeserialize.shouldForwardMessages == true);
+    CHECK(msgDeserialize.delay == std::chrono::milliseconds(13));
+    REQUIRE(msgDeserialize.tags.size() == 2);
+    CHECK(msgDeserialize.tags[0] == "foo");
+    CHECK(msgDeserialize.tags[1] == "bar");
+    CHECK(msgDeserialize.description == "foobar");
+    REQUIRE(msgDeserialize.configurations.size() == 2);
+    CHECK(msgDeserialize.configurations[0].name == "foo");
+    CHECK(msgDeserialize.configurations[0].parameters == "bar");
+    CHECK(msgDeserialize.configurations[0].description == "baz");
+    CHECK(msgDeserialize.configurations[1].name == "fooz");
+    CHECK(msgDeserialize.configurations[1].parameters == "barz");
+    CHECK(msgDeserialize.configurations[1].description == "bazz");
+    REQUIRE(msgDeserialize.clusters.size() == 2);
+    CHECK(msgDeserialize.clusters[0].name == "foo");
+    CHECK(msgDeserialize.clusters[0].parameters == "abc");
+    CHECK(msgDeserialize.clusters[1].name == "bar");
+    CHECK(msgDeserialize.clusters[1].parameters == "");
+
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
+}
+
+TEST_CASE("Program full", "[Program]") {
     Program msg;
     msg.clusters.push_back({ "foo", "abc" });
     msg.clusters.push_back({ "bar", "" });
@@ -226,95 +304,14 @@ TEST_CASE("(Program) clusters", "[Program]") {
 
     Program msgDeserialize;
     from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    REQUIRE(msgDeserialize.clusters.size() == 2);
+    CHECK(msgDeserialize.clusters[0].name == "foo");
+    CHECK(msgDeserialize.clusters[0].parameters == "abc");
+    CHECK(msgDeserialize.clusters[1].name == "bar");
+    CHECK(msgDeserialize.clusters[1].parameters == "");
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-TEST_CASE("(Program::Configuration) Default Ctor", "[Program::Configuration]") {
-    Program msg;
-
-
-    nlohmann::json j1;
-    to_json(j1, msg);
-
-    Program msgDeserialize;
-    from_json(j1, msgDeserialize);
-    nlohmann::json j2;
-    to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
-}
-
-TEST_CASE("(Program::Configuration) id", "[Program::Configuration]") {
-    Program msg;
-    Program::Configuration c;
-    c.id = 5;
-
-
-    nlohmann::json j1;
-    to_json(j1, msg);
-
-    Program msgDeserialize;
-    from_json(j1, msgDeserialize);
-    nlohmann::json j2;
-    to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
-}
-
-TEST_CASE("(Program::Configuration) name", "[Program::Configuration]") {
-    Program msg;
-    Program::Configuration c;
-    c.name = "foobar";
-
-
-    nlohmann::json j1;
-    to_json(j1, msg);
-
-    Program msgDeserialize;
-    from_json(j1, msgDeserialize);
-    nlohmann::json j2;
-    to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
-}
-
-TEST_CASE("(Program::Configuration) parameters", "[Program::Configuration]") {
-    Program msg;
-    Program::Configuration c;
-    c.parameters = "foobar";
-
-
-    nlohmann::json j1;
-    to_json(j1, msg);
-
-    Program msgDeserialize;
-    from_json(j1, msgDeserialize);
-    nlohmann::json j2;
-    to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
-}
-
-TEST_CASE("(Program::Configuration) description", "[Program::Configuration]") {
-    Program msg;
-    Program::Configuration c;
-    c.description = "foobar";
-
-
-    nlohmann::json j1;
-    to_json(j1, msg);
-
-    Program msgDeserialize;
-    from_json(j1, msgDeserialize);
-    nlohmann::json j2;
-    to_json(j2, msgDeserialize);
-
-    REQUIRE(j1 == j2);
+    CHECK(j1 == j2);
 }

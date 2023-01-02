@@ -36,6 +36,10 @@
 
 namespace common {
 
+RestartNodeMessage::RestartNodeMessage()
+    : Message(std::string(RestartNodeMessage::Type))
+{}
+
 void to_json(nlohmann::json& j, const RestartNodeMessage& m) {
     j[Message::KeyType] = RestartNodeMessage::Type;
     j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };

@@ -47,6 +47,9 @@ namespace common {
 struct ErrorOccurredMessage : public Message {
     static constexpr std::string_view Type = "ErrorOccurredMessage";
 
+    ErrorOccurredMessage();
+    auto operator<=>(const ErrorOccurredMessage& rhs) const = default;
+
     std::string error;
     std::vector<std::string> lastMessages;
 };
