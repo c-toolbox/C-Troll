@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -55,6 +55,7 @@ TEST_CASE("ExitCommandMessage Default Ctor", "[ExitCommandMessage]") {
 TEST_CASE("ExitCommandMessage Correct Type", "[ExitCommandMessage]") {
     common::ExitCommandMessage msg;
     CHECK(msg.type == common::ExitCommandMessage::Type);
+
 
     nlohmann::json j;
     to_json(j, msg);

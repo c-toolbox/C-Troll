@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -132,7 +132,7 @@ TEST_CASE("ProcessStatusMessage.status = NormalExit", "[ProcessStatusMessage]") 
     from_json(j1, msgDeserialize);
     CHECK(msg == msgDeserialize);
     CHECK(msgDeserialize.status == common::ProcessStatusMessage::Status::NormalExit);
-    
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
     CHECK(j1 == j2);

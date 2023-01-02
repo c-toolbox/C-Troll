@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -57,7 +57,7 @@ TEST_CASE("Cluster Default Ctor", "[Cluster]") {
 TEST_CASE("Cluster.name", "[Cluster]") {
     Cluster msg;
     msg.name = "foobar";
-    
+
 
     nlohmann::json j1;
     to_json(j1, msg);
@@ -66,7 +66,7 @@ TEST_CASE("Cluster.name", "[Cluster]") {
     from_json(j1, msgDeserialize);
     CHECK(msg == msgDeserialize);
     CHECK(msgDeserialize.name == "foobar");
-    
+
 
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
@@ -76,7 +76,7 @@ TEST_CASE("Cluster.name", "[Cluster]") {
 TEST_CASE("Cluster.isEnabled", "[Cluster]") {
     Cluster msg;
     msg.isEnabled = false;
-    
+
 
     nlohmann::json j1;
     to_json(j1, msg);
@@ -95,7 +95,7 @@ TEST_CASE("Cluster.isEnabled", "[Cluster]") {
 TEST_CASE("Cluster.description", "[Cluster]") {
     Cluster msg;
     msg.description = "foobar";
-    
+
 
     nlohmann::json j1;
     to_json(j1, msg);

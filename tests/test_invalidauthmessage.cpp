@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -47,7 +47,7 @@ TEST_CASE("InvalidAuthMessage Default Ctor", "[InvalidAuthMessage]") {
     common::InvalidAuthMessage msgDeserialize;
     from_json(j1, msgDeserialize);
     CHECK(msg == msgDeserialize);
-    
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
     CHECK(j1 == j2);
@@ -56,6 +56,7 @@ TEST_CASE("InvalidAuthMessage Default Ctor", "[InvalidAuthMessage]") {
 TEST_CASE("InvalidAuthMessage Correct Type", "[InvalidAuthMessage]") {
     common::InvalidAuthMessage msg;
     CHECK(msg.type == common::InvalidAuthMessage::Type);
+
 
     nlohmann::json j;
     to_json(j, msg);

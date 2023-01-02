@@ -1,7 +1,7 @@
 ##########################################################################################
 #                                                                                        #
-# Copyright (c) 2016 - 2023                                                              #
-# Alexander Bock, Erik Sunden, Emil Axelsson                                             #
+# Copyright (c) 2016-2023                                                                #
+# Alexander Bock                                                                         #
 #                                                                                        #
 # All rights reserved.                                                                   #
 #                                                                                        #
@@ -100,5 +100,16 @@ add_library(common
 )
 
 target_include_directories(common PUBLIC "include")
-target_link_libraries(common PUBLIC project_options fmt nlohmann_json nlohmann_json_schema_validator Qt::Core Qt::Widgets Qt::Network simplecrypt)
+target_link_libraries(
+  common
+  PUBLIC
+    project_options
+    fmt
+    nlohmann_json
+    nlohmann_json_schema_validator
+    Qt::Core
+    Qt::Widgets
+    Qt::Network
+    simplecrypt
+)
 qt_disable_unicode_defines(common)

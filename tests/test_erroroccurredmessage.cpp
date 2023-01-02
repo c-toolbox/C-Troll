@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -100,7 +100,7 @@ TEST_CASE("ErrorOccurred.lastMessages", "[ErrorOccurred]") {
     REQUIRE(msgDeserialize.lastMessages.size() == 2);
     CHECK(msgDeserialize.lastMessages[0] == "foo");
     CHECK(msgDeserialize.lastMessages[1] == "bar");
-    
+
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
     CHECK(j1 == j2);

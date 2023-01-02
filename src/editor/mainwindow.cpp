@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -188,14 +188,14 @@ void MainWindow::dropEvent(QDropEvent* event) {
     configPath.replace_extension(".json");
 
     ProgramDialog dialog = ProgramDialog(this, configPath.string(), _clusterPath);
-    
+
     std::string exe = p.string();
     if (exe.starts_with("file:///")) {
         using namespace std::string_view_literals;
         exe = exe.substr("file:///"sv.size());
     }
     dialog.setExecutableInformation(exe);
-    
+
     dialog.exec();
 }
 

@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -332,7 +332,7 @@ bool loadData(std::string_view programPath, std::string_view clusterPath,
     //  Nodes
     //
     gNodes.clear();
-    
+
     std::vector<Node> nodes;
     try {
         std::pair<std::vector<Node>, bool> res = loadNodesFromDirectory(nodePath);

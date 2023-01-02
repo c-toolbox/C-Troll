@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -70,7 +70,7 @@ namespace application {
 
 // This is the version of the JSON based socket API and its messages that are used to
 // communicate between C-Troll and the Tray. This version number should be updated
-// according to the following rules. 
+// according to the following rules.
 //
 // Update to major version
 //   - A new required message was added

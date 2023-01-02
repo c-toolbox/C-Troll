@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -56,6 +56,7 @@ TEST_CASE("ProcessOutputMessage Default Ctor", "[ProcessOutputMessage]") {
 TEST_CASE("ProcessOutputMessage Correct Type", "[ProcessOutputMessage]") {
     common::ProcessOutputMessage msg;
     CHECK(msg.type == common::ProcessOutputMessage::Type);
+
 
     nlohmann::json j;
     to_json(j, msg);

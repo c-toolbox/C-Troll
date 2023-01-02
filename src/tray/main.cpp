@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
         mw.move(pos->first, pos->second);
     }
 
-    Configuration config; 
+    Configuration config;
     try {
         config = common::loadConfiguration<Configuration>(
             "config-tray.json",

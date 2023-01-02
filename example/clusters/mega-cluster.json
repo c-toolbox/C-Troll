@@ -1,5 +1,5 @@
 {
-    "name": "Mega Cluster",
-    "enabled": true,
-    "nodes": [ "Local", "Office", "Laptop" ]
+  "name": "Mega Cluster",
+  "enabled": true,
+  "nodes": [ "Local", "Office", "Laptop" ]
 }

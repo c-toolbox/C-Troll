@@ -1,7 +1,7 @@
 ##########################################################################################
 #                                                                                        #
-# Copyright (c) 2016 - 2023                                                              #
-# Alexander Bock, Erik Sunden, Emil Axelsson                                             #
+# Copyright (c) 2016-2023                                                                #
+# Alexander Bock                                                                         #
 #                                                                                        #
 # All rights reserved.                                                                   #
 #                                                                                        #

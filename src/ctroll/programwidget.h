@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -195,7 +195,7 @@ public:
     ProgramsWidget();
 
     void processUpdated(Process::ID processId);
-    
+
     void selectTags(std::vector<std::string> tags);
 
 public slots:

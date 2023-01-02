@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -130,7 +130,7 @@ void ProgramButton::handleButtonPress() {
         // We disable the button until we get another message back from the tray
         setEnabled(false);
     }
-    
+
     if (hasAllProcessesRunning()) {
         emit stopProgram(_configuration->id);
 

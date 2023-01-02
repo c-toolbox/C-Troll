@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -77,7 +77,7 @@ ProgramDialog::ConfigurationWidget::ConfigurationWidget() {
 ProgramDialog::ClusterWidget::ClusterWidget(std::string cluster, std::string parameters) {
     QBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    
+
     label = new QLabel(QString::fromStdString(cluster));
     layout->addWidget(label);
     layout->setStretch(0, 2);
@@ -257,7 +257,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
         );
         editLayout->addWidget(_clusters, 15, 0, 1, 2);
     }
-    
+
     editLayout->addWidget(new Spacer, 16, 0, 1, 2);
 
     {

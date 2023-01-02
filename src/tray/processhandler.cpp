@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -252,7 +252,7 @@ void ProcessHandler::handleStarted() {
 
 void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     Debug("Process finished");
-    
+
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
 
     // Find specifc value in process map i.e. process
@@ -261,7 +261,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     // the _processes list immediately before the handleFinished function can be called
     if (p != _processes.end()) {
         Debug(fmt::format("Found process {}", p->processId));
-        
+
         common::ProcessStatusMessage msg;
         msg.processId = p->processId;
         if (p->wasUserTerminated) {
@@ -283,7 +283,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
 
 void ProcessHandler::handleReadyReadStandardError() {
     Debug("Reading stderr message");
-    
+
     QProcess* proc = qobject_cast<QProcess*>(QObject::sender());
 
     // Find specifc value in process map i.e. process
@@ -291,7 +291,7 @@ void ProcessHandler::handleReadyReadStandardError() {
     assert(p != _processes.end());
     if (p != _processes.end()) {
         Debug(fmt::format("Found process {}", p->processId));
-        
+
         // Send out the TrayProcessLogMessage with the stderror key
         common::ProcessOutputMessage msg;
         msg.processId = p->processId;
@@ -366,7 +366,7 @@ void ProcessHandler::createAndRunProcessFromCommandMessage(
                                                    const common::StartCommandMessage& cmd)
 {
     Debug("Starting process");
-    
+
     QProcess* proc = new QProcess(this);
 
     // Connect all process signals for logging feedback to core

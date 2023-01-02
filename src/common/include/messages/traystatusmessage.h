@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -55,7 +55,7 @@ struct TrayStatusMessage : public Message {
         int clusterId;
         int nodeId;
         std::size_t dataHash;
-      
+
         auto operator<=>(const ProcessInfo& rhs) const = default;
     };
 

@@ -1,7 +1,7 @@
 /*****************************************************************************************
  *                                                                                       *
- * Copyright (c) 2016-2023                                                             *
- * Alexander Bock, Erik Sunden, Emil Axelsson                                            *
+ * Copyright (c) 2016-2023                                                               *
+ * Alexander Bock                                                                        *
  *                                                                                       *
  * All rights reserved.                                                                  *
  *                                                                                       *
@@ -56,6 +56,7 @@ TEST_CASE("KillTrayMessage Default Ctor", "[KillTrayMessage]") {
 TEST_CASE("KillTrayMessage Correct Type", "[KillTrayMessage]") {
     common::KillTrayMessage msg;
     CHECK(msg.type == common::KillTrayMessage::Type);
+
 
     nlohmann::json j;
     to_json(j, msg);

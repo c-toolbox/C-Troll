@@ -1,7 +1,7 @@
 ##########################################################################################
 #                                                                                        #
-# Copyright (c) 2016 - 2023                                                              #
-# Alexander Bock, Erik Sundén, Emil Axelsson                                             #
+# Copyright (c) 2016-2023                                                                #
+# Alexander Bock, Erik Sundén                                                            #
 #                                                                                        #
 # All rights reserved.                                                                   #
 #                                                                                        #
@@ -73,8 +73,6 @@ target_compile_options(project_options INTERFACE
 )
 
 target_precompile_headers(project_options INTERFACE <vector> <string> <map> <utility>)
-
-
 
 
 add_subdirectory(common)
