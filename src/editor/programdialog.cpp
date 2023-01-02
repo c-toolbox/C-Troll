@@ -59,18 +59,19 @@ ProgramDialog::ConfigurationWidget::ConfigurationWidget() {
     name = new QLineEdit;
     name->setToolTip("The user-facing name of this configuration");
     layout->addWidget(name);
-    layout->setStretch(0, 2);
+    layout->setStretch(0, 3);
 
     parameters = new QLineEdit;
     parameters->setToolTip("Additional commandline parameters that are passed");
     parameters->setPlaceholderText("optional");
     layout->addWidget(parameters);
-    //layout->setStretch(0, 2);
+    layout->setStretch(1, 2);
 
     description = new QLineEdit;
     description->setToolTip("Additional user information about this configuration");
     description->setPlaceholderText("optional");
     layout->addWidget(description);
+    layout->setStretch(2, 2);
 }
 
 ProgramDialog::ClusterWidget::ClusterWidget(std::string cluster, std::string parameters) {
@@ -79,14 +80,14 @@ ProgramDialog::ClusterWidget::ClusterWidget(std::string cluster, std::string par
     
     label = new QLabel(QString::fromStdString(cluster));
     layout->addWidget(label);
-    layout->setStretch(0, 3);
+    layout->setStretch(0, 2);
 
     arguments = new QLineEdit;
     arguments->setText(QString::fromStdString(parameters));
     arguments->setToolTip("Additional commandline parameters that are passed");
     arguments->setPlaceholderText("optional");
     layout->addWidget(arguments);
-    layout->setStretch(1, 2);
+    layout->setStretch(1, 3);
 }
 
 bool operator==(const Cluster& c, const std::string& name) {
@@ -342,7 +343,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 }
             );
             if (it == clusters.first.end()) {
-                c->setObjectName("invalid");
+                c->label->setObjectName("invalid");
                 c->setToolTip("Could not find cluster in clusters folder");
             }
         }
