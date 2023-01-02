@@ -63,11 +63,17 @@ void from_json(const nlohmann::json& j, Node& n) {
 }
 
 void to_json(nlohmann::json& j, const Node& n) {
+    Node def;
+
     j[KeyName] = n.name;
     j[KeyIpAddress] = n.ipAddress;
     j[KeyPort] = n.port;
-    j[KeySecret] = n.secret;
-    j[KeyDescription] = n.description;
+    if (n.secret != def.secret) {
+        j[KeySecret] = n.secret;
+    }
+    if (n.description != def.description) {
+        j[KeyDescription] = n.description;
+    }
 }
 
 std::pair<std::vector<Node>, bool> loadNodesFromDirectory(std::string_view directory) {

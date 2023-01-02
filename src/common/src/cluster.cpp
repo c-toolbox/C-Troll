@@ -61,9 +61,13 @@ void from_json(const nlohmann::json& j, Cluster& c) {
 }
 
 void to_json(nlohmann::json& j, const Cluster& c) {
+    Cluster def;
+
     j[KeyName] = c.name;
     j[KeyEnabled] = c.isEnabled;
-    j[KeyDescription] = c.description;
+    if (c.description != def.description) {
+        j[KeyDescription] = c.description;
+    }
     j[KeyNodes] = c.nodes;
 }
 

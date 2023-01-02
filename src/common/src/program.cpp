@@ -73,9 +73,13 @@ void from_json(const nlohmann::json& j, Program::Configuration& p) {
 }
 
 void to_json(nlohmann::json& j, const Program::Configuration& p) {
+    Program::Configuration def;
+
     j[KeyConfigurationName] = p.name;
     j[KeyConfigurationParameters] = p.parameters;
-    j[KeyConfigurationDescription] = p.description;
+    if (p.description != def.description) {
+        j[KeyConfigurationDescription] = p.description;
+    }
 }
 
 void from_json(const nlohmann::json& j, Program::Cluster& c) {
@@ -86,8 +90,10 @@ void from_json(const nlohmann::json& j, Program::Cluster& c) {
 }
 
 void to_json(nlohmann::json& j, const Program::Cluster& c) {
+    Program::Cluster def;
+
     j[KeyClusterName] = c.name;
-    if (!c.parameters.empty()) {
+    if (c.parameters != def.parameters) {
         j[KeyClusterParameters] = c.parameters;
     }
 }
@@ -144,26 +150,32 @@ void from_json(const nlohmann::json& j, Program& p) {
 }
 
 void to_json(nlohmann::json& j, const Program& p) {
+    Program def;
+
     j[KeyName] = p.name;
     j[KeyExecutable] = p.executable;
-    if (!p.commandlineParameters.empty()) {
+    if (p.commandlineParameters != def.commandlineParameters) {
         j[KeyCommandlineParameters] = p.commandlineParameters;
     }
-    if (!p.workingDirectory.empty()) {
+    if (p.workingDirectory != def.workingDirectory) {
         j[KeyWorkingDirectory] = p.workingDirectory;
     }
-    if (!p.tags.empty()) {
+    if (p.tags != def.tags) {
         j[KeyTags] = p.tags;
     }
-    if (!p.description.empty()) {
+    if (p.description != def.description) {
         j[KeyDescription] = p.description;
     }
-    j[KeySendConsole] = p.shouldForwardMessages;
-    j[KeyEnabled] = p.isEnabled;
-    if (p.delay.has_value()) {
+    if (p.shouldForwardMessages != def.shouldForwardMessages) {
+        j[KeySendConsole] = p.shouldForwardMessages;
+    }
+    if (p.isEnabled != def.isEnabled) {
+        j[KeyEnabled] = p.isEnabled;
+    }
+    if (p.delay != def.delay && p.delay.has_value() ) {
         j[KeyDelay] = p.delay->count();
     }
-    if (!p.preStart.empty()) {
+    if (p.preStart != def.preStart) {
         j[KeyPreStart] = p.preStart;
     }
     j[KeyConfigurations] = p.configurations;
