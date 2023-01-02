@@ -39,18 +39,18 @@ add_executable(UnitTest
   test_program.cpp
 
   # Messages
-  test_erroroccurred.cpp
-  test_exitcommand.cpp
-  test_invalidauth.cpp
-  test_killall.cpp
+  test_erroroccurredmessage.cpp
+  test_exitcommandmessage.cpp
+  test_invalidauthmessage.cpp
+  test_killallmessage.cpp
   test_killtraymessage.cpp
   test_message.cpp
-  test_processoutput.cpp
+  test_processoutputmessage.cpp
   test_processstatusmessage.cpp
-  test_restartnode.cpp
+  test_restartnodemessage.cpp
   test_startcommandmessage.cpp
   test_trayconnectedmessage.cpp
-  test_traystatus.cpp
+  test_traystatusmessage.cpp
 )
 target_include_directories(UnitTest PUBLIC ${CMAKE_SOURCE_DIR}/ext/catch2/single_include)
 target_link_libraries(UnitTest PUBLIC common Catch2WithMain)
