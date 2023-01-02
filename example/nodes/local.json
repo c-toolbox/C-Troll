@@ -1,5 +1,5 @@
 {
-  "description": "asd",
+  "description": "The local machine",
   "ip": "localhost",
   "name": "Local",
   "port": 5000

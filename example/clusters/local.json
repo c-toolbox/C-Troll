@@ -1,5 +1,5 @@
 {
-  "description": "abc",
+  "description": "A local cluster",
   "enabled": true,
   "name": "Local",
   "nodes": [

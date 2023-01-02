@@ -35,8 +35,11 @@
 add_executable(UnitTest
   # Configurations
   test_cluster.cpp
+  test_cluster_examples.cpp
   test_node.cpp
+  test_node_examples.cpp
   test_program.cpp
+  test_program_examples.cpp
 
   # Messages
   test_erroroccurredmessage.cpp

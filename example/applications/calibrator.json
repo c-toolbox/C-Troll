@@ -1,0 +1,21 @@
+{
+  "name": "Calibrator",
+  "executable": "A:/Calibrator/calibrator.exe",
+  "workingDirectory": "A:/Calibrator",
+  "tags": [ "test" ],
+  "configurations": [
+    {
+      "name": "Default",
+      "parameters": ""
+    },
+    {
+      "name": "Fancy",
+      "parameters": "-foo bar"
+    }
+  ],
+  "clusters": [
+    "Local",
+    "Local+Office",
+    "Local+Home"
+  ]
+}

@@ -143,6 +143,24 @@ TEST_CASE("Program.shouldForwardMessages", "[Program]") {
     CHECK(j1 == j2);
 }
 
+TEST_CASE("Program.isEnabled", "[Program]") {
+    Program msg;
+    msg.isEnabled = false;
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Program msgDeserialize;
+    from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.isEnabled == false);
+
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
+}
+
 TEST_CASE("Program.delay", "[Program]") {
     Program msg;
     msg.delay = std::chrono::milliseconds(13);
@@ -155,6 +173,24 @@ TEST_CASE("Program.delay", "[Program]") {
     from_json(j1, msgDeserialize);
     CHECK(msg == msgDeserialize);
     CHECK(msgDeserialize.delay == std::chrono::milliseconds(13));
+
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
+}
+
+TEST_CASE("Program.preStart", "[Program]") {
+    Program msg;
+    msg.preStart = "abc";
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Program msgDeserialize;
+    from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.preStart == "abc");
 
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
@@ -241,7 +277,9 @@ TEST_CASE("Program.clusters", "[Program]") {
     msg.commandlineParameters = "foobar";
     msg.workingDirectory = "foobar";
     msg.shouldForwardMessages = true;
+    msg.isEnabled = false;
     msg.delay = std::chrono::milliseconds(13);
+    msg.preStart = "barfoo";
     msg.tags.push_back("foo");
     msg.tags.push_back("bar");
     msg.description = "foobar";
@@ -270,7 +308,9 @@ TEST_CASE("Program.clusters", "[Program]") {
     CHECK(msgDeserialize.commandlineParameters == "foobar");
     CHECK(msgDeserialize.workingDirectory == "foobar");
     CHECK(msgDeserialize.shouldForwardMessages == true);
+    CHECK(msgDeserialize.isEnabled == false);
     CHECK(msgDeserialize.delay == std::chrono::milliseconds(13));
+    CHECK(msgDeserialize.preStart == "barfoo");
     REQUIRE(msgDeserialize.tags.size() == 2);
     CHECK(msgDeserialize.tags[0] == "foo");
     CHECK(msgDeserialize.tags[1] == "bar");
@@ -314,4 +354,55 @@ TEST_CASE("Program full", "[Program]") {
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
     CHECK(j1 == j2);
+}
+
+TEST_CASE("Program v1->v2 upgrade", "[Program]") {
+    using namespace nlohmann;
+
+    // Moving from version 1 to version 2 we changed the 'clusters' tag from an array of
+    // strings to an array of objects with 'name' + 'parameter' properties. To make
+    // transitioning easier, we convert the old style into new style while loading
+
+    json confV1 = R"(
+{
+  "name": "name",
+  "executable": "exe",
+  "configurations": [ { "name": "Default" } ],
+  "clusters": [
+    "Cluster1", "Cluster2", "Cluster3"
+  ]
+}
+)"_json;
+
+    json confV2 = R"(
+{
+  "name": "name",
+  "executable": "exe",
+  "configurations": [ { "name": "Default" } ],
+  "clusters": [
+    { "name": "Cluster1" },
+    { "name": "Cluster2" },
+    { "name": "Cluster3" }
+  ]
+}
+)"_json;
+
+    Program v1 = confV1;
+    REQUIRE(v1.clusters.size() == 3);
+    CHECK(v1.clusters[0].name == "Cluster1");
+    CHECK(v1.clusters[0].parameters.empty());
+    CHECK(v1.clusters[1].name == "Cluster2");
+    CHECK(v1.clusters[1].parameters.empty());
+    CHECK(v1.clusters[2].name == "Cluster3");
+    CHECK(v1.clusters[2].parameters.empty());
+    Program v2 = confV2;
+    REQUIRE(v2.clusters.size() == 3);
+    CHECK(v2.clusters[0].name == "Cluster1");
+    CHECK(v2.clusters[0].parameters.empty());
+    CHECK(v2.clusters[1].name == "Cluster2");
+    CHECK(v2.clusters[1].parameters.empty());
+    CHECK(v2.clusters[2].name == "Cluster3");
+    CHECK(v2.clusters[2].parameters.empty());
+
+    CHECK(v1 == v2);
 }
