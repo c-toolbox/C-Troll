@@ -111,12 +111,20 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     editLayout->addWidget(new QLabel("Name:"), 0, 0);
     _name = new QLineEdit;
     _name->setToolTip("The name of this program");
+    connect(
+        _name, &QLineEdit::textChanged,
+        this, &ProgramDialog::updateSaveButton
+    );
     editLayout->addWidget(_name, 0, 1);
 
     editLayout->addWidget(new QLabel("Executable:"), 1, 0);
     _executable = new QLineEdit;
     _executable->setToolTip(
         "The command that will be executed when this program is started"
+    );
+    connect(
+        _executable, &QLineEdit::textChanged,
+        this, &ProgramDialog::updateSaveButton
     );
     editLayout->addWidget(_executable, 1, 1);
 
