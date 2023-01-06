@@ -201,34 +201,38 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
 
 void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     QProcess* process = qobject_cast<QProcess*>(QObject::sender());
+    std::string err = QMetaEnum::fromType<QProcess::ProcessError>().valueToKey(error);
+    Log("Process Error", err);
 
     // Find specifc value in process map i.e. process
     const auto p = processIt(process);
+    if (p == _processes.end()) {
+        // This shouldn't normally happen, but if it does it would cause the Tray to crash
+        // which is something we want to prevent at all costs
+        return;
+    }
+
     if (p->wasUserTerminated && error == QProcess::Crashed) {
-        // If the processe was terminated on behest of the user, than this error message
+        // If the process was terminated on behest of the user, than this error message
         // is going to be the error that tells us that the program "crashed", which we
         // don't want to sent to the UI as it would be confusing. If the user wanted to
         // terminate the process, they wouldn't expect it to show up as crashed instead
         return;
     }
 
-    std::string err = QMetaEnum::fromType<QProcess::ProcessError>().valueToKey(error);
-    Log("Process Error", err);
-    if (p != _processes.end()) {
-        Debug(fmt::format("Found process {}", p->processId));
-        common::ProcessStatusMessage msg;
-        msg.processId = p->processId;
-        msg.status = toTrayStatus(error);
-        emit sendSocketMessage(msg);
+    Debug(fmt::format("Found process {}", p->processId));
+    common::ProcessStatusMessage msg;
+    msg.processId = p->processId;
+    msg.status = toTrayStatus(error);
+    emit sendSocketMessage(msg);
 
-        // The FailedToStart error is handled differently since that is the one that will
-        // not also lead to a `handleFinished` call
-        if (error == QProcess::ProcessError::FailedToStart) {
-            Debug(fmt::format("Removing process {}", p->processId));
-            ProcessInfo info = *p;
-            _processes.erase(p);
-            emit closedProcess(info);
-        }
+    // The FailedToStart error is handled differently since that is the one that will
+    // not also lead to a `handleFinished` call
+    if (error == QProcess::ProcessError::FailedToStart) {
+        Debug(fmt::format("Removing process {}", p->processId));
+        ProcessInfo info = *p;
+        _processes.erase(p);
+        emit closedProcess(info);
     }
 }
 
@@ -395,15 +399,16 @@ void ProcessHandler::createAndRunProcessFromCommandMessage(
     connect(proc, &QProcess::started, this, &ProcessHandler::handleStarted);
 
     // Insert command identifier and process into out lists
-    ProcessInfo info;
-    info.processId = cmd.id;
-    info.process = proc;
-    info.executable = cmd.executable;
-    info.programId = cmd.programId;
-    info.configurationId = cmd.configurationId;
-    info.clusterId = cmd.clusterId;
-    info.nodeId = cmd.nodeId;
-    info.dataHash = cmd.dataHash;
+    ProcessInfo info = {
+        .processId = cmd.id,
+        .process = proc,
+        .executable = cmd.executable,
+        .programId = cmd.programId,
+        .configurationId = cmd.configurationId,
+        .clusterId = cmd.clusterId,
+        .nodeId = cmd.nodeId,
+        .dataHash = cmd.dataHash
+    };
     _processes.push_back(info);
 
     // Run the process with the command

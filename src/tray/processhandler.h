@@ -48,8 +48,8 @@ class ProcessHandler : public QObject {
 Q_OBJECT
 public:
     struct ProcessInfo {
-        int processId;
-        QProcess* process;
+        int processId = -1;
+        QProcess* process = nullptr;
 
         std::string executable;
 

@@ -192,17 +192,6 @@ ProcessWidget::~ProcessWidget() {
     delete _messageContainer;
 }
 
-void ProcessWidget::removeFromLayout(QGridLayout* layout) {
-    layout->removeWidget(_programInfo);
-    layout->removeWidget(_configurationInfo);
-    layout->removeWidget(_clusterInfo);
-    layout->removeWidget(_processIdInfo);
-    layout->removeWidget(_status);
-    layout->removeWidget(_showOutput);
-    layout->removeWidget(_killProcess);
-    layout->removeWidget(_remove);
-}
-
 QWidget* ProcessWidget::createMessageContainer() {
     QWidget* container = new QWidget;
     std::string title = fmt::format("C-Troll | Process: {}", _processId.v);

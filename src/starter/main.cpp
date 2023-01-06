@@ -50,7 +50,7 @@ namespace {
         "Example: Starter localhost:8000 Calc Local Default my-user my-password";
 } // namespace
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
     if (argc != 5 && argc != 7) {
         std::cout << HelpMessage;
         exit(EXIT_FAILURE);

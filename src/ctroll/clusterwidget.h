@@ -57,7 +57,7 @@ public:
     };
 
     void setStatus(Status status);
-    void paintEvent(QPaintEvent*);
+    void paintEvent(QPaintEvent*) override;
 };
 
 
@@ -67,7 +67,7 @@ public:
 class NodeWidget : public QGroupBox {
 Q_OBJECT
 public:
-    NodeWidget(const Node& node);
+    explicit NodeWidget(const Node& node);
 
     void updateConnectionStatus();
 
@@ -92,7 +92,7 @@ private:
 class ClusterWidget : public QGroupBox {
 Q_OBJECT
 public:
-    ClusterWidget(const Cluster& cluster);
+    explicit ClusterWidget(const Cluster& cluster);
 
     void updateConnectionStatus(Node::ID nodeId);
 

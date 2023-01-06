@@ -157,7 +157,7 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     bool anyMissingTags = std::any_of(
         defaultTags.begin(),
         defaultTags.end(),
-        [&allTags](std::string tag) { return allTags.find(tag) == allTags.end(); }
+        [&allTags](const std::string& tag) { return allTags.find(tag) == allTags.end(); }
     );
     if (anyMissingTags) {
         Log(
@@ -170,7 +170,9 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
             std::remove_if(
                 defaultTags.begin(),
                 defaultTags.end(),
-                [&allTags](std::string tag) { return allTags.find(tag) == allTags.end(); }
+                [&allTags](const std::string& tag) {
+                    return allTags.find(tag) == allTags.end();
+                }
             ),
             defaultTags.end()
         );

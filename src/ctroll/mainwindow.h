@@ -72,8 +72,8 @@ private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
 protected:
-    void closeEvent(QCloseEvent* event);
-    void changeEvent(QEvent* event);
+    void closeEvent(QCloseEvent* event) override;
+    void changeEvent(QEvent* event) override;
 
 private:
     void startProgram(Cluster::ID clusterId, Program::ID programId,

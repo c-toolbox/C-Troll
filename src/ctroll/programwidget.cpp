@@ -449,7 +449,7 @@ void TagsWidget::addTag(std::string tag) {
     _buttons[tag] = button;
 }
 
-void TagsWidget::removeTag(std::string tag) {
+void TagsWidget::removeTag(const std::string& tag) {
     auto it = _buttons.find(tag);
     assert(it != _buttons.end());
     _layout->removeWidget(it->second);
@@ -612,7 +612,7 @@ QWidget* ProgramsWidget::createControls() {
     }
     connect(
         _availableTags, &TagsWidget::pickedTag,
-        [this](std::string tag) {
+        [this](const std::string& tag) {
             _availableTags->removeTag(tag);
             _selectedTags->addTag(tag);
 
@@ -625,7 +625,7 @@ QWidget* ProgramsWidget::createControls() {
     _selectedTags = new TagsWidget("Selection");
     connect(
         _selectedTags, &TagsWidget::pickedTag,
-        [this](std::string tag) {
+        [this](const std::string& tag) {
             _selectedTags->removeTag(tag);
             _availableTags->addTag(tag);
 

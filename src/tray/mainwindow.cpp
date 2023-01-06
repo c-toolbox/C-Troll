@@ -97,11 +97,11 @@ void MainWindow::closedConnection(const std::string& peerAddress) {
 }
 
 void MainWindow::newProcess(ProcessHandler::ProcessInfo process) {
-    _centralWidget->newProcess(process);
+    _centralWidget->newProcess(std::move(process));
 }
 
 void MainWindow::endedProcess(ProcessHandler::ProcessInfo process) {
-    _centralWidget->endedProcess(process);
+    _centralWidget->endedProcess(std::move(process));
 }
 
 // The method that handles the closing event of the application window

@@ -57,7 +57,6 @@ public:
     ~ProcessWidget();
 
     void addToLayout(QGridLayout* layout, int row);
-    void removeFromLayout(QGridLayout* layout);
 
     void updateStatus();
     void addMessage(common::ProcessOutputMessage message);

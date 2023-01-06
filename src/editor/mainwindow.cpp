@@ -214,13 +214,13 @@ std::string MainWindow::newFilePath(const std::string& path) {
 }
 
 void MainWindow::editNode(std::string path) {
-    NodeDialog(this, path).exec();
+    NodeDialog(this, std::move(path)).exec();
 }
 
 void MainWindow::editCluster(std::string path) {
-    ClusterDialog(this, path, _nodePath).exec();
+    ClusterDialog(this, std::move(path), _nodePath).exec();
 }
 
 void MainWindow::editProgram(std::string path) {
-    ProgramDialog(this, path, _clusterPath).exec();
+    ProgramDialog(this, std::move(path), _clusterPath).exec();
 }

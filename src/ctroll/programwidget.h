@@ -119,7 +119,7 @@ private:
 class TagInfoWidget : public QWidget {
 Q_OBJECT
 public:
-    TagInfoWidget(const std::vector<std::string>& tags);
+    explicit TagInfoWidget(const std::vector<std::string>& tags);
 };
 
 
@@ -129,7 +129,7 @@ public:
 class ProgramWidget : public QGroupBox {
 Q_OBJECT
 public:
-    ProgramWidget(const Program& program);
+    explicit ProgramWidget(const Program& program);
 
     void updateStatus(Cluster::ID clusterId);
     void processUpdated(Process::ID processId);
@@ -152,10 +152,10 @@ private:
 class TagsWidget : public QGroupBox {
 Q_OBJECT
 public:
-    TagsWidget(QString title);
+    explicit TagsWidget(QString title);
 
     void addTag(std::string tag);
-    void removeTag(std::string tag);
+    void removeTag(const std::string& tag);
     std::vector<std::string> tags() const;
 
 signals:
@@ -174,7 +174,7 @@ private:
 class CustomProgramWidget : public QWidget {
 Q_OBJECT
 public:
-    CustomProgramWidget(QWidget* parent = nullptr);
+    explicit CustomProgramWidget(QWidget* parent = nullptr);
 
 signals:
     void startCustomProgram(Node::ID nodeId, std::string executable,
@@ -192,7 +192,7 @@ private:
 class ProgramsWidget : public QWidget {
 Q_OBJECT
 public:
-    ProgramsWidget();
+    explicit ProgramsWidget();
 
     void processUpdated(Process::ID processId);
 
