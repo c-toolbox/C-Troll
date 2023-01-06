@@ -132,7 +132,7 @@ void Log::logMessage(std::string category, std::string message) {
 
 void Log::logDebugMessage(std::string category, std::string message) {
     if (_log && _log->_shouldLogDebug) {
-        logMessage(std::move(category), "{Debug} " + message);
+        logMessage(std::move(category), "{Debug} " + std::move(message));
     }
 
     // No else case since we don't want to log debug messages before we have a log
