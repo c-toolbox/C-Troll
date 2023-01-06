@@ -23,7 +23,7 @@ parallel tools: {
     stage('tools/cppcheck/create') {
       createDirectory('build');
       sh(
-        script: 'cppcheck -j 4 --platform=win64 --enable=all --quiet --xml --xml-version=2 -I src/common/include -I ext/fmt/include --suppress=*:ext/fmt/include -I ext/json/include --suppress=*:ext/json/include -I ext/simplecrypt/include --suppress=*:ext/simplecrypt/include src 2> build/cppcheck.xml',
+        script: 'cppcheck --platform=win64 --enable=all --quiet --xml --xml-version=2 -I src/common/include -I ext/fmt/include --suppress=*:ext/fmt/include/* -I ext/json/include --suppress=*:ext/json/include/* -I ext/simplecrypt/include --suppress=*:ext/simplecrypt/include/* src 2> build/cppcheck.xml',
         label: 'Run CPPCheck'
       )
       recordIssues(
