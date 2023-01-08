@@ -126,29 +126,30 @@ programs--ProgramsWidget  programs--TagsWidget  QPushButton:open {
   /* background-color is specified in the C++ source code */
 }
 
-/* programs--ProgramsWidget  QComboBox::item {
-  height: 10px;
-  margin: 5px 0 0 5px;
-  padding: 6px 0 5px 20px;
-
-
-}
-
-QComboBox QAbstractItemView
-{
-   color:#ccc;
-   background-color:#333;
-   border:none;
-   selection-background-color:#1c1c1c;
-   selection-color: #ccc;
-   min-height: 5em;
-} */
-
 programs--ProgramWidget  programs--TagInfoWidget {
   min-width: 0.5em;
   max-width: 1.25em;
 }
 
+programs--ProgramWidget   QPushButton#gotoFolder {
+  background-color: transparent;
+
+  margin: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  border-width: 0px;
+  border-radius: 5px;
+}
+
+programs--ProgramWidget   QPushButton#gotoFolder:hover {
+  /* background-color: #ff0000; */
+  border: 1px outset #acacac;
+}
+
+programs--ProgramWidget   QPushButton#gotoFolder:pressed {
+  background-color: #2c2c2c;
+  border: 1px outset #acacac;
+}
 
 /*
  * ClusterWidget
@@ -276,7 +277,7 @@ ProcessesWidget  QPushButton#removeprocess:disabled {
 }
 
 /*
- * ConfigurationWidget
+ * SettingsWidget
  */
 SettingsWidget  QLineEdit, QSpinBox {
   font-size: 10pt;

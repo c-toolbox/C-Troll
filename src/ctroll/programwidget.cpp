@@ -41,6 +41,7 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QDesktopServices>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -378,6 +379,31 @@ ProgramWidget::ProgramWidget(const Program& program)
 
         _widgets[cluster->id] = w;
         layout->addWidget(w);
+    }
+
+
+    // Only add the button if the program exists on this machine
+    if (std::filesystem::exists(program.executable)) {
+        QPushButton* gotoFolder = new QPushButton;
+        gotoFolder->setObjectName("gotoFolder");
+        gotoFolder->setIcon(QIcon(":/images/goto.png"));
+        gotoFolder->setFlat(true);
+        gotoFolder->setContentsMargins(0, 0, 0, 0);
+        gotoFolder->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
+        gotoFolder->setToolTip(
+            "Open the explorer to the directory where this program is located on this "
+            "machine"
+        );
+        connect(
+            gotoFolder, &QPushButton::clicked,
+            [exe = program.executable]() {
+                std::string path = fmt::format(
+                    "file:///{}", std::filesystem::path(exe).parent_path().string()
+                );
+                QDesktopServices::openUrl(QString::fromStdString(path));
+            }
+        );
+        layout->addWidget(gotoFolder);
     }
 }
 
