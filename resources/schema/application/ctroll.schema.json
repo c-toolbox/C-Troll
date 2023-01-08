@@ -121,6 +121,11 @@
         }
       }
     },
+    "showShutdownButton": {
+      "type": "boolean",
+      "title": "Show shut down buttons",
+      "description": "If this is set to true, the cluster widgets will show the option to completely shut down the nodes in addition to restarting them."
+    },
     "restLoopback": {
       "$ref": "#/$defs/rest",
       "title": "REST API for Loopback connections",
