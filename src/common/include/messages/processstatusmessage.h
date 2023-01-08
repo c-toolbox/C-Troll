@@ -48,6 +48,7 @@ struct ProcessStatusMessage : public Message {
     static constexpr std::string_view Type = "ProcessStatusMessage";
 
     ProcessStatusMessage();
+    auto operator<=>(const ProcessStatusMessage& rhs) const = default;
 
     enum class Status : int {
         Unknown = -1,
@@ -66,8 +67,6 @@ struct ProcessStatusMessage : public Message {
     int processId = -1;
     /// The process status
     Status status = Status::Unknown;
-
-    auto operator<=>(const ProcessStatusMessage& rhs) const = default;
 };
 
 void to_json(nlohmann::json& j, const ProcessStatusMessage& m);

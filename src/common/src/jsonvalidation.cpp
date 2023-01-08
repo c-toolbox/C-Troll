@@ -37,10 +37,6 @@
 #include <nlohmann/json-schema.hpp>
 #include <QFile>
 
-namespace {
-    //nlohmann::json_schema::json_validator ApplicationCTroll
-} // namespace
-
 namespace validation {
 
 void ErrorHandler::error(const nlohmann::json::json_pointer& ptr,

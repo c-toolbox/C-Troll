@@ -139,6 +139,39 @@ namespace {
         }
     }
 
+    std::optional<std::string> endpoint(QStringList tokens) {
+        if (tokens.size() >= 2) {
+            return tokens[1].toStdString();
+        }
+        else {
+            return std::nullopt;
+        }
+    }
+
+    std::optional<std::string> authorization(QStringList tokens) {
+        for (int i = 0; i < tokens.size() - 2; ++i) {
+            std::string value = tokens[i].toStdString();
+            if ((value == "Authorization:") && (tokens[i + 1].toStdString() == "Basic")) {
+                return tokens[i + 2].toStdString();
+            }
+        }
+        return std::nullopt;
+    }
+
+    std::map<std::string, std::string> parameters(QStringList tokens) {
+        std::map<std::string, std::string> res;
+        QStringList parameters = tokens.back().split('&');
+        for (int i = 0; i < parameters.size(); ++i) {
+            QStringList kv = parameters[i].split('=');
+            if (kv.size() == 2) {
+                std::string key = kv[0].toStdString();
+                std::string value = kv[1].toStdString();
+                res[key] = value;
+            }
+        }
+        return res;
+    }
+
     struct ProgramInfo {
         const Cluster* cluster;
         const Program* program;
@@ -188,14 +221,13 @@ RestConnectionHandler::RestConnectionHandler(QObject* parent, int port,
     : QObject(parent)
     , _hasCustomProgramAPI(provideCustomProgramAPI)
     , _acceptOnlyLoopbackConnection(acceptOnlyLoopbackConnection)
+    , _secret(
+        (!user.empty() && !password.empty()) ?
+        QString::fromStdString(user + ':' + password).toUtf8().toBase64().toStdString() :
+        ""
+    )
 {
     Log("Status", fmt::format("REST API listening on port: {}", port));
-
-    if (!user.empty() && !password.empty()) {
-        const std::string combined = user + ':' + password;
-        _secret = QString::fromStdString(combined).toUtf8().toBase64().toStdString();
-    }
-
 
     const bool success = _server.listen(QHostAddress::Any, static_cast<quint16>(port));
     if (!success) {
@@ -216,49 +248,13 @@ void RestConnectionHandler::newConnectionEstablished() {
             "New connection from {}", socket->peerAddress().toString().toStdString()
         ));
 
-        connect(
-            socket, &QTcpSocket::disconnected,
-            socket, &QTcpSocket::deleteLater
-        );
+        connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
 
         connect(
             socket, &QTcpSocket::readyRead,
             this, &RestConnectionHandler::handleNewConnection
         );
     }
-}
-
-std::optional<std::string> endpoint(QStringList tokens) {
-    if (tokens.size() >= 2) {
-        return tokens[1].toStdString();
-    }
-    else {
-        return std::nullopt;
-    }
-}
-
-std::optional<std::string> authorization(QStringList tokens) {
-    for (int i = 0; i < tokens.size() - 2; ++i) {
-        std::string value = tokens[i].toStdString();
-        if ((value == "Authorization:") && (tokens[i+1].toStdString() == "Basic")) {
-            return tokens[i + 2].toStdString();
-        }
-    }
-    return std::nullopt;
-}
-
-std::map<std::string, std::string> parameters(QStringList tokens) {
-    std::map<std::string, std::string> res;
-    QStringList parameters = tokens.back().split('&');
-    for (int i = 0; i < parameters.size(); ++i) {
-        QStringList kv = parameters[i].split('=');
-        if (kv.size() == 2) {
-            std::string key = kv[0].toStdString();
-            std::string value = kv[1].toStdString();
-            res[key] = value;
-        }
-    }
-    return res;
 }
 
 void RestConnectionHandler::handleNewConnection() {
@@ -284,7 +280,7 @@ void RestConnectionHandler::handleNewConnection() {
     std::optional<std::string> authValue = authorization(tokens);
     const bool wantsAuth = !_secret.empty();
     const bool hasAuth = authValue.has_value();
-    const bool authCorrect = hasAuth ? (*authValue == _secret) : false;
+    const bool authCorrect = hasAuth && (*authValue == _secret);
     if (wantsAuth && (!(hasAuth && authCorrect))) {
         // We only want to check if we actually want authorization. If so we only want to
         // proceed if we have authorization and if it is correct
@@ -345,11 +341,11 @@ void RestConnectionHandler::handleNewConnection() {
         constexpr const char* KeyArguments = "arguments";
 
 
-        const bool hasCluster = params.find(KeyCluster) != params.end();
-        const bool hasNode = params.find(KeyNode) != params.end();
-        const bool hasExecutable = params.find(KeyExecutable) != params.end();
-        const bool hasWorkingDir = params.find(KeyWorkingDir) != params.end();
-        const bool hasArguments = params.find(KeyArguments) != params.end();
+        const bool hasCluster = params.contains(KeyCluster);
+        const bool hasNode = params.contains(KeyNode);
+        const bool hasExecutable = params.contains(KeyExecutable);
+        const bool hasWorkingDir = params.contains(KeyWorkingDir);
+        const bool hasArguments = params.contains(KeyArguments);
 
         if (!(hasCluster || hasNode) || !hasExecutable) {
             sendResponse(*socket, Response::BadRequest);
@@ -405,12 +401,10 @@ void RestConnectionHandler::handleStartProgramMessage(QTcpSocket& socket,
                                                       const Program& program,
                                               const Program::Configuration& configuration)
 {
-    Log(
-        fmt::format(
-            "Received command to start {} ({}) on {}",
-            program.name, configuration.name, cluster.name
-        )
-    );
+    Log(fmt::format(
+        "Received command to start {} ({}) on {}",
+        program.name, configuration.name, cluster.name
+    ));
     emit startProgram(cluster.id, program.id, configuration.id);
     sendResponse(socket, Response::Ok);
 }
@@ -420,12 +414,10 @@ void RestConnectionHandler::handleStopProgramMessage(QTcpSocket& socket,
                                                      const Program& program,
                                               const Program::Configuration& configuration)
 {
-    Log(
-        fmt::format(
-            "Received command to stop {} ({}) on {}",
-            program.name, configuration.name, cluster.name
-        )
-    );
+    Log(fmt::format(
+        "Received command to stop {} ({}) on {}",
+        program.name, configuration.name, cluster.name
+    ));
     emit stopProgram(cluster.id, program.id, configuration.id);
     sendResponse(socket, Response::Ok);
 }
@@ -438,12 +430,10 @@ void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
 {
     assert(cluster);
 
-    Log(
-        fmt::format(
-            "Received command to start {} {} in {} on cluster {}",
-            executable, arguments, workingDir, cluster->name
-        )
-    );
+    Log(fmt::format(
+        "Received command to start {} {} in {} on cluster {}",
+        executable, arguments, workingDir, cluster->name
+    ));
 
     for (const std::string& node : cluster->nodes) {
         const Node* n = data::findNode(node);
@@ -462,12 +452,10 @@ void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
 {
     assert(node);
 
-    Log(
-        fmt::format(
-            "Received command to start {} {} in {} on node {}",
-            executable, arguments, workingDir, node->name
-        )
-    );
+    Log(fmt::format(
+        "Received command to start {} {} in {} on node {}",
+        executable, arguments, workingDir, node->name
+    ));
 
     emit startCustomProgram(node->id, executable, workingDir, arguments);
     sendResponse(socket, Response::Ok);

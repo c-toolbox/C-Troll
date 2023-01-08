@@ -44,7 +44,7 @@
  * setting whether or not it is \m enabled and a list of computer \m nodes.
  */
 struct Cluster {
-    using ID = TypedId<int, struct ClusterTag>;
+    using ID = TypedId<struct ClusterTag>;
 
     ID id{ -1 };
 

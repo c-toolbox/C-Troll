@@ -472,6 +472,10 @@ std::vector<std::string> TagsWidget::tags() const {
 CustomProgramWidget::CustomProgramWidget(QWidget* parent)
     : QWidget(parent)
 {
+    static constexpr const int TagSeparator = -1;
+    static constexpr const int TagCluster = 0;
+    static constexpr const int TagNode = 1;
+
     QBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
@@ -566,10 +570,7 @@ CustomProgramWidget::CustomProgramWidget(QWidget* parent)
         targetList, QOverload<int>::of(&QComboBox::currentIndexChanged),
         updateRunButton
     );
-    connect(
-        executable, &QLineEdit::textChanged,
-        updateRunButton
-    );
+    connect(executable, &QLineEdit::textChanged, updateRunButton);
 }
 
 
@@ -606,8 +607,7 @@ QWidget* ProgramsWidget::createControls() {
     );
 
     _availableTags = new TagsWidget("Tags");
-    std::set<std::string> tags = data::findTags();
-    for (const std::string& tag : tags) {
+    for (const std::string& tag : data::tags()) {
         _availableTags->addTag(tag);
     }
     connect(
@@ -699,14 +699,12 @@ void ProgramsWidget::selectTags(std::vector<std::string> tags) {
     // Check that all that want to be picked also exist
     assert(
         std::all_of(
-            tags.begin(),
-            tags.end(), [allTags = data::findTags()](std::string tag) {
-                return allTags.find(tag) != allTags.end();
-            }
+            tags.cbegin(), tags.cend(),
+            [](std::string tag) { return data::tags().contains(tag); }
         )
     );
 
-    for (std::string tag : tags) {
+    for (const std::string& tag : tags) {
         _availableTags->removeTag(tag);
         _selectedTags->addTag(tag);
     }

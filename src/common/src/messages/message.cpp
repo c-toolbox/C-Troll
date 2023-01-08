@@ -63,8 +63,8 @@ void validateMessage(const nlohmann::json& message, std::string_view expectedTyp
 
 void from_json(const nlohmann::json& message, Message& m) {
     message.at(Message::KeyType).get_to(m.type);
-    if (message.find(Message::KeySecret) != message.end()) {
-        message[Message::KeySecret].get_to(m.secret);
+    if (auto it = message.find(Message::KeySecret);  it != message.end()) {
+        it->get_to(m.secret);
     }
 }
 

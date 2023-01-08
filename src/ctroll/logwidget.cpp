@@ -53,7 +53,7 @@ LogWidget::LogWidget() {
     m.setBottom(10);
     versionLayout->setContentsMargins(m);
 
-    std::string coreVer = fmt::format("Core Version: {}", application::Version);
+    std::string coreVer = fmt::format("Core Version: {}", app::Version);
     versionLayout->addWidget(new QLabel(QString::fromStdString(coreVer)));
 
     versionLayout->addStretch();
@@ -65,5 +65,5 @@ LogWidget::LogWidget() {
 }
 
 void LogWidget::appendMessage(std::string msg) {
-    _message.append(QString::fromStdString(msg));
+    _message.append(QString::fromStdString(std::move(msg)));
 }

@@ -244,7 +244,6 @@ void ProcessWidget::updateStatus() {
                             p->status == common::ProcessStatusMessage::Status::Running;
     _killProcess->setEnabled(isKillable);
 
-
     // The user should only be able to remove the process entry if the process has
     // finished in some state
     _remove->setEnabled(p->status != common::ProcessStatusMessage::Status::Running);

@@ -60,7 +60,7 @@ namespace common {
  * \param jsonFile The path to the JSON file that contains the data for the object T
  * \return A constructed object T that is initialized from the JSON file \p jsonFile
  */
-template <typename T>
+template <typename T> requires std::is_constructible_v<T, nlohmann::json>
 T loadFromJson(std::string_view jsonFile,
      const std::optional<nlohmann::json_schema::json_validator>& validator = std::nullopt)
 {
@@ -79,7 +79,7 @@ T loadFromJson(std::string_view jsonFile,
     return T(obj);
 }
 
-template <typename T>
+template <typename T> requires std::is_constructible_v<nlohmann::json, T>
 void saveToJson(std::string_view filename, const T& value) {
     nlohmann::json obj;
     to_json(obj, value);
@@ -99,7 +99,7 @@ void saveToJson(std::string_view filename, const T& value) {
  *        directory is traversed recursively
  * \return A list of \tparam T objects that was created from JSON files in \p directory
  */
-template <typename T>
+template <typename T> requires std::is_constructible_v<T, nlohmann::json>
 std::pair<std::vector<T>, bool> loadJsonFromDirectory(std::string_view directory,
      const std::optional<nlohmann::json_schema::json_validator>& validator = std::nullopt)
 {
@@ -134,7 +134,7 @@ std::pair<std::vector<T>, bool> loadJsonFromDirectory(std::string_view directory
     return { res, loadingSucceeded };
 }
 
-template <typename Conf>
+template <typename Conf> requires std::is_constructible_v<Conf, nlohmann::json>
 Conf loadConfiguration(std::string config, std::string schema) {
     if (!std::filesystem::exists(config)) {
         ::Log("Loading", fmt::format("Creating new configuration at {}", config));

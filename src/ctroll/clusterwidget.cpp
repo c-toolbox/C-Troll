@@ -419,10 +419,12 @@ void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
     std::vector<const Node*> nodes = data::findNodesForCluster(*cluster);
 
     const bool allConnected = std::all_of(
-        nodes.cbegin(), nodes.cend(), std::mem_fn(&Node::isConnected)
+        nodes.cbegin(), nodes.cend(),
+        std::mem_fn(&Node::isConnected)
     );
     const bool someConnected = !std::none_of(
-        nodes.cbegin(), nodes.cend(), std::mem_fn(&Node::isConnected)
+        nodes.cbegin(), nodes.cend(),
+        std::mem_fn(&Node::isConnected)
     );
 
     ConnectionWidget::Status status =

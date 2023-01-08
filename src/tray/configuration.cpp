@@ -56,16 +56,16 @@ void to_json(nlohmann::json& j, const Configuration& c) {
 void from_json(const nlohmann::json& j, Configuration& c) {
     j.at(KeyPort).get_to(c.port);
 
-    if (j.find(KeySecret) != j.end()) {
-        j.at(KeySecret).get_to(c.secret);
+    if (auto it = j.find(KeySecret);  it != j.end()) {
+        it->get_to(c.secret);
     }
-    if (j.find(KeyShowWindow) != j.end()) {
-        j.at(KeyShowWindow).get_to(c.showWindow);
+    if (auto it = j.find(KeyShowWindow);  it != j.end()) {
+        it->get_to(c.showWindow);
     }
-    if (j.find(KeyLogFile) != j.end()) {
-        j.at(KeyLogFile).get_to(c.logFile);
+    if (auto it = j.find(KeyLogFile);  it != j.end()) {
+        it->get_to(c.logFile);
     }
-    if (j.find(KeyLogRotation) != j.end()) {
-        c.logRotation = j.at(KeyLogRotation).get<common::LogRotation>();
+    if (auto it = j.find(KeyLogRotation);  it != j.end()) {
+        c.logRotation = it->get<common::LogRotation>();
     }
 }

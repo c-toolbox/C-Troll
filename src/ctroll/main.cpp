@@ -117,19 +117,15 @@ int main(int argc, char** argv) {
             mem.attach();
             mem.lock();
             auto data = reinterpret_cast<SharedMemoryMarker*>(mem.data());
-            if (data->majorVersion != application::MajorVersion) {
+            if (data->majorVersion != app::MajorVersion) {
                 QMessageBox::critical(
                     nullptr,
                     "Version mismatch",
                     QString::fromStdString(fmt::format(
                         "Starting to launch C-Troll of version {}.{}.{} while "
                         "incompatible version {}.{}.{} is still running",
-                        data->majorVersion,
-                        data->minorVersion,
-                        data->patchVersion,
-                        application::MajorVersion,
-                        application::MinorVersion,
-                        application::PatchVersion
+                        data->majorVersion, data->minorVersion, data->patchVersion,
+                        app::MajorVersion, app::MinorVersion, app::PatchVersion
                     ))
                 );
                 mem.unlock();
@@ -156,9 +152,9 @@ int main(int argc, char** argv) {
         mem.attach();
         mem.lock();
         SharedMemoryMarker* data = new (mem.data()) SharedMemoryMarker;
-        data->majorVersion = application::MajorVersion;
-        data->minorVersion = application::MinorVersion;
-        data->patchVersion = application::PatchVersion;
+        data->majorVersion = app::MajorVersion;
+        data->minorVersion = app::MinorVersion;
+        data->patchVersion = app::PatchVersion;
         mem.unlock();
     }
 

@@ -111,10 +111,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     editLayout->addWidget(new QLabel("Name:"), 0, 0);
     _name = new QLineEdit;
     _name->setToolTip("The name of this program");
-    connect(
-        _name, &QLineEdit::textChanged,
-        this, &ProgramDialog::updateSaveButton
-    );
+    connect(_name, &QLineEdit::textChanged, this, &ProgramDialog::updateSaveButton);
     editLayout->addWidget(_name, 0, 1);
 
     editLayout->addWidget(new QLabel("Executable:"), 1, 0);
@@ -122,10 +119,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     _executable->setToolTip(
         "The command that will be executed when this program is started"
     );
-    connect(
-        _executable, &QLineEdit::textChanged,
-        this, &ProgramDialog::updateSaveButton
-    );
+    connect(_executable, &QLineEdit::textChanged, this, &ProgramDialog::updateSaveButton);
     editLayout->addWidget(_executable, 1, 1);
 
     editLayout->addWidget(new QLabel("Commandline Parameters:"), 2, 0);
@@ -259,10 +253,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
 
         _clusters = new DynamicList;
         _clusters->setToolTip("The list of clusters on which the program can be run");
-        connect(
-            _clusters, &DynamicList::updated,
-            this, &ProgramDialog::updateSaveButton
-        );
+        connect(_clusters, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
         editLayout->addWidget(_clusters, 15, 0, 1, 2);
     }
 
@@ -344,8 +335,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             _clusters->addItem(c);
 
             const auto it = std::find_if(
-                clusters.first.cbegin(),
-                clusters.first.cend(),
+                clusters.first.cbegin(), clusters.first.cend(),
                 [cluster](const Cluster& c) {
                     return c.name == cluster.name;
                 }
@@ -427,8 +417,7 @@ std::string ProgramDialog::selectCluster() {
             clusters.first.begin(), clusters.first.end(),
             [&currClusters](const Cluster& c) {
                 const auto it = std::find_if(
-                    currClusters.cbegin(),
-                    currClusters.cend(),
+                    currClusters.cbegin(), currClusters.cend(),
                     [c](ClusterWidget* cw) { return cw->label == c; }
                 );
                 return it != currClusters.cend();
@@ -465,7 +454,9 @@ std::string ProgramDialog::selectCluster() {
 }
 
 void ProgramDialog::updateSaveButton() {
-    std::vector<ConfigurationWidget*> configurations = _configurations->items<ConfigurationWidget>();
+    std::vector<ConfigurationWidget*> configurations =
+        _configurations->items<ConfigurationWidget>();
+
     const bool confHasName = std::all_of(
         configurations.cbegin(), configurations.cend(),
         [](ConfigurationWidget* config) { return !config->name->text().isEmpty(); }

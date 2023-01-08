@@ -51,14 +51,14 @@
 #include <string_view>
 
 namespace {
+    struct SharedMemoryMarker {
+        std::byte unused[32] = {};
+    };
+
     void Debug(std::string msg) {
         ::Debug("Initialization", std::move(msg));
     }
 } // namespace
-
-struct SharedMemoryMarker {
-    std::byte unused[32] = {};
-};
 
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);

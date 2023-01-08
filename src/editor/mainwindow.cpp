@@ -167,7 +167,7 @@ MainWindow::MainWindow(std::string applicationPath, std::string clusterPath,
 
     {
         QLabel* version = new QLabel(QString::fromStdString(
-            fmt::format("Version: {}", application::Version))
+            fmt::format("Version: {}", app::Version))
         );
         version->setObjectName("version");
         layout->addWidget(version, 3, 0, 1, 3, Qt::AlignLeft);

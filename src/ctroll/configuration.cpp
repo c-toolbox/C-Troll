@@ -119,8 +119,8 @@ void to_json(nlohmann::json& j, const Configuration& c) {
 void from_json(const nlohmann::json& j, Configuration& c) {
     from_json(j, static_cast<BaseConfiguration&>(c));
 
-    if (j.find(KeyRemovalTimeout) != j.end()) {
-        int ms = j[KeyRemovalTimeout].get<int>();
+    if (auto it = j.find(KeyRemovalTimeout);  it != j.end()) {
+        int ms = it->get<int>();
 
         if (ms < 0) {
             throw std::runtime_error("Negative process removal time is not allowed");
@@ -129,58 +129,58 @@ void from_json(const nlohmann::json& j, Configuration& c) {
         c.removalTimeout = std::chrono::milliseconds(ms);
     }
 
-    if (j.find(KeyTagColors) != j.end()) {
+    if (auto it = j.find(KeyTagColors);  it != j.end()) {
         // get_to adds the values to the end of the vector, so we have to clear it first
         c.tagColors.clear();
-        j[KeyTagColors].get_to(c.tagColors);
+        it->get_to(c.tagColors);
     }
 
-    if (j.find(KeyLogFile) != j.end()) {
-        j[KeyLogFile].get_to(c.logFile);
+    if (auto it = j.find(KeyLogFile);  it != j.end()) {
+        it->get_to(c.logFile);
     }
 
-    if (j.find(KeyLogRotation) != j.end()) {
-        c.logRotation = j[KeyLogRotation].get<common::LogRotation>();
+    if (auto it = j.find(KeyLogRotation);  it != j.end()) {
+        c.logRotation = it->get<common::LogRotation>();
     }
 
-    if (j.find(KeyShowShutdownButton) != j.end()) {
-        j[KeyShowShutdownButton].get_to(c.showShutdownButtons);
+    if (auto it = j.find(KeyShowShutdownButton);  it != j.end()) {
+        it->get_to(c.showShutdownButtons);
     }
 
-    if (j.find(KeyRestLoopback) != j.end()) {
-        const nlohmann::json& rest = j[KeyRestLoopback];
+    if (auto it = j.find(KeyRestLoopback);  it != j.end()) {
+        const nlohmann::json& rest = *it;
 
         Configuration::Rest r;
-        if (rest.find(KeyRestUsername) != rest.end()) {
-            rest[KeyRestUsername].get_to(r.username);
+        if (auto jt = rest.find(KeyRestUsername);  jt != rest.end()) {
+            jt->get_to(r.username);
         }
-        if (rest.find(KeyRestPassword) != rest.end()) {
-            rest[KeyRestPassword].get_to(r.password);
+        if (auto jt = rest.find(KeyRestPassword);  jt != rest.end()) {
+            jt->get_to(r.password);
         }
-        if (rest.find(KeyRestPort) != rest.end()) {
-            rest[KeyRestPort].get_to(r.port);
+        if (auto jt = rest.find(KeyRestPort);  jt != rest.end()) {
+            jt->get_to(r.port);
         }
-        if (rest.find(KeyRestAllowCustomPrograms) != rest.end()) {
-            rest[KeyRestAllowCustomPrograms].get_to(r.allowCustomPrograms);
+        if (auto jt = rest.find(KeyRestAllowCustomPrograms);  jt != rest.end()) {
+            jt->get_to(r.allowCustomPrograms);
         }
         c.restLoopback = r;
     }
 
-    if (j.find(KeyRestGeneral) != j.end()) {
-        const nlohmann::json& rest = j[KeyRestGeneral];
+    if (auto it = j.find(KeyRestGeneral);  it != j.end()) {
+        const nlohmann::json& rest = *it;
 
         Configuration::Rest r;
-        if (rest.find(KeyRestUsername) != rest.end()) {
-            rest[KeyRestUsername].get_to(r.username);
+        if (auto jt = rest.find(KeyRestUsername);  jt != rest.end()) {
+            jt->get_to(r.username);
         }
-        if (rest.find(KeyRestPassword) != rest.end()) {
-            rest[KeyRestPassword].get_to(r.password);
+        if (auto jt = rest.find(KeyRestPassword);  jt != rest.end()) {
+            jt->get_to(r.password);
         }
-        if (rest.find(KeyRestPort) != rest.end()) {
-            rest[KeyRestPort].get_to(r.port);
+        if (auto jt = rest.find(KeyRestPort);  jt != rest.end()) {
+            jt->get_to(r.port);
         }
-        if (rest.find(KeyRestAllowCustomPrograms) != rest.end()) {
-            rest[KeyRestAllowCustomPrograms].get_to(r.allowCustomPrograms);
+        if (auto jt = rest.find(KeyRestAllowCustomPrograms);  jt != rest.end()) {
+            jt->get_to(r.allowCustomPrograms);
         }
         c.restGeneral = r;
     }

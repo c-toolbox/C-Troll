@@ -66,8 +66,8 @@ signals:
 
 private:
     void newConnectionEstablished();
-    void disconnected(common::JsonSocket*);
-    void handleMessage(nlohmann::json, common::JsonSocket*);
+    void disconnected(common::JsonSocket* socket);
+    void handleMessage(nlohmann::json message, common::JsonSocket* socket);
 
     QTcpServer _server;
     std::vector<common::JsonSocket*> _sockets;

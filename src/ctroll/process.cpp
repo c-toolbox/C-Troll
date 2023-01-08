@@ -55,8 +55,7 @@ common::StartCommandMessage startProcessCommand(const Process& process) {
     const Cluster* cluster = data::findCluster(process.clusterId);
     assert(cluster);
     auto it = std::find_if(
-        program->clusters.begin(),
-        program->clusters.end(),
+        program->clusters.begin(), program->clusters.end(),
         [cluster](const Program::Cluster& c) { return c.name == cluster->name; }
     );
     assert(it != program->clusters.end());

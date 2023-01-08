@@ -51,7 +51,7 @@ class QSpinBox;
 class ColorWidget : public QWidget {
 Q_OBJECT
 public:
-    ColorWidget(Color color);
+    explicit ColorWidget(Color color);
 
     void setColor(Color color);
     Color color() const;

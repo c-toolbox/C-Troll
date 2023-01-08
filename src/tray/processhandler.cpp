@@ -84,13 +84,14 @@ ProcessHandler::~ProcessHandler() {
 void ProcessHandler::newConnection() {
     common::TrayStatusMessage msg;
     for (const ProcessInfo& p : _processes) {
-        common::TrayStatusMessage::ProcessInfo pi;
-        pi.processId = p.processId;
-        pi.programId = p.programId;
-        pi.configurationId = p.configurationId;
-        pi.clusterId = p.clusterId;
-        pi.nodeId = p.nodeId;
-        pi.dataHash = p.dataHash;
+        common::TrayStatusMessage::ProcessInfo pi = {
+            .processId = p.processId,
+            .programId = p.programId,
+            .configurationId = p.configurationId,
+            .clusterId = p.clusterId,
+            .nodeId = p.nodeId,
+            .dataHash = p.dataHash
+        };
         msg.processes.push_back(std::move(pi));
     }
 
@@ -134,7 +135,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
             common::ExitCommandMessage command = message;
             Log(fmt::format("Received [{}]: {}", peer, message.dump()));
 
-            // Check if the identifier of traycommand already is tied to a process
+            // Check if the identifier of tray command already is tied to a process
             // We don't allow the same id for multiple processes
             const auto p = processIt(command.id);
             if (p == _processes.end()) {
@@ -424,8 +425,7 @@ std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::process
                                                                         QProcess* process)
 {
     const auto p = std::find_if(
-        _processes.cbegin(),
-        _processes.cend(),
+        _processes.cbegin(), _processes.cend(),
         [process](const ProcessInfo& proc) { return proc.process == process; }
     );
     return p;
@@ -434,8 +434,7 @@ std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::process
 std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::processIt(int id)
 {
     const auto p = std::find_if(
-        _processes.cbegin(),
-        _processes.cend(),
+        _processes.cbegin(), _processes.cend(),
         [id](const ProcessInfo& proc) { return proc.processId == id; }
     );
     return p;

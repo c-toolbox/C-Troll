@@ -72,6 +72,7 @@ using ApiVersion = std::array<int, 3>;
  * \return \c true if the message is valid, \c false otherwise
  */
 template <typename T = void>
+    requires std::is_same_v<T, void> || std::is_base_of_v<Message, T>
 [[nodiscard]] bool isValidMessage(const nlohmann::json& message) {
     const bool hasType = message.find(Message::KeyType) != message.end();
     const bool hasVersion = message.find(Message::KeyVersion) != message.end();

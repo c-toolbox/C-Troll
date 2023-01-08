@@ -91,9 +91,9 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
         _description->setPlaceholderText("optional");
         editLayout->addWidget(_description, 2, 1);
 
-
-
+        
         editLayout->addWidget(new Spacer, 3, 0, 1, 2);
+
 
         editLayout->addWidget(new QLabel("Nodes"), 4, 0);
 

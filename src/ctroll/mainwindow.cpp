@@ -60,7 +60,6 @@
 
 MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration config)
     : _trayIcon(QIcon(":/images/C_transparent.png"), this)
-    , _config(std::move(config))
 {
     setWindowTitle("C-Troll");
 
@@ -118,13 +117,13 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
 
     //
     // Load the data
-    Log("Status", fmt::format("Loading programs from '{}'", _config.applicationPath));
-    Log("Status", fmt::format("Loading nodes from '{}'", _config.nodePath));
-    Log("Status", fmt::format("Loading clusters from '{}'", _config.clusterPath));
+    Log("Status", fmt::format("Loading programs from '{}'", config.applicationPath));
+    Log("Status", fmt::format("Loading nodes from '{}'", config.nodePath));
+    Log("Status", fmt::format("Loading clusters from '{}'", config.clusterPath));
     bool success = data::loadData(
-        _config.applicationPath,
-        _config.clusterPath,
-        _config.nodePath
+        config.applicationPath,
+        config.clusterPath,
+        config.nodePath
     );
     if (!success) {
         QMessageBox::critical(
@@ -133,11 +132,11 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
             "Error occured while loading data, inspect the Log for detailed information"
         );
     }
-    data::setTagColors(_config.tagColors);
+    data::setTagColors(config.tagColors);
 
-    if (_config.logRotation.has_value()) {
-        const bool keepLog = _config.logRotation->keepPrevious;
-        const std::chrono::hours freq = _config.logRotation->frequency;
+    if (config.logRotation.has_value()) {
+        const bool keepLog = config.logRotation->keepPrevious;
+        const std::chrono::hours freq = config.logRotation->frequency;
 
         QTimer* timer = new QTimer(this);
         timer->setTimerType(Qt::VeryCoarseTimer);
@@ -153,11 +152,9 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     // Programs
     _programWidget = new programs::ProgramsWidget;
 
-    std::set<std::string> allTags = data::findTags();
     bool anyMissingTags = std::any_of(
-        defaultTags.begin(),
-        defaultTags.end(),
-        [&allTags](const std::string& tag) { return allTags.find(tag) == allTags.end(); }
+        defaultTags.cbegin(), defaultTags.cend(),
+        [](const std::string& tag) { return !data::tags().contains(tag); }
     );
     if (anyMissingTags) {
         Log(
@@ -168,11 +165,8 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
 
         defaultTags.erase(
             std::remove_if(
-                defaultTags.begin(),
-                defaultTags.end(),
-                [&allTags](const std::string& tag) {
-                    return allTags.find(tag) == allTags.end();
-                }
+                defaultTags.begin(), defaultTags.end(),
+                [](const std::string& tag) { return !data::tags().contains(tag); }
             ),
             defaultTags.end()
         );
@@ -241,7 +235,7 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     );
 
     // Processes
-    _processesWidget = new ProcessesWidget(_config.removalTimeout);
+    _processesWidget = new ProcessesWidget(config.removalTimeout);
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::receivedTrayProcess,
         this, &MainWindow::handleTrayProcess
@@ -276,19 +270,19 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     tabWidget->addTab(_clustersWidget, "Clusters");
     tabWidget->addTab(_processesWidget, "Processes");
     tabWidget->addTab(&_logWidget, "Log");
-    tabWidget->addTab(new SettingsWidget(_config, "config.json"), "Settings");
+    tabWidget->addTab(new SettingsWidget(config, "config.json"), "Settings");
 
     _clusterConnectionHandler.initialize();
 
 
-    if (_config.restLoopback.has_value()) {
+    if (config.restLoopback.has_value()) {
         _restLoopbackHandler = new RestConnectionHandler(
             this,
-            _config.restLoopback->port,
+            config.restLoopback->port,
             true, // only accept local connection
-            _config.restLoopback->username,
-            _config.restLoopback->password,
-            _config.restLoopback->allowCustomPrograms
+            config.restLoopback->username,
+            config.restLoopback->password,
+            config.restLoopback->allowCustomPrograms
         );
 
         connect(
@@ -305,14 +299,14 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
         );
     }
 
-    if (_config.restGeneral.has_value()) {
+    if (config.restGeneral.has_value()) {
         _restGeneralHandler = new RestConnectionHandler(
             this,
-            _config.restGeneral->port,
+            config.restGeneral->port,
             false, // do not only accept local connection
-            _config.restGeneral->username,
-            _config.restGeneral->password,
-            _config.restGeneral->allowCustomPrograms
+            config.restGeneral->username,
+            config.restGeneral->password,
+            config.restGeneral->allowCustomPrograms
         );
 
         connect(
@@ -353,9 +347,9 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
 
     // Notify the user if configuration files have changed
     _watcher.addPaths({
-        QString::fromStdString(_config.applicationPath),
-        QString::fromStdString(_config.clusterPath),
-        QString::fromStdString(_config.nodePath)
+        QString::fromStdString(config.applicationPath),
+        QString::fromStdString(config.clusterPath),
+        QString::fromStdString(config.nodePath)
     });
 
     auto watchAllFilesInFolder = [this](std::string path) {
@@ -369,9 +363,9 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
             _watcher.addPath(it.next());
         }
     };
-    watchAllFilesInFolder(_config.applicationPath);
-    watchAllFilesInFolder(_config.clusterPath);
-    watchAllFilesInFolder(_config.nodePath);
+    watchAllFilesInFolder(config.applicationPath);
+    watchAllFilesInFolder(config.clusterPath);
+    watchAllFilesInFolder(config.nodePath);
 
     connect(
         &_watcher, &QFileSystemWatcher::directoryChanged,
@@ -593,6 +587,7 @@ void MainWindow::stopProgram(Cluster::ID clusterId, Program::ID programId,
     // First, collect all the processes that belong to this program combination
     std::vector<const Process*> processes;
     for (const Process* process : data::processes()) {
+        assert(process);
         const bool clusterMatch = (process->clusterId == clusterId);
         const bool programMatch = (process->programId == programId);
         const bool configurationMatch = (process->configurationId == configurationId);

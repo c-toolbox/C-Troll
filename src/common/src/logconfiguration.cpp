@@ -49,12 +49,12 @@ void to_json(nlohmann::json& j, const LogRotation& lr) {
 }
 
 void from_json(const nlohmann::json& j, LogRotation& lr) {
-    if (j.find(KeyLogRotationFrequency) != j.end()) {
-        int hs = j[KeyLogRotationFrequency].get<int>();
+    if (auto it = j.find(KeyLogRotationFrequency);  it != j.end()) {
+        int hs = it->get<int>();
         lr.frequency = std::chrono::hours(hs);
     }
-    if (j.find(KeyLogRotationKeepPrevious) != j.end()) {
-        j[KeyLogRotationKeepPrevious].get_to(lr.keepPrevious);
+    if (auto it = j.find(KeyLogRotationKeepPrevious);  it != j.end()) {
+        it->get_to(lr.keepPrevious);
     }
 }
 

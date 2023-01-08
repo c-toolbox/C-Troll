@@ -45,7 +45,6 @@ struct InvalidAuthMessage : public Message {
     static constexpr std::string_view Type = "InvalidAuthMessage";
 
     InvalidAuthMessage();
-
     auto operator<=>(const InvalidAuthMessage& rhs) const = default;
 };
 

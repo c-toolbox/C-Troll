@@ -125,7 +125,7 @@ QWidget* CentralWidget::createInfoWidget() {
     infoLayout->setContentsMargins(5, 1, 5, 5);
     info->setLayout(infoLayout);
 
-    std::string trayVer = fmt::format("Tray Version: {}", application::Version);
+    std::string trayVer = fmt::format("Tray Version: {}", app::Version);
     infoLayout->addWidget(new QLabel(QString::fromStdString(trayVer)));
 
     infoLayout->addStretch();

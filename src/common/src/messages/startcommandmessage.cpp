@@ -79,15 +79,15 @@ void from_json(const nlohmann::json& j, StartCommandMessage& m) {
     from_json(j, static_cast<Message&>(m));
 
     j.at(KeyId).get_to(m.id);
-    if (j.find(KeyForwardOutErr) != j.end()) {
-        j[KeyForwardOutErr].get_to(m.forwardStdOutStdErr);
+    if (auto it = j.find(KeyForwardOutErr);  it != j.end()) {
+        it->get_to(m.forwardStdOutStdErr);
     }
 
     j.at(KeyExecutable).get_to(m.executable);
     j.at(KeyWorkingDirectory).get_to(m.workingDirectory);
 
-    if (j.find(KeyCommandlineArguments) != j.end()) {
-        j.at(KeyCommandlineArguments).get_to(m.commandlineParameters);
+    if (auto it = j.find(KeyCommandlineArguments);  it != j.end()) {
+        it->get_to(m.commandlineParameters);
     }
 
     j.at(KeyProgramId).get_to(m.programId);

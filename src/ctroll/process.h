@@ -41,7 +41,7 @@
 #include "typedid.h"
 
 struct Process {
-    using ID = TypedId<int, struct ProcessIdTag>;
+    using ID = TypedId<struct ProcessIdTag>;
 
     Process(Program::ID programId, Program::Configuration::ID configurationId,
         Cluster::ID clusterId, Node::ID NodeId);

@@ -78,10 +78,7 @@ ColorWidget::ColorWidget(Color color)
 
     QPushButton* remove = new QPushButton;
     remove->setIcon(QIcon(":/images/x.png"));
-    connect(
-        remove, &QPushButton::clicked,
-        [this]() { emit removed(this); }
-    );
+    connect(remove, &QPushButton::clicked, [this]() { emit removed(this); });
     layout->addWidget(remove, 0, 1);
 
 
@@ -91,10 +88,10 @@ ColorWidget::ColorWidget(Color color)
     connect(
         _tagLine, &QLineEdit::textEdited,
         [this]() {
-        Color res = _color;
-        res.tag = _tagLine->text().toStdString();
-        emit colorChanged(res);
-    }
+            Color res = _color;
+            res.tag = _tagLine->text().toStdString();
+            emit colorChanged(res);
+        }
     );
     layout->addWidget(_tagLine, 1, 0, 1, 2);
 
@@ -112,11 +109,9 @@ Color ColorWidget::color() const {
 
 void ColorWidget::applyColor() {
     _colorButton->setStyleSheet(
-        QString::fromStdString(
-            fmt::format(
-                "background-color: #{0:02x}{1:02x}{2:02x};", _color.r, _color.g, _color.b
-            )
-        )
+        QString::fromStdString(fmt::format(
+            "background-color: #{0:02x}{1:02x}{2:02x};", _color.r, _color.g, _color.b
+        ))
     );
 }
 
@@ -192,10 +187,7 @@ SettingsWidget::SettingsWidget(Configuration configuration,
 
         _nodePath = new QLineEdit;
         _nodePath->setToolTip(toolTip);
-        connect(
-            _nodePath, &QLineEdit::textEdited,
-            this, &SettingsWidget::valuesChanged
-        );
+        connect(_nodePath, &QLineEdit::textEdited, this, &SettingsWidget::valuesChanged);
         controlsLayout->addWidget(_nodePath, 2, 1);
     }
 
@@ -230,10 +222,7 @@ SettingsWidget::SettingsWidget(Configuration configuration,
 
         _logFile = new QCheckBox;
         _logFile->setToolTip(toolTip);
-        connect(
-            _logFile, &QCheckBox::clicked,
-            this, &SettingsWidget::valuesChanged
-        );
+        connect(_logFile, &QCheckBox::clicked, this, &SettingsWidget::valuesChanged);
         controlsLayout->addWidget(_logFile, 4, 1);
     }
 
@@ -249,10 +238,7 @@ SettingsWidget::SettingsWidget(Configuration configuration,
         _logRotation = new QGroupBox("Log Rotation");
         _logRotation->setToolTip(toolTip);
         _logRotation->setCheckable(true);
-        connect(
-            _logRotation, &QGroupBox::clicked,
-            this, &SettingsWidget::valuesChanged
-        );
+        connect(_logRotation, &QGroupBox::clicked, this, &SettingsWidget::valuesChanged);
 
         QGridLayout* contentLayout = new QGridLayout(_logRotation);
 
@@ -269,10 +255,7 @@ SettingsWidget::SettingsWidget(Configuration configuration,
 
         contentLayout->addWidget(new QLabel("Keep old logs:"), 1, 0);
         _keepOldLog = new QCheckBox;
-        connect(
-            _keepOldLog, &QCheckBox::clicked,
-            this, &SettingsWidget::valuesChanged
-        );
+        connect(_keepOldLog, &QCheckBox::clicked, this, &SettingsWidget::valuesChanged);
         contentLayout->addWidget(_keepOldLog, 1, 1);
 
         groupLayouts->addWidget(_logRotation);
@@ -382,10 +365,7 @@ SettingsWidget::SettingsWidget(Configuration configuration,
 
         _saveButton = new QPushButton("Save File");
         _saveButton->setObjectName("control");
-        connect(
-            _saveButton, &QPushButton::clicked,
-            this, &SettingsWidget::saveValues
-        );
+        connect(_saveButton, &QPushButton::clicked, this, &SettingsWidget::saveValues);
         l->addWidget(_saveButton);
 
         layout->addWidget(line);
@@ -450,8 +430,6 @@ void SettingsWidget::valuesChanged() {
     _changesLabel->setVisible(hasChanged);
     _restoreButton->setEnabled(hasChanged);
     _saveButton->setEnabled(hasChanged);
-
-
 }
 
 void SettingsWidget::resetValues() {
@@ -587,7 +565,6 @@ void SettingsWidget::layoutColorWidgets() {
     for (size_t i = 0; i < _colors.size(); ++i) {
         const int rowIdx = static_cast<int>(i / Columns);
         const int columnIdx = static_cast<int>(i % Columns);
-
         _colorLayout->addWidget(_colors[i], rowIdx, columnIdx);
     }
 }
@@ -601,10 +578,7 @@ void SettingsWidget::createColorWidget(Color color) {
             valuesChanged();
         }
     );
-    connect(
-        cw, &ColorWidget::removed,
-        this, &SettingsWidget::removedColor
-    );
+    connect(cw, &ColorWidget::removed, this, &SettingsWidget::removedColor);
 
     _colors.push_back(cw);
 }
@@ -619,27 +593,18 @@ void SettingsWidget::createColorWidgets() {
 void SettingsWidget::createRestWidgets(RestControls& rest, QString title) {
     rest.box = new QGroupBox(title);
     rest.box->setCheckable(true);
-    connect(
-        rest.box, &QGroupBox::clicked,
-        this, &SettingsWidget::valuesChanged
-    );
+    connect(rest.box, &QGroupBox::clicked, this, &SettingsWidget::valuesChanged);
 
     QGridLayout* contentLayout = new QGridLayout(rest.box);
 
     contentLayout->addWidget(new QLabel("Username:"), 0, 0);
     rest.username = new QLineEdit;
-    connect(
-        rest.username, &QLineEdit::textEdited,
-        this, &SettingsWidget::valuesChanged
-    );
+    connect(rest.username, &QLineEdit::textEdited, this, &SettingsWidget::valuesChanged);
     contentLayout->addWidget(rest.username, 0, 1);
 
     contentLayout->addWidget(new QLabel("Password:"), 1, 0);
     rest.password = new QLineEdit;
-    connect(
-        rest.password, &QLineEdit::textEdited,
-        this, &SettingsWidget::valuesChanged
-    );
+    connect(rest.password, &QLineEdit::textEdited, this, &SettingsWidget::valuesChanged);
     contentLayout->addWidget(rest.password, 1, 1);
 
     contentLayout->addWidget(new QLabel("Port:"), 2, 0);

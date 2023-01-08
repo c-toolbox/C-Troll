@@ -126,7 +126,6 @@ void Log::logMessage(std::string category, std::string message) {
         std::cout << message << '\n';
     }
 
-    // And if we are running in Visual Studio, this output, too
     OutputDebugString((message + '\n').c_str());
 }
 

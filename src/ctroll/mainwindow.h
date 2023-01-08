@@ -58,8 +58,7 @@ namespace programs { class ProgramsWidget; }
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
-    MainWindow(std::vector<std::string> defaultTags,
-        Configuration config);
+    MainWindow(std::vector<std::string> defaultTags, Configuration config);
 
 private slots:
     void handleTrayProcess(common::ProcessStatusMessage status);
@@ -102,7 +101,6 @@ private:
     ClusterConnectionHandler _clusterConnectionHandler;
     RestConnectionHandler* _restLoopbackHandler = nullptr;
     RestConnectionHandler* _restGeneralHandler = nullptr;
-    Configuration _config;
 
     QSystemTrayIcon _trayIcon;
     QFileSystemWatcher _watcher;

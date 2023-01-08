@@ -41,10 +41,13 @@
 struct BaseConfiguration {
     /// The path that contains the JSON objects describing the available applications
     std::string applicationPath = "applications";
+    
     /// The path that contains the JSON objects describing the available clusters
     std::string clusterPath = "clusters";
+    
     /// The path that contains the JSON objects describing the available nodes
     std::string nodePath = "nodes";
+
 
     auto operator<=>(const BaseConfiguration& rhs) const = default;
 };

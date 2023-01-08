@@ -121,13 +121,13 @@ NodeDialog::NodeDialog(QWidget* parent, std::string path)
 }
 
 void NodeDialog::save() {
-    Node node;
-    node.name = _name->text().toStdString();
-    node.ipAddress = _ip->text().toStdString();
-    node.port = _port->value();
-    node.secret = _secret->text().toStdString();
-    node.description = _description->text().toStdString();
-
+    Node node = {
+        .name = _name->text().toStdString(),
+        .ipAddress = _ip->text().toStdString(),
+        .port = _port->value(),
+        .secret = _secret->text().toStdString(),
+        .description = _description->text().toStdString()
+    };
     common::saveToJson(_path, node);
     accept();
 }

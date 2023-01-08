@@ -71,8 +71,8 @@ private slots:
 private:
     void updateTrayIcon();
 
-    CentralWidget* _centralWidget;
-    QSystemTrayIcon* _trayIcon;
+    CentralWidget* _centralWidget = nullptr;
+    QSystemTrayIcon* _trayIcon = nullptr;
 };
 
 #endif // __TRAY__MAINWINDOW_H__

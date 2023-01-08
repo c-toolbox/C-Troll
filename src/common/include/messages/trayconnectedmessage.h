@@ -46,7 +46,6 @@ struct TrayConnectedMessage : public Message {
     static constexpr std::string_view Type = "TrayConnectedMessage";
 
     TrayConnectedMessage();
-
     auto operator<=>(const TrayConnectedMessage& rhs) const = default;
 };
 

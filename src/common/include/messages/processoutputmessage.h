@@ -48,6 +48,7 @@ struct ProcessOutputMessage : Message {
     static constexpr std::string_view Type = "ProcessOutputMessage";
 
     ProcessOutputMessage();
+    auto operator<=>(const ProcessOutputMessage& rhs) const = default;
 
     enum class OutputType : int {
         StdOut = 0,
@@ -60,8 +61,6 @@ struct ProcessOutputMessage : Message {
     std::string message;
     /// The type of output
     OutputType outputType = OutputType::StdOut;
-
-    auto operator<=>(const ProcessOutputMessage& rhs) const = default;
 };
 
 void to_json(nlohmann::json& j, const ProcessOutputMessage& m);

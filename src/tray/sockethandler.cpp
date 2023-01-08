@@ -58,7 +58,6 @@ namespace {
     void Debug(std::string msg) {
         ::Debug("SocketHandler", std::move(msg));
     }
-
 } // namespace
 
 SocketHandler::SocketHandler(int port, std::string secret)
@@ -70,11 +69,7 @@ SocketHandler::SocketHandler(int port, std::string secret)
     const bool success = _server.listen(QHostAddress::Any, static_cast<quint16>(port));
     if (!success) {
         std::string msg = fmt::format("Failed to listen on port {}", port);
-        QMessageBox::critical(
-            nullptr,
-            "Socket Creation",
-            QString::fromStdString(msg)
-        );
+        QMessageBox::critical(nullptr, "Socket Creation", QString::fromStdString(msg));
         Log("Error", msg);
         exit(EXIT_FAILURE);
     }
@@ -102,8 +97,7 @@ void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* so
     else {
         Log(fmt::format("Received [{}]", socket->peerAddress()), "Invalid message");
         common::InvalidAuthMessage invalidAuthMsg;
-        nlohmann::json j = invalidAuthMsg;
-        socket->write(j);
+        socket->write(invalidAuthMsg);
     }
 }
 
@@ -142,12 +136,12 @@ void SocketHandler::newConnectionEstablished() {
 
         Debug(fmt::format("Creating new connection to {}", socket->peerAddress()));
 
-        QObject::connect(
+        connect(
             socket, &common::JsonSocket::disconnected,
             [this, socket]() { disconnected(socket); }
         );
 
-        QObject::connect(
+        connect(
             socket, &common::JsonSocket::messageReceived,
             [this, socket](nlohmann::json message) {
                 try {
@@ -159,10 +153,11 @@ void SocketHandler::newConnectionEstablished() {
                         _lastMessages.rend()
                     );
 
-                    MessageLog ml;
-                    ml.time = currentTime();
-                    ml.message = message;
-                    ml.peer = socket->peerAddress();
+                    MessageLog ml = {
+                        .time = currentTime(),
+                        .message = std::move(message),
+                        .peer = socket->peerAddress()
+                    };
                     _lastMessages.front() = ml;
 
                     handleMessage(message, socket);

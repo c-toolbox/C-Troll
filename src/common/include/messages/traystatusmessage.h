@@ -47,21 +47,20 @@ struct TrayStatusMessage : public Message {
     static constexpr std::string_view Type = "TrayStatusMessage";
 
     TrayStatusMessage();
+    auto operator<=>(const TrayStatusMessage& rhs) const = default;
 
     struct ProcessInfo {
+        auto operator<=>(const ProcessInfo& rhs) const = default;
+        
         int processId;
         int programId;
         int configurationId;
         int clusterId;
         int nodeId;
         std::size_t dataHash;
-
-        auto operator<=>(const ProcessInfo& rhs) const = default;
     };
 
     std::vector<ProcessInfo> processes;
-
-    auto operator<=>(const TrayStatusMessage& rhs) const = default;
 };
 
 void to_json(nlohmann::json& j, const TrayStatusMessage& m);

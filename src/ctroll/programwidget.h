@@ -179,11 +179,6 @@ public:
 signals:
     void startCustomProgram(Node::ID nodeId, std::string executable,
         std::string workingDir, std::string arguments);
-
-private:
-    static constexpr const int TagSeparator = -1;
-    static constexpr const int TagCluster = 0;
-    static constexpr const int TagNode = 1;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////

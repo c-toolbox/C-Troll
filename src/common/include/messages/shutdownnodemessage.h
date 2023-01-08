@@ -46,7 +46,6 @@ struct ShutdownNodeMessage : public Message {
     static constexpr std::string_view Type = "ShutdownNodeMessage";
 
     ShutdownNodeMessage();
-
     auto operator<=>(const ShutdownNodeMessage& rhs) const = default;
 };
 

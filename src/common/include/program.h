@@ -45,8 +45,10 @@
 
 struct Program {
     struct Configuration {
-        using ID = TypedId<int, struct ConfigurationTag>;
+        using ID = TypedId<struct ConfigurationTag>;
 
+        auto operator<=>(const Configuration& rhs) const = default;
+        
         /// Unique identifier of the configuration
         ID id{ -1 };
 
@@ -58,23 +60,22 @@ struct Program {
 
         /// A user-friendly description that better identifies this configuration
         std::string description;
-
-        auto operator<=>(const Configuration& rhs) const = default;
-
     };
 
     struct Cluster {
+        auto operator<=>(const Cluster& rhs) const = default;
+        
         /// The name of the cluster
         std::string name;
 
         /// The commandline arguments that are specific for this cluster
         std::string parameters;
-
-        auto operator<=>(const Cluster& rhs) const = default;
     };
 
-    using ID = TypedId<int, struct ProgramTag>;
+    using ID = TypedId<struct ProgramTag>;
 
+    auto operator<=>(const Program& rhs) const = default;
+    
     /// A unique identifier
     ID id = ID(-1);
     /// A human readable name for this Program
@@ -102,8 +103,6 @@ struct Program {
     std::vector<Configuration> configurations;
     /// List of all clusters
     std::vector<Cluster> clusters;
-
-    auto operator<=>(const Program& rhs) const = default;
 };
 
 std::pair<std::vector<Program>, bool> loadProgramsFromDirectory(

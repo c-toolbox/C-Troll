@@ -52,6 +52,7 @@ std::vector<const Cluster*> clusters();
 std::vector<const Node*> nodes();
 std::vector<const Program*> programs();
 std::vector<const Process*> processes();
+std::set<std::string> tags();
 
 const Cluster* findCluster(Cluster::ID id);
 const Cluster* findCluster(std::string_view name);
@@ -74,7 +75,6 @@ const Program::Configuration* findConfigurationForProgram(const Program& program
     std::string_view name);
 
 bool hasTag(Program::ID id, const std::vector<std::string>& tags);
-std::set<std::string> findTags();
 
 const Process* findProcess(Process::ID id);
 void addProcess(std::unique_ptr<Process> process);

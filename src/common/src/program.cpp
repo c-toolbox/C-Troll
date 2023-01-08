@@ -64,36 +64,32 @@ namespace {
 
 void from_json(const nlohmann::json& j, Program::Configuration& p) {
     j.at(KeyConfigurationName).get_to(p.name);
-    if (j.find(KeyConfigurationParameters) != j.end()) {
-        j[KeyConfigurationParameters].get_to(p.parameters);
+    if (auto it = j.find(KeyConfigurationParameters);  it != j.end()) {
+        it->get_to(p.parameters);
     }
-    if (j.find(KeyConfigurationDescription) != j.end()) {
-        j[KeyConfigurationDescription].get_to(p.description);
+    if (auto it = j.find(KeyConfigurationDescription);  it != j.end()) {
+        it->get_to(p.description);
     }
 }
 
 void to_json(nlohmann::json& j, const Program::Configuration& p) {
-    Program::Configuration def;
-
     j[KeyConfigurationName] = p.name;
     j[KeyConfigurationParameters] = p.parameters;
-    if (p.description != def.description) {
+    if (p.description != Program::Configuration().description) {
         j[KeyConfigurationDescription] = p.description;
     }
 }
 
 void from_json(const nlohmann::json& j, Program::Cluster& c) {
     j.at(KeyClusterName).get_to(c.name);
-    if (j.find(KeyClusterParameters) != j.end()) {
-        j[KeyClusterParameters].get_to(c.parameters);
+    if (auto it = j.find(KeyClusterParameters);  it != j.end()) {
+        it->get_to(c.parameters);
     }
 }
 
 void to_json(nlohmann::json& j, const Program::Cluster& c) {
-    Program::Cluster def;
-
     j[KeyClusterName] = c.name;
-    if (c.parameters != def.parameters) {
+    if (c.parameters != Program::Cluster().parameters) {
         j[KeyClusterParameters] = c.parameters;
     }
 }
@@ -101,33 +97,33 @@ void to_json(nlohmann::json& j, const Program::Cluster& c) {
 void from_json(const nlohmann::json& j, Program& p) {
     j.at(KeyName).get_to(p.name);
     j.at(KeyExecutable).get_to(p.executable);
-    if (j.find(KeyCommandlineParameters) != j.end()) {
-        j.at(KeyCommandlineParameters).get_to(p.commandlineParameters);
+    if (auto it = j.find(KeyCommandlineParameters);  it != j.end()) {
+        it->get_to(p.commandlineParameters);
     }
-    if (j.find(KeyWorkingDirectory) != j.end()) {
-        j.at(KeyWorkingDirectory).get_to(p.workingDirectory);
+    if (auto it = j.find(KeyWorkingDirectory);  it != j.end()) {
+        it->get_to(p.workingDirectory);
     }
-    if (j.find(KeyTags) != j.end()) {
-        j.at(KeyTags).get_to(p.tags);
+    if (auto it = j.find(KeyTags);  it != j.end()) {
+        it->get_to(p.tags);
     }
-    if (j.find(KeyDescription) != j.end()) {
-        j.at(KeyDescription).get_to(p.description);
+    if (auto it = j.find(KeyDescription);  it != j.end()) {
+        it->get_to(p.description);
     }
-    if (j.find(KeySendConsole) != j.end()) {
-        j.at(KeySendConsole).get_to(p.shouldForwardMessages);
+    if (auto it = j.find(KeySendConsole);  it != j.end()) {
+        it->get_to(p.shouldForwardMessages);
     }
-    if (j.find(KeyEnabled) != j.end()) {
-        j.at(KeyEnabled).get_to(p.isEnabled);
+    if (auto it = j.find(KeyEnabled);  it != j.end()) {
+        it->get_to(p.isEnabled);
     }
-    if (j.find(KeyDelay) != j.end()) {
-        const unsigned int delay = j.at(KeyDelay).get<unsigned int>();
+    if (auto it = j.find(KeyDelay);  it != j.end()) {
+        const unsigned int delay = it->get<unsigned int>();
         p.delay = std::chrono::milliseconds(delay);
     }
-    if (j.find(KeyPreStart) != j.end()) {
-        j.at(KeyPreStart).get_to(p.preStart);
+    if (auto it = j.find(KeyPreStart);  it != j.end()) {
+        it->get_to(p.preStart);
     }
-    if (j.find(KeyConfigurations) != j.end()) {
-        j.at(KeyConfigurations).get_to(p.configurations);
+    if (auto it = j.find(KeyConfigurations);  it != j.end()) {
+        it->get_to(p.configurations);
     }
     else {
         // There always has to be at least a default configuration
@@ -152,32 +148,30 @@ void from_json(const nlohmann::json& j, Program& p) {
 }
 
 void to_json(nlohmann::json& j, const Program& p) {
-    Program def;
-
     j[KeyName] = p.name;
     j[KeyExecutable] = p.executable;
-    if (p.commandlineParameters != def.commandlineParameters) {
+    if (p.commandlineParameters != Program().commandlineParameters) {
         j[KeyCommandlineParameters] = p.commandlineParameters;
     }
-    if (p.workingDirectory != def.workingDirectory) {
+    if (p.workingDirectory != Program().workingDirectory) {
         j[KeyWorkingDirectory] = p.workingDirectory;
     }
-    if (p.tags != def.tags) {
+    if (p.tags != Program().tags) {
         j[KeyTags] = p.tags;
     }
-    if (p.description != def.description) {
+    if (p.description != Program().description) {
         j[KeyDescription] = p.description;
     }
-    if (p.shouldForwardMessages != def.shouldForwardMessages) {
+    if (p.shouldForwardMessages != Program().shouldForwardMessages) {
         j[KeySendConsole] = p.shouldForwardMessages;
     }
-    if (p.isEnabled != def.isEnabled) {
+    if (p.isEnabled != Program().isEnabled) {
         j[KeyEnabled] = p.isEnabled;
     }
-    if (p.delay != def.delay && p.delay.has_value() ) {
+    if (p.delay != Program().delay && p.delay.has_value() ) {
         j[KeyDelay] = p.delay->count();
     }
-    if (p.preStart != def.preStart) {
+    if (p.preStart != Program().preStart) {
         j[KeyPreStart] = p.preStart;
     }
     j[KeyConfigurations] = p.configurations;

@@ -50,22 +50,20 @@ namespace {
 
 void from_json(const nlohmann::json& j, Cluster& c) {
     j.at(KeyName).get_to(c.name);
-    if (j.find(KeyEnabled) != j.end()) {
-        j[KeyEnabled].get_to(c.isEnabled);
+    if (auto it = j.find(KeyEnabled);  it != j.end()) {
+        it->get_to(c.isEnabled);
     }
-    if (j.find(KeyDescription) != j.end()) {
-        j[KeyDescription].get_to(c.description);
+    if (auto it = j.find(KeyDescription);  it != j.end()) {
+        it->get_to(c.description);
     }
 
     j.at(KeyNodes).get_to(c.nodes);
 }
 
 void to_json(nlohmann::json& j, const Cluster& c) {
-    Cluster def;
-
     j[KeyName] = c.name;
     j[KeyEnabled] = c.isEnabled;
-    if (c.description != def.description) {
+    if (c.description != Cluster().description) {
         j[KeyDescription] = c.description;
     }
     j[KeyNodes] = c.nodes;

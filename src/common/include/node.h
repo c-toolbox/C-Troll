@@ -44,8 +44,10 @@
  * Tray application is listening.
  */
 struct Node {
-    using ID = TypedId<int, struct NodeTag>;
+    using ID = TypedId<struct NodeTag>;
 
+    auto operator<=>(const Node& rhs) const = default;
+    
     /// Unique identifier for the cluster node
     ID id{ -1 };
 
@@ -66,8 +68,6 @@ struct Node {
     bool isConnecting = false;
     /// A flag representing whether the node is connected or not
     bool isConnected = false;
-
-    auto operator<=>(const Node& rhs) const = default;
 };
 
 void from_json(const nlohmann::json& j, Node& n);

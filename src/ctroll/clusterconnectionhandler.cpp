@@ -81,10 +81,9 @@ void ClusterConnectionHandler::initialize() {
             }
         );
 
-        auto jsonSocket = std::make_unique<common::JsonSocket>(
-            std::move(socket),
-            node->secret
-        );
+        std::unique_ptr<common::JsonSocket> jsonSocket =
+            std::make_unique<common::JsonSocket>(std::move(socket), node->secret);
+
         connect(
             jsonSocket.get(), &common::JsonSocket::messageReceived,
             [this, id = node->id](nlohmann::json message) {
@@ -137,10 +136,10 @@ void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
     const Node* node = data::findNode(nodeId);
     assert(node);
 
-    Log(
-        fmt::format("Socket State Change [{}:{}]", node->ipAddress, node->port),
-        std::string(stateToString(state))
-    );
+    Log(fmt::format(
+        "Socket State Change [{}:{}]",
+        node->ipAddress, node->port), std::string(stateToString(state)
+    ));
 
     if (state == QAbstractSocket::SocketState::ConnectedState) {
         data::setNodeConnecting(nodeId, true);
@@ -166,10 +165,8 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
         std::string(common::ProcessOutputMessage::Type) :
         message.dump();
 
-    Log(
-        fmt::format(
-            "Received [{}:{} ({})]",
-            data::findNode(nodeId)->ipAddress,
+    Debug(
+        fmt::format("Received [{}:{} ({})]", data::findNode(nodeId)->ipAddress,
             data::findNode(nodeId)->port,
             data::findNode(nodeId)->name
         ),

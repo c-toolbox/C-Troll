@@ -35,17 +35,17 @@
 #ifndef __COMMON__TYPED_ID_H__
 #define __COMMON__TYPED_ID_H__
 
-template <typename T, typename Tag>
+template <typename Tag>
 struct TypedId {
     constexpr TypedId() = default;
-    constexpr explicit TypedId(T value) : v(value) {}
+    constexpr explicit TypedId(int value) : v(value) {}
 
     constexpr bool operator==(const TypedId& rhs) const { return v == rhs.v; }
     constexpr TypedId& operator=(int value) { v = value; return *this; }
 
     constexpr bool operator<(const TypedId& rhs) const { return v < rhs.v; }
 
-    T v = T(0);
+    int v = 0;
 };
 
 #endif // __COMMON__TYPED_ID_H__

@@ -54,24 +54,22 @@ void from_json(const nlohmann::json& j, Node& n) {
     j.at(KeyName).get_to(n.name);
     j.at(KeyIpAddress).get_to(n.ipAddress);
     j.at(KeyPort).get_to(n.port);
-    if (j.find(KeySecret) != j.end()) {
-        j[KeySecret].get_to(n.secret);
+    if (auto it = j.find(KeySecret);  it != j.end()) {
+        it->get_to(n.secret);
     }
-    if (j.find(KeyDescription) != j.end()) {
-        j[KeyDescription].get_to(n.description);
+    if (auto it = j.find(KeyDescription);  it != j.end()) {
+        it->get_to(n.description);
     }
 }
 
 void to_json(nlohmann::json& j, const Node& n) {
-    Node def;
-
     j[KeyName] = n.name;
     j[KeyIpAddress] = n.ipAddress;
     j[KeyPort] = n.port;
-    if (n.secret != def.secret) {
+    if (n.secret != Node().secret) {
         j[KeySecret] = n.secret;
     }
-    if (n.description != def.description) {
+    if (n.description != Node().description) {
         j[KeyDescription] = n.description;
     }
 }
@@ -104,21 +102,6 @@ std::pair<std::vector<Node>, bool> loadNodesFromDirectory(std::string_view direc
             node.id.v, node.name, node.ipAddress, node.port, node.description,
             node.isConnected
         );
-
-        if (node.name.empty()) {
-            throw std::runtime_error(fmt::format("Found node without a name: {}", text));
-        }
-        if (node.ipAddress.empty()) {
-            throw std::runtime_error(
-                fmt::format("Found node without an IP address: {}", text)
-            );
-        }
-
-        if (node.port <= 0 || node.port >= 65536) {
-            throw std::runtime_error(
-                fmt::format("Found node with invalid port: {}", text)
-            );
-        }
     }
 
     // Inject the unique identifiers into the nodes

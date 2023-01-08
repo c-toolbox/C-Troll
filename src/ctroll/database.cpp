@@ -45,6 +45,8 @@ namespace {
     std::vector<std::unique_ptr<Program>> gPrograms;
     std::vector<std::unique_ptr<Process>> gProcesses;
 
+    std::set<std::string> gTags;
+
     std::vector<Color> gTagColors;
 
     std::size_t gDataHash = 0;
@@ -88,6 +90,10 @@ std::vector<const Process*> processes() {
         processes.push_back(p.get());
     }
     return processes;
+}
+
+std::set<std::string> tags() {
+    return gTags;
 }
 
 
@@ -237,16 +243,6 @@ bool hasTag(Program::ID id, const std::vector<std::string>& tags) {
     return res;
 }
 
-std::set<std::string> findTags() {
-    std::set<std::string> res;
-    for (const Program* program : programs()) {
-        for (const std::string& tag : program->tags) {
-            res.insert(tag);
-        }
-    }
-    return res;
-}
-
 const Process* findProcess(Process::ID id) {
     const auto it = std::find_if(
         gProcesses.cbegin(), gProcesses.cend(),
@@ -380,16 +376,6 @@ bool loadData(std::string_view programPath, std::string_view clusterPath,
     }
 
     for (Cluster& cluster : clusters) {
-        if (cluster.name.empty()) {
-            throw std::runtime_error("Missing name for cluster");
-        }
-
-        if (cluster.nodes.empty()) {
-            throw std::runtime_error(fmt::format(
-                "No nodes specified for cluster {}", cluster.name
-            ));
-        }
-
         for (const std::string& node : cluster.nodes) {
             const Node* n = findNode(node);
             if (!n) {
@@ -421,30 +407,6 @@ bool loadData(std::string_view programPath, std::string_view clusterPath,
     }
 
     for (Program& program : programs) {
-        if (program.name.empty()) {
-            throw std::runtime_error("No name specified for program");
-        }
-        if (program.executable.empty()) {
-            throw std::runtime_error(fmt::format(
-                "No executable specified for program {}", program.name
-            ));
-        }
-        if (program.clusters.empty()) {
-            throw std::runtime_error(fmt::format(
-                "No clusters specified for program {}", program.name
-            ));
-        }
-
-        const bool hasEmptyTag = std::any_of(
-            program.tags.cbegin(), program.tags.cend(),
-            std::mem_fn(&std::string::empty)
-        );
-        if (hasEmptyTag) {
-            throw std::runtime_error(fmt::format(
-                "At least one tag of the program {} has an empty tag", program.name
-            ));
-        }
-
         for (const Program::Cluster& cluster : program.clusters) {
             const Cluster* c = data::findCluster(cluster.name);
             if (!c) {
@@ -455,11 +417,13 @@ bool loadData(std::string_view programPath, std::string_view clusterPath,
         }
 
         std::unique_ptr<Program> p = std::make_unique<Program>(std::move(program));
+
+        for (const std::string& tag : p->tags) {
+            gTags.insert(tag);
+        }
+
         gPrograms.push_back(std::move(p));
     }
-
-
-
 
     // Calculate the hash of all the data that was just loaded
     std::size_t hash = 0;

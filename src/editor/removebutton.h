@@ -40,7 +40,7 @@
 class RemoveButton : public QPushButton {
 Q_OBJECT
 public:
-    RemoveButton(QWidget* parent = 0);
+    explicit RemoveButton(QWidget* parent = 0);
 };
 
 #endif // __EDITOR__REMOVEBUTTON_H__

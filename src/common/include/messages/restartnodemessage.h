@@ -46,7 +46,6 @@ struct RestartNodeMessage : public Message {
     static constexpr std::string_view Type = "RestartNodeMessage";
 
     RestartNodeMessage();
-
     auto operator<=>(const RestartNodeMessage& rhs) const = default;
 };
 

@@ -82,7 +82,6 @@ private:
     QPushButton* _killProcess = nullptr;
     QPushButton* _remove = nullptr;
 
-
     QWidget* _messageContainer = nullptr;
     QPlainTextEdit* _messages = nullptr;
     QPlainTextEdit* _errorMessages = nullptr;
@@ -97,7 +96,7 @@ private:
 class ProcessesWidget : public QWidget {
 Q_OBJECT
 public:
-    ProcessesWidget(const std::chrono::milliseconds& processTimeout);
+    explicit ProcessesWidget(const std::chrono::milliseconds& processTimeout);
 
     void processAdded(Process::ID processId);
     void processUpdated(Process::ID processId);

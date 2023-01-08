@@ -55,10 +55,7 @@ void to_json(nlohmann::json& j, const Color& c) {
     if (!c.tag.empty()) {
         j[KeyTagColorsTag] = c.tag;
     }
-
-    if (c.r < 0 || c.r > 255 || c.g < 0 || c.g > 255 || c.b < 0 || c.b > 255) {
-        throw std::runtime_error("Color components must be in the range [0, 255]");
-    }
+    assert(c.r >= 0 && c.r <= 255 && c.g >= 0 && c.g <= 255 && c.b >= 0 && c.b <= 255);
 }
 
 void from_json(const nlohmann::json& j, Color& c) {
@@ -66,11 +63,7 @@ void from_json(const nlohmann::json& j, Color& c) {
     j.at(KeyTagColorsGreen).get_to(c.g);
     j.at(KeyTagColorsBlue).get_to(c.b);
 
-    if (j.find(KeyTagColorsTag) != j.end()) {
-        j[KeyTagColorsTag].get_to(c.tag);
-    }
-
-    if (c.r < 0 || c.r > 255 || c.g < 0 || c.g > 255 || c.b < 0 || c.b > 255) {
-        throw std::runtime_error("All color components must be in [0, 255]");
+    if (auto it = j.find(KeyTagColorsTag);  it != j.end()) {
+        it->get_to(c.tag);
     }
 }

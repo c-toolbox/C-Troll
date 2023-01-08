@@ -59,13 +59,13 @@
 //   - If the patch version of the API was increased
 
 
-namespace application {
+namespace app {
     constexpr int MajorVersion = 2;
     constexpr int MinorVersion = 0;
     constexpr int PatchVersion = 0;
 
     constexpr std::string_view Version = "2.0.0";
-} // namespace application
+} // namespace app
 
 
 // This is the version of the JSON based socket API and its messages that are used to

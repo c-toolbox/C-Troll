@@ -48,7 +48,7 @@ public:
 
     void addItem(QWidget* item);
 
-    template <typename T>
+    template <typename T> requires std::is_base_of_v<QWidget, T>
     std::vector<T*> items() const;
 
 signals:
@@ -62,7 +62,7 @@ private:
 
 
 
-template <typename T>
+template <typename T> requires std::is_base_of_v<QWidget, T>
 std::vector<T*> DynamicList::items() const {
     std::vector<T*> res;
     res.reserve(_items.size());

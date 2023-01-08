@@ -62,12 +62,12 @@ public slots:
 private:
     QWidget* createInfoWidget();
 
-    QTextEdit* _messageBox;
-    QLabel* _portLabel;
+    QTextEdit* _messageBox = nullptr;
+    QLabel* _portLabel = nullptr;
 
-    QLayout* _connectionsLayout;
+    QLayout* _connectionsLayout = nullptr;
     std::map<std::string, QLabel*> _connections;
-    QLayout* _processesLayout;
+    QLayout* _processesLayout = nullptr;
     std::map<int, QLabel*> _processes;
 };
 

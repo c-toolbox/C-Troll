@@ -78,9 +78,9 @@ private:
     void handleApiInfoMessage(QTcpSocket& socket);
 
     QTcpServer _server;
-    bool _hasCustomProgramAPI = false;
-    bool _acceptOnlyLoopbackConnection = true;
-    std::string _secret;
+    const bool _hasCustomProgramAPI = false;
+    const bool _acceptOnlyLoopbackConnection = true;
+    const std::string _secret;
 };
 
 #endif // __CTROLL_RESTCONNECTIONHANDLER_H__
