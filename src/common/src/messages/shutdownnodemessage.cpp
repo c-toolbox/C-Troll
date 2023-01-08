@@ -32,117 +32,23 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CTROLL__CLUSTERWIDGET_H__
-#define __CTROLL__CLUSTERWIDGET_H__
+#include "messages/shutdownnodemessage.h"
 
-#include <QGroupBox>
-#include <QScrollArea>
-#include <QWidget>
+namespace common {
 
-#include "cluster.h"
-#include "node.h"
-#include <map>
+ShutdownNodeMessage::ShutdownNodeMessage()
+    : Message(std::string(ShutdownNodeMessage::Type))
+{}
 
-class QLabel;
-class QPushButton;
+void to_json(nlohmann::json& j, const ShutdownNodeMessage& m) {
+    j[Message::KeyType] = ShutdownNodeMessage::Type;
+    j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
+    j[Message::KeySecret] = m.secret;
+}
 
-class ConnectionWidget : public QWidget {
-Q_OBJECT
-public:
-    enum class Status {
-        Connected = 0,
-        ConnectedButInvalid, ///< If a port is listening, but it is not the tray
-        PartiallyConnected,
-        Disconnected
-    };
+void from_json(const nlohmann::json& j, ShutdownNodeMessage& m) {
+    validateMessage(j, ShutdownNodeMessage::Type);
+    from_json(j, static_cast<Message&>(m));
+}
 
-    void setStatus(Status status);
-    void paintEvent(QPaintEvent*) override;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-class NodeWidget : public QGroupBox {
-Q_OBJECT
-public:
-    NodeWidget(const Node& node, bool showShutdownButton);
-
-    void updateConnectionStatus();
-
-signals:
-    void killProcesses(Node::ID id);
-    void killTray(Node::ID id);
-    void restartNode(Node::ID id);
-    void shutdownNode(Node::ID id);
-
-private:
-    const Node::ID _nodeId;
-
-    ConnectionWidget* _connectionLabel = nullptr;
-    QPushButton* _killProcesses = nullptr;
-    QPushButton* _killTray = nullptr;
-    QPushButton* _restartNode = nullptr;
-    QPushButton* _shutdownNode = nullptr;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-class ClusterWidget : public QGroupBox {
-Q_OBJECT
-public:
-    ClusterWidget(const Cluster& cluster, bool showShutdownButton);
-
-    void updateConnectionStatus(Node::ID nodeId);
-
-signals:
-    void killProcesses(Node::ID id);
-    void killProcesses(Cluster::ID id);
-    void killTray(Node::ID id);
-    void killTrays(Cluster::ID id);
-    void restartNode(Node::ID id);
-    void restartNodes(Cluster::ID id);
-    void shutdownNode(Node::ID id);
-    void shutdownNodes(Cluster::ID id);
-
-private:
-    const Cluster::ID _clusterId;
-
-    ConnectionWidget* _connectionLabel = nullptr;
-    QPushButton* _killProcesses = nullptr;
-    QPushButton* _killTrays = nullptr;
-    QPushButton* _restartNodes = nullptr;
-    QPushButton* _shutdownNodes = nullptr;
-    std::map<Node::ID, NodeWidget*> _nodeWidgets;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-class ClustersWidget : public QScrollArea {
-Q_OBJECT
-public:
-    explicit ClustersWidget(bool showShutdownButton);
-
-public slots:
-    void connectedStatusChanged(Cluster::ID clusterId, Node::ID nodeId);
-
-signals:
-    void killProcesses(Node::ID id);
-    void killProcesses(Cluster::ID id);
-    void killTray(Node::ID id);
-    void killTrays(Cluster::ID id);
-    void restartNode(Node::ID id);
-    void restartNodes(Cluster::ID id);
-    void shutdownNode(Node::ID id);
-    void shutdownNodes(Cluster::ID id);
-
-private:
-    std::map<Cluster::ID, ClusterWidget*> _clusterWidgets;
-};
-
-#endif // __CTROLL__CLUSTERWIDGET_H__
+} // namespace common

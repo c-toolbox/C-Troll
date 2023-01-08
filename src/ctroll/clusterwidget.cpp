@@ -77,7 +77,7 @@ void ConnectionWidget::paintEvent(QPaintEvent*) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-NodeWidget::NodeWidget(const Node& node)
+NodeWidget::NodeWidget(const Node& node, bool showShutdownButton)
     : QGroupBox(QString::fromStdString(node.name))
     , _nodeId(node.id)
 {
@@ -189,7 +189,39 @@ NodeWidget::NodeWidget(const Node& node)
             }
         }
     );
-    bottomLayout->addWidget(_restartNode, 1, 0, 1, 2);
+    // If we want to show the shutdown buttons, the restart node button only needs to be
+    // normal width instead. Otherwise we make it double width to fill the widget
+    bottomLayout->addWidget(_restartNode, 1, 0, 1, showShutdownButton ? 1 : 2);
+
+    if (showShutdownButton) {
+        _shutdownNode = new QPushButton("Shutdown node");
+        _shutdownNode->setObjectName("shutdownnode");
+        _shutdownNode->setToolTip("Shuts down this particular node");
+        connect(
+            _shutdownNode, &QPushButton::clicked,
+            [this, node]() {
+                std::string text = fmt::format(
+                    "Are you sure you want to shut down '{}'?", node.name
+                );
+
+                QMessageBox box;
+                box.setText("Shutdown node");
+                box.setInformativeText(QString::fromStdString(text));
+                box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+                box.setDefaultButton(QMessageBox::Ok);
+                int res = box.exec();
+                if (res == QMessageBox::Ok) {
+                    box.setInformativeText(QString::fromStdString("AGAIN: " + text));
+                    res = box.exec();
+
+                    if (res == QMessageBox::Ok) {
+                        emit shutdownNode(node.id);
+                    }
+                }
+            }
+        );
+        bottomLayout->addWidget(_shutdownNode, 1, 1);
+    }
 
     layout->addWidget(bottomRow);
 }
@@ -210,13 +242,16 @@ void NodeWidget::updateConnectionStatus() {
     _killProcesses->setEnabled(n->isConnected);
     _killTray->setEnabled(n->isConnected);
     _restartNode->setEnabled(n->isConnected);
+    if (_shutdownNode) {
+        _shutdownNode->setEnabled(n->isConnected);
+    }
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ClusterWidget::ClusterWidget(const Cluster& cluster)
+ClusterWidget::ClusterWidget(const Cluster& cluster, bool showShutdownButton)
     : QGroupBox(QString::fromStdString(cluster.name))
     , _clusterId(cluster.id)
 {
@@ -233,13 +268,14 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
     static constexpr const int Columns = 5;
     for (size_t i = 0; i < nodes.size(); ++i) {
         const Node* n = nodes[i];
-        NodeWidget* node = new NodeWidget(*n);
+        NodeWidget* node = new NodeWidget(*n, showShutdownButton);
         connect(
             node, &NodeWidget::killProcesses,
             this, QOverload<Node::ID>::of(&ClusterWidget::killProcesses)
         );
         connect(node, &NodeWidget::killTray, this, &ClusterWidget::killTray);
         connect(node, &NodeWidget::restartNode, this, &ClusterWidget::restartNode);
+        connect(node, &NodeWidget::shutdownNode, this, &ClusterWidget::shutdownNode);
         layout->addWidget(
             node,
             static_cast<int>(i) / Columns,
@@ -308,12 +344,12 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
         _restartNodes, &QPushButton::clicked,
         [this, cluster]() {
             std::string text = fmt::format(
-                "Are you sure you want restart all nodes of cluster '{}'?",
+                "Are you sure you want to restart all nodes of cluster '{}'?",
                 cluster.name
             );
 
             QMessageBox box;
-            box.setText("Restart Nodes Trays");
+            box.setText("Restart nodes");
             box.setInformativeText(QString::fromStdString(text));
             box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             box.setDefaultButton(QMessageBox::Ok);
@@ -327,7 +363,38 @@ ClusterWidget::ClusterWidget(const Cluster& cluster)
             }
         }
     );
-    btnLayout->addWidget(_restartNodes, 1, 0, 1, 2);
+    // If we want to show the shutdown buttons, the restart node button only needs to be
+    // normal width instead. Otherwise we make it double width to fill the widget
+    btnLayout->addWidget(_restartNodes, 1, 0, 1, showShutdownButton ? 1 : 2);
+
+    if (showShutdownButton) {
+        _shutdownNodes = new QPushButton("Shutdown all nodes");
+        _shutdownNodes->setObjectName("shutdownnodes");
+        connect(
+            _shutdownNodes, &QPushButton::clicked,
+            [this, cluster]() {
+                std::string text = fmt::format(
+                    "Are you sure you want to shut down all nodes of cluster '{}'?",
+                    cluster.name
+                );
+
+                QMessageBox box;
+                box.setText("Shut down nodes");
+                box.setInformativeText(QString::fromStdString(text));
+                box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+                box.setDefaultButton(QMessageBox::Ok);
+                int res = box.exec();
+                if (res == QMessageBox::Ok) {
+                    box.setInformativeText(QString::fromStdString("AGAIN: " + text));
+                    res = box.exec();
+                    if (res == QMessageBox::Ok) {
+                        emit shutdownNodes(cluster.id);
+                    }
+                }
+            }
+        );
+        btnLayout->addWidget(_shutdownNodes, 1, 1);
+    }
 
     layout->setRowMinimumHeight(static_cast<int>(nodes.size()) / Columns + 1, 5);
 
@@ -369,13 +436,16 @@ void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
     _killProcesses->setEnabled(someConnected);
     _killTrays->setEnabled(someConnected);
     _restartNodes->setEnabled(someConnected);
+    if (_shutdownNodes) {
+        _shutdownNodes->setEnabled(someConnected);
+    }
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-ClustersWidget::ClustersWidget() {
+ClustersWidget::ClustersWidget(bool showShutdownButton) {
     setWidgetResizable(true);
     QWidget* content = new QWidget;
     setWidget(content);
@@ -385,7 +455,7 @@ ClustersWidget::ClustersWidget() {
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     for (const Cluster* c : data::clusters()) {
-        ClusterWidget* w = new ClusterWidget(*c);
+        ClusterWidget* w = new ClusterWidget(*c, showShutdownButton);
         connect(
             w, QOverload<Node::ID>::of(&ClusterWidget::killProcesses),
             this, QOverload<Node::ID>::of(&ClustersWidget::killProcesses)
@@ -398,6 +468,8 @@ ClustersWidget::ClustersWidget() {
         connect(w, &ClusterWidget::killTrays, this, &ClustersWidget::killTrays);
         connect(w, &ClusterWidget::restartNode, this, &ClustersWidget::restartNode);
         connect(w, &ClusterWidget::restartNodes, this, &ClustersWidget::restartNodes);
+        connect(w, &ClusterWidget::shutdownNode, this, &ClustersWidget::shutdownNode);
+        connect(w, &ClusterWidget::shutdownNodes, this, &ClustersWidget::shutdownNodes);
         _clusterWidgets[c->id] = w;
         contentLayout->addWidget(w);
     }

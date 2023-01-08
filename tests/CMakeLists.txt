@@ -51,6 +51,7 @@ add_executable(UnitTest
   test_processoutputmessage.cpp
   test_processstatusmessage.cpp
   test_restartnodemessage.cpp
+  test_shutdownnodemessage.cpp
   test_startcommandmessage.cpp
   test_trayconnectedmessage.cpp
   test_traystatusmessage.cpp

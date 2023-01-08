@@ -70,6 +70,8 @@ struct Configuration : public BaseConfiguration {
     /// Contains configuration about log rotations
     std::optional<common::LogRotation> logRotation;
 
+    bool showShutdownButtons = false;
+
     struct Rest {
         std::string username;
         std::string password;

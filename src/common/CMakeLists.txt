@@ -42,6 +42,7 @@ set(HEADER_FILES
   include/messages/processoutputmessage.h
   include/messages/processstatusmessage.h
   include/messages/restartnodemessage.h
+  include/messages/shutdownnodemessage.h
   include/messages/startcommandmessage.h
   include/messages/trayconnectedmessage.h
   include/messages/traystatusmessage.h
@@ -70,6 +71,7 @@ set(SOURCE_FILES
   src/messages/processoutputmessage.cpp
   src/messages/processstatusmessage.cpp
   src/messages/restartnodemessage.cpp
+  src/messages/shutdownnodemessage.cpp
   src/messages/startcommandmessage.cpp
   src/messages/trayconnectedmessage.cpp
   src/messages/traystatusmessage.cpp

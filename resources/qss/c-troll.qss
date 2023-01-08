@@ -173,6 +173,16 @@ ClusterWidget  QPushButton#restartnodes:hover {
   background-color: #b32525;
 }
 
+ClusterWidget  QPushButton#shutdownnodes:enabled {
+  background-color: #932525;
+  color: #dddddd;
+  font-weight: bold;
+}
+
+ClusterWidget  QPushButton#shutdownnodes:hover {
+  background-color: #b32525;
+}
+
 NodeWidget  ConnectionWidget {
   min-width: 0.75em;
   max-width: 0.75em;
@@ -189,6 +199,11 @@ NodeWidget  QPushButton#killtray:enabled {
 }
 
 NodeWidget  QPushButton#restartnode:enabled {
+  color: #f33e3e;
+  font-weight: bold;
+}
+
+NodeWidget  QPushButton#shutdownnode:enabled {
   color: #f33e3e;
   font-weight: bold;
 }

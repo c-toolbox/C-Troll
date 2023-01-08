@@ -42,6 +42,8 @@ namespace {
     constexpr std::string_view KeyLogFile = "logFile";
     constexpr std::string_view KeyLogRotation = "logRotation";
 
+    constexpr std::string_view KeyShowShutdownButton = "showShutdownButton";
+
     constexpr std::string_view KeyTagColors = "tagColors";
 
     constexpr std::string_view KeyRestLoopback = "restLoopback";
@@ -69,6 +71,10 @@ void to_json(nlohmann::json& j, const Configuration& c) {
 
     if (c.logRotation.has_value()) {
         j[KeyLogRotation] = *c.logRotation;
+    }
+
+    if (c.showShutdownButtons != Configuration().showShutdownButtons) {
+        j[KeyShowShutdownButton] = c.showShutdownButtons;
     }
 
     if (c.restLoopback.has_value()) {
@@ -135,6 +141,10 @@ void from_json(const nlohmann::json& j, Configuration& c) {
 
     if (j.find(KeyLogRotation) != j.end()) {
         c.logRotation = j[KeyLogRotation].get<common::LogRotation>();
+    }
+
+    if (j.find(KeyShowShutdownButton) != j.end()) {
+        j[KeyShowShutdownButton].get_to(c.showShutdownButtons);
     }
 
     if (j.find(KeyRestLoopback) != j.end()) {

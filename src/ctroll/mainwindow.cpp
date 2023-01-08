@@ -208,7 +208,7 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
 
 
     // Clusters
-    _clustersWidget = new ClustersWidget;
+    _clustersWidget = new ClustersWidget(config.showShutdownButtons);
     connect(
         &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
         _clustersWidget, &ClustersWidget::connectedStatusChanged
@@ -230,6 +230,14 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     connect(
         _clustersWidget, &ClustersWidget::restartNodes,
         this, &MainWindow::restartNodes
+    );
+    connect(
+        _clustersWidget, &ClustersWidget::shutdownNode,
+        this, &MainWindow::shutdownNode
+    );
+    connect(
+        _clustersWidget, &ClustersWidget::shutdownNodes,
+        this, &MainWindow::shutdownNodes
     );
 
     // Processes
@@ -757,6 +765,49 @@ void MainWindow::restartNodes(Cluster::ID id) const {
 
     for (const Node* node : nodes) {
         common::RestartNodeMessage command;
+        if (!node->secret.empty()) {
+            command.secret = node->secret;
+        }
+        _clusterConnectionHandler.sendMessage(*node, command);
+    }
+}
+
+void MainWindow::shutdownNode(Node::ID id) const {
+    Log("Sending", fmt::format("Send message to shut down node {}", id.v));
+    const Node* node = data::findNode(id);
+    assert(node);
+
+    common::ShutdownNodeMessage command;
+    if (!node->secret.empty()) {
+        command.secret = node->secret;
+    }
+    _clusterConnectionHandler.sendMessage(*node, command);
+}
+
+void MainWindow::shutdownNodes(Cluster::ID id) const {
+    Log("Sending", fmt::format("Send message to shut down nodes on {}", id.v));
+
+    std::vector<const Node*> nodes;
+    if (id.v == -1) {
+        // Send kill command to all clusters
+        for (const Cluster* cluster : data::clusters()) {
+            std::vector<const Node*> ns = data::findNodesForCluster(*cluster);
+            std::copy(ns.begin(), ns.end(), std::back_inserter(nodes));
+        }
+
+        // We have probably picked up a number of duplicates in this process as nodes can
+        // be specified in multiple clusters
+        std::sort(nodes.begin(), nodes.end());
+        nodes.erase(std::unique(nodes.begin(), nodes.end()), nodes.end());
+    }
+    else {
+        // We want to send the kill command only to the nodes of a specific cluster
+        const Cluster* cluster = data::findCluster(id);
+        nodes = data::findNodesForCluster(*cluster);
+    }
+
+    for (const Node* node : nodes) {
+        common::ShutdownNodeMessage command;
         if (!node->secret.empty()) {
             command.secret = node->secret;
         }

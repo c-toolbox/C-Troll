@@ -45,6 +45,7 @@
 #include "messages/processoutputmessage.h"
 #include "messages/processstatusmessage.h"
 #include "messages/restartnodemessage.h"
+#include "messages/shutdownnodemessage.h"
 #include "messages/startcommandmessage.h"
 #include "messages/trayconnectedmessage.h"
 #include "messages/traystatusmessage.h"

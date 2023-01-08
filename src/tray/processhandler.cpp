@@ -191,6 +191,11 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
 
             QProcess::startDetached("shutdown", { "/r", "/t", "0" });
         }
+        else if (common::isValidMessage<common::ShutdownNodeMessage>(message)) {
+            Log(fmt::format("Received [{}]: {}", peer, message.dump()));
+
+            QProcess::startDetached("shutdown", { "/s", "/t", "0" });
+        }
     }
     catch (const std::exception& e) {
         Log(fmt::format(

@@ -89,6 +89,8 @@ private:
     void killTrays(Cluster::ID id) const;
     void restartNode(Node::ID id) const;
     void restartNodes(Cluster::ID id) const;
+    void shutdownNode(Node::ID id) const;
+    void shutdownNodes(Cluster::ID id) const;
 
     void log(std::string msg);
 
