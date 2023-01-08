@@ -42,6 +42,7 @@
 #include <QFileDialog>
 #include <QIcon>
 #include <QMessageBox>
+#include <QProcessEnvironment>
 #include <QPushButton>
 #include <filesystem>
 
@@ -68,10 +69,22 @@ int main(int argc, char** argv) {
 
     BaseConfiguration config;
     try {
+        std::string cfg = "config.json";
+        if (QProcessEnvironment::systemEnvironment().contains("CTROLL_CONFIG")) {
+            QString c = QProcessEnvironment::systemEnvironment().value("CTROLL_CONFIG");
+            cfg = c.toStdString();
+
+            // We assume the paths in the configuration file to be relative to the file,
+            // so we need to change the current working directory to the folder where the
+            // configuration file exists
+            std::filesystem::current_path(std::filesystem::path(cfg).parent_path());
+        }
+
         config = common::loadConfiguration<BaseConfiguration>(
-            "config.json",
+            cfg,
             ":/schema/application/editor.schema.json"
         );
+        Log("Config", fmt::format("Finished loading configuration file '{}'", cfg));
     }
     catch (const std::runtime_error& err) {
         QMessageBox::critical(

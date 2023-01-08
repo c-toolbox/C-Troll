@@ -42,6 +42,7 @@
 #include <QFile>
 #include <QIcon>
 #include <QMessageBox>
+#include <QProcessEnvironment>
 #include <QSharedMemory>
 #include <QTimer>
 #include <fmt/format.h>
@@ -175,10 +176,21 @@ int main(int argc, char** argv) {
         app.setStyleSheet(styleSheet);
     }
 
+    std::string cfg = "config.json";
     Configuration config;
     try {
+        if (QProcessEnvironment::systemEnvironment().contains("CTROLL_CONFIG")) {
+            QString c = QProcessEnvironment::systemEnvironment().value("CTROLL_CONFIG");
+            cfg = c.toStdString();
+
+            // We assume the paths in the configuration file to be relative to the file,
+            // so we need to change the current working directory to the folder where the
+            // configuration file exists
+            std::filesystem::current_path(std::filesystem::path(cfg).parent_path());
+        }
+        
         config = common::loadConfiguration<Configuration>(
-            "config.json",
+            cfg,
             ":/schema/application/ctroll.schema.json"
         );
     }
@@ -192,6 +204,7 @@ int main(int argc, char** argv) {
     }
 
     common::Log::initialize("ctroll", config.logFile, logDebug);
+    Log("Config", fmt::format("Finished loading configuration file '{}'", cfg));
 
 
     try {
