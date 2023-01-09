@@ -381,29 +381,37 @@ ProgramWidget::ProgramWidget(const Program& program)
         layout->addWidget(w);
     }
 
+    QPushButton* gotoFolder = new QPushButton;
+    gotoFolder->setObjectName("gotoFolder");
+    gotoFolder->setIcon(gotoFolder->style()->standardIcon(QStyle::SP_DirIcon));
+    gotoFolder->setFlat(true);
+    gotoFolder->setContentsMargins(0, 0, 0, 0);
+    gotoFolder->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
 
-    // Only add the button if the program exists on this machine
+    connect(
+        gotoFolder, &QPushButton::clicked,
+        [exe = program.executable]() {
+            std::string path = fmt::format(
+                "file:///{}", std::filesystem::path(exe).parent_path().string()
+            );
+            QDesktopServices::openUrl(QString::fromStdString(path));
+        }
+    );
+    layout->addWidget(gotoFolder, 0, Qt::AlignTop);
+ 
+    // Only enable the button if the program exists on this machine
     if (std::filesystem::exists(program.executable)) {
-        QPushButton* gotoFolder = new QPushButton;
-        gotoFolder->setObjectName("gotoFolder");
-        gotoFolder->setIcon(QIcon(":/images/goto.png"));
-        gotoFolder->setFlat(true);
-        gotoFolder->setContentsMargins(0, 0, 0, 0);
-        gotoFolder->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
+        gotoFolder->setEnabled(true);
         gotoFolder->setToolTip(
             "Open the explorer to the directory where this program is located on this "
             "machine"
         );
-        connect(
-            gotoFolder, &QPushButton::clicked,
-            [exe = program.executable]() {
-                std::string path = fmt::format(
-                    "file:///{}", std::filesystem::path(exe).parent_path().string()
-                );
-                QDesktopServices::openUrl(QString::fromStdString(path));
-            }
-        );
-        layout->addWidget(gotoFolder);
+    }
+    else {
+        gotoFolder->setEnabled(false);
+        gotoFolder->setToolTip(QString::fromStdString(fmt::format(
+            "Unable to find the executable '{}' on this computer", program.executable
+        )));
     }
 }
 
