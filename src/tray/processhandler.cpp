@@ -154,7 +154,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                 // those cases
                 p->process->terminate();
                 returnMsg.status = common::ProcessStatusMessage::Status::NormalExit;
-                // Find specifc value in process map i.e. process
+                // Find specific value in process map i.e. process
                 const auto pIt = processIt(p->process);
 
                 if (pIt != _processes.end()) {
