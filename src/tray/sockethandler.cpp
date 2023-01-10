@@ -155,7 +155,7 @@ void SocketHandler::newConnectionEstablished() {
 
                     MessageLog ml = {
                         .time = currentTime(),
-                        .message = std::move(message),
+                        .message = message,
                         .peer = socket->peerAddress()
                     };
                     _lastMessages.front() = ml;
