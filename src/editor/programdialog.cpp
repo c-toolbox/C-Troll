@@ -84,6 +84,7 @@ ProgramDialog::ClusterWidget::ClusterWidget(std::string cluster, std::string par
 
     arguments = new QLineEdit;
     arguments->setText(QString::fromStdString(parameters));
+    arguments->setCursorPosition(0);
     arguments->setToolTip("Additional commandline parameters that are passed");
     arguments->setPlaceholderText("optional");
     layout->addWidget(arguments);
@@ -300,11 +301,15 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             common::loadJsonFromDirectory<Cluster>(_clusterPath);
 
         _name->setText(QString::fromStdString(program.name));
+        _name->setCursorPosition(0);
         _executable->setText(QString::fromStdString(program.executable));
+        _executable->setCursorPosition(0);
         _commandLineParameters->setText(
             QString::fromStdString(program.commandlineParameters)
         );
+        _commandLineParameters->setCursorPosition(0);
         _workingDirectory->setText(QString::fromStdString(program.workingDirectory));
+        _workingDirectory->setCursorPosition(0);
         _isEnabled->setChecked(program.isEnabled);
         _shouldForwardMessages->setChecked(program.shouldForwardMessages);
         _hasDelay->setChecked(program.delay.has_value());
@@ -324,10 +329,13 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             );
 
             config->name->setText(QString::fromStdString(configuration.name));
+            config->name->setCursorPosition(0);
             config->parameters->setText(QString::fromStdString(configuration.parameters));
+            config->parameters->setCursorPosition(0);
             config->description->setText(
                 QString::fromStdString(configuration.description)
             );
+            config->description->setCursorPosition(0);
             _configurations->addItem(config);
         }
         for (const Program::Cluster& cluster : program.clusters) {

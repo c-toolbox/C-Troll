@@ -111,10 +111,14 @@ NodeDialog::NodeDialog(QWidget* parent, std::string path)
         Node node = common::loadFromJson<Node>(_path);
 
         _name->setText(QString::fromStdString(node.name));
+        _name->setCursorPosition(0);
         _ip->setText(QString::fromStdString(node.ipAddress));
+        _ip->setCursorPosition(0);
         _port->setValue(node.port);
         _secret->setText(QString::fromStdString(node.secret));
+        _secret->setCursorPosition(0);
         _description->setText(QString::fromStdString(node.description));
+        _description->setCursorPosition(0);
     }
 
     updateSaveButton();

@@ -125,8 +125,10 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
             common::loadJsonFromDirectory<Node>(_nodePath);
 
         _name->setText(QString::fromStdString(cluster.name));
+        _name->setCursorPosition(0);
         _enabled->setChecked(cluster.isEnabled);
         _description->setText(QString::fromStdString(cluster.description));
+        _description->setCursorPosition(0);
         for (const std::string& node : cluster.nodes) {
             QLabel* nodeLabel = new QLabel(QString::fromStdString(node));
             _nodes->addItem(nodeLabel);
