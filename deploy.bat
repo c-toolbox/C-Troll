@@ -4,7 +4,7 @@
 echo ### Removing old folders
 if exist bin-old rmdir /S /Q bin-old
 if exist build-deploy rmdir /S /Q build-deploy
-
+if exist C-Troll.zip del C-Troll.zip
 
 echo ### Moving existing folders out of the way
 if exist bin move bin bin-old
