@@ -96,37 +96,13 @@ int main(int argc, char** argv) {
     }
 
     if (!std::filesystem::exists(config.applicationPath)) {
-        QMessageBox::critical(
-            nullptr,
-            "Directory missing",
-            QString::fromStdString(fmt::format(
-                "Could not find application path directory '{}'", config.applicationPath
-            ))
-        );
-        Q_CLEANUP_RESOURCE(resources);
-        return EXIT_SUCCESS;
+        std::filesystem::create_directory(config.applicationPath);
     }
     if (!std::filesystem::exists(config.clusterPath)) {
-        QMessageBox::critical(
-            nullptr,
-            "Directory missing",
-            QString::fromStdString(fmt::format(
-                "Could not find cluster path directory '{}'", config.clusterPath
-            ))
-        );
-        Q_CLEANUP_RESOURCE(resources);
-        return EXIT_SUCCESS;
+        std::filesystem::create_directory(config.clusterPath);
     }
     if (!std::filesystem::exists(config.nodePath)) {
-        QMessageBox::critical(
-            nullptr,
-            "Directory missing",
-            QString::fromStdString(fmt::format(
-                "Could not find node path directory '{}'", config.nodePath
-            ))
-        );
-        Q_CLEANUP_RESOURCE(resources);
-        return EXIT_SUCCESS;
+        std::filesystem::create_directory(config.nodePath);
     }
 
     MainWindow mw(config.applicationPath, config.clusterPath, config.nodePath);
