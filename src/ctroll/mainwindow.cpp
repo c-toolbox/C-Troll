@@ -118,8 +118,44 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     //
     // Load the data
     Log("Status", fmt::format("Loading programs from '{}'", config.applicationPath));
+    if (!std::filesystem::exists(config.applicationPath)) {
+        std::string msg = fmt::format(
+            "Could not find application path '{}'", config.applicationPath
+        );
+        QMessageBox::critical(
+            nullptr,
+            "Error loading",
+            QString::fromStdString(msg)
+        );
+        exit(EXIT_FAILURE);
+    }
+
     Log("Status", fmt::format("Loading nodes from '{}'", config.nodePath));
+    if (!std::filesystem::exists(config.nodePath)) {
+        std::string msg = fmt::format(
+            "Could not find node path '{}'", config.nodePath
+        );
+        QMessageBox::critical(
+            nullptr,
+            "Error loading",
+            QString::fromStdString(msg)
+        );
+        exit(EXIT_FAILURE);
+    }
+
     Log("Status", fmt::format("Loading clusters from '{}'", config.clusterPath));
+    if (!std::filesystem::exists(config.clusterPath)) {
+        std::string msg = fmt::format(
+            "Could not find cluster path '{}'", config.clusterPath
+        );
+        QMessageBox::critical(
+            nullptr,
+            "Error loading",
+            QString::fromStdString(msg)
+        );
+        exit(EXIT_FAILURE);
+    }
+
     bool success = data::loadData(
         config.applicationPath,
         config.clusterPath,
