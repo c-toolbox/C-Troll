@@ -83,6 +83,7 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
         editLayout->addWidget(new QLabel("Enabled:"), 1, 0);
         _enabled = new QCheckBox;
         _enabled->setToolTip("Determines whether this cluster is currently used");
+        _enabled->setChecked(true);
         editLayout->addWidget(_enabled, 1, 1);
 
         editLayout->addWidget(new QLabel("Description:"), 2, 0);
