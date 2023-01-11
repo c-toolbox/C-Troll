@@ -65,6 +65,9 @@ protected:
     void closeEvent(QCloseEvent* event);
     void changeEvent(QEvent* event);
 
+    void showEvent(QShowEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
+
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
@@ -73,6 +76,10 @@ private:
 
     CentralWidget* _centralWidget = nullptr;
     QSystemTrayIcon* _trayIcon = nullptr;
+
+    QAction* _showAction = nullptr;
+    QAction* _hideAction = nullptr;
+
 };
 
 #endif // __TRAY__MAINWINDOW_H__

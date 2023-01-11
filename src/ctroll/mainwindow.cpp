@@ -76,10 +76,15 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
 
     // After that create a context menu of two items
     QMenu* menu = new QMenu(this);
+
     // The first menu item expands the application from the tray,
-    QAction* viewWindow = new QAction("Show", this);
-    connect(viewWindow, &QAction::triggered, this, &MainWindow::show);
-    menu->addAction(viewWindow);
+    _showAction = new QAction("Show", this);
+    connect(_showAction, &QAction::triggered, this, &MainWindow::show);
+    menu->addAction(_showAction);
+
+    _hideAction = new QAction("Hide", this);
+    connect(_hideAction, &QAction::triggered, this, &MainWindow::hide);
+    menu->addAction(_hideAction);
 
     // The second menu item terminates the application
     QAction* quit = new QAction("Quit", this);
@@ -886,10 +891,22 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason) {
         // Conversely, if hidden, it unfolds on the screen
         if (isVisible()) {
             hide(); // Hide the taskbar icon
+
         }
         else {
             show(); // Show the taskbar icon
             showNormal(); // Bring the window to the front
+
         }
     }
+}
+
+void MainWindow::showEvent(QShowEvent*) {
+    _showAction->setVisible(false);
+    _hideAction->setVisible(true);
+}
+
+void MainWindow::hideEvent(QHideEvent*) {
+    _showAction->setVisible(true);
+    _hideAction->setVisible(false);
 }

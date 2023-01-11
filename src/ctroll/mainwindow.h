@@ -74,6 +74,9 @@ protected:
     void closeEvent(QCloseEvent* event) override;
     void changeEvent(QEvent* event) override;
 
+    void showEvent(QShowEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
+
 private:
     void startProgram(Cluster::ID clusterId, Program::ID programId,
         Program::Configuration::ID configurationId);
@@ -104,6 +107,9 @@ private:
 
     QSystemTrayIcon _trayIcon;
     QFileSystemWatcher _watcher;
+
+    QAction* _showAction = nullptr;
+    QAction* _hideAction = nullptr;
 
     bool _isClosingApplication = false;
     bool _shouldShowDifferentDataHashMessage = false;
