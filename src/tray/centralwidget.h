@@ -60,13 +60,21 @@ public slots:
     void endedProcess(ProcessHandler::ProcessInfo process);
 
 private:
+    struct ConnectionInfo {
+        QLabel* label = nullptr;
+        std::string peerAddress;
+        int nConnections = 0;
+    };
+
     QWidget* createInfoWidget();
+    void updateLabel(ConnectionInfo& ci);
+
 
     QTextEdit* _messageBox = nullptr;
     QLabel* _portLabel = nullptr;
 
     QLayout* _connectionsLayout = nullptr;
-    std::map<std::string, QLabel*> _connections;
+    std::map<std::string, ConnectionInfo> _connections;
     QLayout* _processesLayout = nullptr;
     std::map<int, QLabel*> _processes;
 };

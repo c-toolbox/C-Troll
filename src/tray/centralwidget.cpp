@@ -79,9 +79,26 @@ bool CentralWidget::hasConnections() const {
 
 void CentralWidget::newConnection(const std::string& peerAddress) {
     Debug(fmt::format("Opened connection to {}", peerAddress));
-    QLabel* label = new QLabel(QString::fromStdString(peerAddress));
-    _connectionsLayout->addWidget(label);
-    _connections[peerAddress] = label;
+
+    if (!_connections.contains(peerAddress)) {
+        // We are the first connection, so we need to create the map entry
+        QLabel* label = new QLabel(QString::fromStdString(peerAddress));
+        _connectionsLayout->addWidget(label);
+
+        _connections[peerAddress] = {
+            .label = label,
+            .peerAddress = peerAddress,
+            .nConnections = 1
+        };
+    }
+    else {
+        // Otherwise we need to update the entry and recreate the label text
+        assert(_connections[peerAddress].label);
+        assert(_connections[peerAddress].nConnections > 0);
+
+        _connections[peerAddress].nConnections += 1;
+        updateLabel(_connections[peerAddress]);
+    }
 }
 
 void CentralWidget::closedConnection(const std::string& peerAddress) {
@@ -90,9 +107,18 @@ void CentralWidget::closedConnection(const std::string& peerAddress) {
     const auto it = _connections.find(peerAddress);
     assert(it != _connections.end());
 
-    it->second->deleteLater();
-    _connectionsLayout->removeWidget(it->second);
-    _connections.erase(it);
+    ConnectionInfo& ci = it->second;
+    if (ci.nConnections == 1) {
+        // We are the last connection and we need to turn off the light
+        ci.label->deleteLater();
+        _connectionsLayout->removeWidget(ci.label);
+        _connections.erase(it);
+    }
+    else {
+        // Otherwise we just need to update the label
+        ci.nConnections -= 1;
+        updateLabel(_connections[peerAddress]);
+    }
 }
 
 void CentralWidget::newProcess(ProcessHandler::ProcessInfo process) {
@@ -137,4 +163,11 @@ QWidget* CentralWidget::createInfoWidget() {
     infoLayout->addWidget(new QLabel(QString::fromStdString(apiVer)));
 
     return info;
+}
+
+void CentralWidget::updateLabel(ConnectionInfo& ci) {
+    std::string msg = fmt::format(
+        "{} (x{})", ci.peerAddress, ci.nConnections
+    );
+    ci.label->setText(QString::fromStdString(msg));
 }
