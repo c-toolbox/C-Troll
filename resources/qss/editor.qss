@@ -146,18 +146,26 @@ ClusterDialog  DynamicList  QWidget {
 /*
  * ProgramDialog
  */
-ProgramDialog > QWidget > QLineEdit {
+ProgramDialog > QWidget {
+  min-height: 90em;
+  min-width: 50em;
+}
+
+ProgramDialog  Spacer {
+  min-height: 0.5em;
+}
+
+ProgramDialog  QLineEdit#name {
   min-width: 30em;
 }
 
-ProgramDialog > QWidget > QLabel#information-label {
+ProgramDialog  QLabel#information-label {
   font-size: 9pt;
   font-style: italic;
-  /* color: #ff00ff; */
 }
 
 ProgramDialog  QScrollArea {
-  min-height: 7.5em;
+  min-height: 4.5em;
 }
 
 ProgramDialog QScrollArea QWidget {

@@ -102,15 +102,30 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     , _clusterPath(std::move(clusterPath))
 {
     setWindowTitle(QString::fromStdString(fmt::format("Program: {}", _programPath)));
+    resize(800, 900);
 
-    QBoxLayout* layout = new QVBoxLayout(this);
+    QBoxLayout* l = new QVBoxLayout(this);
+    l->setContentsMargins(0, 0, 0, 0);
+
+    QScrollArea* area = new QScrollArea;
+    area->setWidgetResizable(true);
+    area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    area->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    l->addWidget(area);
+
+    QWidget* content = new QWidget;
+    area->setWidget(content);
+    QBoxLayout* layout = new QVBoxLayout(content);
+    
 
     QWidget* edit = new QWidget;
     QGridLayout* editLayout = new QGridLayout(edit);
     editLayout->setContentsMargins(0, 0, 0, 0);
+    editLayout->setSpacing(5);
 
     editLayout->addWidget(new QLabel("Name:"), 0, 0);
     _name = new QLineEdit;
+    _name->setObjectName("name");
     _name->setToolTip("The name of this program");
     connect(_name, &QLineEdit::textChanged, this, &ProgramDialog::updateSaveButton);
     editLayout->addWidget(_name, 0, 1);
@@ -189,9 +204,9 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     editLayout->addWidget(_description, 8, 1);
 
     QLabel* parametersLabel = new QLabel(
-        "The complete arguments for the program are constructed in the following order:\n"
-        "1. the global parameters provided above;  2. the configuration-specific "
-        "parameters;  3. the cluster-specific parameters."
+        "The complete arguments for the program are given in the following order: "
+        "1. the global parameters;  2. the configuration-specific parameters;  "
+        "3. the cluster-specific parameters."
     );
     parametersLabel->setWordWrap(true);
     parametersLabel->setObjectName("information-label");
