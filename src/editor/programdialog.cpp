@@ -158,6 +158,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     _isEnabled->setToolTip(
         "If this is disabled, this program will not be listed in the C-Troll application"
     );
+    _isEnabled->setChecked(true);
     editLayout->addWidget(_isEnabled, 4, 1);
 
     editLayout->addWidget(new QLabel("Forward Messages:"), 5, 0);
