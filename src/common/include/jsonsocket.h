@@ -62,7 +62,7 @@ public:
     void connectToHost(const std::string& host, int port);
     QTcpSocket::SocketState state() const;
 
-    void write(nlohmann::json json);
+    void write(const nlohmann::json& json);
 
     std::string localAddress() const;
     std::string peerAddress() const;

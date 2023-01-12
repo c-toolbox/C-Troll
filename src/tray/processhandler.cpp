@@ -315,9 +315,8 @@ void ProcessHandler::handleReadyReadStandardError() {
 void ProcessHandler::handleReadyReadStandardOutput() {
     QProcess* proc = qobject_cast<QProcess*>(QObject::sender());
 
-    // Find specifc value in process map i.e. process
+    // Find specific value in process map i.e. process
     auto p = processIt(proc);
-    assert(p != _processes.end());
     if (p != _processes.end()) {
         common::ProcessOutputMessage msg;
         msg.processId = p->processId;

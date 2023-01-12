@@ -75,7 +75,7 @@ QTcpSocket::SocketState JsonSocket::state() const {
     return _socket->state();
 }
 
-void JsonSocket::write(nlohmann::json jsonDocument) {
+void JsonSocket::write(const nlohmann::json& jsonDocument) {
     std::string jsonText = jsonDocument.dump();
     std::string length = std::to_string(jsonText.size());
     std::string msg = length + '#' + jsonText;
