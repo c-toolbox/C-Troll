@@ -56,28 +56,4 @@ windows_msvc: { // windows/build(msvc)
       cleanWs()
     } // node('windows')
   }
-},
-windows_ninja: { // windows/build(msvc)
-  if (env.USE_BUILD_OS_WINDOWS == 'true') {
-    node('windows') {
-      stage('windows-ninja/scm') {
-        deleteDir();
-        checkoutGit();
-      }
-      stage('windows-ninja/build') {
-        bat(
-          script: """
-          call "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
-          if not exist build-ninja mkdir build-ninja
-          cd build-ninja
-          cmake -G Ninja ..
-          ninja
-          """,
-          label: 'Generate build-scripts with cmake and execute them'
-        )
-      }
-      cleanWs()
-    } // node('windows')
-  }
 }
-
