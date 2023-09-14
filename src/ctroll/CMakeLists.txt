@@ -90,6 +90,12 @@ add_executable(C-Troll WIN32
 target_link_libraries(C-Troll PRIVATE common Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
 qt_disable_unicode_defines(C-Troll)
 
+# Just in case, create the bin directory
+add_custom_command(
+  TARGET C-Troll
+  PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+)
+
 # Find the windeployqt application
 get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)

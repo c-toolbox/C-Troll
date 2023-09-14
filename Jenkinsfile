@@ -71,7 +71,7 @@ windows_ninja: { // windows/build(msvc)
           if not exist build-ninja mkdir build-ninja
           cd build-ninja
           cmake -G Ninja ..
-          cmake --build . -- -j 6 all
+          ninja
           """,
           label: 'Generate build-scripts with cmake and execute them'
         )
