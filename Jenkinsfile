@@ -5,9 +5,9 @@ parallel tools: {
   node("tools") {
     stage("tools/scm") {
       deleteDir();
-      checkout scm
+      checkout scm;
       sh(
-        script: git submodule update --init,
+        script: "git submodule update --init",
         label: "Init submodules"
       )
     }
@@ -33,7 +33,7 @@ windows_msvc: { // windows/build(msvc)
         deleteDir();
         checkout scm
         bat(
-          script: git submodule update --init,
+          script: "git submodule update --init",
           label: "Init submodules"
         )
       }
