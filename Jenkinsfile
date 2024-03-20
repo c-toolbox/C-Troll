@@ -6,7 +6,6 @@ parallel tools: {
     stage("tools/scm") {
       deleteDir();
       checkout scm
-      // sh "git clone --recursive --depth 1 ${url} --branch ${branch} --single-branch .";
     }
     stage("tools/cppcheck/run") {
       sh(
@@ -28,7 +27,7 @@ windows_msvc: { // windows/build(msvc)
     node("windows") {
       stage("windows-msvc/scm") {
         deleteDir();
-        bat "git clone --recursive --depth 1 ${url} --branch ${branch} --single-branch .";
+        checkout scm
       }
       stage("windows-msvc/build") {
         cmakeBuild([
