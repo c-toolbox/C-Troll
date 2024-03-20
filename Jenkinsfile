@@ -6,6 +6,10 @@ parallel tools: {
     stage("tools/scm") {
       deleteDir();
       checkout scm
+      sh(
+        script: git submodule update --init,
+        label: "Init submodules"
+      )
     }
     stage("tools/cppcheck/run") {
       sh(
@@ -28,6 +32,10 @@ windows_msvc: { // windows/build(msvc)
       stage("windows-msvc/scm") {
         deleteDir();
         checkout scm
+        bat(
+          script: git submodule update --init,
+          label: "Init submodules"
+        )
       }
       stage("windows-msvc/build") {
         cmakeBuild([
