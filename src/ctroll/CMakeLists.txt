@@ -102,7 +102,7 @@ get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
 add_custom_command(
   TARGET C-Troll POST_BUILD
-  COMMAND "${CMAKE_COMMAND}" -E env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations --no-virtualkeyboard --no-opengl-sw --no-system-d3d-compiler \"$<TARGET_FILE:C-Troll>\"
+  COMMAND "${CMAKE_COMMAND}" -E env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations --no-opengl-sw --no-system-d3d-compiler \"$<TARGET_FILE:C-Troll>\"
   COMMENT "Deploying Qt libraries"
 )
 
