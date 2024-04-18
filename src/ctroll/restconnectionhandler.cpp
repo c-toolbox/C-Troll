@@ -70,9 +70,45 @@ namespace {
         Unknown
     };
 
-    void sendResponse(QTcpSocket& socket, Response response,
-                      nlohmann::json payload = nlohmann::json())
+    void Debug(std::string msg) {
+        ::Debug("RestConnectionHandler", std::move(msg));
+    }
+
+    void Log(std::string msg) {
+        ::Log("REST", std::move(msg));
+    }
+
+    void sendResponse(QTcpSocket& socket, Response response, std::string content) {
+        if (content.empty()) {
+            return;
+        }
+
+        Debug(content);
+
+        std::string_view code = [](Response resp) {
+            switch (resp) {
+                case Response::Ok: return "200 OK";
+                case Response::BadRequest: return "400 Bad Request";
+                case Response::Unauthorized: return "401 Unauthorized";
+                case Response::Forbidden: return "403 Forbidden";
+                case Response::NotFound: return "404 Not Found";
+            }
+            throw std::logic_error("Unhandled case label");
+            }(response);
+
+            const std::string status = fmt::format("HTTP/1.1 {}\n", code);
+            std::string message = fmt::format(
+                "{}Content-Type: application/json\nContent-Length: {}\n\n{}",
+                status, content.size(), content
+            );
+            socket.write(message.data(), static_cast<qint64>(message.size()));
+    }
+
+    void sendJSONResponse(QTcpSocket& socket, Response response, nlohmann::json payload)
     {
+        if (payload.empty())
+            return;
+
         std::string_view code = [](Response resp) {
             switch (resp) {
                 case Response::Ok: return "200 OK";
@@ -85,18 +121,12 @@ namespace {
         }(response);
 
         const std::string status = fmt::format("HTTP/1.1 {}\n", code);
-        if (payload.empty()) {
-            socket.write(status.data(), static_cast<qint64>(status.size()));
-        }
-        else {
-            std::string content = payload.dump();
-            std::string message = fmt::format(
-                "{}Content-Type: application/json\nContent-Length: {}\n\n{}",
-                status, content.size(), content
-            );
-            socket.write(message.data(), static_cast<qint64>(message.size()));
-        }
-        socket.close();
+        std::string content = payload.dump();
+        std::string message = fmt::format(
+            "{}Content-Type: application/json\nContent-Length: {}\n\n{}",
+            status, content.size(), content
+        );
+        socket.write(message.data(), static_cast<qint64>(message.size()));
     }
 
 
@@ -204,14 +234,6 @@ namespace {
             p != nullptr ? data::findConfigurationForProgram(*p, configuration) : nullptr;
         return { c, p, conf };
     }
-
-    void Debug(std::string msg) {
-        ::Debug("RestConnectionHandler", std::move(msg));
-    }
-
-    void Log(std::string msg) {
-        ::Log("REST", std::move(msg));
-    }
 } // namespace
 
 RestConnectionHandler::RestConnectionHandler(QObject* parent, int port,
@@ -248,7 +270,7 @@ void RestConnectionHandler::newConnectionEstablished() {
             "New connection from {}", socket->peerAddress().toString().toStdString()
         ));
 
-        connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
+        //connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
 
         connect(
             socket, &QTcpSocket::readyRead,
@@ -272,8 +294,7 @@ void RestConnectionHandler::handleNewConnection() {
     QString content = socket->readAll();
     QStringList tokens = content.split(QRegularExpression("[ \r\n][ \r\n]*"));
     if (tokens.empty()) {
-        Debug("Rejecting due to no payload");
-        sendResponse(*socket, Response::BadRequest);
+        sendResponse(*socket, Response::BadRequest, "Rejecting due to no payload");
         return;
     }
 
@@ -284,53 +305,63 @@ void RestConnectionHandler::handleNewConnection() {
     if (wantsAuth && (!(hasAuth && authCorrect))) {
         // We only want to check if we actually want authorization. If so we only want to
         // proceed if we have authorization and if it is correct
-        Debug("Rejecting due to bad authorization");
-        sendResponse(*socket, Response::Unauthorized);
+        sendResponse(*socket, Response::Unauthorized, "Rejecting due to bad authorization");
         return;
     }
 
-    std::optional<std::string> endpointValue = endpoint(tokens);
     HttpMethod method = parseMethod(tokens[0].toStdString());
-    Endpoint endpoint = endpointValue.has_value() ?
-        parseEndpoint(*endpointValue) :
-        Endpoint::Unknown;
-
     if (method == HttpMethod::Unknown) {
-        Debug("Rejecting due to unknown HTTP method");
-        sendResponse(*socket, Response::BadRequest);
+        sendResponse(*socket, Response::BadRequest, "Rejecting due to unknown HTTP method");
         return;
     }
 
-    if (endpoint == Endpoint::Unknown) {
-        sendResponse(*socket, Response::NotFound);
-        return;
+    Endpoint foundEndPoint = Endpoint::Unknown;
+    std::optional<std::string> endpointValue = endpoint(tokens);
+    std::map<std::string, std::string> params;
+    if (method == HttpMethod::Get && endpointValue.has_value()) {
+        QString endPointStr = QString::fromStdString(*endpointValue);
+        QStringList endPointList = endPointStr.split('?');
+        foundEndPoint = parseEndpoint(endPointList[0].toStdString());
+        if (endPointList.size() > 1) {
+            endPointList.pop_front();
+            params = parameters(endPointList);
+        }
+    }
+    else if (method == HttpMethod::Post) {
+        params = parameters(tokens);
+        if (endpointValue.has_value()) {
+            foundEndPoint = parseEndpoint(*endpointValue);
+        }
     }
 
-    std::map<std::string, std::string> params = parameters(tokens);
+    if (foundEndPoint == Endpoint::Unknown) {
+        sendResponse(*socket, Response::NotFound, "No endpoint found");
+        return;
+    }
 
     //
     // Handle message
-    if (method == HttpMethod::Post && endpoint == Endpoint::StartProgram) {
+    if (method == HttpMethod::Post && foundEndPoint == Endpoint::StartProgram) {
         ProgramInfo pi = extractProgramInfo(params);
         if (!pi) {
-            sendResponse(*socket, Response::BadRequest);
+            sendResponse(*socket, Response::BadRequest, "No program found");
             return;
         }
 
         handleStartProgramMessage(*socket, *pi.cluster, *pi.program, *pi.configuration);
     }
-    else if (method == HttpMethod::Post && endpoint == Endpoint::StopProgram) {
+    else if (method == HttpMethod::Post && foundEndPoint == Endpoint::StopProgram) {
         ProgramInfo pi = extractProgramInfo(params);
         if (!pi) {
-            sendResponse(*socket, Response::BadRequest);
+            sendResponse(*socket, Response::BadRequest, "No program found");
             return;
         }
 
         handleStopProgramMessage(*socket, *pi.cluster, *pi.program, *pi.configuration);
     }
-    else if (method == HttpMethod::Post && endpoint == Endpoint::StartCustomProgram) {
+    else if (method == HttpMethod::Post && foundEndPoint == Endpoint::StartCustomProgram) {
         if (!_hasCustomProgramAPI) {
-            sendResponse(*socket, Response::Forbidden);
+            sendResponse(*socket, Response::Forbidden, "No program found");
             return;
         }
 
@@ -348,7 +379,7 @@ void RestConnectionHandler::handleNewConnection() {
         const bool hasArguments = params.contains(KeyArguments);
 
         if (!(hasCluster || hasNode) || !hasExecutable) {
-            sendResponse(*socket, Response::BadRequest);
+            sendResponse(*socket, Response::BadRequest, "Missing parameters");
             return;
         }
 
@@ -360,7 +391,7 @@ void RestConnectionHandler::handleNewConnection() {
         if (hasCluster) {
             const Cluster* c = data::findCluster(params[KeyCluster]);
             if (!c) {
-                sendResponse(*socket, Response::BadRequest);
+                sendResponse(*socket, Response::BadRequest, "Could not find cluster");
                 return;
             }
 
@@ -369,7 +400,7 @@ void RestConnectionHandler::handleNewConnection() {
         else if (hasNode) {
             const Node* n = data::findNode(params[KeyNode]);
             if (!n) {
-                sendResponse(*socket, Response::BadRequest);
+                sendResponse(*socket, Response::BadRequest, "Could not find node");
                 return;
             }
 
@@ -379,20 +410,20 @@ void RestConnectionHandler::handleNewConnection() {
             throw std::logic_error("Shouldn't get here");
         }
     }
-    else if (method == HttpMethod::Get && endpoint == Endpoint::InfoProgram) {
+    else if (method == HttpMethod::Get && foundEndPoint == Endpoint::InfoProgram) {
         handleProgramInfoMessage(*socket);
     }
-    else if (method == HttpMethod::Get && endpoint == Endpoint::InfoCluster) {
+    else if (method == HttpMethod::Get && foundEndPoint == Endpoint::InfoCluster) {
         handleClusterInfoMessage(*socket);
     }
-    else if (method == HttpMethod::Get && endpoint == Endpoint::InfoNode) {
+    else if (method == HttpMethod::Get && foundEndPoint == Endpoint::InfoNode) {
         handleNodeInfoMessage(*socket);
     }
-    else if (method == HttpMethod::Get && endpoint == Endpoint::InfoApi) {
+    else if (method == HttpMethod::Get && foundEndPoint == Endpoint::InfoApi) {
         handleApiInfoMessage(*socket);
     }
     else {
-        sendResponse(*socket, Response::BadRequest);
+        sendResponse(*socket, Response::BadRequest, "No endpoint method found");
     }
 }
 
@@ -401,12 +432,13 @@ void RestConnectionHandler::handleStartProgramMessage(QTcpSocket& socket,
                                                       const Program& program,
                                               const Program::Configuration& configuration)
 {
-    Log(fmt::format(
+    std::string message = fmt::format(
         "Received command to start {} ({}) on {}",
         program.name, configuration.name, cluster.name
-    ));
+    );
+    Log(message);
     emit startProgram(cluster.id, program.id, configuration.id);
-    sendResponse(socket, Response::Ok);
+    sendResponse(socket, Response::Ok, message);
 }
 
 void RestConnectionHandler::handleStopProgramMessage(QTcpSocket& socket,
@@ -414,12 +446,13 @@ void RestConnectionHandler::handleStopProgramMessage(QTcpSocket& socket,
                                                      const Program& program,
                                               const Program::Configuration& configuration)
 {
-    Log(fmt::format(
+    std::string message = fmt::format(
         "Received command to stop {} ({}) on {}",
         program.name, configuration.name, cluster.name
-    ));
+    );
+    Log(message);
     emit stopProgram(cluster.id, program.id, configuration.id);
-    sendResponse(socket, Response::Ok);
+    sendResponse(socket, Response::Ok, message);
 }
 
 void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
@@ -430,10 +463,11 @@ void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
 {
     assert(cluster);
 
-    Log(fmt::format(
+    std::string message = fmt::format(
         "Received command to start {} {} in {} on cluster {}",
         executable, arguments, workingDir, cluster->name
-    ));
+    );
+    Log(message);
 
     for (const std::string& node : cluster->nodes) {
         const Node* n = data::findNode(node);
@@ -441,7 +475,8 @@ void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
 
         emit startCustomProgram(n->id, executable, workingDir, arguments);
     }
-    sendResponse(socket, Response::Ok);
+
+    sendResponse(socket, Response::Ok, message);
 }
 
 void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
@@ -452,13 +487,15 @@ void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
 {
     assert(node);
 
-    Log(fmt::format(
+    std::string message = fmt::format(
         "Received command to start {} {} in {} on node {}",
         executable, arguments, workingDir, node->name
-    ));
+    );
+    Log(message);
 
     emit startCustomProgram(node->id, executable, workingDir, arguments);
-    sendResponse(socket, Response::Ok);
+
+    sendResponse(socket, Response::Ok, message);
 }
 
 void RestConnectionHandler::handleProgramInfoMessage(QTcpSocket& socket) {
@@ -484,7 +521,7 @@ void RestConnectionHandler::handleProgramInfoMessage(QTcpSocket& socket) {
         result.push_back(p);
     }
 
-    sendResponse(socket, Response::Ok, result);
+    sendJSONResponse(socket, Response::Ok, result);
 }
 
 void RestConnectionHandler::handleClusterInfoMessage(QTcpSocket& socket) {
@@ -509,7 +546,7 @@ void RestConnectionHandler::handleClusterInfoMessage(QTcpSocket& socket) {
         }
     }
 
-    sendResponse(socket, Response::Ok, result);
+    sendJSONResponse(socket, Response::Ok, result);
 }
 
 void RestConnectionHandler::handleNodeInfoMessage(QTcpSocket& socket) {
@@ -525,7 +562,7 @@ void RestConnectionHandler::handleNodeInfoMessage(QTcpSocket& socket) {
         result.push_back(n);
     }
 
-    sendResponse(socket, Response::Ok, result);
+    sendJSONResponse(socket, Response::Ok, result);
 }
 
 void RestConnectionHandler::handleApiInfoMessage(QTcpSocket& socket) {
@@ -593,5 +630,5 @@ void RestConnectionHandler::handleApiInfoMessage(QTcpSocket& socket) {
         { "description", "Gets information about the available nodes" }
     });
 
-    sendResponse(socket, Response::Ok, result);
+    sendJSONResponse(socket, Response::Ok, result);
 }
