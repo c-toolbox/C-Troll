@@ -78,20 +78,20 @@ namespace {
         ::Log("REST", std::move(msg));
     }
 
-    void sendResponse(QTcpSocket& socket, Response response, std::string content)
-    {
-        if (content.empty())
+    void sendResponse(QTcpSocket& socket, Response response, std::string content) {
+        if (content.empty()) {
             return;
+        }
 
         Debug(content);
 
         std::string_view code = [](Response resp) {
             switch (resp) {
-            case Response::Ok: return "200 OK";
-            case Response::BadRequest: return "400 Bad Request";
-            case Response::Unauthorized: return "401 Unauthorized";
-            case Response::Forbidden: return "403 Forbidden";
-            case Response::NotFound: return "404 Not Found";
+                case Response::Ok: return "200 OK";
+                case Response::BadRequest: return "400 Bad Request";
+                case Response::Unauthorized: return "401 Unauthorized";
+                case Response::Forbidden: return "403 Forbidden";
+                case Response::NotFound: return "404 Not Found";
             }
             throw std::logic_error("Unhandled case label");
             }(response);
@@ -327,7 +327,7 @@ void RestConnectionHandler::handleNewConnection() {
             params = parameters(endPointList);
         }
     }
-    else if(method == HttpMethod::Post) {
+    else if (method == HttpMethod::Post) {
         params = parameters(tokens);
         if (endpointValue.has_value()) {
             foundEndPoint = parseEndpoint(*endpointValue);
