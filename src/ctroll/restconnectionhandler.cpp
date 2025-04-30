@@ -94,20 +94,20 @@ namespace {
                 case Response::NotFound: return "404 Not Found";
             }
             throw std::logic_error("Unhandled case label");
-            }(response);
+        }(response);
 
-            const std::string status = fmt::format("HTTP/1.1 {}\n", code);
-            std::string message = fmt::format(
-                "{}Content-Type: application/json\nContent-Length: {}\n\n{}",
-                status, content.size(), content
-            );
-            socket.write(message.data(), static_cast<qint64>(message.size()));
+        const std::string status = fmt::format("HTTP/1.1 {}\n", code);
+        std::string message = fmt::format(
+            "{}Content-Type: application/json\nContent-Length: {}\n\n{}",
+            status, content.size(), content
+        );
+        socket.write(message.data(), static_cast<qint64>(message.size()));
     }
 
-    void sendJSONResponse(QTcpSocket& socket, Response response, nlohmann::json payload)
-    {
-        if (payload.empty())
+    void sendJSONResponse(QTcpSocket& socket, Response response, nlohmann::json payload) {
+        if (payload.empty()) {
             return;
+        }
 
         std::string_view code = [](Response resp) {
             switch (resp) {
@@ -305,13 +305,21 @@ void RestConnectionHandler::handleNewConnection() {
     if (wantsAuth && (!(hasAuth && authCorrect))) {
         // We only want to check if we actually want authorization. If so we only want to
         // proceed if we have authorization and if it is correct
-        sendResponse(*socket, Response::Unauthorized, "Rejecting due to bad authorization");
+        sendResponse(
+            *socket,
+            Response::Unauthorized,
+            "Rejecting due to bad authorization"
+        );
         return;
     }
 
     HttpMethod method = parseMethod(tokens[0].toStdString());
     if (method == HttpMethod::Unknown) {
-        sendResponse(*socket, Response::BadRequest, "Rejecting due to unknown HTTP method");
+        sendResponse(
+            *socket,
+            Response::BadRequest,
+            "Rejecting due to unknown HTTP method"
+        );
         return;
     }
 
@@ -359,7 +367,8 @@ void RestConnectionHandler::handleNewConnection() {
 
         handleStopProgramMessage(*socket, *pi.cluster, *pi.program, *pi.configuration);
     }
-    else if (method == HttpMethod::Post && foundEndPoint == Endpoint::StartCustomProgram) {
+    else if (method == HttpMethod::Post && foundEndPoint == Endpoint::StartCustomProgram)
+    {
         if (!_hasCustomProgramAPI) {
             sendResponse(*socket, Response::Forbidden, "No program found");
             return;
@@ -610,7 +619,10 @@ void RestConnectionHandler::handleApiInfoMessage(QTcpSocket& socket) {
                 },
                 { "executable", "The name of the executable to start" },
                 { "workingDir", "The working directory where to start the executable "},
-                { "arguments", "Additional commandline arguments to pass to the program "}
+                {
+                    "arguments",
+                    "Additional commandline arguments to pass to the program "
+                }
             }}
         });
     }
