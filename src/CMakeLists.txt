@@ -1,7 +1,7 @@
 ##########################################################################################
 #                                                                                        #
-# Copyright (c) 2016-2023                                                                #
-# Alexander Bock, Erik Sundén                                                            #
+# Copyright (c) 2016-2025                                                                #
+# Alexander Bock                                                                         #
 #                                                                                        #
 # All rights reserved.                                                                   #
 #                                                                                        #
