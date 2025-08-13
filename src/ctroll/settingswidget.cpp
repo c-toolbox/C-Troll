@@ -45,7 +45,6 @@
 #include <QScrollArea>
 #include <QSpinBox>
 #include <QVBoxLayout>
-#include <fmt/format.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <random>
@@ -108,11 +107,9 @@ Color ColorWidget::color() const {
 }
 
 void ColorWidget::applyColor() {
-    _colorButton->setStyleSheet(
-        QString::fromStdString(fmt::format(
-            "background-color: #{0:02x}{1:02x}{2:02x};", _color.r, _color.g, _color.b
-        ))
-    );
+    _colorButton->setStyleSheet(QString::fromStdString(std::format(
+        "background-color: #{0:02x}{1:02x}{2:02x};", _color.r, _color.g, _color.b
+    )));
 }
 
 

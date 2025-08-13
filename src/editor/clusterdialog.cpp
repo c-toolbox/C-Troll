@@ -40,7 +40,6 @@
 #include "node.h"
 #include "removebutton.h"
 #include "spacer.h"
-#include <fmt/format.h>
 #include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QGridLayout>
@@ -65,7 +64,7 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
 {
     assert(!_clusterPath.empty());
 
-    setWindowTitle(QString::fromStdString(fmt::format("Cluster: {}", _clusterPath)));
+    setWindowTitle(QString::fromStdString(std::format("Cluster: {}", _clusterPath)));
 
     QBoxLayout* layout = new QVBoxLayout(this);
 

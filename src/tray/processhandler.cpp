@@ -37,7 +37,6 @@
 #include <QMetaEnum>
 #include "logging.h"
 #include "messages.h"
-#include <fmt/format.h>
 #include <filesystem>
 #include <functional>
 
@@ -102,7 +101,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                                          const std::string& peer)
 {
     try {
-        Debug(fmt::format("Received message: {}", message.dump(2)));
+        Debug(std::format("Received message: {}", message.dump(2)));
 
         const bool validMessage = common::isValidMessage(message);
         if (!validMessage) {
@@ -113,7 +112,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
         Debug("Parsing base message");
         if (common::isValidMessage<common::StartCommandMessage>(message)) {
             common::StartCommandMessage command = message;
-            Log(fmt::format("Received [{}]: {}", peer, message.dump()));
+            Log(std::format("Received [{}]: {}", peer, message.dump()));
 
             // Check if the identifier of traycommand already is tied to a process
             // We don't allow the same id for multiple processes
@@ -133,7 +132,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
         }
         else if (common::isValidMessage<common::ExitCommandMessage>(message)) {
             common::ExitCommandMessage command = message;
-            Log(fmt::format("Received [{}]: {}", peer, message.dump()));
+            Log(std::format("Received [{}]: {}", peer, message.dump()));
 
             // Check if the identifier of tray command already is tied to a process
             // We don't allow the same id for multiple processes
@@ -170,10 +169,10 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
             }
         }
         else if (common::isValidMessage<common::KillAllMessage>(message)) {
-            Log(fmt::format("Received [{}]: {}", peer, message.dump()));
+            Log(std::format("Received [{}]: {}", peer, message.dump()));
 
             for (ProcessInfo& p : _processes) {
-                Log(fmt::format("Killing process {}", p.processId));
+                Log(std::format("Killing process {}", p.processId));
 
                 p.wasUserTerminated = true;
                 p.process->kill();
@@ -183,23 +182,23 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
             _processes.clear();
         }
         else if (common::isValidMessage<common::KillTrayMessage>(message)) {
-            Log(fmt::format("Received [{}]: {}", peer, message.dump()));
+            Log(std::format("Received [{}]: {}", peer, message.dump()));
 
             emit closeApplication();
         }
         else if (common::isValidMessage<common::RestartNodeMessage>(message)) {
-            Log(fmt::format("Received [{}]: {}", peer, message.dump()));
+            Log(std::format("Received [{}]: {}", peer, message.dump()));
 
             QProcess::startDetached("shutdown", { "/r", "/t", "0" });
         }
         else if (common::isValidMessage<common::ShutdownNodeMessage>(message)) {
-            Log(fmt::format("Received [{}]: {}", peer, message.dump()));
+            Log(std::format("Received [{}]: {}", peer, message.dump()));
 
             QProcess::startDetached("shutdown", { "/s", "/t", "0" });
         }
     }
     catch (const std::exception& e) {
-        Log(fmt::format(
+        Log(std::format(
             "Caught exception {} with message: {}", e.what(), message.dump()
         ));
     }
@@ -226,7 +225,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
         return;
     }
 
-    Debug(fmt::format("Found process {}", p->processId));
+    Debug(std::format("Found process {}", p->processId));
     common::ProcessStatusMessage msg;
     msg.processId = p->processId;
     msg.status = toTrayStatus(error);
@@ -235,7 +234,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
     // The FailedToStart error is handled differently since that is the one that will
     // not also lead to a `handleFinished` call
     if (error == QProcess::ProcessError::FailedToStart) {
-        Debug(fmt::format("Removing process {}", p->processId));
+        Debug(std::format("Removing process {}", p->processId));
         ProcessInfo info = *p;
         _processes.erase(p);
         emit closedProcess(info);
@@ -250,7 +249,7 @@ void ProcessHandler::handleStarted() {
     auto p = processIt(process);
     assert(p != _processes.end());
     if (p != _processes.end()) {
-        Debug(fmt::format("Found process {}", p->processId));
+        Debug(std::format("Found process {}", p->processId));
 
         // Send out the TrayProcessStatus with the status string
         common::ProcessStatusMessage msg;
@@ -270,7 +269,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     // p might be .end() if we caused the process to be killed which also removes it from
     // the _processes list immediately before the handleFinished function can be called
     if (p != _processes.end()) {
-        Debug(fmt::format("Found process {}", p->processId));
+        Debug(std::format("Found process {}", p->processId));
 
         common::ProcessStatusMessage msg;
         msg.processId = p->processId;
@@ -300,7 +299,7 @@ void ProcessHandler::handleReadyReadStandardError() {
     auto p = processIt(proc);
     assert(p != _processes.end());
     if (p != _processes.end()) {
-        Debug(fmt::format("Found process {}", p->processId));
+        Debug(std::format("Found process {}", p->processId));
 
         // Send out the TrayProcessLogMessage with the stderror key
         common::ProcessOutputMessage msg;
@@ -350,11 +349,11 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
     }
 
     if (command.commandlineParameters.empty()) {
-        std::string cmd = fmt::format("\"{}\"", command.executable);
+        std::string cmd = std::format("\"{}\"", command.executable);
         process->start(QString::fromStdString(cmd));
     }
     else {
-        std::string cmd = fmt::format(
+        std::string cmd = std::format(
             "\"{}\" {}", command.executable, command.commandlineParameters
         );
         process->start(QString::fromStdString(cmd));
@@ -362,7 +361,7 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
 
     // If the executable does not exist, the process might still be in the NotRunning
     // state. It also will have already triggered the `errorOccurred` message by that time
-    Debug(fmt::format("State: {}", static_cast<int>(process->state())));
+    Debug(std::format("State: {}", static_cast<int>(process->state())));
     if (process->state() != QProcess::ProcessState::NotRunning) {
         process->waitForStarted();
         const auto p = processIt(process);

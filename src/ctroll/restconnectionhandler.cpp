@@ -38,7 +38,6 @@
 #include "logging.h"
 #include <QRegularExpression>
 #include <QTcpSocket>
-#include <fmt/format.h>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <string_view>
@@ -96,8 +95,8 @@ namespace {
             throw std::logic_error("Unhandled case label");
         }(response);
 
-        const std::string status = fmt::format("HTTP/1.1 {}\n", code);
-        std::string message = fmt::format(
+        const std::string status = std::format("HTTP/1.1 {}\n", code);
+        std::string message = std::format(
             "{}Content-Type: application/json\nContent-Length: {}\n\n{}",
             status, content.size(), content
         );
@@ -120,9 +119,9 @@ namespace {
             throw std::logic_error("Unhandled case label");
         }(response);
 
-        const std::string status = fmt::format("HTTP/1.1 {}\n", code);
+        const std::string status = std::format("HTTP/1.1 {}\n", code);
         std::string content = payload.dump();
-        std::string message = fmt::format(
+        std::string message = std::format(
             "{}Content-Type: application/json\nContent-Length: {}\n\n{}",
             status, content.size(), content
         );
@@ -249,11 +248,11 @@ RestConnectionHandler::RestConnectionHandler(QObject* parent, int port,
         ""
     )
 {
-    Log("Status", fmt::format("REST API listening on port: {}", port));
+    Log("Status", std::format("REST API listening on port: {}", port));
 
     const bool success = _server.listen(QHostAddress::Any, static_cast<quint16>(port));
     if (!success) {
-        Log("Error", fmt::format("Listening to REST API on port {} failed", port));
+        Log("Error", std::format("Listening to REST API on port {} failed", port));
         return;
     }
 
@@ -266,7 +265,7 @@ RestConnectionHandler::RestConnectionHandler(QObject* parent, int port,
 void RestConnectionHandler::newConnectionEstablished() {
     while (_server.hasPendingConnections()) {
         QTcpSocket* socket = _server.nextPendingConnection();
-        Debug(fmt::format(
+        Debug(std::format(
             "New connection from {}", socket->peerAddress().toString().toStdString()
         ));
 
@@ -282,7 +281,7 @@ void RestConnectionHandler::newConnectionEstablished() {
 void RestConnectionHandler::handleNewConnection() {
     QTcpSocket* socket = dynamic_cast<QTcpSocket*>(QObject::sender());
     assert(socket);
-    Debug(fmt::format(
+    Debug(std::format(
         "Handling new message from {}", socket->peerAddress().toString().toStdString()
     ));
 
@@ -441,7 +440,7 @@ void RestConnectionHandler::handleStartProgramMessage(QTcpSocket& socket,
                                                       const Program& program,
                                               const Program::Configuration& configuration)
 {
-    std::string message = fmt::format(
+    std::string message = std::format(
         "Received command to start {} ({}) on {}",
         program.name, configuration.name, cluster.name
     );
@@ -455,7 +454,7 @@ void RestConnectionHandler::handleStopProgramMessage(QTcpSocket& socket,
                                                      const Program& program,
                                               const Program::Configuration& configuration)
 {
-    std::string message = fmt::format(
+    std::string message = std::format(
         "Received command to stop {} ({}) on {}",
         program.name, configuration.name, cluster.name
     );
@@ -472,7 +471,7 @@ void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
 {
     assert(cluster);
 
-    std::string message = fmt::format(
+    std::string message = std::format(
         "Received command to start {} {} in {} on cluster {}",
         executable, arguments, workingDir, cluster->name
     );
@@ -496,7 +495,7 @@ void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
 {
     assert(node);
 
-    std::string message = fmt::format(
+    std::string message = std::format(
         "Received command to start {} {} in {} on node {}",
         executable, arguments, workingDir, node->name
     );

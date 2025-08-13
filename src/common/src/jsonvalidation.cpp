@@ -51,7 +51,7 @@ void ErrorHandler::error(const nlohmann::json::json_pointer& ptr,
 }
 
 JsonError::JsonError(ErrorHandler handler)
-    : std::runtime_error(fmt::format("Error at {}: {}", handler.path, handler.message))
+    : std::runtime_error(std::format("Error at {}: {}", handler.path, handler.message))
     , path(std::move(handler.path))
     , message(std::move(handler.message))
 {}

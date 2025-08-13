@@ -38,7 +38,6 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>
-#include <fmt/format.h>
 
 LogWidget::LogWidget() {
     QBoxLayout* layout = new QVBoxLayout(this);
@@ -53,12 +52,12 @@ LogWidget::LogWidget() {
     m.setBottom(10);
     versionLayout->setContentsMargins(m);
 
-    std::string coreVer = fmt::format("Core Version: {}", app::Version);
+    std::string coreVer = std::format("Core Version: {}", app::Version);
     versionLayout->addWidget(new QLabel(QString::fromStdString(coreVer)));
 
     versionLayout->addStretch();
 
-    std::string apiVer = fmt::format("API Version: {}", api::Version);
+    std::string apiVer = std::format("API Version: {}", api::Version);
     versionLayout->addWidget(new QLabel(QString::fromStdString(apiVer)));
 
     layout->addWidget(container);

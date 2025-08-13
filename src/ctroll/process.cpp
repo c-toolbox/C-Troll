@@ -37,7 +37,6 @@
 #include "database.h"
 #include "program.h"
 #include "logging.h"
-#include <fmt/format.h>
 #include <assert.h>
 
 common::StartCommandMessage startProcessCommand(const Process& process) {
@@ -64,7 +63,7 @@ common::StartCommandMessage startProcessCommand(const Process& process) {
     t.id = process.id.v;
     t.executable = prg.executable;
     t.workingDirectory = prg.workingDirectory;
-    t.commandlineParameters = fmt::format(
+    t.commandlineParameters = std::format(
         "{} {} {}", prg.commandlineParameters, conf.parameters, it->parameters
     );
     t.programId = process.programId.v;

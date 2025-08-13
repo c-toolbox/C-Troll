@@ -38,7 +38,6 @@
 #include "jsonvalidation.h"
 #include "logging.h"
 #include <QDirIterator>
-#include <fmt/format.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json-schema.hpp>
 #include <filesystem>
@@ -105,7 +104,7 @@ std::pair<std::vector<T>, bool> loadJsonFromDirectory(std::string_view directory
 {
     namespace fs = std::filesystem;
     if (!fs::is_directory(directory)) {
-        throw std::runtime_error(fmt::format("Could not find directory '{}'", directory));
+        throw std::runtime_error(std::format("Could not find directory '{}'", directory));
     }
 
     std::vector<T> res;
@@ -116,17 +115,17 @@ std::pair<std::vector<T>, bool> loadJsonFromDirectory(std::string_view directory
         }
 
         const std::string file = p.path().string();
-        ::Log("Status", fmt::format("Loading file '{}'", file));
+        ::Log("Status", std::format("Loading file '{}'", file));
         try {
             T obj = common::loadFromJson<T>(file, validator);
             res.push_back(std::move(obj));
         }
         catch (const validation::JsonError& e) {
-            ::Log("Error", fmt::format("Failed to load file '{}': {}", file, e.what()));
+            ::Log("Error", std::format("Failed to load file '{}': {}", file, e.what()));
             loadingSucceeded = false;
         }
         catch (const std::runtime_error& e) {
-            ::Log("Error",fmt::format("Failed to load file '{}': {}", file, e.what()));
+            ::Log("Error", std::format("Failed to load file '{}': {}", file, e.what()));
             loadingSucceeded = false;
         }
     }
@@ -137,13 +136,13 @@ std::pair<std::vector<T>, bool> loadJsonFromDirectory(std::string_view directory
 template <typename Conf> requires std::is_constructible_v<Conf, nlohmann::json>
 Conf loadConfiguration(std::string config, std::string schema) {
     if (!std::filesystem::exists(config)) {
-        ::Log("Loading", fmt::format("Creating new configuration at {}", config));
+        ::Log("Loading", std::format("Creating new configuration at {}", config));
 
         nlohmann::json obj = Conf();
         std::ofstream file = std::ofstream(config);
         file << obj.dump(2);
     }
-    ::Log("Loading", fmt::format("Loading configuration {}", config));
+    ::Log("Loading", std::format("Loading configuration {}", config));
 
     if (schema.empty()) {
         return common::loadFromJson<Conf>(config);

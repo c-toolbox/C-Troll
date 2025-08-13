@@ -34,7 +34,6 @@
 
 #include "messages/message.h"
 
-#include <fmt/format.h>
 #include <string>
 
 namespace common {
@@ -47,14 +46,14 @@ void validateMessage(const nlohmann::json& message, std::string_view expectedTyp
     // Sanity checks
     const std::string type = message.at(Message::KeyType).get<std::string>();
     if (type != expectedType) {
-        throw std::logic_error(fmt::format(
+        throw std::logic_error(std::format(
             "Validation failed. Expected type '{}', got '{}'", expectedType, type
         ));
     }
 
     const ApiVersion version = message.at(Message::KeyVersion).get<ApiVersion>();
     if (version[0] != api::MajorVersion) {
-        throw std::runtime_error(fmt::format(
+        throw std::runtime_error(std::format(
             "Mismatching version number. Expected {} got {}.{}.{}",
             api::MajorVersion, version[0], version[1], version[2]
         ));

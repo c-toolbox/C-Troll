@@ -36,7 +36,6 @@
 
 #include "jsonload.h"
 #include "logging.h"
-#include <fmt/format.h>
 #include <assert.h>
 #include <filesystem>
 #include <set>
@@ -92,11 +91,11 @@ std::pair<std::vector<Node>, bool> loadNodesFromDirectory(std::string_view direc
         [](const Node& lhs, const Node& rhs) { return lhs.name == rhs.name; }
     );
     if (it != nodes.end()) {
-        throw std::runtime_error(fmt::format("Duplicate node name '{}' found", it->name));
+        throw std::runtime_error(std::format("Duplicate node name '{}' found", it->name));
     }
 
     for (const Node& node : nodes) {
-        std::string text = fmt::format(
+        std::string text = std::format(
             "(id: {}, name : \"{}\", ipAddress: \"{}\", port: {}, description: {}, "
             "isConnected: {} )",
             node.id.v, node.name, node.ipAddress, node.port, node.description,

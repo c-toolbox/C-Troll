@@ -10,10 +10,6 @@ set_target_properties(Catch2 PROPERTIES FOLDER External)
 set_compile_options(Catch2WithMain)
 set_target_properties(Catch2WithMain PROPERTIES FOLDER External)
 
-add_subdirectory(fmt SYSTEM)
-set_compile_options(fmt)
-set_target_properties(fmt PROPERTIES FOLDER External)
-
 add_subdirectory(json SYSTEM)
 
 set(JSON_VALIDATOR_INSTALL FALSE CACHE BOOL "" FORCE)

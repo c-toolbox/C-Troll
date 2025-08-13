@@ -35,7 +35,6 @@
 #ifndef __COMMON__JSONVALIDATION_H__
 #define __COMMON__JSONVALIDATION_H__
 
-#include <fmt/format.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json-schema.hpp>
 

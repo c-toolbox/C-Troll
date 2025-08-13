@@ -37,7 +37,6 @@
 #include "logging.h"
 #include <QCryptographicHash>
 #include <QNetworkProxy>
-#include <fmt/format.h>
 
 namespace {
     void Debug(std::string msg) {
@@ -67,7 +66,7 @@ JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, std::string secret)
 }
 
 void JsonSocket::connectToHost(const std::string& host, int port) {
-    Debug(fmt::format("Connecting to {}:{}", host, port));
+    Debug(std::format("Connecting to {}:{}", host, port));
     _socket->connectToHost(QString::fromStdString(host), static_cast<quint16>(port));
 }
 
@@ -92,7 +91,7 @@ void JsonSocket::write(const nlohmann::json& jsonDocument) {
         success = (static_cast<qint64>(messageSize) == res);
     }
     if (!success) {
-        ::Log("JsonSocket", fmt::format("Error writing message: {})", msg));
+        ::Log("JsonSocket", std::format("Error writing message: {})", msg));
     }
     _socket->flush();
 }

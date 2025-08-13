@@ -45,7 +45,6 @@
 #include <QStyle>
 #include <QStyleOption>
 #include <QVBoxLayout>
-#include <fmt/format.h>
 
 void ConnectionWidget::setStatus(Status status) {
     std::string string = [](Status s) {
@@ -117,7 +116,7 @@ NodeWidget::NodeWidget(const Node& node, bool showShutdownButton)
     connect(
         _killProcesses, &QPushButton::clicked,
         [this, node]() {
-            std::string text = fmt::format(
+            std::string text = std::format(
                 "Are you sure you want to kill all processes on '{}'?", node.name
             );
 
@@ -141,7 +140,7 @@ NodeWidget::NodeWidget(const Node& node, bool showShutdownButton)
     connect(
         _killTray, &QPushButton::clicked,
         [this, node]() {
-            std::string text = fmt::format(
+            std::string text = std::format(
                 "Are you sure you want to kill the TRAY on '{}'?", node.name
             );
 
@@ -169,7 +168,7 @@ NodeWidget::NodeWidget(const Node& node, bool showShutdownButton)
     connect(
         _restartNode, &QPushButton::clicked,
         [this, node]() {
-            std::string text = fmt::format(
+            std::string text = std::format(
                 "Are you sure you want to restart '{}'?", node.name
             );
 
@@ -200,7 +199,7 @@ NodeWidget::NodeWidget(const Node& node, bool showShutdownButton)
         connect(
             _shutdownNode, &QPushButton::clicked,
             [this, node]() {
-                std::string text = fmt::format(
+                std::string text = std::format(
                     "Are you sure you want to shut down '{}'?", node.name
                 );
 
@@ -292,7 +291,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster, bool showShutdownButton)
     connect(
         _killProcesses, &QPushButton::clicked,
         [this, cluster]() {
-            std::string text = fmt::format(
+            std::string text = std::format(
                 "Are you sure you want to kill all processes on cluster '{}'?",
                 cluster.name
             );
@@ -316,7 +315,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster, bool showShutdownButton)
     connect(
         _killTrays, &QPushButton::clicked,
         [this, cluster]() {
-            std::string text = fmt::format(
+            std::string text = std::format(
                 "Are you sure you want to kill all TRAYs on cluster '{}'?",
                 cluster.name
             );
@@ -343,7 +342,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster, bool showShutdownButton)
     connect(
         _restartNodes, &QPushButton::clicked,
         [this, cluster]() {
-            std::string text = fmt::format(
+            std::string text = std::format(
                 "Are you sure you want to restart all nodes of cluster '{}'?",
                 cluster.name
             );
@@ -373,7 +372,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster, bool showShutdownButton)
         connect(
             _shutdownNodes, &QPushButton::clicked,
             [this, cluster]() {
-                std::string text = fmt::format(
+                std::string text = std::format(
                     "Are you sure you want to shut down all nodes of cluster '{}'?",
                     cluster.name
                 );

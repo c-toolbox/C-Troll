@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
             cfg,
             ":/schema/application/editor.schema.json"
         );
-        Log("Config", fmt::format("Finished loading configuration file '{}'", cfg));
+        Log("Config", std::format("Finished loading configuration file '{}'", cfg));
     }
     catch (const std::runtime_error& err) {
         QMessageBox::critical(

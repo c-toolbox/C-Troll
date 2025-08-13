@@ -36,7 +36,6 @@
 
 #include "centralwidget.h"
 #include "version.h"
-#include <fmt/format.h>
 #include <QApplication>
 #include <QHBoxLayout>
 #include <QLabel>

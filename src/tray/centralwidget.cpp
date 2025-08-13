@@ -38,7 +38,6 @@
 #include "version.h"
 #include <QGroupBox>
 #include <QVBoxLayout>
-#include <fmt/format.h>
 
 namespace {
     void Debug(std::string msg) {
@@ -65,7 +64,7 @@ CentralWidget::CentralWidget() {
 }
 
 void CentralWidget::setPort(int port) {
-    _portLabel->setText(QString::fromStdString(fmt::format("Port: {}", port)));
+    _portLabel->setText(QString::fromStdString(std::format("Port: {}", port)));
 }
 
 void CentralWidget::log(std::string msg) {
@@ -78,7 +77,7 @@ bool CentralWidget::hasConnections() const {
 }
 
 void CentralWidget::newConnection(const std::string& peerAddress) {
-    Debug(fmt::format("Opened connection to {}", peerAddress));
+    Debug(std::format("Opened connection to {}", peerAddress));
 
     if (!_connections.contains(peerAddress)) {
         // We are the first connection, so we need to create the map entry
@@ -102,7 +101,7 @@ void CentralWidget::newConnection(const std::string& peerAddress) {
 }
 
 void CentralWidget::closedConnection(const std::string& peerAddress) {
-    Debug(fmt::format("Closed connection to {}", peerAddress));
+    Debug(std::format("Closed connection to {}", peerAddress));
 
     const auto it = _connections.find(peerAddress);
     assert(it != _connections.end());
@@ -122,16 +121,16 @@ void CentralWidget::closedConnection(const std::string& peerAddress) {
 }
 
 void CentralWidget::newProcess(ProcessHandler::ProcessInfo process) {
-    Debug(fmt::format("New process: {}, {}", process.processId, process.executable));
+    Debug(std::format("New process: {}, {}", process.processId, process.executable));
 
-    std::string text = fmt::format("{}: {}", process.processId, process.executable);
+    std::string text = std::format("{}: {}", process.processId, process.executable);
     QLabel* label = new QLabel(QString::fromStdString(text));
     _processesLayout->addWidget(label);
     _processes[process.processId] = label;
 }
 
 void CentralWidget::endedProcess(ProcessHandler::ProcessInfo process) {
-    Debug(fmt::format("Close process: {}, {}", process.processId, process.executable));
+    Debug(std::format("Close process: {}, {}", process.processId, process.executable));
 
     const auto it = _processes.find(process.processId);
     // The processId might not exist yet if the process starting fails (for example if the
@@ -151,7 +150,7 @@ QWidget* CentralWidget::createInfoWidget() {
     infoLayout->setContentsMargins(5, 1, 5, 5);
     info->setLayout(infoLayout);
 
-    std::string trayVer = fmt::format("Tray Version: {}", app::Version);
+    std::string trayVer = std::format("Tray Version: {}", app::Version);
     infoLayout->addWidget(new QLabel(QString::fromStdString(trayVer)));
 
     infoLayout->addStretch();
@@ -159,15 +158,13 @@ QWidget* CentralWidget::createInfoWidget() {
     infoLayout->addWidget(_portLabel);
     infoLayout->addStretch();
 
-    std::string apiVer = fmt::format("API Version: {}", api::Version);
+    std::string apiVer = std::format("API Version: {}", api::Version);
     infoLayout->addWidget(new QLabel(QString::fromStdString(apiVer)));
 
     return info;
 }
 
 void CentralWidget::updateLabel(ConnectionInfo& ci) {
-    std::string msg = fmt::format(
-        "{} (x{})", ci.peerAddress, ci.nConnections
-    );
+    std::string msg = std::format("{} (x{})", ci.peerAddress, ci.nConnections);
     ci.label->setText(QString::fromStdString(msg));
 }

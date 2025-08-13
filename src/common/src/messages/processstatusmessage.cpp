@@ -34,8 +34,6 @@
 
 #include "messages/processstatusmessage.h"
 
-#include <fmt/format.h>
-
 namespace {
     constexpr const char* KeyProcessId = "processId";
     constexpr const char* KeyStatus = "status";

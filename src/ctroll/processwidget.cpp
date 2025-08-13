@@ -47,7 +47,6 @@
 #include <QStyle>
 #include <QTimer>
 #include <QVBoxLayout>
-#include <fmt/format.h>
 
 namespace {
     std::string statusToString(common::ProcessStatusMessage::Status status) {
@@ -120,7 +119,7 @@ ProcessWidget::ProcessWidget(Process::ID processId,
         connect(
             _killProcess, &QPushButton::clicked,
             [this, program, configuration, cluster]() {
-                std::string text = fmt::format(
+                std::string text = std::format(
                     "Are you sure you want to kill '{}/{}' running on cluster '{}'?",
                     program->name, configuration->name, cluster->name
                 );
@@ -194,7 +193,7 @@ ProcessWidget::~ProcessWidget() {
 
 QWidget* ProcessWidget::createMessageContainer() {
     QWidget* container = new QWidget;
-    std::string title = fmt::format("C-Troll | Process: {}", _processId.v);
+    std::string title = std::format("C-Troll | Process: {}", _processId.v);
     container->setWindowTitle(QString::fromStdString(title));
 
     container->setMinimumSize(1200, 500);
@@ -315,7 +314,7 @@ void ProcessesWidget::receivedProcessMessage(Node::ID, common::ProcessOutputMess
 }
 
 void ProcessesWidget::processAdded(Process::ID processId) {
-    Debug(fmt::format("Adding process {}", processId.v));
+    Debug(std::format("Adding process {}", processId.v));
 
     // The process has been created, but the widget did not exist yet
     ProcessWidget* w = new ProcessWidget(processId, _processTimeout);

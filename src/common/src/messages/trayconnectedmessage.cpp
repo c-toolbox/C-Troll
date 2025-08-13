@@ -34,8 +34,6 @@
 
 #include "messages/trayconnectedmessage.h"
 
-#include <fmt/format.h>
-
 namespace common {
 
 TrayConnectedMessage::TrayConnectedMessage()

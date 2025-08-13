@@ -44,7 +44,6 @@
 #include <QMessageBox>
 #include <QSharedMemory>
 #include <QTimer>
-#include <fmt/format.h>
 #include <nlohmann/json.hpp>
 #include <filesystem>
 #include <iostream>
@@ -85,7 +84,7 @@ int main(int argc, char** argv) {
             QMessageBox::critical(
                 nullptr,
                 "Memory error",
-                QString::fromStdString(fmt::format(
+                QString::fromStdString(std::format(
                     "Error creating shared memory: {}", mem.errorString().toStdString()
                 ))
             );
@@ -147,7 +146,7 @@ int main(int argc, char** argv) {
         logDebug,
         [&mw](std::string msg) { mw.log(std::move(msg)); }
     );
-    Log("Config", fmt::format("Finished loading configuration file '{}'", cfg));
+    Log("Config", std::format("Finished loading configuration file '{}'", cfg));
 
 #ifdef QT_DEBUG
     config.showWindow = true;
@@ -238,7 +237,7 @@ int main(int argc, char** argv) {
             message.error = e.what();
             std::array<SocketHandler::MessageLog, 3> mls = socketHandler.lastMessages();
             for (const SocketHandler::MessageLog& m : mls) {
-                std::string msg = fmt::format(
+                std::string msg = std::format(
                     "{} ({}): {}", m.time, m.peer, m.message.dump()
                 );
                 message.lastMessages.push_back(msg);
@@ -254,7 +253,7 @@ int main(int argc, char** argv) {
             message.error = "Unknown exception";
             std::array<SocketHandler::MessageLog, 3> mls = socketHandler.lastMessages();
             for (const SocketHandler::MessageLog& m : mls) {
-                std::string msg = fmt::format(
+                std::string msg = std::format(
                     "{} ({}): {}", m.time, m.peer, m.message.dump()
                 );
                 message.lastMessages.push_back(msg);

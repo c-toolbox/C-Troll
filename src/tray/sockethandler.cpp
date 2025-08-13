@@ -39,7 +39,6 @@
 #include "messages.h"
 #include <QMessageBox>
 #include <QTcpSocket>
-#include <fmt/format.h>
 #include <Windows.h>
 #include <iostream>
 #include <memory>
@@ -49,7 +48,7 @@ namespace {
         SYSTEMTIME t = {};
         GetLocalTime(&t);
 
-        return fmt::format(
+        return std::format(
             "{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0<3}",
             t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, t.wMilliseconds
         );
@@ -64,11 +63,11 @@ SocketHandler::SocketHandler(int port, std::string secret)
     : _secret(std::move(secret))
 {
     Debug("Creating socket handler");
-    Log("Status", fmt::format("Listening on port: {}", port));
+    Log("Status", std::format("Listening on port: {}", port));
 
     const bool success = _server.listen(QHostAddress::Any, static_cast<quint16>(port));
     if (!success) {
-        std::string msg = fmt::format("Failed to listen on port {}", port);
+        std::string msg = std::format("Failed to listen on port {}", port);
         QMessageBox::critical(nullptr, "Socket Creation", QString::fromStdString(msg));
         Log("Error", msg);
         exit(EXIT_FAILURE);
@@ -88,14 +87,14 @@ std::array<SocketHandler::MessageLog, 3> SocketHandler::lastMessages() const {
 }
 
 void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* socket) {
-    Debug(fmt::format("Received message: {}", message.dump(2)));
+    Debug(std::format("Received message: {}", message.dump(2)));
 
     common::Message msg = message;
     if (msg.secret == _secret) {
         emit messageReceived(std::move(message), socket->peerAddress());
     }
     else {
-        Log(fmt::format("Received [{}]", socket->peerAddress()), "Invalid message");
+        Log(std::format("Received [{}]", socket->peerAddress()), "Invalid message");
         common::InvalidAuthMessage invalidAuthMsg;
         socket->write(invalidAuthMsg);
     }
@@ -105,20 +104,20 @@ void SocketHandler::sendMessage(const nlohmann::json& message, bool printMessage
     for (common::JsonSocket* jsonSocket : _sockets) {
         std::string peer = jsonSocket->peerAddress();
         if (printMessage) {
-            Log(fmt::format("Sending [{}]", peer), message.dump());
+            Log(std::format("Sending [{}]", peer), message.dump());
         }
         jsonSocket->write(message);
     }
 }
 
 void SocketHandler::disconnected(common::JsonSocket* socket) {
-    Debug(fmt::format("Disconnected remote socket to {}", socket->peerAddress()));
+    Debug(std::format("Disconnected remote socket to {}", socket->peerAddress()));
 
     auto ptr = std::find(_sockets.begin(), _sockets.end(), socket);
     if (ptr != _sockets.end()) {
         (*ptr)->deleteLater();
         _sockets.erase(ptr);
-        Log("Status", fmt::format("Socket from {} disconnected", socket->peerAddress()));
+        Log("Status", std::format("Socket from {} disconnected", socket->peerAddress()));
 
         emit closedConnection(socket->peerAddress());
     }
@@ -134,7 +133,7 @@ void SocketHandler::newConnectionEstablished() {
             _secret
         );
 
-        Debug(fmt::format("Creating new connection to {}", socket->peerAddress()));
+        Debug(std::format("Creating new connection to {}", socket->peerAddress()));
 
         connect(
             socket, &common::JsonSocket::disconnected,
@@ -169,10 +168,10 @@ void SocketHandler::newConnectionEstablished() {
         );
 
         _sockets.push_back(socket);
-        Log("Status", fmt::format("Socket connected from {}", socket->peerAddress()));
+        Log("Status", std::format("Socket connected from {}", socket->peerAddress()));
 
         common::TrayConnectedMessage msg;
-        Log(fmt::format(
+        Log(std::format(
             "Sending [{}]", socket->peerAddress()), nlohmann::json(msg).dump()
         );
         socket->write(msg);

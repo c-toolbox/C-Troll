@@ -39,7 +39,6 @@
 #include "messages.h"
 #include "node.h"
 #include <QTimer>
-#include <fmt/format.h>
 #include <assert.h>
 
 namespace {
@@ -93,7 +92,7 @@ void ClusterConnectionHandler::initialize() {
                 catch (const std::exception& e) {
                     Log(
                         "ClusterConnectionHandler::initialize",
-                        fmt::format(
+                        std::format(
                             "Caught exception {} when receiving message {}",
                             e.what(), message.dump()
                         )
@@ -136,7 +135,7 @@ void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
     const Node* node = data::findNode(nodeId);
     assert(node);
 
-    Log(fmt::format(
+    Log(std::format(
         "Socket State Change [{}:{}]",
         node->ipAddress, node->port), std::string(stateToString(state)
     ));
@@ -166,7 +165,7 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
         message.dump();
 
     Debug(
-        fmt::format("Received [{}:{} ({})]", data::findNode(nodeId)->ipAddress,
+        std::format("Received [{}:{} ({})]", data::findNode(nodeId)->ipAddress,
             data::findNode(nodeId)->port,
             data::findNode(nodeId)->name
         ),
@@ -213,7 +212,7 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
 
         for (const Cluster* c : clusters) {
             assert(c);
-            Log(fmt::format("Received [{} / {}]", c->name, n->name), message.dump());
+            Log(std::format("Received [{} / {}]", c->name, n->name), message.dump());
         }
     }
 }
@@ -222,7 +221,7 @@ void ClusterConnectionHandler::sendMessage(const Node& node, nlohmann::json msg)
     assert(!msg.is_null());
 
     Log(
-        fmt::format("Sending [{}:{} ({})]", node.ipAddress, node.port, node.name),
+        std::format("Sending [{}:{} ({})]", node.ipAddress, node.port, node.name),
         msg.dump()
     );
     const auto it = _sockets.find(node.id);

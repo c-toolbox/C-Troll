@@ -36,7 +36,6 @@
 
 #include <jsonvalidation.h>
 #include <QObject>
-#include <fmt/format.h>
 #include <random>
 
 namespace {
@@ -370,7 +369,7 @@ bool loadData(std::string_view programPath, std::string_view clusterPath,
         [](const Cluster& lhs, const Cluster& rhs) { return lhs.name == rhs.name; }
     );
     if (it != clusters.end()) {
-        throw std::runtime_error(fmt::format(
+        throw std::runtime_error(std::format(
             "Duplicate cluster name '{}' found", it->name
         ));
     }
@@ -379,9 +378,9 @@ bool loadData(std::string_view programPath, std::string_view clusterPath,
         for (const std::string& node : cluster.nodes) {
             const Node* n = findNode(node);
             if (!n) {
-                throw std::runtime_error(
-                    fmt::format("Could not find node with name {}", node)
-                );
+                throw std::runtime_error(std::format(
+                    "Could not find node with name {}", node
+                ));
             }
         }
 
@@ -410,7 +409,7 @@ bool loadData(std::string_view programPath, std::string_view clusterPath,
         for (const Program::Cluster& cluster : program.clusters) {
             const Cluster* c = data::findCluster(cluster.name);
             if (!c) {
-                throw std::runtime_error(fmt::format(
+                throw std::runtime_error(std::format(
                     "Could not find cluster '{}'", cluster.name
                 ));
             }

@@ -34,7 +34,6 @@
 
 #include "logging.h"
 
-#include <fmt/format.h>
 #include <Windows.h>
 #include <assert.h>
 #include <filesystem>
@@ -47,7 +46,7 @@ namespace {
         SYSTEMTIME t = {};
         GetLocalTime(&t);
 
-        return fmt::format(
+        return std::format(
             "{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0<3}",
             t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, t.wMilliseconds
         );
@@ -56,7 +55,7 @@ namespace {
     std::string currentDate() {
         SYSTEMTIME t = {};
         GetLocalTime(&t);
-        return fmt::format("{:0>4}-{:0>2}-{:0>2}", t.wYear, t.wMonth, t.wDay);
+        return std::format("{:0>4}-{:0>2}-{:0>2}", t.wYear, t.wMonth, t.wDay);
     }
 
     std::string nextFreeFilename(std::string_view path) {
@@ -65,8 +64,8 @@ namespace {
 
         int i = 0;
         while (true) {
-            std::string versionPostFix = (i == 0) ? "" : fmt::format("-{}", i);
-            std::string newFile = fmt::format(
+            std::string versionPostFix = (i == 0) ? "" : std::format("-{}", i);
+            std::string newFile = std::format(
                 "{}_{}{}{}", fileBegin, date, versionPostFix, LogPostfix
             );
 
@@ -100,7 +99,7 @@ Log::Log(std::string componentName, bool createLogFile, bool shouldLogDebug)
 {
     assert(!componentName.empty());
     if (createLogFile) {
-        _filePath = fmt::format("{}{}{}", LogPrefix, componentName, LogPostfix);
+        _filePath = std::format("{}{}{}", LogPrefix, componentName, LogPostfix);
         _file = std::ofstream(_filePath);
     }
 }
@@ -110,7 +109,7 @@ Log::~Log() {
 }
 
 void Log::logMessage(std::string category, std::string message) {
-    message = fmt::format("{}  ({}): {}", currentTime(), category, message);
+    message = std::format("{}  ({}): {}", currentTime(), category, message);
 
     if (_log) {
         // First the file

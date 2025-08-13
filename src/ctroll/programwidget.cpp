@@ -48,7 +48,6 @@
 #include <QMenu>
 #include <QScrollArea>
 #include <QVBoxLayout>
-#include <fmt/format.h>
 #include <set>
 
 namespace programs {
@@ -77,11 +76,11 @@ void ProgramButton::updateStatus() {
     );
     setEnabled(allConnected);
 
-    Debug(id(), fmt::format("Update status. All connected: {}", allConnected));
+    Debug(id(), std::format("Update status. All connected: {}", allConnected));
 }
 
 void ProgramButton::processUpdated(Process::ID processId) {
-    Debug(id(), fmt::format("Update process {}", processId.v));
+    Debug(id(), std::format("Update process {}", processId.v));
 
     const Process* process = data::findProcess(processId);
 
@@ -122,8 +121,8 @@ void ProgramButton::handleButtonPress() {
     );
 
     Debug(id(), "Handle button");
-    Debug(id(), fmt::format("  No process running: {}", hasNoProcessRunning()));
-    Debug(id(), fmt::format("  All processes running: {}", hasAllProcessesRunning()));
+    Debug(id(), std::format("  No process running: {}", hasNoProcessRunning()));
+    Debug(id(), std::format("  All processes running: {}", hasAllProcessesRunning()));
 
     if (hasNoProcessRunning()) {
         emit startProgram(_configuration->id);
@@ -142,8 +141,8 @@ void ProgramButton::handleButtonPress() {
 
 void ProgramButton::updateButton() {
     Debug(id(), "Update button");
-    Debug(id(), fmt::format("  No process running: {}", hasNoProcessRunning()));
-    Debug(id(), fmt::format("  All processes running: {}", hasAllProcessesRunning()));
+    Debug(id(), std::format("  No process running: {}", hasNoProcessRunning()));
+    Debug(id(), std::format("  All processes running: {}", hasAllProcessesRunning()));
 
     setEnabled(true);
 
@@ -259,7 +258,7 @@ bool ProgramButton::hasAllProcessesRunning() const {
 }
 
 std::string ProgramButton::id() const {
-    return fmt::format("Program Button ({}|{})", _cluster->name, _configuration->name);
+    return std::format("Program Button ({}|{})", _cluster->name, _configuration->name);
 }
 
 
@@ -331,7 +330,7 @@ TagInfoWidget::TagInfoWidget(const std::vector<std::string>& tags) {
         QWidget* w = new QWidget;
 
         Color color = data::colorForTag(tag);
-        w->setStyleSheet(QString::fromStdString(fmt::format(
+        w->setStyleSheet(QString::fromStdString(std::format(
             "background: #{0:02x}{1:02x}{2:02x}", color.r, color.g, color.b
         )));
 
@@ -391,7 +390,7 @@ ProgramWidget::ProgramWidget(const Program& program)
     connect(
         gotoFolder, &QPushButton::clicked,
         [exe = program.executable]() {
-            std::string path = fmt::format(
+            std::string path = std::format(
                 "file:///{}", std::filesystem::path(exe).parent_path().string()
             );
             QDesktopServices::openUrl(QString::fromStdString(path));
@@ -409,7 +408,7 @@ ProgramWidget::ProgramWidget(const Program& program)
     }
     else {
         gotoFolder->setEnabled(false);
-        gotoFolder->setToolTip(QString::fromStdString(fmt::format(
+        gotoFolder->setToolTip(QString::fromStdString(std::format(
             "Unable to find the executable '{}' on this computer", program.executable
         )));
     }
@@ -457,7 +456,7 @@ void TagsWidget::addTag(std::string tag) {
         ""
     };
 
-    std::string colorText = fmt::format(
+    std::string colorText = std::format(
         R"(
                 QPushButton {{ background-color: #{0:02x}{1:02x}{2:02x}; }}
                 QPushButton:hover {{ background-color: #{3:02x}{4:02x}{5:02x}; }}

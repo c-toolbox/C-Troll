@@ -106,7 +106,6 @@ target_link_libraries(
   common
   PUBLIC
     project_options
-    fmt
     nlohmann_json
     nlohmann_json_schema_validator
     Qt::Core

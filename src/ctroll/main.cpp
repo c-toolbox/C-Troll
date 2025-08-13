@@ -45,7 +45,6 @@
 #include <QProcessEnvironment>
 #include <QSharedMemory>
 #include <QTimer>
-#include <fmt/format.h>
 #include <chrono>
 
 namespace {
@@ -121,7 +120,7 @@ int main(int argc, char** argv) {
                 QMessageBox::critical(
                     nullptr,
                     "Version mismatch",
-                    QString::fromStdString(fmt::format(
+                    QString::fromStdString(std::format(
                         "Starting to launch C-Troll of version {}.{}.{} while "
                         "incompatible version {}.{}.{} is still running",
                         data->majorVersion, data->minorVersion, data->patchVersion,
@@ -140,7 +139,7 @@ int main(int argc, char** argv) {
             QMessageBox::critical(
                 nullptr,
                 "Memory error",
-                QString::fromStdString(fmt::format(
+                QString::fromStdString(std::format(
                     "Error creating shared memory: {}",
                     mem.errorString().toStdString()
                 ))
@@ -200,7 +199,7 @@ int main(int argc, char** argv) {
     }
 
     common::Log::initialize("ctroll", config.logFile, logDebug);
-    Log("Config", fmt::format("Finished loading configuration file '{}'", cfg));
+    Log("Config", std::format("Finished loading configuration file '{}'", cfg));
 
 
     try {

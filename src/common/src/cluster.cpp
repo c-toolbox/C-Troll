@@ -36,7 +36,6 @@
 
 #include "jsonload.h"
 #include "logging.h"
-#include <fmt/format.h>
 #include <assert.h>
 #include <filesystem>
 #include <string_view>

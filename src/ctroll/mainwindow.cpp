@@ -122,9 +122,9 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
 
     //
     // Load the data
-    Log("Status", fmt::format("Loading programs from '{}'", config.applicationPath));
+    Log("Status", std::format("Loading programs from '{}'", config.applicationPath));
     if (!std::filesystem::exists(config.applicationPath)) {
-        std::string msg = fmt::format(
+        std::string msg = std::format(
             "Could not find application path '{}'", config.applicationPath
         );
         QMessageBox::critical(
@@ -135,11 +135,9 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
         exit(EXIT_FAILURE);
     }
 
-    Log("Status", fmt::format("Loading nodes from '{}'", config.nodePath));
+    Log("Status", std::format("Loading nodes from '{}'", config.nodePath));
     if (!std::filesystem::exists(config.nodePath)) {
-        std::string msg = fmt::format(
-            "Could not find node path '{}'", config.nodePath
-        );
+        std::string msg = std::format("Could not find node path '{}'", config.nodePath);
         QMessageBox::critical(
             nullptr,
             "Error loading",
@@ -148,9 +146,9 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
         exit(EXIT_FAILURE);
     }
 
-    Log("Status", fmt::format("Loading clusters from '{}'", config.clusterPath));
+    Log("Status", std::format("Loading clusters from '{}'", config.clusterPath));
     if (!std::filesystem::exists(config.clusterPath)) {
-        std::string msg = fmt::format(
+        std::string msg = std::format(
             "Could not find cluster path '{}'", config.clusterPath
         );
         QMessageBox::critical(
@@ -505,7 +503,7 @@ void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
         if (proc) {
             Log(
                 "Status",
-                fmt::format("Ignoring process with duplicate id {}", pi.processId)
+                std::format("Ignoring process with duplicate id {}", pi.processId)
             );
             continue;
         }
@@ -532,7 +530,7 @@ void MainWindow::handleInvalidAuth(Node::ID id, common::InvalidAuthMessage) {
     const Node* node = data::findNode(id);
     assert(node);
 
-    std::string m = fmt::format("Send invalid auth token to node {}", node->name);
+    std::string m = std::format("Send invalid auth token to node {}", node->name);
     QMessageBox::critical(this, "Error in Connection", QString::fromStdString(m));
 }
 
@@ -548,7 +546,7 @@ void MainWindow::handleErrorMessage(Node::ID id, common::ErrorOccurredMessage me
     QMessageBox::critical(
         this,
         "Tray error",
-        QString::fromStdString(fmt::format(
+        QString::fromStdString(std::format(
             "Node {} reported a critical error. It said: \n{}\n\nThe last {} messages "
             "that were received on that node were:\n\n{}",
             node->name, message.error, message.lastMessages.size(), msg
@@ -723,7 +721,7 @@ void MainWindow::killAllProcesses(Node::ID id) const {
 }
 
 void MainWindow::killTray(Node::ID id) const {
-    Log("Sending", fmt::format("Send message to kill Tray on {}", id.v));
+    Log("Sending", std::format("Send message to kill Tray on {}", id.v));
     const Node* node = data::findNode(id);
     assert(node);
 
@@ -735,7 +733,7 @@ void MainWindow::killTray(Node::ID id) const {
 }
 
 void MainWindow::killTrays(Cluster::ID id) const {
-    Log("Sending", fmt::format("Send message to kill Trays on {}", id.v));
+    Log("Sending", std::format("Send message to kill Trays on {}", id.v));
 
     std::vector<const Node*> nodes;
     if (id.v == -1) {
@@ -766,7 +764,7 @@ void MainWindow::killTrays(Cluster::ID id) const {
 }
 
 void MainWindow::restartNode(Node::ID id) const {
-    Log("Sending", fmt::format("Send message to restart node {}", id.v));
+    Log("Sending", std::format("Send message to restart node {}", id.v));
     const Node* node = data::findNode(id);
     assert(node);
 
@@ -778,7 +776,7 @@ void MainWindow::restartNode(Node::ID id) const {
 }
 
 void MainWindow::restartNodes(Cluster::ID id) const {
-    Log("Sending", fmt::format("Send message to restart nodes on {}", id.v));
+    Log("Sending", std::format("Send message to restart nodes on {}", id.v));
 
     std::vector<const Node*> nodes;
     if (id.v == -1) {
@@ -809,7 +807,7 @@ void MainWindow::restartNodes(Cluster::ID id) const {
 }
 
 void MainWindow::shutdownNode(Node::ID id) const {
-    Log("Sending", fmt::format("Send message to shut down node {}", id.v));
+    Log("Sending", std::format("Send message to shut down node {}", id.v));
     const Node* node = data::findNode(id);
     assert(node);
 
@@ -821,7 +819,7 @@ void MainWindow::shutdownNode(Node::ID id) const {
 }
 
 void MainWindow::shutdownNodes(Cluster::ID id) const {
-    Log("Sending", fmt::format("Send message to shut down nodes on {}", id.v));
+    Log("Sending", std::format("Send message to shut down nodes on {}", id.v));
 
     std::vector<const Node*> nodes;
     if (id.v == -1) {

@@ -101,7 +101,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     , _programPath(std::move(programPath))
     , _clusterPath(std::move(clusterPath))
 {
-    setWindowTitle(QString::fromStdString(fmt::format("Program: {}", _programPath)));
+    setWindowTitle(QString::fromStdString(std::format("Program: {}", _programPath)));
     resize(800, 900);
 
     QBoxLayout* l = new QVBoxLayout(this);

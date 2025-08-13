@@ -35,7 +35,6 @@
 #include "messages/processoutputmessage.h"
 
 #include "logging.h"
-#include <fmt/format.h>
 
 namespace {
     constexpr std::string_view KeyIdentifier = "processId";
@@ -79,7 +78,7 @@ void from_json(const nlohmann::json& j, ProcessOutputMessage& m) {
         m.outputType = ProcessOutputMessage::OutputType::StdErr;
     }
     else {
-        throw std::runtime_error(fmt::format("Unknown output type '{}'", type));
+        throw std::runtime_error(std::format("Unknown output type '{}'", type));
     }
 }
 
