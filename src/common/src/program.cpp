@@ -139,7 +139,7 @@ void from_json(const nlohmann::json& j, Program& p) {
         else {
             std::vector<std::string> clusters;
             j.at(KeyClusters).get_to(clusters);
-            for (std::string cluster : clusters) {
+            for (std::string& cluster : clusters) {
                 p.clusters.push_back({ .name = std::move(cluster) });
             }
         }

@@ -155,8 +155,8 @@ ProcessWidget::ProcessWidget(Process::ID processId,
     _removalTimer->setSingleShot(true);
     connect(
         _removalTimer, &QTimer::timeout,
-        [this, messageContainer = _messageContainer]() {
-            if (messageContainer->isVisible()) {
+        [this]() {
+            if (_messageContainer->isVisible()) {
                 _removalTimer->start(_timeout);
             }
             else {

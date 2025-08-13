@@ -35,12 +35,14 @@
 #ifndef __TRAY__SOCKETHANDLER_H__
 #define __TRAY__SOCKETHANDLER_H__
 
-#include "jsonsocket.h"
-#include <QFloat16>
 #include <QObject>
+
 #include <QTcpServer>
 #include <nlohmann/json.hpp>
 #include <array>
+#include <string>
+
+namespace common { class JsonSocket; }
 
 class SocketHandler : public QObject {
 Q_OBJECT

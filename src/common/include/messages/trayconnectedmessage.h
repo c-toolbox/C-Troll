@@ -46,7 +46,7 @@ struct TrayConnectedMessage : public Message {
     static constexpr std::string_view Type = "TrayConnectedMessage";
 
     TrayConnectedMessage();
-    auto operator<=>(const TrayConnectedMessage& rhs) const = default;
+    bool operator==(const TrayConnectedMessage& rhs) const noexcept = default;
 };
 
 void to_json(nlohmann::json& j, const TrayConnectedMessage& m);

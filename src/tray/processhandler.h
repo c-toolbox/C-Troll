@@ -38,7 +38,6 @@
 #include <QObject>
 
 #include "messages.h"
-#include <QFloat16>
 #include <QProcess>
 #include <nlohmann/json.hpp>
 #include <map>

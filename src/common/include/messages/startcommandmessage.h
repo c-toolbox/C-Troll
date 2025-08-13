@@ -48,7 +48,7 @@ struct StartCommandMessage : public Message {
     static constexpr std::string_view Type = "StartCommandMessage";
 
     StartCommandMessage();
-    auto operator<=>(const StartCommandMessage& rhs) const = default;
+    bool operator==(const StartCommandMessage& rhs) const noexcept = default;
 
     /// The unique identifier for the process that will be created
     int id = -1;

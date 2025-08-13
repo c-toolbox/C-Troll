@@ -74,7 +74,9 @@ ProgramDialog::ConfigurationWidget::ConfigurationWidget() {
     layout->setStretch(2, 2);
 }
 
-ProgramDialog::ClusterWidget::ClusterWidget(std::string cluster, std::string parameters) {
+ProgramDialog::ClusterWidget::ClusterWidget(const std::string& cluster,
+                                            const std::string& parameters)
+{
     QBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
@@ -89,10 +91,6 @@ ProgramDialog::ClusterWidget::ClusterWidget(std::string cluster, std::string par
     arguments->setPlaceholderText("optional");
     layout->addWidget(arguments);
     layout->setStretch(1, 3);
-}
-
-bool operator==(const Cluster& c, const std::string& name) {
-    return c.name == name;
 }
 
 ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
@@ -142,8 +140,8 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     _commandLineParameters = new QLineEdit;
     _commandLineParameters->setPlaceholderText("optional");
     _commandLineParameters->setToolTip(
-        "Global commandline parameters that will be added to the command regardless "
-        "of the configuration that was selected"
+        "Global commandline parameters that will be added to the command regardless of "
+        "the configuration that was selected"
     );
     editLayout->addWidget(_commandLineParameters, 2, 1);
 
@@ -164,8 +162,8 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     editLayout->addWidget(new QLabel("Forward Messages:"), 5, 0);
     _shouldForwardMessages = new QCheckBox;
     _shouldForwardMessages->setToolTip(
-        "If this is enabled, all console messages from the executable will be sent "
-        "back to C-Troll"
+        "If this is enabled, all console messages from the executable will be sent back "
+        "to C-Troll"
     );
     editLayout->addWidget(_shouldForwardMessages, 5, 1);
 
@@ -205,9 +203,9 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     editLayout->addWidget(_description, 8, 1);
 
     QLabel* parametersLabel = new QLabel(
-        "The complete arguments for the program are given in the following order: "
-        "1. the global parameters;  2. the configuration-specific parameters;  "
-        "3. the cluster-specific parameters."
+        "The complete arguments for the program are given in the following order: 1. the "
+        "global parameters;  2. the configuration-specific parameters;  3. the "
+        "cluster-specific parameters."
     );
     parametersLabel->setWordWrap(true);
     parametersLabel->setObjectName("information-label");
@@ -359,10 +357,8 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             _clusters->addItem(c);
 
             const auto it = std::find_if(
-                clusters.first.cbegin(), clusters.first.cend(),
-                [cluster](const Cluster& c) {
-                    return c.name == cluster.name;
-                }
+                clusters.first.begin(), clusters.first.end(),
+                [cluster](const Cluster& c) { return c.name == cluster.name; }
             );
             if (it == clusters.first.end()) {
                 c->label->setObjectName("invalid");
@@ -427,24 +423,22 @@ void ProgramDialog::save() {
     accept();
 }
 
-bool operator==(QLabel* name, const Cluster& cluster) {
-    return cluster.name == name->text().toStdString();
-}
-
 std::string ProgramDialog::selectCluster() {
     std::pair<std::vector<Cluster>, bool> clusters =
         common::loadJsonFromDirectory<Cluster>(_clusterPath);
 
     std::vector<ClusterWidget*> currClusters = _clusters->items<ClusterWidget>();
-        clusters.first.erase(
+    clusters.first.erase(
         std::remove_if(
             clusters.first.begin(), clusters.first.end(),
             [&currClusters](const Cluster& c) {
                 const auto it = std::find_if(
-                    currClusters.cbegin(), currClusters.cend(),
-                    [c](ClusterWidget* cw) { return cw->label == c; }
+                    currClusters.begin(), currClusters.end(),
+                    [c](ClusterWidget* cw) {
+                        return cw->label->text().toStdString() == c.name;
+                    }
                 );
-                return it != currClusters.cend();
+                return it != currClusters.end();
             }
         ),
         clusters.first.end()
@@ -482,7 +476,7 @@ void ProgramDialog::updateSaveButton() {
         _configurations->items<ConfigurationWidget>();
 
     const bool confHasName = std::all_of(
-        configurations.cbegin(), configurations.cend(),
+        configurations.begin(), configurations.end(),
         [](ConfigurationWidget* config) { return !config->name->text().isEmpty(); }
     );
 

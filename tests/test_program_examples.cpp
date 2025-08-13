@@ -40,7 +40,7 @@
 TEST_CASE("Program Example: Calc", "[Program]") {
     using namespace nlohmann;
 
-    json conf = R"(
+    const json conf = R"(
 {
   "clusters": [
     { "name": "Local" },
@@ -89,7 +89,7 @@ TEST_CASE("Program Example: Calc", "[Program]") {
 TEST_CASE("Program Example: Calibrator", "[Program]") {
     using namespace nlohmann;
 
-    json conf = R"(
+    const json conf = R"(
 {
   "name": "Calibrator",
   "executable": "A:/Calibrator/calibrator.exe",
@@ -145,7 +145,7 @@ TEST_CASE("Program Example: Calibrator", "[Program]") {
 TEST_CASE("Program Example: VLC", "[Program]") {
     using namespace nlohmann;
 
-    json conf = R"(
+    const json conf = R"(
 {
   "name": "VLC",
   "executable": "C:/Program Files (x86)/VideoLAN/VLC/vlc.exe",

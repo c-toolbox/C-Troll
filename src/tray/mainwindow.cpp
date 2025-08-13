@@ -37,13 +37,17 @@
 #include "centralwidget.h"
 #include "version.h"
 #include <QApplication>
+#include <QCloseEvent>
+#include <QEvent>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>
 #include <QVBoxLayout>
-#include <iostream>
 
-MainWindow::MainWindow() {
+MainWindow::MainWindow()
+    : _onlineIcon(":/images/tray_online_cog.png")
+    , _offlineIcon(":/images/tray_offline_cog.png")
+{
     setWindowTitle("C-Troll Tray");
 
     _centralWidget = new CentralWidget;
@@ -92,14 +96,12 @@ void MainWindow::log(std::string msg) {
 
 void MainWindow::newConnection(const std::string& peerAddress) {
     _centralWidget->newConnection(peerAddress);
-
-    updateTrayIcon();
+    _trayIcon->setIcon(_centralWidget->hasConnections() ? _onlineIcon : _offlineIcon);
 }
 
 void MainWindow::closedConnection(const std::string& peerAddress) {
     _centralWidget->closedConnection(peerAddress);
-
-    updateTrayIcon();
+    _trayIcon->setIcon(_centralWidget->hasConnections() ? _onlineIcon : _offlineIcon);
 }
 
 void MainWindow::newProcess(ProcessHandler::ProcessInfo process) {
@@ -154,11 +156,4 @@ void MainWindow::showEvent(QShowEvent*) {
 void MainWindow::hideEvent(QHideEvent*) {
     _showAction->setVisible(true);
     _hideAction->setVisible(false);
-}
-
-void MainWindow::updateTrayIcon() {
-    constexpr const char Offline[] = ":/images/tray_offline_cog.png";
-    constexpr const char Online[] = ":/images/tray_online_cog.png";
-
-    _trayIcon->setIcon(QIcon(_centralWidget->hasConnections() ? Online : Offline));
 }

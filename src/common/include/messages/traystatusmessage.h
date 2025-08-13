@@ -47,10 +47,10 @@ struct TrayStatusMessage : public Message {
     static constexpr std::string_view Type = "TrayStatusMessage";
 
     TrayStatusMessage();
-    auto operator<=>(const TrayStatusMessage& rhs) const = default;
+    bool operator==(const TrayStatusMessage& rhs) const noexcept = default;
 
     struct ProcessInfo {
-        auto operator<=>(const ProcessInfo& rhs) const = default;
+        bool operator==(const ProcessInfo& rhs) const noexcept = default;
         
         int processId;
         int programId;

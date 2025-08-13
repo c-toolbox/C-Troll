@@ -157,7 +157,7 @@ void SocketHandler::newConnectionEstablished() {
                         .message = message,
                         .peer = socket->peerAddress()
                     };
-                    _lastMessages.front() = ml;
+                    _lastMessages.front() = std::move(ml);
 
                     handleMessage(message, socket);
                 }

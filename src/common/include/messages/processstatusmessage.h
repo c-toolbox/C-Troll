@@ -47,9 +47,6 @@ namespace common {
 struct ProcessStatusMessage : public Message {
     static constexpr std::string_view Type = "ProcessStatusMessage";
 
-    ProcessStatusMessage();
-    auto operator<=>(const ProcessStatusMessage& rhs) const = default;
-
     enum class Status : int {
         Unknown = -1,
         Starting = 0,
@@ -62,6 +59,9 @@ struct ProcessStatusMessage : public Message {
         ReadError,
         UnknownError
     };
+
+    ProcessStatusMessage();
+    bool operator==(const ProcessStatusMessage& rhs) const = default;
 
     /// The unique identifier for the process that will be created
     int processId = -1;

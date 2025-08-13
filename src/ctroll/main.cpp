@@ -100,12 +100,12 @@ namespace {
 int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
 
-    QApplication app(argc, argv);
+    QApplication app = QApplication(argc, argv);
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
 
     //
     // Handle shared memory
-    QSharedMemory mem("/C-Troll/Single-Instance-Marker");
+    QSharedMemory mem = QSharedMemory("/C-Troll/Single-Instance-Marker");
     bool ret = mem.create(sizeof(SharedMemoryMarker));
     if (!ret) {
         // Something went wrong with creating the memory
@@ -140,8 +140,7 @@ int main(int argc, char** argv) {
                 nullptr,
                 "Memory error",
                 QString::fromStdString(std::format(
-                    "Error creating shared memory: {}",
-                    mem.errorString().toStdString()
+                    "Error creating shared memory: {}", mem.errorString().toStdString()
                 ))
             );
         }
@@ -165,25 +164,25 @@ int main(int argc, char** argv) {
     qInstallMessageHandler(QtLogFunction);
 
     {
-        QFile file(":/qss/c-troll.qss");
+        QFile file = QFile(":/qss/c-troll.qss");
         file.open(QFile::ReadOnly | QFile::Text);
         QString styleSheet = QLatin1String(file.readAll());
         app.setStyleSheet(styleSheet);
     }
 
     std::string cfg = "config.json";
+    if (QProcessEnvironment::systemEnvironment().contains("CTROLL_CONFIG")) {
+        QString c = QProcessEnvironment::systemEnvironment().value("CTROLL_CONFIG");
+        cfg = c.toStdString();
+
+        // We assume the paths in the configuration file to be relative to the file,
+        // so we need to change the current working directory to the folder where the
+        // configuration file exists
+        std::filesystem::current_path(std::filesystem::path(cfg).parent_path());
+    }
+
     Configuration config;
     try {
-        if (QProcessEnvironment::systemEnvironment().contains("CTROLL_CONFIG")) {
-            QString c = QProcessEnvironment::systemEnvironment().value("CTROLL_CONFIG");
-            cfg = c.toStdString();
-
-            // We assume the paths in the configuration file to be relative to the file,
-            // so we need to change the current working directory to the folder where the
-            // configuration file exists
-            std::filesystem::current_path(std::filesystem::path(cfg).parent_path());
-        }
-        
         config = common::loadConfiguration<Configuration>(
             cfg,
             ":/schema/application/ctroll.schema.json"

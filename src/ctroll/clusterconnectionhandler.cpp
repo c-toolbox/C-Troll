@@ -42,15 +42,15 @@
 #include <assert.h>
 
 namespace {
-    std::string_view stateToString(QAbstractSocket::SocketState state) {
+    constexpr std::string_view stateToString(QAbstractSocket::SocketState state) {
         switch (state) {
             case QAbstractSocket::SocketState::UnconnectedState: return "Unconnected";
-            case QAbstractSocket::SocketState::HostLookupState: return "Host Lookup";
-            case QAbstractSocket::SocketState::ConnectingState: return "Connecting";
-            case QAbstractSocket::SocketState::ConnectedState: return "Connected";
-            case QAbstractSocket::SocketState::BoundState: return "Bound";
-            case QAbstractSocket::SocketState::ListeningState: return "Listening";
-            case QAbstractSocket::SocketState::ClosingState: return "Closing";
+            case QAbstractSocket::SocketState::HostLookupState:  return "Host Lookup";
+            case QAbstractSocket::SocketState::ConnectingState:  return "Connecting";
+            case QAbstractSocket::SocketState::ConnectedState:   return "Connected";
+            case QAbstractSocket::SocketState::BoundState:       return "Bound";
+            case QAbstractSocket::SocketState::ListeningState:   return "Listening";
+            case QAbstractSocket::SocketState::ClosingState:     return "Closing";
         }
         throw std::logic_error("Missing case label");
     }
@@ -164,13 +164,12 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
         std::string(common::ProcessOutputMessage::Type) :
         message.dump();
 
-    Debug(
-        std::format("Received [{}:{} ({})]", data::findNode(nodeId)->ipAddress,
-            data::findNode(nodeId)->port,
-            data::findNode(nodeId)->name
-        ),
-        content
+    std::string cat = std::format(
+        "Received [{}:{} ({})]",
+        data::findNode(nodeId)->ipAddress, data::findNode(nodeId)->port,
+        data::findNode(nodeId)->name
     );
+    Debug(std::move(cat), std::move(content));
 #endif // QT_DEBUG
 
     if (common::isValidMessage<common::ProcessStatusMessage>(message)) {

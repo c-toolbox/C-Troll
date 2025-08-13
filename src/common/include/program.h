@@ -47,7 +47,7 @@ struct Program {
     struct Configuration {
         using ID = TypedId<struct ConfigurationTag>;
 
-        auto operator<=>(const Configuration& rhs) const = default;
+        bool operator==(const Configuration& rhs) const noexcept = default;
         
         /// Unique identifier of the configuration
         ID id{ -1 };
@@ -63,7 +63,7 @@ struct Program {
     };
 
     struct Cluster {
-        auto operator<=>(const Cluster& rhs) const = default;
+        bool operator==(const Cluster& rhs) const noexcept = default;
         
         /// The name of the cluster
         std::string name;
@@ -74,7 +74,7 @@ struct Program {
 
     using ID = TypedId<struct ProgramTag>;
 
-    auto operator<=>(const Program& rhs) const = default;
+    bool operator==(const Program& rhs) const noexcept = default;
     
     /// A unique identifier
     ID id = ID(-1);

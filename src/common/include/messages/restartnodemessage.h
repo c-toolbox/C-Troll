@@ -46,7 +46,7 @@ struct RestartNodeMessage : public Message {
     static constexpr std::string_view Type = "RestartNodeMessage";
 
     RestartNodeMessage();
-    auto operator<=>(const RestartNodeMessage& rhs) const = default;
+    bool operator==(const RestartNodeMessage& rhs) const noexcept = default;
 };
 
 void to_json(nlohmann::json& j, const RestartNodeMessage& m);

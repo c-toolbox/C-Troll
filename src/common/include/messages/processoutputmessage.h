@@ -48,7 +48,7 @@ struct ProcessOutputMessage : Message {
     static constexpr std::string_view Type = "ProcessOutputMessage";
 
     ProcessOutputMessage();
-    auto operator<=>(const ProcessOutputMessage& rhs) const = default;
+    bool operator==(const ProcessOutputMessage& rhs) const noexcept = default;
 
     enum class OutputType : int {
         StdOut = 0,

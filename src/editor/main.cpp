@@ -57,29 +57,29 @@ int main(int argc, char** argv) {
 
     common::Log::initialize("editor", false, logDebug, [](const std::string&) {});
 
-    QApplication app(argc, argv);
+    QApplication app = QApplication(argc, argv);
     app.setWindowIcon(QIcon(":/images/editor.png"));
 
     {
-        QFile file(":/qss/editor.qss");
+        QFile file = QFile(":/qss/editor.qss");
         file.open(QFile::ReadOnly | QFile::Text);
         QString styleSheet = QLatin1String(file.readAll());
         app.setStyleSheet(styleSheet);
     }
 
+    std::string cfg = "config.json";
+    if (QProcessEnvironment::systemEnvironment().contains("CTROLL_CONFIG")) {
+        QString c = QProcessEnvironment::systemEnvironment().value("CTROLL_CONFIG");
+        cfg = c.toStdString();
+
+        // We assume the paths in the configuration file to be relative to the file,
+        // so we need to change the current working directory to the folder where the
+        // configuration file exists
+        std::filesystem::current_path(std::filesystem::path(cfg).parent_path());
+    }
+    
     BaseConfiguration config;
     try {
-        std::string cfg = "config.json";
-        if (QProcessEnvironment::systemEnvironment().contains("CTROLL_CONFIG")) {
-            QString c = QProcessEnvironment::systemEnvironment().value("CTROLL_CONFIG");
-            cfg = c.toStdString();
-
-            // We assume the paths in the configuration file to be relative to the file,
-            // so we need to change the current working directory to the folder where the
-            // configuration file exists
-            std::filesystem::current_path(std::filesystem::path(cfg).parent_path());
-        }
-
         config = common::loadConfiguration<BaseConfiguration>(
             cfg,
             ":/schema/application/editor.schema.json"

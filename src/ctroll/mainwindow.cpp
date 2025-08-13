@@ -116,9 +116,7 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     tabWidget->setTabPosition(QTabWidget::West);
     layout->addWidget(tabWidget);
 
-    common::Log::ref()->setLoggingFunction(
-        [this](std::string msg) { log(std::move(msg)); }
-    );
+    common::Log::ref()->setLoggingFunction([this](std::string m) { log(std::move(m)); });
 
     //
     // Load the data
@@ -127,22 +125,14 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
         std::string msg = std::format(
             "Could not find application path '{}'", config.applicationPath
         );
-        QMessageBox::critical(
-            nullptr,
-            "Error loading",
-            QString::fromStdString(msg)
-        );
+        QMessageBox::critical(nullptr, "Error loading", QString::fromStdString(msg));
         exit(EXIT_FAILURE);
     }
 
     Log("Status", std::format("Loading nodes from '{}'", config.nodePath));
     if (!std::filesystem::exists(config.nodePath)) {
         std::string msg = std::format("Could not find node path '{}'", config.nodePath);
-        QMessageBox::critical(
-            nullptr,
-            "Error loading",
-            QString::fromStdString(msg)
-        );
+        QMessageBox::critical(nullptr, "Error loading", QString::fromStdString(msg));
         exit(EXIT_FAILURE);
     }
 
@@ -151,11 +141,7 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
         std::string msg = std::format(
             "Could not find cluster path '{}'", config.clusterPath
         );
-        QMessageBox::critical(
-            nullptr,
-            "Error loading",
-            QString::fromStdString(msg)
-        );
+        QMessageBox::critical(nullptr, "Error loading", QString::fromStdString(msg));
         exit(EXIT_FAILURE);
     }
 
@@ -192,7 +178,7 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     _programWidget = new programs::ProgramsWidget;
 
     bool anyMissingTags = std::any_of(
-        defaultTags.cbegin(), defaultTags.cend(),
+        defaultTags.begin(), defaultTags.end(),
         [](const std::string& tag) { return !data::tags().contains(tag); }
     );
     if (anyMissingTags) {
@@ -595,7 +581,7 @@ void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
 void MainWindow::startCustomProgram(Node::ID nodeId, std::string executable,
                                     std::string workingDir, std::string arguments)
 {
-    static int CustomCommandId = -1;
+    int CustomCommandId = -1;
 
     const Node* n = data::findNode(nodeId);
     assert(n);

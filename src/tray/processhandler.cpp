@@ -275,7 +275,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
         msg.processId = p->processId;
         if (p->wasUserTerminated) {
             // If the user terminated the process it will report back an exitStatus of
-            // 'CrashExit', which does not really convey the write reason to the user
+            // 'CrashExit', which does not really convey the right reason to the user
             msg.status = common::ProcessStatusMessage::Status::NormalExit;
         }
         else {
@@ -423,7 +423,7 @@ std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::process
                                                                         QProcess* process)
 {
     const auto p = std::find_if(
-        _processes.cbegin(), _processes.cend(),
+        _processes.begin(), _processes.end(),
         [process](const ProcessInfo& proc) { return proc.process == process; }
     );
     return p;
@@ -432,7 +432,7 @@ std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::process
 std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::processIt(int id)
 {
     const auto p = std::find_if(
-        _processes.cbegin(), _processes.cend(),
+        _processes.begin(), _processes.end(),
         [id](const ProcessInfo& proc) { return proc.processId == id; }
     );
     return p;

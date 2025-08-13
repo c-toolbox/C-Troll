@@ -35,11 +35,12 @@
 #ifndef __EDITOR__MAINWINDOW_H__
 #define __EDITOR__MAINWINDOW_H__
 
-#include <QDragEnterEvent>
-#include <QDropEvent>
 #include <QMainWindow>
 
 #include <string>
+
+class QDragEnterEvent;
+class QDropEevent;
 
 class MainWindow : public QMainWindow {
 Q_OBJECT

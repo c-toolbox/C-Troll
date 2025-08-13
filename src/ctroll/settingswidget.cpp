@@ -64,12 +64,13 @@ ColorWidget::ColorWidget(Color color)
             QColor initial = QColor(_color.r, _color.g, _color.b);
             QColor selected = QColorDialog::getColor(initial);
             if (selected.isValid()) {
-                Color res;
-                res.r = selected.red();
-                res.g = selected.green();
-                res.b = selected.blue();
-                res.tag = _tagLine->text().toStdString();
-                emit colorChanged(res);
+                Color res = {
+                    .r = selected.red(),
+                    .g = selected.green(),
+                    .b = selected.blue(),
+                    .tag = _tagLine->text().toStdString()
+                };
+                emit colorChanged(std::move(res));
             }
         }
     );
@@ -228,8 +229,8 @@ SettingsWidget::SettingsWidget(Configuration configuration,
     {
         // Log Rotation
         QString toolTip = "Controls whether there will be a log rotation or not. Each "
-            "'Frequency' hours a rotation is performed if it is enabled and if "
-            "'Keep old logs' is enabled, the old log file is backed up. Otherwise, it is "
+            "'Frequency' hours a rotation is performed if it is enabled and if 'Keep old "
+            "logs' is enabled, the old log file is backed up. Otherwise, it is "
             "overwritten.";
 
         _logRotation = new QGroupBox("Log Rotation");
@@ -320,11 +321,12 @@ SettingsWidget::SettingsWidget(Configuration configuration,
                 std::random_device rd;
                 std::uniform_int_distribution<int> dist(0, 255);
 
-                Color c;
-                c.r = dist(rd);
-                c.g = dist(rd);
-                c.b = dist(rd);
-                createColorWidget(c);
+                Color c = {
+                    .r = dist(rd),
+                    .g = dist(rd),
+                    .b = dist(rd)
+                };
+                createColorWidget(std::move(c));
                 layoutColorWidgets();
                 valuesChanged();
             }
@@ -375,8 +377,8 @@ SettingsWidget::SettingsWidget(Configuration configuration,
 void SettingsWidget::removedColor(ColorWidget* sender) {
     _colorLayout->removeWidget(sender);
 
-    const auto it = std::find(_colors.cbegin(), _colors.cend(), sender);
-    assert(it != _colors.cend());
+    const auto it = std::find(_colors.begin(), _colors.end(), sender);
+    assert(it != _colors.end());
     _colors.erase(it);
 
     layoutColorWidgets();
@@ -452,12 +454,12 @@ void SettingsWidget::resetValues() {
 
     if (_configuration.restLoopback.has_value()) {
         _restLoopback.box->setChecked(true);
-        _restLoopback.username->setText(
-            QString::fromStdString(_configuration.restLoopback->username)
-        );
-        _restLoopback.password->setText(
-            QString::fromStdString(_configuration.restLoopback->password)
-        );
+        _restLoopback.username->setText(QString::fromStdString(
+            _configuration.restLoopback->username
+        ));
+        _restLoopback.password->setText(QString::fromStdString(
+            _configuration.restLoopback->password
+        ));
         _restLoopback.port->setValue(_configuration.restLoopback->port);
         _restLoopback.allowCustomPrograms->setChecked(
             _configuration.restLoopback->allowCustomPrograms
@@ -474,12 +476,12 @@ void SettingsWidget::resetValues() {
 
     if (_configuration.restGeneral.has_value()) {
         _restGeneral.box->setChecked(true);
-        _restGeneral.username->setText(
-            QString::fromStdString(_configuration.restGeneral->username)
-        );
-        _restGeneral.password->setText(
-            QString::fromStdString(_configuration.restGeneral->password)
-        );
+        _restGeneral.username->setText(QString::fromStdString(
+            _configuration.restGeneral->username
+        ));
+        _restGeneral.password->setText(QString::fromStdString(
+            _configuration.restGeneral->password
+        ));
         _restGeneral.port->setValue(_configuration.restGeneral->port);
         _restGeneral.allowCustomPrograms->setChecked(
             _configuration.restGeneral->allowCustomPrograms
@@ -543,15 +545,17 @@ void SettingsWidget::saveValues() {
     nlohmann::json j;
     to_json(j, config);
 
-    std::ofstream file(_configurationFilePath);
-    file << j.dump(2);
+    {
+        std::ofstream file = std::ofstream(_configurationFilePath);
+        file << j.dump(2);
+    }
 
     _configuration = config;
     valuesChanged();
 }
 
 void SettingsWidget::layoutColorWidgets() {
-    constexpr const int Columns = 5;
+    constexpr int Columns = 5;
 
     // First remove all widgets from the layout
     for (ColorWidget* w : _colors) {
@@ -559,7 +563,7 @@ void SettingsWidget::layoutColorWidgets() {
     }
 
     // Then readd them
-    for (size_t i = 0; i < _colors.size(); ++i) {
+    for (size_t i = 0; i < _colors.size(); i++) {
         const int rowIdx = static_cast<int>(i / Columns);
         const int columnIdx = static_cast<int>(i % Columns);
         _colorLayout->addWidget(_colors[i], rowIdx, columnIdx);
@@ -587,7 +591,7 @@ void SettingsWidget::createColorWidgets() {
     layoutColorWidgets();
 }
 
-void SettingsWidget::createRestWidgets(RestControls& rest, QString title) {
+void SettingsWidget::createRestWidgets(RestControls& rest, QString title) const {
     rest.box = new QGroupBox(title);
     rest.box->setCheckable(true);
     connect(rest.box, &QGroupBox::clicked, this, &SettingsWidget::valuesChanged);
@@ -618,11 +622,11 @@ void SettingsWidget::createRestWidgets(RestControls& rest, QString title) {
     rest.allowCustomPrograms = new QCheckBox;
     rest.allowCustomPrograms->setToolTip(
         "If this is checked, the REST API allows the execution of custom programs on "
-        "nodes and clusters. Depending on who has access to the REST API, this might "
-        "be a big security hole, so only enable if you are sure about access"
+        "nodes and clusters. Depending on who has access to the REST API, this might be "
+        "a big security hole, so only enable if you are sure about access"
     );
     connect(
-        rest.allowCustomPrograms, &QCheckBox::stateChanged,
+        rest.allowCustomPrograms, &QCheckBox::checkStateChanged,
         this, &SettingsWidget::valuesChanged
     );
     contentLayout->addWidget(rest.allowCustomPrograms, 3, 1);

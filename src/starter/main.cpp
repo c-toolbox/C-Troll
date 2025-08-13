@@ -77,7 +77,7 @@ int main(int argc, const char** argv) {
     }
     cli.Post(
         "/program/start",
-        Params{
+        Params {
             { "program", program },
             { "cluster", cluster },
             { "configuration", configuration}

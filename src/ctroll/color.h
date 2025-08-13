@@ -38,12 +38,13 @@
 #include <nlohmann/json.hpp>
 
 struct Color {
+    bool operator==(const Color& rhs) const noexcept = default;
+
     int r = 255;
     int g = 255;
     int b = 255;
     std::string tag;
 };
-bool operator==(const Color& lhs, const Color& rhs);
 
 void to_json(nlohmann::json& j, const Color& c);
 void from_json(const nlohmann::json& j, Color& c);

@@ -264,8 +264,8 @@ ClusterWidget::ClusterWidget(const Cluster& cluster, bool showShutdownButton)
     _connectionLabel->setStatus(ConnectionWidget::Status::Disconnected);
 
     std::vector<const Node*> nodes = data::findNodesForCluster(cluster);
-    static constexpr const int Columns = 5;
-    for (size_t i = 0; i < nodes.size(); ++i) {
+    constexpr size_t Columns = 5;
+    for (size_t i = 0; i < nodes.size(); i++) {
         const Node* n = nodes[i];
         NodeWidget* node = new NodeWidget(*n, showShutdownButton);
         connect(
@@ -277,8 +277,8 @@ ClusterWidget::ClusterWidget(const Cluster& cluster, bool showShutdownButton)
         connect(node, &NodeWidget::shutdownNode, this, &ClusterWidget::shutdownNode);
         layout->addWidget(
             node,
-            static_cast<int>(i) / Columns,
-            static_cast<int>(i) % Columns
+            static_cast<int>(i / Columns),
+            static_cast<int>(i % Columns)
         );
         _nodeWidgets[n->id] = node;
     }
@@ -316,8 +316,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster, bool showShutdownButton)
         _killTrays, &QPushButton::clicked,
         [this, cluster]() {
             std::string text = std::format(
-                "Are you sure you want to kill all TRAYs on cluster '{}'?",
-                cluster.name
+                "Are you sure you want to kill all TRAYs on cluster '{}'?", cluster.name
             );
 
             QMessageBox box;
@@ -399,7 +398,7 @@ ClusterWidget::ClusterWidget(const Cluster& cluster, bool showShutdownButton)
 
     layout->addWidget(
         boxContainer,
-        static_cast<int>(nodes.size()) / Columns + 2,
+        static_cast<int>(nodes.size() / Columns + 2),
         0,
         1,
         Columns
@@ -418,11 +417,11 @@ void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
     std::vector<const Node*> nodes = data::findNodesForCluster(*cluster);
 
     const bool allConnected = std::all_of(
-        nodes.cbegin(), nodes.cend(),
+        nodes.begin(), nodes.end(),
         std::mem_fn(&Node::isConnected)
     );
     const bool someConnected = !std::none_of(
-        nodes.cbegin(), nodes.cend(),
+        nodes.begin(), nodes.end(),
         std::mem_fn(&Node::isConnected)
     );
 

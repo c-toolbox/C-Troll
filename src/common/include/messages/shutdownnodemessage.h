@@ -46,7 +46,7 @@ struct ShutdownNodeMessage : public Message {
     static constexpr std::string_view Type = "ShutdownNodeMessage";
 
     ShutdownNodeMessage();
-    auto operator<=>(const ShutdownNodeMessage& rhs) const = default;
+    bool operator==(const ShutdownNodeMessage& rhs) const noexcept = default;
 };
 
 void to_json(nlohmann::json& j, const ShutdownNodeMessage& m);

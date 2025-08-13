@@ -48,7 +48,7 @@ struct ExitCommandMessage : public Message {
     static constexpr std::string_view Type = "ExitCommandMessage";
 
     ExitCommandMessage();
-    auto operator<=>(const ExitCommandMessage& rhs) const = default;
+    bool operator==(const ExitCommandMessage& rhs) const noexcept = default;
 
     /// The unique identifier for the process that will be created
     int id = -1;

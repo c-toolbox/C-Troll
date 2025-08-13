@@ -52,8 +52,8 @@ namespace common {
  * This function loads an object \tparam T from the specified \p jsonFile. \p jsonFile has
  * to be a fully qualified path to the JSON file on disk and \p baseDirectory is the part
  * of the path that is removed to make a unique identifier that is stored in the object.
- * For example: <code>loadFromJson('c/d/e/foobar.json', 'c/d')</code> will result in an
- * identifier <code>e/foobar</code>.
+ * For example: `loadFromJson('c/d/e/foobar.json', 'c/d')` will result in an identifier
+ * `e/foobar`.
  *
  * \tparam T The type of the object that should be constructed from the JSON file
  * \param jsonFile The path to the JSON file that contains the data for the object T
@@ -88,10 +88,10 @@ void saveToJson(std::string_view filename, const T& value) {
 }
 
 /**
- * This function reads all <code>.json</code> files in the provided \p directory and
- * creates a list of \tparam T objects from these files. Each file in the directory will
- * lead to a single \tparam T in the result vector. For each of the valid files in
- * \p directory, the loadFromJson function will be called
+ * This function reads all `.json` files in the provided \p directory and creates a list
+ * of \tparam T objects from these files. Each file in the directory will lead to a single
+ * \tparam T in the result vector. For each of the valid files in \p directory, the
+ * loadFromJson function will be called
  *
  * \tparam T The type of the object that is created from the JSON files in \p directory
  * \param directory The path to the directory that contains a list of JSON files, this

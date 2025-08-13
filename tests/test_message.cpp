@@ -38,7 +38,9 @@
 #include <nlohmann/json.hpp>
 
 TEST_CASE("Message Default Ctor", "[Message]") {
-    nlohmann::json j = {
+    using namespace nlohmann;
+    
+    const json j = {
         { common::Message::KeyType, "" },
         { common::Message::KeySecret, "" }
     };
@@ -51,7 +53,9 @@ TEST_CASE("Message Default Ctor", "[Message]") {
 }
 
 TEST_CASE("Message Type", "[Message]") {
-    nlohmann::json j = {
+    using namespace nlohmann;
+    
+    const json j = {
         { common::Message::KeyType, "abc" },
         { common::Message::KeySecret, "" }
     };
@@ -65,7 +69,9 @@ TEST_CASE("Message Type", "[Message]") {
 }
 
 TEST_CASE("Message.secret", "[Message]") {
-    nlohmann::json j = {
+    using namespace nlohmann;
+    
+    const json j = {
         { common::Message::KeyType, "" },
         { common::Message::KeySecret, "abc" }
     };
@@ -80,7 +86,9 @@ TEST_CASE("Message.secret", "[Message]") {
 }
 
 TEST_CASE("Message full", "[Message]") {
-    nlohmann::json j = {
+    using namespace nlohmann;
+    
+    const json j = {
         { common::Message::KeyType, "abc" },
         { common::Message::KeySecret, "def" }
     };

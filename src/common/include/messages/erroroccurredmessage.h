@@ -39,6 +39,7 @@
 
 #include <nlohmann/json.hpp>
 #include <string_view>
+#include <vector>
 
 namespace common {
 
@@ -48,7 +49,7 @@ struct ErrorOccurredMessage : public Message {
     static constexpr std::string_view Type = "ErrorOccurredMessage";
 
     ErrorOccurredMessage();
-    auto operator<=>(const ErrorOccurredMessage& rhs) const = default;
+    bool operator==(const ErrorOccurredMessage& rhs) const noexcept = default;
 
     std::string error;
     std::vector<std::string> lastMessages;

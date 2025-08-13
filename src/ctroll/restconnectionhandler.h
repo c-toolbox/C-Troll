@@ -68,9 +68,9 @@ private:
         const Program& program, const Program::Configuration& configuration);
     void handleStopProgramMessage(QTcpSocket& socket, const Cluster& cluster,
         const Program& program, const Program::Configuration& configuration);
-    void handleStartCustomProgramMessage(QTcpSocket& socket, const Cluster* cluster,
+    void handleStartCustomProgramMessage(QTcpSocket& socket, const Cluster& cluster,
         std::string executable, std::string workingDir, std::string arguments);
-    void handleStartCustomProgramMessage(QTcpSocket& socket, const Node* node,
+    void handleStartCustomProgramMessage(QTcpSocket& socket, const Node& node,
         std::string executable, std::string workingDir, std::string arguments);
     void handleProgramInfoMessage(QTcpSocket& socket);
     void handleClusterInfoMessage(QTcpSocket& socket);

@@ -62,7 +62,7 @@ public:
     };
 
     struct ClusterWidget : QWidget {
-        ClusterWidget(std::string cluster, std::string parameters);
+        ClusterWidget(const std::string& cluster, const std::string& parameters);
 
         QLabel* label = nullptr;
         QLineEdit* arguments = nullptr;

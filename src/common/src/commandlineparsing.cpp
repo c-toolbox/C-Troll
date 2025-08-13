@@ -48,14 +48,14 @@ std::optional<std::pair<int, int>> parseLocationArgument(std::vector<std::string
     if (it == args.end()) {
         return std::nullopt;
     }
-    else {
-        if ((it + 1) == args.end() || (it + 2) == args.end()) {
-            throw std::runtime_error("Provided too few parameters for --pos argument");
-        }
-        const int x = std::stoi(*(it + 1));
-        const int y = std::stoi(*(it + 2));
-        return std::pair(x, y);
+
+    if ((it + 1) == args.end() || (it + 2) == args.end()) {
+        throw std::runtime_error("Provided too few parameters for --pos argument");
     }
+
+    const int x = std::stoi(*(it + 1));
+    const int y = std::stoi(*(it + 2));
+    return std::pair(x, y);
 }
 
 } // namespace common

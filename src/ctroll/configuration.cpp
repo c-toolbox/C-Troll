@@ -78,41 +78,41 @@ void to_json(nlohmann::json& j, const Configuration& c) {
     }
 
     if (c.restLoopback.has_value()) {
-        j[KeyRestLoopback] = nlohmann::json::object();
+        nlohmann::json obj = nlohmann::json::object();
         if (!c.restLoopback->username.empty()) {
-            j[KeyRestLoopback][KeyRestUsername] = c.restLoopback->username;
+            obj[KeyRestUsername] = c.restLoopback->username;
         }
         if (!c.restLoopback->password.empty()) {
-            j[KeyRestLoopback][KeyRestPassword] = c.restLoopback->password;
+            obj[KeyRestPassword] = c.restLoopback->password;
         }
         if (c.restLoopback->port != Configuration::Rest().port) {
-            j[KeyRestLoopback][KeyRestPort] = c.restLoopback->port;
+            obj[KeyRestPort] = c.restLoopback->port;
         }
         if (c.restLoopback->allowCustomPrograms !=
             Configuration::Rest().allowCustomPrograms)
         {
-            j[KeyRestLoopback][KeyRestAllowCustomPrograms] =
-                c.restLoopback->allowCustomPrograms;
+            obj[KeyRestAllowCustomPrograms] = c.restLoopback->allowCustomPrograms;
         }
+        j[KeyRestLoopback] = std::move(obj);
     }
 
     if (c.restGeneral.has_value()) {
-        j[KeyRestGeneral] = nlohmann::json::object();
+        nlohmann::json obj = nlohmann::json::object();
         if (!c.restGeneral->username.empty()) {
-            j[KeyRestGeneral][KeyRestUsername] = c.restGeneral->username;
+            obj[KeyRestUsername] = c.restGeneral->username;
         }
         if (!c.restGeneral->password.empty()) {
-            j[KeyRestGeneral][KeyRestPassword] = c.restGeneral->password;
+            obj[KeyRestPassword] = c.restGeneral->password;
         }
         if (c.restGeneral->port != Configuration::Rest().port) {
-            j[KeyRestGeneral][KeyRestPort] = c.restGeneral->port;
+            obj[KeyRestPort] = c.restGeneral->port;
         }
         if (c.restGeneral->allowCustomPrograms !=
             Configuration::Rest().allowCustomPrograms)
         {
-            j[KeyRestGeneral][KeyRestAllowCustomPrograms] =
-                c.restGeneral->allowCustomPrograms;
+            obj[KeyRestAllowCustomPrograms] = c.restGeneral->allowCustomPrograms;
         }
+        j[KeyRestGeneral] = obj;
     }
 }
 

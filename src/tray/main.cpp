@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/images/tray_cog.png"));
 
-    QSharedMemory mem("/Tray/Single-Instance-Marker");
+    QSharedMemory mem = QSharedMemory("/Tray/Single-Instance-Marker");
     bool ret = mem.create(sizeof(SharedMemoryMarker));
     if (!ret) {
         // Something went wrong with creating the memory
@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
     qInstallMessageHandler(QtLogFunction);
 
     {
-        QFile file(":/qss/tray.qss");
+        QFile file = QFile(":/qss/tray.qss");
         file.open(QFile::ReadOnly | QFile::Text);
         QString styleSheet = QLatin1String(file.readAll());
         app.setStyleSheet(styleSheet);
@@ -114,18 +114,18 @@ int main(int argc, char** argv) {
 
     
     std::string cfg = "config-tray.json";
+    if (QProcessEnvironment::systemEnvironment().contains("CTRAY_CONFIG")) {
+        QString c = QProcessEnvironment::systemEnvironment().value("CTRAY_CONFIG");
+        cfg = c.toStdString();
+
+        // We assume the paths in the configuration file to be relative to the file,
+        // so we need to change the current working directory to the folder where the
+        // configuration file exists
+        std::filesystem::current_path(std::filesystem::path(cfg).parent_path());
+    }
+
     Configuration config;
     try {
-        if (QProcessEnvironment::systemEnvironment().contains("CTRAY_CONFIG")) {
-            QString c = QProcessEnvironment::systemEnvironment().value("CTRAY_CONFIG");
-            cfg = c.toStdString();
-        
-            // We assume the paths in the configuration file to be relative to the file,
-            // so we need to change the current working directory to the folder where the
-            // configuration file exists
-            std::filesystem::current_path(std::filesystem::path(cfg).parent_path());
-        }
-
         config = common::loadConfiguration<Configuration>(
             cfg,
             ":/schema/application/tray.schema.json"
@@ -180,7 +180,7 @@ int main(int argc, char** argv) {
         timer->start(std::chrono::duration_cast<std::chrono::milliseconds>(freq));
     }
 
-    SocketHandler socketHandler(config.port, config.secret);
+    SocketHandler socketHandler = SocketHandler(config.port, config.secret);
 
     ProcessHandler processHandler;
 

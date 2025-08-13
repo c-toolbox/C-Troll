@@ -38,9 +38,11 @@
 #include <QWidget>
 
 #include "processhandler.h"
-#include <QLabel>
-#include <QTextEdit>
 #include <map>
+#include <string>
+
+class QLabel;
+class QTextEdit;
 
 class CentralWidget : public QWidget {
 Q_OBJECT

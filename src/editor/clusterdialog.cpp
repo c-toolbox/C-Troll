@@ -36,6 +36,7 @@
 
 #include "addbutton.h"
 #include "cluster.h"
+#include "dynamiclist.h"
 #include "jsonload.h"
 #include "node.h"
 #include "removebutton.h"
@@ -54,6 +55,10 @@
 
 bool operator==(const Node& node, const std::string& name) {
     return node.name == name;
+}
+
+bool operator==(QLabel* name, const Node& node) {
+    return node.name == name->text().toStdString();
 }
 
 ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
@@ -133,8 +138,8 @@ ClusterDialog::ClusterDialog(QWidget* parent, std::string clusterPath,
             QLabel* nodeLabel = new QLabel(QString::fromStdString(node));
             _nodes->addItem(nodeLabel);
 
-            const auto it = std::find(nodes.first.cbegin(), nodes.first.cend(), node);
-            if (it == nodes.first.cend()) {
+            const auto it = std::find(nodes.first.begin(), nodes.first.end(), node);
+            if (it == nodes.first.end()) {
                 nodeLabel->setObjectName("invalid");
                 nodeLabel->setToolTip("Could not find node in nodes folder");
             }
@@ -161,10 +166,6 @@ void ClusterDialog::updateSaveButton() {
     _saveButton->setEnabled(!_name->text().isEmpty() && hasItems);
 }
 
-bool operator==(QLabel* name, const Node& node) {
-    return node.name == name->text().toStdString();
-}
-
 void ClusterDialog::addNewNode() {
     std::pair<std::vector<Node>, bool> nodes =
         common::loadJsonFromDirectory<Node>(_nodePath);
@@ -175,8 +176,8 @@ void ClusterDialog::addNewNode() {
         std::remove_if(
             nodes.first.begin(), nodes.first.end(),
             [&currentNodes](const Node& n) {
-                const auto it = std::find(currentNodes.cbegin(), currentNodes.cend(), n);
-                return it != currentNodes.cend();
+                const auto it = std::find(currentNodes.begin(), currentNodes.end(), n);
+                return it != currentNodes.end();
             }
         ),
         nodes.first.end()

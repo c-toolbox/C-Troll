@@ -86,19 +86,18 @@ namespace {
 
         std::string_view code = [](Response resp) {
             switch (resp) {
-                case Response::Ok: return "200 OK";
-                case Response::BadRequest: return "400 Bad Request";
+                case Response::Ok:           return "200 OK";
+                case Response::BadRequest:   return "400 Bad Request";
                 case Response::Unauthorized: return "401 Unauthorized";
-                case Response::Forbidden: return "403 Forbidden";
-                case Response::NotFound: return "404 Not Found";
+                case Response::Forbidden:    return "403 Forbidden";
+                case Response::NotFound:     return "404 Not Found";
             }
             throw std::logic_error("Unhandled case label");
         }(response);
 
-        const std::string status = std::format("HTTP/1.1 {}\n", code);
         std::string message = std::format(
-            "{}Content-Type: application/json\nContent-Length: {}\n\n{}",
-            status, content.size(), content
+            "HTTP/1.1 {}\nContent-Type: application/json\nContent-Length: {}\n\n{}",
+            code, content.size(), content
         );
         socket.write(message.data(), static_cast<qint64>(message.size()));
     }
@@ -110,62 +109,42 @@ namespace {
 
         std::string_view code = [](Response resp) {
             switch (resp) {
-                case Response::Ok: return "200 OK";
-                case Response::BadRequest: return "400 Bad Request";
+                case Response::Ok:           return "200 OK";
+                case Response::BadRequest:   return "400 Bad Request";
                 case Response::Unauthorized: return "401 Unauthorized";
-                case Response::Forbidden: return "403 Forbidden";
-                case Response::NotFound: return "404 Not Found";
+                case Response::Forbidden:    return "403 Forbidden";
+                case Response::NotFound:     return "404 Not Found";
             }
             throw std::logic_error("Unhandled case label");
         }(response);
 
-        const std::string status = std::format("HTTP/1.1 {}\n", code);
         std::string content = payload.dump();
         std::string message = std::format(
-            "{}Content-Type: application/json\nContent-Length: {}\n\n{}",
-            status, content.size(), content
+            "HTTP/1.1 {}\nContent-Type: application/json\nContent-Length: {}\n\n{}",
+            code, content.size(), content
         );
         socket.write(message.data(), static_cast<qint64>(message.size()));
     }
 
-
-    HttpMethod parseMethod(std::string_view value) {
-        if (value == "POST") {
-            return HttpMethod::Post;
-        }
-        else if (value == "GET") {
-            return HttpMethod::Get;
-        }
-        else {
-            return HttpMethod::Unknown;
-        }
+    constexpr HttpMethod parseMethod(std::string_view value) {
+        if (value == "POST")     { return HttpMethod::Post;    }
+        else if (value == "GET") { return HttpMethod::Get;     }
+        else                     { return HttpMethod::Unknown; }
     }
 
     Endpoint parseEndpoint(std::string_view value) {
-        if ((value == "/program/start") || (value == "/program/start/")) {
-            return Endpoint::StartProgram;
+        if (!value.empty() && value.back() == '/') {
+            value.remove_suffix(1);
         }
-        else if ((value == "/program/stop") || (value == "/program/stop/")) {
-            return Endpoint::StopProgram;
-        }
-        else if ((value == "/program/custom") || (value == "/program/custom/")) {
-            return Endpoint::StartCustomProgram;
-        }
-        else if ((value == "/program") || (value == "/program/")) {
-            return Endpoint::InfoProgram;
-        }
-        else if ((value == "/cluster") || (value == "/cluster/")) {
-            return Endpoint::InfoCluster;
-        }
-        else if ((value == "/node") || (value == "/node/")) {
-            return Endpoint::InfoNode;
-        }
-        else if ((value == "/api") || (value == "/api/")) {
-            return Endpoint::InfoApi;
-        }
-        else {
-            return Endpoint::Unknown;
-        }
+
+        if (value == "/program/start")       { return Endpoint::StartProgram;       }
+        else if (value == "/program/stop")   { return Endpoint::StopProgram;        }
+        else if (value == "/program/custom") { return Endpoint::StartCustomProgram; }
+        else if (value == "/program")        { return Endpoint::InfoProgram;        }
+        else if (value == "/cluster")        { return Endpoint::InfoCluster;        }
+        else if (value == "/node")           { return Endpoint::InfoNode;           }
+        else if (value == "/api")            { return Endpoint::InfoApi;            }
+        else                                 { return Endpoint::Unknown;            }
     }
 
     std::optional<std::string> endpoint(QStringList tokens) {
@@ -178,7 +157,7 @@ namespace {
     }
 
     std::optional<std::string> authorization(QStringList tokens) {
-        for (int i = 0; i < tokens.size() - 2; ++i) {
+        for (int i = 0; i < tokens.size() - 2; i++) {
             std::string value = tokens[i].toStdString();
             if ((value == "Authorization:") && (tokens[i + 1].toStdString() == "Basic")) {
                 return tokens[i + 2].toStdString();
@@ -190,7 +169,7 @@ namespace {
     std::map<std::string, std::string> parameters(QStringList tokens) {
         std::map<std::string, std::string> res;
         QStringList parameters = tokens.back().split('&');
-        for (int i = 0; i < parameters.size(); ++i) {
+        for (int i = 0; i < parameters.size(); i++) {
             QStringList kv = parameters[i].split('=');
             if (kv.size() == 2) {
                 std::string key = kv[0].toStdString();
@@ -202,9 +181,9 @@ namespace {
     }
 
     struct ProgramInfo {
-        const Cluster* cluster;
-        const Program* program;
-        const Program::Configuration* configuration;
+        const Cluster* cluster = nullptr;
+        const Program* program = nullptr;
+        const Program::Configuration* configuration = nullptr;
 
         operator bool() const {
             return cluster && program && configuration;
@@ -212,20 +191,20 @@ namespace {
     };
 
     ProgramInfo extractProgramInfo(const std::map<std::string, std::string>& params) {
+        constexpr const char* KeyCluster = "cluster";
         constexpr const char* KeyProgram = "program";
         constexpr const char* KeyConfiguration = "configuration";
-        constexpr const char* KeyCluster = "cluster";
 
-        const bool hasCluster = params.find(KeyCluster) != params.end();
-        const bool hasProgram = params.find(KeyProgram) != params.end();
-        const bool hasConfiguration = params.find(KeyConfiguration) != params.end();
+        const bool hasCluster = params.contains(KeyCluster);
+        const bool hasProgram = params.contains(KeyProgram);
+        const bool hasConfiguration = params.contains(KeyConfiguration);
         if (!hasCluster || !hasProgram || !hasConfiguration) {
             return { nullptr, nullptr, nullptr };
         }
 
-        const std::string cluster = params.at(KeyCluster);
-        const std::string program = params.at(KeyProgram);
-        const std::string configuration = params.at(KeyConfiguration);
+        const std::string& cluster = params.at(KeyCluster);
+        const std::string& program = params.at(KeyProgram);
+        const std::string& configuration = params.at(KeyConfiguration);
 
         const Cluster* c = data::findCluster(cluster);
         const Program* p = data::findProgram(program);
@@ -268,8 +247,6 @@ void RestConnectionHandler::newConnectionEstablished() {
         Debug(std::format(
             "New connection from {}", socket->peerAddress().toString().toStdString()
         ));
-
-        //connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
 
         connect(
             socket, &QTcpSocket::readyRead,
@@ -322,13 +299,13 @@ void RestConnectionHandler::handleNewConnection() {
         return;
     }
 
-    Endpoint foundEndPoint = Endpoint::Unknown;
+    Endpoint endPoint = Endpoint::Unknown;
     std::optional<std::string> endpointValue = endpoint(tokens);
     std::map<std::string, std::string> params;
     if (method == HttpMethod::Get && endpointValue.has_value()) {
         QString endPointStr = QString::fromStdString(*endpointValue);
         QStringList endPointList = endPointStr.split('?');
-        foundEndPoint = parseEndpoint(endPointList[0].toStdString());
+        endPoint = parseEndpoint(endPointList[0].toStdString());
         if (endPointList.size() > 1) {
             endPointList.pop_front();
             params = parameters(endPointList);
@@ -337,18 +314,18 @@ void RestConnectionHandler::handleNewConnection() {
     else if (method == HttpMethod::Post) {
         params = parameters(tokens);
         if (endpointValue.has_value()) {
-            foundEndPoint = parseEndpoint(*endpointValue);
+            endPoint = parseEndpoint(*endpointValue);
         }
     }
 
-    if (foundEndPoint == Endpoint::Unknown) {
+    if (endPoint == Endpoint::Unknown) {
         sendResponse(*socket, Response::NotFound, "No endpoint found");
         return;
     }
 
     //
     // Handle message
-    if (method == HttpMethod::Post && foundEndPoint == Endpoint::StartProgram) {
+    if (method == HttpMethod::Post && endPoint == Endpoint::StartProgram) {
         ProgramInfo pi = extractProgramInfo(params);
         if (!pi) {
             sendResponse(*socket, Response::BadRequest, "No program found");
@@ -357,7 +334,7 @@ void RestConnectionHandler::handleNewConnection() {
 
         handleStartProgramMessage(*socket, *pi.cluster, *pi.program, *pi.configuration);
     }
-    else if (method == HttpMethod::Post && foundEndPoint == Endpoint::StopProgram) {
+    else if (method == HttpMethod::Post && endPoint == Endpoint::StopProgram) {
         ProgramInfo pi = extractProgramInfo(params);
         if (!pi) {
             sendResponse(*socket, Response::BadRequest, "No program found");
@@ -366,8 +343,7 @@ void RestConnectionHandler::handleNewConnection() {
 
         handleStopProgramMessage(*socket, *pi.cluster, *pi.program, *pi.configuration);
     }
-    else if (method == HttpMethod::Post && foundEndPoint == Endpoint::StartCustomProgram)
-    {
+    else if (method == HttpMethod::Post && endPoint == Endpoint::StartCustomProgram) {
         if (!_hasCustomProgramAPI) {
             sendResponse(*socket, Response::Forbidden, "No program found");
             return;
@@ -403,7 +379,7 @@ void RestConnectionHandler::handleNewConnection() {
                 return;
             }
 
-            handleStartCustomProgramMessage(*socket, c, exec, workingDir, arguments);
+            handleStartCustomProgramMessage(*socket, *c, exec, workingDir, arguments);
         }
         else if (hasNode) {
             const Node* n = data::findNode(params[KeyNode]);
@@ -412,22 +388,22 @@ void RestConnectionHandler::handleNewConnection() {
                 return;
             }
 
-            handleStartCustomProgramMessage(*socket, n, exec, workingDir, arguments);
+            handleStartCustomProgramMessage(*socket, *n, exec, workingDir, arguments);
         }
         else {
             throw std::logic_error("Shouldn't get here");
         }
     }
-    else if (method == HttpMethod::Get && foundEndPoint == Endpoint::InfoProgram) {
+    else if (method == HttpMethod::Get && endPoint == Endpoint::InfoProgram) {
         handleProgramInfoMessage(*socket);
     }
-    else if (method == HttpMethod::Get && foundEndPoint == Endpoint::InfoCluster) {
+    else if (method == HttpMethod::Get && endPoint == Endpoint::InfoCluster) {
         handleClusterInfoMessage(*socket);
     }
-    else if (method == HttpMethod::Get && foundEndPoint == Endpoint::InfoNode) {
+    else if (method == HttpMethod::Get && endPoint == Endpoint::InfoNode) {
         handleNodeInfoMessage(*socket);
     }
-    else if (method == HttpMethod::Get && foundEndPoint == Endpoint::InfoApi) {
+    else if (method == HttpMethod::Get && endPoint == Endpoint::InfoApi) {
         handleApiInfoMessage(*socket);
     }
     else {
@@ -445,6 +421,7 @@ void RestConnectionHandler::handleStartProgramMessage(QTcpSocket& socket,
         program.name, configuration.name, cluster.name
     );
     Log(message);
+
     emit startProgram(cluster.id, program.id, configuration.id);
     sendResponse(socket, Response::Ok, message);
 }
@@ -459,25 +436,24 @@ void RestConnectionHandler::handleStopProgramMessage(QTcpSocket& socket,
         program.name, configuration.name, cluster.name
     );
     Log(message);
+
     emit stopProgram(cluster.id, program.id, configuration.id);
     sendResponse(socket, Response::Ok, message);
 }
 
 void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
-                                                            const Cluster* cluster,
+                                                            const Cluster& cluster,
                                                             std::string executable,
                                                             std::string workingDir,
                                                             std::string arguments)
 {
-    assert(cluster);
-
     std::string message = std::format(
         "Received command to start {} {} in {} on cluster {}",
-        executable, arguments, workingDir, cluster->name
+        executable, arguments, workingDir, cluster.name
     );
     Log(message);
 
-    for (const std::string& node : cluster->nodes) {
+    for (const std::string& node : cluster.nodes) {
         const Node* n = data::findNode(node);
         assert(n);
 
@@ -488,21 +464,18 @@ void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
 }
 
 void RestConnectionHandler::handleStartCustomProgramMessage(QTcpSocket& socket,
-                                                            const Node* node,
+                                                            const Node& node,
                                                             std::string executable,
                                                             std::string workingDir,
                                                             std::string arguments)
 {
-    assert(node);
-
     std::string message = std::format(
         "Received command to start {} {} in {} on node {}",
-        executable, arguments, workingDir, node->name
+        executable, arguments, workingDir, node.name
     );
     Log(message);
 
-    emit startCustomProgram(node->id, executable, workingDir, arguments);
-
+    emit startCustomProgram(node.id, executable, workingDir, arguments);
     sendResponse(socket, Response::Ok, message);
 }
 
@@ -584,8 +557,8 @@ void RestConnectionHandler::handleApiInfoMessage(QTcpSocket& socket) {
         { "description", "Starts already registered programs" },
         { "parameters", {
             { "program", "Name of the program to start" },
-            { "configuration", "Which configuration of the program should be started " },
-            { "cluster", "On which cluster should the program be started"}
+            { "configuration", "Which configuration of the program should be started" },
+            { "cluster", "On which cluster should the program be started" }
         }}
     });
 
@@ -594,8 +567,8 @@ void RestConnectionHandler::handleApiInfoMessage(QTcpSocket& socket) {
         { "description", "Stops already registered programs" },
         { "parameters", {
             { "program", "Name of the program to start" },
-            { "configuration", "Which configuration of the program should be started " },
-            { "cluster", "On which cluster should the program be started"}
+            { "configuration", "Which configuration of the program should be started" },
+            { "cluster", "On which cluster should the program be started" }
         }}
     });
 
@@ -617,10 +590,10 @@ void RestConnectionHandler::handleApiInfoMessage(QTcpSocket& socket) {
                     "cannot be used at the same time"
                 },
                 { "executable", "The name of the executable to start" },
-                { "workingDir", "The working directory where to start the executable "},
+                { "workingDir", "The working directory where to start the executable" },
                 {
                     "arguments",
-                    "Additional commandline arguments to pass to the program "
+                    "Additional commandline arguments to pass to the program"
                 }
             }}
         });

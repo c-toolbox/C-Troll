@@ -40,7 +40,7 @@
 class AddButton : public QPushButton {
 Q_OBJECT
 public:
-    AddButton(QWidget* parent = 0);
+    explicit AddButton(QWidget* parent = 0);
 };
 
 #endif // __EDITOR__ADDBUTTON_H__

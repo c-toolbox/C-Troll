@@ -77,7 +77,7 @@ QTcpSocket::SocketState JsonSocket::state() const {
 void JsonSocket::write(const nlohmann::json& jsonDocument) {
     std::string jsonText = jsonDocument.dump();
     std::string length = std::to_string(jsonText.size());
-    std::string msg = length + '#' + jsonText;
+    std::string msg = std::format("{}#{}", std::move(length), std::move(jsonText));
 
     bool success;
     if (_crypto.has_value()) {
@@ -127,17 +127,20 @@ void JsonSocket::readToBuffer() {
 void JsonSocket::parseBuffer() {
     // If it is the first package to arrive, we extract the expected length of the message
     if (_payloadSize == -1) {
-        const auto it = std::find(_buffer.cbegin(), _buffer.cend(), '#');
+        const auto it = std::find(_buffer.begin(), _buffer.end(), '#');
         if (it != _buffer.end()) {
-            std::string sizeString(_buffer.cbegin(), it);
+            std::string sizeString = std::string(_buffer.begin(), it);
             _payloadSize = std::stoi(sizeString);
             _buffer.erase(_buffer.begin(), it + 1);
         }
     }
 
     if (_payloadSize > 0 && (_payloadSize <= static_cast<int>(_buffer.size()))) {
-        std::vector<char> data(_buffer.begin(), _buffer.begin() + _payloadSize);
-        std::string json(data.data(), static_cast<size_t>(_payloadSize));
+        std::vector<char> data = std::vector<char>(
+            _buffer.begin(),
+            _buffer.begin() + _payloadSize
+        );
+        std::string json = std::string(data.data(), static_cast<size_t>(_payloadSize));
         _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
         _payloadSize = -1;
 

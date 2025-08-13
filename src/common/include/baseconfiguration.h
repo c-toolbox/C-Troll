@@ -49,7 +49,7 @@ struct BaseConfiguration {
     std::string nodePath = "nodes";
 
 
-    auto operator<=>(const BaseConfiguration& rhs) const = default;
+    bool operator==(const BaseConfiguration& rhs) const noexcept = default;
 };
 
 void to_json(nlohmann::json& j, const BaseConfiguration& c);

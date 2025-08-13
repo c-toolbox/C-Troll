@@ -73,7 +73,7 @@ namespace {
                 return newFile;
             }
 
-            ++i;
+            i++;
         }
     }
 } // namespace
@@ -102,10 +102,6 @@ Log::Log(std::string componentName, bool createLogFile, bool shouldLogDebug)
         _filePath = std::format("{}{}{}", LogPrefix, componentName, LogPostfix);
         _file = std::ofstream(_filePath);
     }
-}
-
-Log::~Log() {
-    _file.close();
 }
 
 void Log::logMessage(std::string category, std::string message) {

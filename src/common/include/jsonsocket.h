@@ -37,12 +37,12 @@
 
 #include <QObject>
 
-#include <QFloat16>
 #include <QTcpSocket>
 #include <nlohmann/json.hpp>
 #include <simplecrypt/simplecrypt.h>
 #include <memory>
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace common {

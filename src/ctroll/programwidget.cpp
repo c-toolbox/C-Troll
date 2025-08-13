@@ -71,7 +71,7 @@ void ProgramButton::updateStatus() {
     std::vector<const Node*> nodes = data::findNodesForCluster(*_cluster);
 
     const bool allConnected = std::all_of(
-        nodes.cbegin(), nodes.cend(),
+        nodes.begin(), nodes.end(),
         std::mem_fn(&Node::isConnected)
     );
     setEnabled(allConnected);
@@ -85,7 +85,7 @@ void ProgramButton::processUpdated(Process::ID processId) {
     const Process* process = data::findProcess(processId);
 
     auto it = std::find_if(
-        _processes.cbegin(), _processes.cend(),
+        _processes.begin(), _processes.end(),
         [processId](const std::pair<const Node::ID, ProcessInfo>& p) {
             return p.second.processId.v == processId.v;
         }
@@ -151,19 +151,16 @@ void ProgramButton::updateButton() {
     if (hasNoProcessRunning()) {
         setMenu(nullptr);
         setObjectName("start"); // used in the QSS sheet to style this button
-        // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
         setText(QString::fromStdString(_configuration->name));
     }
     else if (hasAllProcessesRunning()) {
         setMenu(nullptr);
         setObjectName("stop"); // used in the QSS sheet to style this button
-        // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
         setText(QString::fromStdString("Stop:" + _cluster->name));
     }
     else {
         setMenu(_actionMenu);
         setObjectName("mixed"); // used in the QSS sheet to style this button
-        // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
         setText(QString::fromStdString("Mixed:" + _cluster->name));
 
         updateMenu();
@@ -193,14 +190,14 @@ void ProgramButton::updateMenu() {
         QString actName = action->data().toString();
         const std::string nodeName = actName.toLocal8Bit().constData();
         const auto it = std::find_if(
-            _processes.cbegin(), _processes.cend(),
+            _processes.begin(), _processes.end(),
             [nodeName](const std::pair<const Node::ID, ProcessInfo>& p) {
-            const Node* node = data::findNode(p.first);
+                const Node* node = data::findNode(p.first);
                 return node->name == nodeName;
             }
         );
         // If we are getting this far, the node for this action has to exist in the map
-        assert(it != _processes.cend());
+        assert(it != _processes.end());
 
         // We only going to update the actions if some of the nodes are not running but
         // some others are. So we basically have to provide the ability to start the nodes
@@ -212,7 +209,6 @@ void ProgramButton::updateMenu() {
                 [this, id = it->second.processId]() { emit stopProcess(id); }
             );
 
-            // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
             action->setText("Stop: " + actName);
         }
         else {
@@ -222,7 +218,6 @@ void ProgramButton::updateMenu() {
                 [this, id = it->second.processId]() { emit restartProcess(id); }
             );
 
-            // @TODO (abock, 2020-02-25) Replace when putting the QSS in place
             action->setText("Restart: " + actName);
         }
 
@@ -233,13 +228,13 @@ void ProgramButton::updateMenu() {
 bool ProgramButton::isProcessRunning(Node::ID nodeId) const {
     using Status = common::ProcessStatusMessage::Status;
     const auto it = _processes.find(nodeId);
-    return (it != _processes.cend()) &&
+    return (it != _processes.end()) &&
         data::findProcess(it->second.processId)->status == Status::Running;
 }
 
 bool ProgramButton::hasNoProcessRunning() const {
     return std::none_of(
-        _cluster->nodes.cbegin(), _cluster->nodes.cend(),
+        _cluster->nodes.begin(), _cluster->nodes.end(),
         [this](const std::string& n) {
             const Node* node = data::findNode(n);
             return isProcessRunning(node->id);
@@ -249,7 +244,7 @@ bool ProgramButton::hasNoProcessRunning() const {
 
 bool ProgramButton::hasAllProcessesRunning() const {
     return std::all_of(
-        _cluster->nodes.cbegin(), _cluster->nodes.cend(),
+        _cluster->nodes.begin(), _cluster->nodes.end(),
         [this](const std::string& n) {
             const Node* node = data::findNode(n);
             return isProcessRunning(node->id);
@@ -303,7 +298,7 @@ ClusterWidget::ClusterWidget(const Cluster* cluster,
 
 void ClusterWidget::updateStatus() {
     std::for_each(
-        _startButtons.cbegin(), _startButtons.cend(),
+        _startButtons.begin(), _startButtons.end(),
         [](const std::pair<const Program::Configuration::ID, ProgramButton*>& p) {
             p.second->updateStatus();
         }
@@ -447,22 +442,20 @@ TagsWidget::TagsWidget(QString title)
 void TagsWidget::addTag(std::string tag) {
     QPushButton* button = new QPushButton(QString::fromStdString(tag));
 
-    Color color = data::colorForTag(tag);
-    constexpr const int Delta = 40;
-    Color darkColor = Color{
-        std::max(0, color.r - Delta),
-        std::max(0, color.g - Delta),
-        std::max(0, color.b - Delta),
-        ""
+    const Color color = data::colorForTag(tag);
+
+    constexpr int Delta = 40;
+    const Color darkColor = {
+        .r = std::max(0, color.r - Delta),
+        .g = std::max(0, color.g - Delta),
+        .b = std::max(0, color.b - Delta)
     };
 
-    std::string colorText = std::format(
-        R"(
-                QPushButton {{ background-color: #{0:02x}{1:02x}{2:02x}; }}
-                QPushButton:hover {{ background-color: #{3:02x}{4:02x}{5:02x}; }}
-            )",
-        color.r, color.g, color.b,
-        darkColor.r, darkColor.g, darkColor.b
+    std::string colorText = std::format(R"(
+            QPushButton {{ background-color: #{0:02x}{1:02x}{2:02x}; }}
+            QPushButton:hover {{ background-color: #{3:02x}{4:02x}{5:02x}; }}
+        )",
+        color.r, color.g, color.b, darkColor.r, darkColor.g, darkColor.b
     );
     button->setStyleSheet(QString::fromStdString(colorText));
     button->setCheckable(true);
@@ -505,9 +498,9 @@ std::vector<std::string> TagsWidget::tags() const {
 CustomProgramWidget::CustomProgramWidget(QWidget* parent)
     : QWidget(parent)
 {
-    static constexpr const int TagSeparator = -1;
-    static constexpr const int TagCluster = 0;
-    static constexpr const int TagNode = 1;
+    constexpr int TagSeparator = -1;
+    constexpr int TagCluster = 0;
+    constexpr int TagNode = 1;
 
     QBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -706,10 +699,11 @@ QWidget* ProgramsWidget::createPrograms() {
         connect(w, &ProgramWidget::stopProcess, this, &ProgramsWidget::stopProcess);
 
         _widgets[p->id] = w;
-        VisibilityInfo info;
-        info.bySearch = true;
-        info.byTag = true;
-        _visibilities[p->id] = info;
+        VisibilityInfo info = {
+            .byTag = true,
+            .bySearch = true
+        };
+        _visibilities[p->id] = std::move(info);
         contentLayout->addWidget(w);
     }
 
@@ -723,7 +717,7 @@ void ProgramsWidget::processUpdated(Process::ID processId) {
     assert(process);
 
     const auto it = _widgets.find(process->programId);
-    if (it != _widgets.cend()) {
+    if (it != _widgets.end()) {
         it->second->processUpdated(processId);
     }
 }
@@ -732,7 +726,7 @@ void ProgramsWidget::selectTags(std::vector<std::string> tags) {
     // Check that all that want to be picked also exist
     assert(
         std::all_of(
-            tags.cbegin(), tags.cend(),
+            tags.begin(), tags.end(),
             [](std::string tag) { return data::tags().contains(tag); }
         )
     );
@@ -782,7 +776,7 @@ void ProgramsWidget::searchUpdated(std::string text) {
                 auto toLower = [](const std::string& str) {
                     std::string res;
                     std::transform(
-                        str.cbegin(), str.cend(),
+                        str.begin(), str.end(),
                         std::back_inserter(res),
                         [](char c) { return static_cast<char>(::tolower(c)); }
                     );

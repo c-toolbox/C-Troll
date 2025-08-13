@@ -35,8 +35,8 @@
 #ifndef __CTROLL__PROGRAMWIDGET_H__
 #define __CTROLL__PROGRAMWIDGET_H__
 
-#include <QGroupBox>
 #include <QPushButton>
+#include <QGroupBox>
 #include <QWidget>
 
 #include "process.h"

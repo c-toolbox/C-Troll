@@ -46,7 +46,7 @@ struct KillTrayMessage : public Message {
     static constexpr std::string_view Type = "KillTrayMessage";
 
     KillTrayMessage();
-    auto operator<=>(const KillTrayMessage& rhs) const = default;
+    bool operator==(const KillTrayMessage& rhs) const noexcept = default;
 };
 
 void to_json(nlohmann::json& j, const KillTrayMessage& m);

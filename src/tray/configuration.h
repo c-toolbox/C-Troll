@@ -37,7 +37,6 @@
 
 #include "logconfiguration.h"
 #include <nlohmann/json.hpp>
-#include <chrono>
 #include <optional>
 #include <string>
 

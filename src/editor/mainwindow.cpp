@@ -38,6 +38,8 @@
 #include "nodedialog.h"
 #include "programdialog.h"
 #include "version.h"
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QFileDialog>
 #include <QFileSystemModel>
 #include <QGridLayout>
@@ -165,9 +167,9 @@ MainWindow::MainWindow(std::string applicationPath, std::string clusterPath,
     }
 
     {
-        QLabel* version = new QLabel(QString::fromStdString(
-            std::format("Version: {}", app::Version))
-        );
+        QLabel* version = new QLabel(QString::fromStdString(std::format(
+            "Version: {}", app::Version
+        )));
         version->setObjectName("version");
         layout->addWidget(version, 3, 0, 1, 3, Qt::AlignLeft);
     }
@@ -194,7 +196,6 @@ void MainWindow::dropEvent(QDropEvent* event) {
         exe = exe.substr("file:///"sv.size());
     }
     dialog.setExecutableInformation(exe);
-
     dialog.exec();
 }
 

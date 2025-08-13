@@ -35,27 +35,27 @@
 #include "messages/processstatusmessage.h"
 
 namespace {
-    constexpr const char* KeyProcessId = "processId";
-    constexpr const char* KeyStatus = "status";
+    constexpr std::string_view KeyProcessId = "processId";
+    constexpr std::string_view KeyStatus = "status";
 
-    std::string_view fromStatus(common::ProcessStatusMessage::Status status) {
+    constexpr std::string_view fromStatus(common::ProcessStatusMessage::Status status) {
         using PSM = common::ProcessStatusMessage;
         switch (status) {
-            case PSM::Status::Unknown: return "Unknown";
-            case PSM::Status::Starting: return "Starting";
-            case PSM::Status::Running: return "Running";
-            case PSM::Status::NormalExit: return "NormalExit";
-            case PSM::Status::CrashExit: return "CrashExit";
+            case PSM::Status::Unknown:       return "Unknown";
+            case PSM::Status::Starting:      return "Starting";
+            case PSM::Status::Running:       return "Running";
+            case PSM::Status::NormalExit:    return "NormalExit";
+            case PSM::Status::CrashExit:     return "CrashExit";
             case PSM::Status::FailedToStart: return "FailedToStart";
-            case PSM::Status::TimedOut: return "TimedOut";
-            case PSM::Status::WriteError: return "WriteError";
-            case PSM::Status::ReadError: return "ReadError";
-            case PSM::Status::UnknownError: return "UnknownError";
+            case PSM::Status::TimedOut:      return "TimedOut";
+            case PSM::Status::WriteError:    return "WriteError";
+            case PSM::Status::ReadError:     return "ReadError";
+            case PSM::Status::UnknownError:  return "UnknownError";
         }
         throw std::logic_error("Unhandled case label");
     }
 
-    common::ProcessStatusMessage::Status toStatus(std::string_view status) {
+    constexpr common::ProcessStatusMessage::Status toStatus(std::string_view status) {
         if (status == "Unknown") {
             return common::ProcessStatusMessage::Status::Unknown;
         }

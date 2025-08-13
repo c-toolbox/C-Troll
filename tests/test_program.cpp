@@ -238,12 +238,10 @@ TEST_CASE("Program.description", "[Program]") {
 
 TEST_CASE("Program.configurations", "[Program]") {
     Program msg;
-    msg.configurations.push_back({
-        Program::Configuration::ID(13), "foo", "bar", "baz"
-    });
-    msg.configurations.push_back({
+    msg.configurations.emplace_back(Program::Configuration::ID(13), "foo", "bar", "baz");
+    msg.configurations.emplace_back(
         Program::Configuration::ID(17), "fooz", "barz", "bazz"
-    });
+    );
 
 
     nlohmann::json j1;
@@ -283,14 +281,12 @@ TEST_CASE("Program.clusters", "[Program]") {
     msg.tags.push_back("foo");
     msg.tags.push_back("bar");
     msg.description = "foobar";
-    msg.configurations.push_back({
-        Program::Configuration::ID(13), "foo", "bar", "baz"
-    });
-    msg.configurations.push_back({
+    msg.configurations.emplace_back(Program::Configuration::ID(13), "foo", "bar", "baz");
+    msg.configurations.emplace_back(
         Program::Configuration::ID(17), "fooz", "barz", "bazz"
-    });
-    msg.clusters.push_back({ "foo", "abc" });
-    msg.clusters.push_back({ "bar", "" });
+    );
+    msg.clusters.emplace_back("foo", "abc");
+    msg.clusters.emplace_back("bar", "");
 
 
     nlohmann::json j1;
@@ -335,8 +331,8 @@ TEST_CASE("Program.clusters", "[Program]") {
 
 TEST_CASE("Program full", "[Program]") {
     Program msg;
-    msg.clusters.push_back({ "foo", "abc" });
-    msg.clusters.push_back({ "bar", "" });
+    msg.clusters.emplace_back("foo", "abc");
+    msg.clusters.emplace_back("bar", "");
 
 
     nlohmann::json j1;
@@ -363,7 +359,7 @@ TEST_CASE("Program v1->v2 upgrade", "[Program]") {
     // strings to an array of objects with 'name' + 'parameter' properties. To make
     // transitioning easier, we convert the old style into new style while loading
 
-    json confV1 = R"(
+    const json confV1 = R"(
 {
   "name": "name",
   "executable": "exe",

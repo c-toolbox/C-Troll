@@ -40,7 +40,7 @@
 TEST_CASE("Cluster Example: Local+Home", "[Cluster]") {
     using namespace nlohmann;
 
-    json conf = R"(
+    const json conf = R"(
 {
   "name": "Local+Home",
   "enabled": true,
@@ -60,7 +60,7 @@ TEST_CASE("Cluster Example: Local+Home", "[Cluster]") {
 TEST_CASE("Cluster Example: Local", "[Cluster]") {
     using namespace nlohmann;
 
-    json conf = R"(
+    const json conf = R"(
 {
   "description": "A local cluster",
   "enabled": true,

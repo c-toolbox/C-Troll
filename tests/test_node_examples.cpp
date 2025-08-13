@@ -40,7 +40,7 @@
 TEST_CASE("Node Example: Home", "[Node]") {
     using namespace nlohmann;
 
-    json conf = R"(
+    const json conf = R"(
 {
   "name": "Home",
   "ip": "localhost",
@@ -59,7 +59,7 @@ TEST_CASE("Node Example: Home", "[Node]") {
 TEST_CASE("Node Example: Laptop", "[Node]") {
     using namespace nlohmann;
 
-    json conf = R"(
+    const json conf = R"(
 {
   "name": "Laptop",
   "ip": "2001:6b0:17:fc08:ec96:21d7:75bb:3d50",
@@ -78,7 +78,7 @@ TEST_CASE("Node Example: Laptop", "[Node]") {
 TEST_CASE("Node Example: Local", "[Node]") {
     using namespace nlohmann;
 
-    json conf = R"(
+    const json conf = R"(
 {
   "description": "The local machine",
   "ip": "localhost",
@@ -98,7 +98,7 @@ TEST_CASE("Node Example: Local", "[Node]") {
 TEST_CASE("Node Example: Local w/ secret", "[Node]") {
     using namespace nlohmann;
 
-    json conf = R"(
+    const json conf = R"(
 {
   "description": "The local machine",
   "ip": "localhost",

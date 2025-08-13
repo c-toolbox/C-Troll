@@ -71,8 +71,8 @@ void DynamicList::addItem(QWidget* item) {
 }
 
 void DynamicList::removeItem(QWidget* sender) {
-    const auto it = std::find(_items.cbegin(), _items.cend(), sender);
-    assert(it != _items.cend());
+    const auto it = std::find(_items.begin(), _items.end(), sender);
+    assert(it != _items.end());
 
     _items.erase(it);
     widget()->layout()->removeWidget(sender->parentWidget());

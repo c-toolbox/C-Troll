@@ -43,11 +43,6 @@ namespace {
     constexpr std::string_view KeyTagColorsTag = "tag";
 } // namespace
 
-bool operator==(const Color& lhs, const Color& rhs) {
-    return
-        (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b) && (lhs.tag == rhs.tag);
-}
-
 void to_json(nlohmann::json& j, const Color& c) {
     j[KeyTagColorsRed] = c.r;
     j[KeyTagColorsGreen] = c.g;

@@ -45,7 +45,7 @@
 
 /**
  * This method is a shortcut for a more convenient logging. Calling this function is
- * equivalent to calling <code>common::Log::ref().logMessage(msg)</code>.
+ * equivalent to calling `common::Log::ref().logMessage(msg)`.
  *
  * \param category The category/type of the message to be logged
  * \param message The message that is to be logged and passed to the Log::logMessage
@@ -55,9 +55,8 @@ void Log(std::string category, std::string message);
 
 /**
  * This method is a shortcut for a more convenient debug logging. Calling this function is
- * equivalent to calling <code>common::Log::ref().logDebugMessage(msg)</code>, which means
- * that if the Log was created not accepting debug messages, this function will not do any
- * work.
+ * equivalent to calling `common::Log::ref().logDebugMessage(msg)`, which means that if
+ * the Log was created not accepting debug messages, this function will not do any work.
  *
  * \param category The category/type of the message to be logged
  * \param message The message that is to be logged and passed to the Log::logMessage
@@ -79,8 +78,8 @@ namespace common {
  * persistent file. The file will be created in working directory of the application will
  * is partially determined by the \c application variable that is passed to the initialize
  * function. Every following call to logMessage will be relegated to both a file that is
- * called <code>log_{application}.txt</code.> as well as the console. Every time the log
- * file is created, the old contents will be silently overwritten.
+ * called `log_{application}.txt`. as well as the console. Every time the log file is
+ * created, the old contents will be silently overwritten.
  */
 class Log {
 public:
@@ -104,6 +103,7 @@ public:
      * Returns the static reference to the Log instance.
      *
      * \return The static reference to the Log instance
+     *
      * \pre Log::initialize needs to be called before the first call to Log::ref
      */
     static Log* ref();
@@ -136,7 +136,7 @@ public:
     void performLogRotation(bool keepLog);
 
     /**
-     * Returns \c true if debug messages should be logged
+     * Returns \c true if debug messages should be logged.
      */
     bool shouldLogDebugMessage() const;
 
@@ -158,10 +158,7 @@ private:
      */
     Log(std::string application, bool createLogFile, bool shouldLogDebug);
 
-    /// Destructor the will close the file.
-    ~Log();
-
-    // The static Log that is returned in the Log::ref method.
+    // The static Log that is returned in the Log::ref method
     static Log* _log;
 
     const bool _shouldLogDebug;

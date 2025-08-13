@@ -37,16 +37,15 @@
 
 #include <QDialog>
 
-#include "dynamiclist.h"
-#include <QWidget>
 #include <string>
-#include <vector>
 
+class DynamicList;
 class QBoxLayout;
 class QCheckBox;
 class QLabel;
 class QLineEdit;
 class QPushButton;
+class QWidget;
 
 class ClusterDialog : public QDialog {
 Q_OBJECT

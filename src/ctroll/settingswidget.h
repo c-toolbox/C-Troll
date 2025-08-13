@@ -90,7 +90,7 @@ private:
     void layoutColorWidgets();
     void createColorWidget(Color color);
     void createColorWidgets();
-    void createRestWidgets(RestControls& rest, QString title);
+    void createRestWidgets(RestControls& rest, QString title) const;
 
     std::vector<Color> tagColors() const;
 

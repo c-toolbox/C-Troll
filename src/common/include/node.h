@@ -46,7 +46,7 @@
 struct Node {
     using ID = TypedId<struct NodeTag>;
 
-    auto operator<=>(const Node& rhs) const = default;
+    bool operator==(const Node& rhs) const noexcept = default;
     
     /// Unique identifier for the cluster node
     ID id{ -1 };
@@ -74,11 +74,10 @@ void from_json(const nlohmann::json& j, Node& n);
 void to_json(nlohmann::json& j, const Node& n);
 
 /**
- * This method walks the passed \p directory and looks for all <code>*.json</code>
- * files in it. Any \c JSON file in it will be interpreted as a node configuration and
- * returned.
+ * This method walks the passed \p directory and looks for all `*.json` files in it. Any
+ * \c JSON file in it will be interpreted as a node configuration and returned.
  *
- * \param directory The directory that is walked in search for <code>*.json</code> files
+ * \param directory The directory that is walked in search for `*.json` files
  * \return A list of all Nodes%s that were found by walking the \p directory, the second
  *         parameter is true if all files loaded successfully
  */

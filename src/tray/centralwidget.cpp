@@ -37,6 +37,8 @@
 #include "logging.h"
 #include "version.h"
 #include <QGroupBox>
+#include <QLabel>
+#include <QTextEdit>
 #include <QVBoxLayout>
 
 namespace {

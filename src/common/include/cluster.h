@@ -67,11 +67,9 @@ void from_json(const nlohmann::json& j, Cluster& c);
 void to_json(nlohmann::json& j, const Cluster& c);
 
 /**
- * This method walks the passed \p directory and looks for all <code>*.json</code>
- * files in it. Any \c JSON file in it will be interpreted as a cluster configuration
- * and returned.
- * \param directory The directory that is walked in search for <code>*.json</code>
- * files
+ * This method walks the passed \p directory and looks for all `*.json` files in it. Any
+ * \c JSON file in it will be interpreted as a cluster configuration and returned.
+ * \param directory The directory that is walked in search for `*.json` files
  * \return A list of all Cluster%s that were found by walking the \p directory, the second
  *         parameter is true if all files loaded successfully
  */

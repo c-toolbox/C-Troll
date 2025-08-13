@@ -49,7 +49,7 @@ struct Message {
 
     Message() = default;
     explicit Message(std::string type);
-    auto operator<=>(const Message& rhs) const = default;
+    bool operator==(const Message& rhs) const noexcept = default;
 
     /// A string representing the type of payload contained in this Message
     std::string type;
@@ -74,8 +74,8 @@ using ApiVersion = std::array<int, 3>;
 template <typename T = void>
     requires std::is_same_v<T, void> || std::is_base_of_v<Message, T>
 [[nodiscard]] bool isValidMessage(const nlohmann::json& message) {
-    const bool hasType = message.find(Message::KeyType) != message.end();
-    const bool hasVersion = message.find(Message::KeyVersion) != message.end();
+    const bool hasType = message.contains(Message::KeyType);
+    const bool hasVersion = message.contains(Message::KeyVersion);
     if (!hasType || !hasVersion) {
         return false;
     }

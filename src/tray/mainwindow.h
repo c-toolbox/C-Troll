@@ -38,12 +38,15 @@
 #include <QMainWindow>
 
 #include "processhandler.h"
-#include <QCloseEvent>
+#include <QIcon>
 #include <QSystemTrayIcon>
-#include <QLabel>
-#include <QTextEdit>
 
 class CentralWidget;
+class QAction;
+class QCloseEvent;
+class QEvent;
+class QHideEvent;
+class QShowEvent;
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
@@ -72,14 +75,14 @@ private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
-    void updateTrayIcon();
-
     CentralWidget* _centralWidget = nullptr;
     QSystemTrayIcon* _trayIcon = nullptr;
 
     QAction* _showAction = nullptr;
     QAction* _hideAction = nullptr;
 
+    QIcon _onlineIcon;
+    QIcon _offlineIcon;
 };
 
 #endif // __TRAY__MAINWINDOW_H__

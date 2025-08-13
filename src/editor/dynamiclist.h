@@ -44,7 +44,7 @@ class QBoxLayout;
 class DynamicList : public QScrollArea {
 Q_OBJECT
 public:
-    DynamicList(QWidget* parent = nullptr);
+    explicit DynamicList(QWidget* parent = nullptr);
 
     void addItem(QWidget* item);
 

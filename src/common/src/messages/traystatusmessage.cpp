@@ -51,7 +51,7 @@ TrayStatusMessage::TrayStatusMessage()
     : Message(std::string(TrayStatusMessage::Type))
 {}
 
-void to_json(nlohmann::json& j, const TrayStatusMessage::ProcessInfo& p) {
+static void to_json(nlohmann::json& j, const TrayStatusMessage::ProcessInfo& p) {
     j[KeyProcessId] = p.processId;
     j[KeyProgramId] = p.programId;
     j[KeyConfigurationId] = p.configurationId;
@@ -60,7 +60,7 @@ void to_json(nlohmann::json& j, const TrayStatusMessage::ProcessInfo& p) {
     j[KeyDataHash] = p.dataHash;
 }
 
-void from_json(const nlohmann::json & j, TrayStatusMessage::ProcessInfo& p) {
+static void from_json(const nlohmann::json & j, TrayStatusMessage::ProcessInfo& p) {
     j.at(KeyProcessId).get_to(p.processId);
     j.at(KeyProgramId).get_to(p.programId);
     j.at(KeyConfigurationId).get_to(p.configurationId);

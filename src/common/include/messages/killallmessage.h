@@ -46,7 +46,7 @@ struct KillAllMessage : public Message {
     static constexpr std::string_view Type = "KillAllMessage";
 
     KillAllMessage();
-    auto operator<=>(const KillAllMessage& rhs) const = default;
+    bool operator==(const KillAllMessage& rhs) const noexcept = default;
 };
 
 void to_json(nlohmann::json& j, const KillAllMessage& m);
