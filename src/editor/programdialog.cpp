@@ -429,7 +429,10 @@ void ProgramDialog::save() {
     program.preStart = _preStart->text().toStdString();
     program.description = _description->text().toStdString();
     for (QLineEdit* tag : _tags->items<QLineEdit>()) {
-        program.tags.push_back(tag->text().toStdString());
+        std::string t = tag->text().toStdString();
+        if (!t.empty()) {
+            program.tags.push_back(std::move(t));
+        }
     }
     for (ConfigurationWidget* conf : _configurations->items<ConfigurationWidget>()) {
         Program::Configuration c;
