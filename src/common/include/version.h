@@ -64,7 +64,7 @@ namespace app {
     constexpr int MinorVersion = 0;
     constexpr int PatchVersion = 1;
 
-    constexpr std::string_view Version = "2.0.1";
+    constexpr std::string_view Version = "2.1.0";
 } // namespace app
 
 
@@ -91,7 +91,7 @@ namespace api {
     constexpr int MinorVersion = 0;
     constexpr int PatchVersion = 0;
 
-    constexpr std::string_view Version = "2.0.0";
+    constexpr std::string_view Version = "2.1.0";
 } // namespace api
 
 #endif // __COMMON__VERSION_H__
