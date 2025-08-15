@@ -288,7 +288,7 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     ProcessInfo info = *p;
 
     const bool shouldRestart =
-        info.shouldAutoRestart && exitStatus == QProcess::NormalExit;
+        info.shouldAutoRestart && exitStatus == QProcess::CrashExit;
     if (!shouldRestart) {
         // Inform C-Troll about the death of the process
         emit sendSocketMessage(msg);
