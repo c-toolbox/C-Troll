@@ -96,8 +96,7 @@ namespace {
         }(response);
 
         std::string message = std::format(
-            "HTTP/1.1 {}\nContent-Type: application/json\nContent-Length: {}\n\n{}",
-            code, content.size(), content
+            "HTTP/1.1 {}\nContent-Length: {}\n\n{}", code, content.size(), content
         );
         socket.write(message.data(), static_cast<qint64>(message.size()));
     }
@@ -184,10 +183,6 @@ namespace {
         const Cluster* cluster = nullptr;
         const Program* program = nullptr;
         const Program::Configuration* configuration = nullptr;
-
-        operator bool() const {
-            return cluster && program && configuration;
-        }
     };
 
     ProgramInfo extractProgramInfo(const std::map<std::string, std::string>& params) {
@@ -325,25 +320,41 @@ void RestConnectionHandler::handleNewConnection() {
 
     //
     // Handle message
-    if (method == HttpMethod::Post && endPoint == Endpoint::StartProgram) {
+    if (endPoint == Endpoint::StartProgram) {
         ProgramInfo pi = extractProgramInfo(params);
-        if (!pi) {
-            sendResponse(*socket, Response::BadRequest, "No program found");
+        if (!pi.cluster) {
+            sendResponse(*socket, Response::BadRequest, "Cluster not found");
+            return;
+        }
+        if (!pi.program) {
+            sendResponse(*socket, Response::BadRequest, "Program not found");
+            return;
+        }
+        if (!pi.configuration) {
+            sendResponse(*socket, Response::BadRequest, "Configuration not found");
             return;
         }
 
         handleStartProgramMessage(*socket, *pi.cluster, *pi.program, *pi.configuration);
     }
-    else if (method == HttpMethod::Post && endPoint == Endpoint::StopProgram) {
+    else if (endPoint == Endpoint::StopProgram) {
         ProgramInfo pi = extractProgramInfo(params);
-        if (!pi) {
-            sendResponse(*socket, Response::BadRequest, "No program found");
+        if (!pi.cluster) {
+            sendResponse(*socket, Response::BadRequest, "Cluster not found");
+            return;
+        }
+        if (!pi.program) {
+            sendResponse(*socket, Response::BadRequest, "Program not found");
+            return;
+        }
+        if (!pi.configuration) {
+            sendResponse(*socket, Response::BadRequest, "Configuration not found");
             return;
         }
 
         handleStopProgramMessage(*socket, *pi.cluster, *pi.program, *pi.configuration);
     }
-    else if (method == HttpMethod::Post && endPoint == Endpoint::StartCustomProgram) {
+    else if (endPoint == Endpoint::StartCustomProgram) {
         if (!_hasCustomProgramAPI) {
             sendResponse(*socket, Response::Forbidden, "No program found");
             return;
@@ -394,16 +405,16 @@ void RestConnectionHandler::handleNewConnection() {
             throw std::logic_error("Shouldn't get here");
         }
     }
-    else if (method == HttpMethod::Get && endPoint == Endpoint::InfoProgram) {
+    else if (endPoint == Endpoint::InfoProgram) {
         handleProgramInfoMessage(*socket);
     }
-    else if (method == HttpMethod::Get && endPoint == Endpoint::InfoCluster) {
+    else if (endPoint == Endpoint::InfoCluster) {
         handleClusterInfoMessage(*socket);
     }
-    else if (method == HttpMethod::Get && endPoint == Endpoint::InfoNode) {
+    else if (endPoint == Endpoint::InfoNode) {
         handleNodeInfoMessage(*socket);
     }
-    else if (method == HttpMethod::Get && endPoint == Endpoint::InfoApi) {
+    else if (endPoint == Endpoint::InfoApi) {
         handleApiInfoMessage(*socket);
     }
     else {
