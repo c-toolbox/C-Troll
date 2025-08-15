@@ -86,8 +86,10 @@ struct Program {
     std::string commandlineParameters;
     /// The current working directory from which the Program is started
     std::string workingDirectory;
-    /// If this is set to 'true', child processes will forward the Std and error streams
+    /// If this is set to `true`, child processes will forward the Std and error streams
     bool shouldForwardMessages = false;
+    /// If this is set to `true` the program will automatically restart if it crashes
+    bool shouldAutoRestart = false;
     /// A flag showing whether this Program is enabled or disabled
     bool isEnabled = true;
     /// An optional delay that is introduced between startup of individual instances

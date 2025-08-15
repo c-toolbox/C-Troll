@@ -47,7 +47,8 @@ namespace {
     constexpr std::string_view KeyClusters = "clusters";
     constexpr std::string_view KeyTags = "tags";
     constexpr std::string_view KeyDescription = "description";
-    constexpr std::string_view KeySendConsole = "shouldForwardMessages";
+    constexpr std::string_view KeyForwardMessages = "shouldForwardMessages";
+    constexpr std::string_view KeyAutoRestart = "shouldAutorestart";
     constexpr std::string_view KeyEnabled = "enabled";
     constexpr std::string_view KeyDelay = "delay";
     constexpr std::string_view KeyPreStart = "prestart";
@@ -108,8 +109,11 @@ void from_json(const nlohmann::json& j, Program& p) {
     if (auto it = j.find(KeyDescription);  it != j.end()) {
         it->get_to(p.description);
     }
-    if (auto it = j.find(KeySendConsole);  it != j.end()) {
+    if (auto it = j.find(KeyForwardMessages);  it != j.end()) {
         it->get_to(p.shouldForwardMessages);
+    }
+    if (auto it = j.find(KeyAutoRestart);  it != j.end()) {
+        it->get_to(p.shouldAutoRestart);
     }
     if (auto it = j.find(KeyEnabled);  it != j.end()) {
         it->get_to(p.isEnabled);
@@ -162,7 +166,10 @@ void to_json(nlohmann::json& j, const Program& p) {
         j[KeyDescription] = p.description;
     }
     if (p.shouldForwardMessages != Program().shouldForwardMessages) {
-        j[KeySendConsole] = p.shouldForwardMessages;
+        j[KeyForwardMessages] = p.shouldForwardMessages;
+    }
+    if (p.shouldAutoRestart != Program().shouldAutoRestart) {
+        j[KeyAutoRestart] = p.shouldAutoRestart;
     }
     if (p.isEnabled != Program().isEnabled) {
         j[KeyEnabled] = p.isEnabled;

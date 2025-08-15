@@ -37,6 +37,7 @@
 namespace {
     constexpr std::string_view KeyId = "id";
     constexpr std::string_view KeyForwardOutErr = "forwardOutErr";
+    constexpr std::string_view KeyAutoRestart = "autorestart";
     constexpr std::string_view KeyExecutable = "executable";
     constexpr std::string_view KeyWorkingDirectory = "workingDirectory";
     constexpr std::string_view KeyCommandlineArguments = "commandlineArguments";
@@ -62,6 +63,9 @@ void to_json(nlohmann::json& j, const StartCommandMessage& m) {
     if (m.forwardStdOutStdErr) {
         j[KeyForwardOutErr] = m.forwardStdOutStdErr;
     }
+    if (m.autoRestart) {
+        j[KeyAutoRestart] = m.autoRestart;
+    }
     j[KeyExecutable] = m.executable;
     j[KeyWorkingDirectory] = m.workingDirectory;
     if (!m.commandlineParameters.empty()) {
@@ -81,6 +85,9 @@ void from_json(const nlohmann::json& j, StartCommandMessage& m) {
     j.at(KeyId).get_to(m.id);
     if (auto it = j.find(KeyForwardOutErr);  it != j.end()) {
         it->get_to(m.forwardStdOutStdErr);
+    }
+    if (auto it = j.find(KeyAutoRestart);  it != j.end()) {
+        it->get_to(m.autoRestart);
     }
 
     j.at(KeyExecutable).get_to(m.executable);

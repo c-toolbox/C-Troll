@@ -60,6 +60,8 @@ struct StartCommandMessage : public Message {
     std::string commandlineParameters;
     /// This value determines whether the process should send back console messages
     bool forwardStdOutStdErr = false;
+    /// This value determines whether the program should auto restart if it crashes
+    bool autoRestart = false;
 
     // This information is not used directly, but mirrored back by the tray in case the
     // C-Troll reconnects and the process started by this command is still running

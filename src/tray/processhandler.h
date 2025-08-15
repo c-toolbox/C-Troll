@@ -60,6 +60,11 @@ public:
         int clusterId = -1;
         int nodeId = -1;
         std::size_t dataHash = 0;
+        bool shouldAutoRestart = false;
+
+        // This is only needed if `shouldAutoRestart` is enabled and is used to be able to
+        // gracefully restart the process with the same arguments
+        nlohmann::json startMessage;
 
         // This value is used to store whether the process was killed by user input and
         // should thus not send out a CrashExit status

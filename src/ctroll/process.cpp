@@ -71,6 +71,7 @@ common::StartCommandMessage startProcessCommand(const Process& process) {
     t.clusterId = process.clusterId.v;
     t.nodeId = process.nodeId.v;
     t.forwardStdOutStdErr = prg.shouldForwardMessages;
+    t.autoRestart = prg.shouldAutoRestart;
     t.dataHash = data::dataHash();
 
     return t;

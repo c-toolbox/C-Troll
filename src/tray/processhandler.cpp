@@ -268,25 +268,39 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     auto p = processIt(process);
     // p might be .end() if we caused the process to be killed which also removes it from
     // the _processes list immediately before the handleFinished function can be called
-    if (p != _processes.end()) {
-        Debug(std::format("Found process {}", p->processId));
+    if (p == _processes.end()) {
+        return;
+    }
 
-        common::ProcessStatusMessage msg;
-        msg.processId = p->processId;
-        if (p->wasUserTerminated) {
-            // If the user terminated the process it will report back an exitStatus of
-            // 'CrashExit', which does not really convey the right reason to the user
-            msg.status = common::ProcessStatusMessage::Status::NormalExit;
-        }
-        else {
-            msg.status = toTrayStatus(exitStatus);
-        }
+    Debug(std::format("Found process {}", p->processId));
+
+    common::ProcessStatusMessage msg;
+    msg.processId = p->processId;
+    if (p->wasUserTerminated) {
+        // If the user terminated the process it will report back an exitStatus of
+        // 'CrashExit', which does not really convey the right reason to the user
+        msg.status = common::ProcessStatusMessage::Status::NormalExit;
+    }
+    else {
+        msg.status = toTrayStatus(exitStatus);
+    }
+    
+    ProcessInfo info = *p;
+
+    const bool shouldRestart =
+        info.shouldAutoRestart && exitStatus == QProcess::NormalExit;
+    if (!shouldRestart) {
+        // Inform C-Troll about the death of the process
         emit sendSocketMessage(msg);
+    }
 
-        // Remove this process from the list as we consider it finished
-        ProcessInfo info = *p;
-        _processes.erase(p);
-        emit closedProcess(info);
+    // Remove this process from the list as we consider it finished
+    _processes.erase(p);
+    emit closedProcess(info);
+
+    // Restart the process
+    if (info.shouldAutoRestart && exitStatus == QProcess::NormalExit) {
+        createAndRunProcessFromCommandMessage(info.startMessage);
     }
 }
 
@@ -411,7 +425,9 @@ void ProcessHandler::createAndRunProcessFromCommandMessage(
         .configurationId = cmd.configurationId,
         .clusterId = cmd.clusterId,
         .nodeId = cmd.nodeId,
-        .dataHash = cmd.dataHash
+        .dataHash = cmd.dataHash,
+        .shouldAutoRestart = cmd.autoRestart,
+        .startMessage = cmd
     };
     _processes.push_back(info);
 
