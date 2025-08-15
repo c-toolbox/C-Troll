@@ -45,7 +45,7 @@ namespace common {
  * This function returns \c true iff the commandline `--debug` was passed through the list
  * of commandline arguments.  If the parameter does not occur, \c false is returned.
  *
- * \param The list of commandline arguments. The best way to generate this from the
+ * \param args The list of commandline arguments. The best way to generate this from the
  *        standard argc+argv construct is through: `{ argv, argv + argc }`
  * \return \c true if `--debug` occurred in the commandline arguments, \c false otherwise
  */
@@ -55,12 +55,24 @@ bool parseDebugCommandlineArgument(std::vector<std::string> args);
  * This function returns the desired window position if `--pos` was provided to the
  * application, or `std::nullopt` if the argument was not present.
  *
- * \param The list of commandline arguments. The best way to generate this from the
+ * \param args The list of commandline arguments. The best way to generate this from the
  *        standard argc+argv construct is through: `{ argv, argv + argc }`
  * \return Either `std::nullopt` if the commandline flag was not found or the pixel
  *         position provided as arguments
  */
 std::optional<std::pair<int, int>> parseLocationArgument(std::vector<std::string> args);
+
+/**
+ * This function returns the location of the configuration folder if `--config` was
+ * provided to the application. If the commandline flag was not provided, the returned
+ * string is empty.
+ *
+ * \param args The list of commandline arguments. The best way to generate this from the
+ *        standard argc+argv construct is through: `{ argv, argv + argc }`
+ * \return Either the location of the configuration folder if `--config` was provided, or
+ *         the empty string if it was not
+ */
+std::string parseConfigLocationArgument(const std::vector<std::string>& args);
 
 } // namespace common
 

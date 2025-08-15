@@ -55,6 +55,7 @@ namespace {
         std::byte showWindowMarker = std::byte(0);
         std::byte unused[25] = {};
     };
+    static_assert(sizeof(SharedMemoryMarker) == 32);
 
     std::vector<std::string> tokenizeString(const std::string& input, char separator) {
         size_t separatorPos = input.find(separator);
@@ -76,24 +77,22 @@ namespace {
 
     std::vector<std::string> parseTagsArgument(const std::vector<std::string>& args) {
         auto it = std::find(args.begin(), args.end(), "--tags");
-        if (it != args.end()) {
-            // The rest of the commandline argument is a comma-separated list of tags
-            std::string allTags = std::accumulate(
-                it + 1,
-                args.end(),
-                std::string(),
-                [](std::string lhs, std::string rhs) {
-                    return std::move(lhs) + " " + std::move(rhs);
-                }
-            );
-            // We have an empty character at the beginning we need to remove
-            allTags = allTags.substr(1);
-
-            return tokenizeString(allTags, ',');
-        }
-        else {
+        if (it == args.end()) {
             return std::vector<std::string>();
         }
+
+        // The rest of the commandline argument is a comma-separated list of tags
+        std::string allTags = std::accumulate(
+            it + 1, args.end(),
+            std::string(),
+            [](std::string lhs, std::string rhs) {
+                return std::move(lhs) + " " + std::move(rhs);
+            }
+        );
+        // We have an empty character at the beginning we need to remove
+        allTags = allTags.substr(1);
+
+        return tokenizeString(allTags, ',');
     }
 } // namespace
 
@@ -160,6 +159,7 @@ int main(int argc, char** argv) {
     const bool logDebug = common::parseDebugCommandlineArgument(args);
     std::optional<std::pair<int, int>> pos = common::parseLocationArgument(args);
     std::vector<std::string> defaultTags = parseTagsArgument(args);
+    std::string configLoc = common::parseConfigLocationArgument(args);
 
     qInstallMessageHandler(QtLogFunction);
 
@@ -168,6 +168,10 @@ int main(int argc, char** argv) {
         file.open(QFile::ReadOnly | QFile::Text);
         QString styleSheet = QLatin1String(file.readAll());
         app.setStyleSheet(styleSheet);
+    }
+
+    if (!configLoc.empty()) {
+        std::filesystem::current_path(configLoc);
     }
 
     std::string cfg = "config.json";

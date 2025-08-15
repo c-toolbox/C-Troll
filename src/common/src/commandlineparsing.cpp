@@ -58,4 +58,13 @@ std::optional<std::pair<int, int>> parseLocationArgument(std::vector<std::string
     return std::pair(x, y);
 }
 
+std::string parseConfigLocationArgument(const std::vector<std::string>& args) {
+    auto it = std::find(args.begin(), args.end(), "--config");
+    if ((it + 1) == args.end()) {
+        throw std::runtime_error("Provided no parameter for --config argument");
+    }
+
+    return it != args.end() ? *(it + 1) : "";
+}
+
 } // namespace common

@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> args = { argv, argv + argc };
     const bool logDebug = common::parseDebugCommandlineArgument(args);
     std::optional<std::pair<int, int>> pos = common::parseLocationArgument(args);
+    std::string configLoc = common::parseConfigLocationArgument(args);
 
     qInstallMessageHandler(QtLogFunction);
 
@@ -65,6 +66,10 @@ int main(int argc, char** argv) {
         file.open(QFile::ReadOnly | QFile::Text);
         QString styleSheet = QLatin1String(file.readAll());
         app.setStyleSheet(styleSheet);
+    }
+
+    if (!configLoc.empty()) {
+        std::filesystem::current_path(configLoc);
     }
 
     std::string cfg = "config.json";
