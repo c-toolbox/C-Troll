@@ -622,11 +622,6 @@ void MainWindow::stopProgram(Cluster::ID clusterId, Program::ID programId,
         }
     }
 
-    // Something strange must have happened if we get to the stop command without actually
-    // having a single process that corresponds to the command.  The question is, how did
-    // we manage to set off the stopProgram function in the first place?
-    assert(!processes.empty());
-
     for (const Process* process : processes) {
         stopProcess(process->id);
     }
