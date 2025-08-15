@@ -88,6 +88,7 @@ private:
     QLineEdit* _workingDirectory = nullptr;
     QCheckBox* _isEnabled = nullptr;
     QCheckBox* _shouldForwardMessages = nullptr;
+    QCheckBox* _shouldAutoRestart = nullptr;
 
     QCheckBox* _hasDelay = nullptr;
     QSpinBox* _delay = nullptr;

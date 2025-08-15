@@ -194,7 +194,15 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     );
     editLayout->addWidget(_shouldForwardMessages, 5, 1, 1, 2);
 
-    editLayout->addWidget(new QLabel("Delay"), 6, 0);
+    editLayout->addWidget(new QLabel("Autorestart on Crash:"), 6, 0);
+    _shouldAutoRestart = new QCheckBox;
+    _shouldAutoRestart->setToolTip(
+        "If this is enabled, the program will automatically be restarted if it is "
+        "running and it crashes"
+    );
+    editLayout->addWidget(_shouldAutoRestart, 6, 1, 1, 2);
+
+    editLayout->addWidget(new QLabel("Delay"), 7, 0);
     QWidget* delayContainer = new QWidget;
     QBoxLayout* delayLayout = new QHBoxLayout(delayContainer);
     delayLayout->setContentsMargins(0, 0, 0, 0);
@@ -213,21 +221,21 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     _delay->setMinimum(0);
     _delay->setMaximum(std::numeric_limits<int>::max());
     delayLayout->addWidget(_delay);
-    editLayout->addWidget(delayContainer, 6, 1, 1, 2);
+    editLayout->addWidget(delayContainer, 7, 1, 1, 2);
 
-    editLayout->addWidget(new QLabel("PreStart Script"), 7, 0);
+    editLayout->addWidget(new QLabel("PreStart Script"), 8, 0);
     _preStart = new QLineEdit;
     _preStart->setToolTip(
         "A script that gets executed on the C-Troll computer before this program starts"
     );
     _preStart->setPlaceholderText("optional");
-    editLayout->addWidget(_preStart, 7, 1, 1, 2);
+    editLayout->addWidget(_preStart, 8, 1, 1, 2);
 
-    editLayout->addWidget(new QLabel("Description:"), 8, 0);
+    editLayout->addWidget(new QLabel("Description:"), 9, 0);
     _description = new QLineEdit;
     _description->setToolTip("Additional information for the user about the program");
     _description->setPlaceholderText("optional");
-    editLayout->addWidget(_description, 8, 1, 1, 2);
+    editLayout->addWidget(_description, 9, 1, 1, 2);
 
     QLabel* parametersLabel = new QLabel(
         "The complete arguments for the program are given in the following order: 1. the "
@@ -236,14 +244,14 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     );
     parametersLabel->setWordWrap(true);
     parametersLabel->setObjectName("information-label");
-    editLayout->addWidget(parametersLabel, 9, 0, 1, 3);
+    editLayout->addWidget(parametersLabel, 10, 0, 1, 3);
 
-    editLayout->addWidget(new Spacer, 10, 0, 1, 3);
+    editLayout->addWidget(new Spacer, 11, 0, 1, 3);
 
     {
         // Configurations
 
-        editLayout->addWidget(new QLabel("Configurations"), 11, 0);
+        editLayout->addWidget(new QLabel("Configurations"), 12, 0);
 
         QPushButton* newConfiguration = new AddButton;
         connect(
@@ -259,7 +267,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 updateSaveButton();
             }
         );
-        editLayout->addWidget(newConfiguration, 11, 1, 1, 2, Qt::AlignRight);
+        editLayout->addWidget(newConfiguration, 12, 1, 1, 2, Qt::AlignRight);
 
         _configurations = new DynamicList;
         _configurations->setToolTip(
@@ -269,15 +277,15 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             _configurations, &DynamicList::updated,
             this, &ProgramDialog::updateSaveButton
         );
-        editLayout->addWidget(_configurations, 12, 0, 1, 3);
+        editLayout->addWidget(_configurations, 13, 0, 1, 3);
     }
 
-    editLayout->addWidget(new Spacer, 13, 0, 1, 3);
+    editLayout->addWidget(new Spacer, 14, 0, 1, 3);
 
     {
         // Clusters
 
-        editLayout->addWidget(new QLabel("Clusters"), 14, 0);
+        editLayout->addWidget(new QLabel("Clusters"), 15, 0);
 
         QPushButton* newCluster = new AddButton;
         connect(
@@ -291,19 +299,19 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 }
             }
         );
-        editLayout->addWidget(newCluster, 14, 1, 1, 2, Qt::AlignRight);
+        editLayout->addWidget(newCluster, 15, 1, 1, 2, Qt::AlignRight);
 
         _clusters = new DynamicList;
         _clusters->setToolTip("The list of clusters on which the program can be run");
         connect(_clusters, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
-        editLayout->addWidget(_clusters, 15, 0, 1, 3);
+        editLayout->addWidget(_clusters, 16, 0, 1, 3);
     }
 
-    editLayout->addWidget(new Spacer, 16, 0, 1, 3);
+    editLayout->addWidget(new Spacer, 17, 0, 1, 3);
 
     {
         // Tags
-        editLayout->addWidget(new QLabel("Tags (optional)"), 17, 0);
+        editLayout->addWidget(new QLabel("Tags (optional)"), 18, 0);
 
         QPushButton* t = new AddButton;
         connect(
@@ -315,13 +323,13 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 updateSaveButton();
             }
         );
-        editLayout->addWidget(t, 17, 1, 1, 2, Qt::AlignRight);
+        editLayout->addWidget(t, 18, 1, 1, 2, Qt::AlignRight);
 
         _tags = new DynamicList;
         _tags->setToolTip("A list of all tags that this program is associated with");
         connect(_tags, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
 
-        editLayout->addWidget(_tags, 18, 0, 1, 3);
+        editLayout->addWidget(_tags, 19, 0, 1, 3);
     }
 
     layout->addWidget(edit);
@@ -353,6 +361,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
         _workingDirectory->setCursorPosition(0);
         _isEnabled->setChecked(program.isEnabled);
         _shouldForwardMessages->setChecked(program.shouldForwardMessages);
+        _shouldAutoRestart->setChecked(program.shouldAutoRestart);
         _hasDelay->setChecked(program.delay.has_value());
         if (program.delay.has_value()) {
             _delay->setValue(static_cast<int>(program.delay->count()));
@@ -423,6 +432,7 @@ void ProgramDialog::save() {
     program.workingDirectory = _workingDirectory->text().toStdString();
     program.isEnabled = _isEnabled->isChecked();
     program.shouldForwardMessages = _shouldForwardMessages->isChecked();
+    program.shouldAutoRestart = _shouldAutoRestart->isChecked();
     if (_hasDelay->isChecked()) {
         program.delay = std::chrono::milliseconds(_delay->value());
     }
