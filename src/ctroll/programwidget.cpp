@@ -509,6 +509,7 @@ CustomProgramWidget::CustomProgramWidget(QWidget* parent)
     std::vector<const Cluster*> clusters = data::clusters();
     if (!clusters.empty()) {
         targetList->addItem("Clusters", TagSeparator);
+        targetList->addItem("------------", TagSeparator);
         for (const Cluster* c : clusters) {
             targetList->addItem(QString::fromStdString(c->name), TagCluster);
         }
@@ -517,6 +518,7 @@ CustomProgramWidget::CustomProgramWidget(QWidget* parent)
     std::vector<const Node*> nodes = data::nodes();
     if (!nodes.empty()) {
         if (!clusters.empty()) {
+            targetList->addItem("", TagSeparator);
             targetList->addItem("", TagSeparator);
         }
         targetList->addItem("Nodes", TagSeparator);
@@ -587,7 +589,9 @@ CustomProgramWidget::CustomProgramWidget(QWidget* parent)
     layout->addWidget(clear);
 
     auto updateRunButton = [targetList, executable, run]() {
-        const bool goodTarget = targetList->currentData().toInt() != TagSeparator;
+        const int targetTag = targetList->currentData().toInt();
+        const QString targetName = targetList->currentText();
+        const bool goodTarget = targetTag != TagSeparator && !targetName.isEmpty();
         const bool goodExec = !executable->text().isEmpty();
         run->setEnabled(goodTarget && goodExec);
     };
