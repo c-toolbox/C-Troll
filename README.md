@@ -32,7 +32,7 @@ The _Starter_ application is a simple commandline tool that will send a REST mes
 
 
 # Getting started
-The `example` folder contains a full working example including nodes, clusters, and programs.  If you want to create your own setup, the recommended way is to start with configuration the nodes, then grouping them into clusters, and then define programs to execute on the clusters.  The [Wiki](https://github.com/c-toolbox-C-Troll/wiki) contains additional information about allowed parameters for the various configuration and JSON files.  The _Editor_ application contains all tools necessary to create these configurations without manually editing the JSON configuration files.
+The `example` folder contains a full working example including nodes, clusters, and programs.  If you want to create your own setup, the recommended way is to start with configuration the nodes, then grouping them into clusters, and then define programs to execute on the clusters.  The [Wiki](https://github.com/c-toolbox/C-Troll/wiki) contains additional information about allowed parameters for the various configuration and JSON files.  The _Editor_ application contains all tools necessary to create these configurations without manually editing the JSON configuration files.
 
 1. On the `client` computers that should be able to start programs
   1. Install the _Tray_ application
