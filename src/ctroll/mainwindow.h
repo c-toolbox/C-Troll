@@ -58,6 +58,9 @@ namespace programs { class ProgramsWidget; }
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
+    /// The exit code with which the application terminates if it should be restarted
+    static constexpr int RestartExitCode = 1000;
+
     MainWindow(std::vector<std::string> defaultTags, Configuration config);
 
 private slots:

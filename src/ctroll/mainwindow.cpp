@@ -86,10 +86,25 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     connect(_hideAction, &QAction::triggered, this, &MainWindow::hide);
     menu->addAction(_hideAction);
 
-    // The second menu item terminates the application
+    // The second menu item restarts the application to reload the configuration
+    QAction* restart = new QAction("Restart", this);
+    restart->setToolTip("Restarts C-Troll to reload the configuration and data files");
+    connect(
+        restart,
+        &QAction::triggered,
+        [this]() {
+            Log("Info", "Restarting C-Troll");
+            _isClosingApplication = true;
+            qApp->exit(RestartExitCode);
+        }
+    );
+    menu->addAction(restart);
+
+    // The third menu item terminates the application
     QAction* quit = new QAction("Quit", this);
     connect(
-        quit, &QAction::triggered,
+        quit,
+        &QAction::triggered,
         [this]() {
             _isClosingApplication = true;
             qApp->quit();

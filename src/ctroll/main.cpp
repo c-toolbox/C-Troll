@@ -39,9 +39,11 @@
 #include "mainwindow.h"
 #include "version.h"
 #include <QApplication>
+#include <QDir>
 #include <QFile>
 #include <QIcon>
 #include <QMessageBox>
+#include <QProcess>
 #include <QProcessEnvironment>
 #include <QSharedMemory>
 #include <QTimer>
@@ -101,6 +103,14 @@ int main(int argc, char** argv) {
 
     QApplication app = QApplication(argc, argv);
     app.setWindowIcon(QIcon(":/images/C_transparent.png"));
+
+    // Remember the environment in which we were started so that we can recreate it if the
+    // user asks us to restart the application
+    const QString startupDirectory = QDir::currentPath();
+    QStringList startupArguments;
+    for (int i = 1; i < argc; i += 1) {
+        startupArguments.append(QString::fromLocal8Bit(argv[i]));
+    }
 
     //
     // Handle shared memory
@@ -204,6 +214,7 @@ int main(int argc, char** argv) {
     common::Log::initialize("ctroll", config.logFile, logDebug);
     Log("Config", std::format("Finished loading configuration file '{}'", cfg));
 
+    bool shouldRestart = false;
 
     try {
         MainWindow mw = MainWindow(defaultTags, config);
@@ -228,7 +239,7 @@ int main(int argc, char** argv) {
         );
         timer->start(std::chrono::milliseconds(1000));
 
-        app.exec();
+        shouldRestart = app.exec() == MainWindow::RestartExitCode;
     }
     catch (const std::exception& e) {
         QMessageBox::critical(nullptr, "Exception", e.what());
@@ -237,6 +248,26 @@ int main(int argc, char** argv) {
         QMessageBox::critical(nullptr, "Exception", "Unknown error");
     }
 
+    // The MainWindow owning the logging function and the Qt message handler is gone by
+    // now, so any further message would access a destroyed object
+    common::Log::ref()->setLoggingFunction(
+        [](std::string msg) { std::cout << msg << '\n'; }
+    );
+    qInstallMessageHandler(nullptr);
+
     Q_CLEANUP_RESOURCE(resources);
+
+    if (shouldRestart) {
+        // The new instance has to be able to create the single-instance marker, so we
+        // have to release our claim on it before starting the new process
+        mem.detach();
+
+        QProcess::startDetached(
+            QCoreApplication::applicationFilePath(),
+            startupArguments,
+            startupDirectory
+        );
+    }
+
     return 0;
 }
