@@ -38,6 +38,8 @@
 #include "logging.h"
 #include <QRegularExpression>
 #include <QTcpSocket>
+#include <QUrl>
+#include <QUrlQuery>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <string_view>
@@ -165,16 +167,13 @@ namespace {
         return std::nullopt;
     }
 
-    std::map<std::string, std::string> parameters(QStringList tokens) {
+    std::map<std::string, std::string> parameters(const QString& query) {
         std::map<std::string, std::string> res;
-        QStringList parameters = tokens.back().split('&');
-        for (int i = 0; i < parameters.size(); i++) {
-            QStringList kv = parameters[i].split('=');
-            if (kv.size() == 2) {
-                std::string key = kv[0].toStdString();
-                std::string value = kv[1].toStdString();
-                res[key] = value;
-            }
+        const QUrlQuery url = QUrlQuery(query);
+        const QList<std::pair<QString, QString>> items =
+            url.queryItems(QUrl::FullyDecoded);
+        for (const std::pair<QString, QString>& item : items) {
+            res[item.first.toStdString()] = item.second.toStdString();
         }
         return res;
     }
@@ -304,16 +303,17 @@ void RestConnectionHandler::handleNewConnection() {
     std::optional<std::string> endpointValue = endpoint(tokens);
     std::map<std::string, std::string> params;
     if (method == HttpMethod::Get && endpointValue.has_value()) {
-        QString endPointStr = QString::fromStdString(*endpointValue);
-        QStringList endPointList = endPointStr.split('?');
-        endPoint = parseEndpoint(endPointList[0].toStdString());
-        if (endPointList.size() > 1) {
-            endPointList.pop_front();
-            params = parameters(endPointList);
+        const QString endPointStr = QString::fromStdString(*endpointValue);
+        const qsizetype idx = endPointStr.indexOf('?');
+        const QString path =
+            idx == -1 ? endPointStr : endPointStr.left(idx);
+        endPoint = parseEndpoint(QUrl::fromPercentEncoding(path.toUtf8()).toStdString());
+        if (idx != -1) {
+            params = parameters(endPointStr.mid(idx + 1));
         }
     }
     else if (method == HttpMethod::Post) {
-        params = parameters(tokens);
+        params = parameters(tokens.back());
         if (endpointValue.has_value()) {
             endPoint = parseEndpoint(*endpointValue);
         }
