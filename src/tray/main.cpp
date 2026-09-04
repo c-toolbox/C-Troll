@@ -180,7 +180,7 @@ int main(int argc, char** argv) {
         timer->start(std::chrono::duration_cast<std::chrono::milliseconds>(freq));
     }
 
-    SocketHandler socketHandler = SocketHandler(config.port, config.secret);
+    SocketHandler socketHandler = SocketHandler(config.port, config.allowedAddresses);
 
     ProcessHandler processHandler;
 

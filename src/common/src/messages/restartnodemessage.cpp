@@ -40,10 +40,9 @@ RestartNodeMessage::RestartNodeMessage()
     : Message(std::string(RestartNodeMessage::Type))
 {}
 
-void to_json(nlohmann::json& j, const RestartNodeMessage& m) {
+void to_json(nlohmann::json& j, const RestartNodeMessage&) {
     j[Message::KeyType] = RestartNodeMessage::Type;
     j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
-    j[Message::KeySecret] = m.secret;
 }
 
 void from_json(const nlohmann::json& j, RestartNodeMessage& m) {

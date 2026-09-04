@@ -37,11 +37,13 @@
 #include "jsonsocket.h"
 #include "logging.h"
 #include "messages.h"
+#include <QHostAddress>
 #include <QMessageBox>
 #include <QTcpSocket>
 #include <Windows.h>
 #include <iostream>
 #include <memory>
+#include <numeric>
 
 namespace {
     std::string currentTime() {
@@ -59,11 +61,37 @@ namespace {
     }
 } // namespace
 
-SocketHandler::SocketHandler(int port, std::string secret)
-    : _secret(std::move(secret))
+SocketHandler::SocketHandler(int port, const std::vector<std::string>& allowedAddresses)
+    : _allowList(allowedAddresses)
+    , _allowAnyAddress(allowedAddresses.empty())
 {
     Debug("Creating socket handler");
     Log("Status", std::format("Listening on port: {}", port));
+
+    for (const std::string& entry : _allowList.invalidEntries()) {
+        Log("Error", std::format("Ignoring malformed allowed address '{}'", entry));
+    }
+
+    if (_allowAnyAddress) {
+        Log(
+            "Status",
+            "No allowed addresses were configured. Every address is able to control this "
+            "Tray, which is only safe on a trusted network"
+        );
+    }
+    else {
+        // If every configured entry was malformed the list ends up empty, in which case
+        // all connections are refused rather than silently allowing everything
+        const std::string addresses = std::accumulate(
+            allowedAddresses.begin(),
+            allowedAddresses.end(),
+            std::string(),
+            [](const std::string& lhs, const std::string& rhs) {
+                return lhs.empty() ? rhs : lhs + ", " + rhs;
+            }
+        );
+        Log("Status", std::format("Allowed addresses: {}", addresses));
+    }
 
     const bool success = _server.listen(QHostAddress::Any, static_cast<quint16>(port));
     if (!success) {
@@ -88,16 +116,7 @@ std::array<SocketHandler::MessageLog, 3> SocketHandler::lastMessages() const {
 
 void SocketHandler::handleMessage(nlohmann::json message, common::JsonSocket* socket) {
     Debug(std::format("Received message: {}", message.dump(2)));
-
-    common::Message msg = message;
-    if (msg.secret == _secret) {
-        emit messageReceived(std::move(message), socket->peerAddress());
-    }
-    else {
-        Log(std::format("Received [{}]", socket->peerAddress()), "Invalid message");
-        common::InvalidAuthMessage invalidAuthMsg;
-        socket->write(invalidAuthMsg);
-    }
+    emit messageReceived(std::move(message), socket->peerAddress());
 }
 
 void SocketHandler::sendMessage(const nlohmann::json& message, bool printMessage) {
@@ -128,10 +147,26 @@ void SocketHandler::disconnected(common::JsonSocket* socket) {
 
 void SocketHandler::newConnectionEstablished() {
     while (_server.hasPendingConnections()) {
-        common::JsonSocket* socket = new common::JsonSocket(
-            std::unique_ptr<QTcpSocket>(_server.nextPendingConnection()),
-            _secret
-        );
+        std::unique_ptr<QTcpSocket> incoming =
+            std::unique_ptr<QTcpSocket>(_server.nextPendingConnection());
+        const QHostAddress peer = incoming->peerAddress();
+
+        common::JsonSocket* socket = new common::JsonSocket(std::move(incoming));
+
+        if (!_allowAnyAddress && !_allowList.contains(peer)) {
+            Log("Status", std::format(
+                "Rejected connection from {} as it is not an allowed address",
+                peer.toString().toStdString()
+            ));
+
+            // Tell the other side why it is dropped so that C-Troll can report a
+            // misconfigured allow list instead of an unexplained disconnect
+            common::InvalidAuthMessage invalidAuthMsg;
+            socket->write(invalidAuthMsg);
+            socket->disconnectFromHost();
+            socket->deleteLater();
+            continue;
+        }
 
         Debug(std::format("Creating new connection to {}", socket->peerAddress()));
 

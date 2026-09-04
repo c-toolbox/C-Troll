@@ -52,11 +52,17 @@ void ConnectionWidget::setStatus(Status status) {
             case Status::Connected:           return "connected";
             case Status::ConnectedButInvalid: return "connected invalid";
             case Status::PartiallyConnected:  return "partially connected";
+            case Status::NotAllowed:          return "not allowed";
             case Status::Disconnected:        return "disconnected";
         }
         throw std::logic_error("Missing case label");
     }(status);
-    setToolTip(QString::fromStdString(string));
+
+    const std::string tooltip = status == Status::NotAllowed ?
+        "The Tray refused the connection as this computer is not one of the addresses "
+        "that it accepts connections from" :
+        string;
+    setToolTip(QString::fromStdString(tooltip));
 
     setProperty("state", QString::fromStdString(string));
     style()->unpolish(this);
@@ -92,7 +98,10 @@ NodeWidget::NodeWidget(const Node& node, bool showShutdownButton)
 
     _connectionLabel = new ConnectionWidget;
     assert(!(node.isConnecting && node.isConnected));
-    if (node.isConnecting) {
+    if (node.isRejected) {
+        _connectionLabel->setStatus(ConnectionWidget::Status::NotAllowed);
+    }
+    else if (node.isConnecting) {
         _connectionLabel->setStatus(ConnectionWidget::Status::ConnectedButInvalid);
     }
     else if (node.isConnected) {
@@ -228,7 +237,12 @@ NodeWidget::NodeWidget(const Node& node, bool showShutdownButton)
 void NodeWidget::updateConnectionStatus() {
     const Node* n = data::findNode(_nodeId);
     assert(n);
-    if (n->isConnecting) {
+    // The rejection survives the reconnection attempts that keep running in the
+    // background, so it is checked before the transient connection states
+    if (n->isRejected) {
+        _connectionLabel->setStatus(ConnectionWidget::Status::NotAllowed);
+    }
+    else if (n->isConnecting) {
         _connectionLabel->setStatus(ConnectionWidget::Status::ConnectedButInvalid);
     }
     else if (n->isConnected) {
@@ -424,13 +438,21 @@ void ClusterWidget::updateConnectionStatus(Node::ID nodeId) {
         nodes.begin(), nodes.end(),
         std::mem_fn(&Node::isConnected)
     );
+    const bool anyRejected = std::any_of(
+        nodes.begin(), nodes.end(),
+        std::mem_fn(&Node::isRejected)
+    );
 
-    ConnectionWidget::Status status =
-        allConnected ?
-        ConnectionWidget::Status::Connected :
-            someConnected ?
-            ConnectionWidget::Status::PartiallyConnected :
-            ConnectionWidget::Status::Disconnected;
+    ConnectionWidget::Status status = ConnectionWidget::Status::Disconnected;
+    if (allConnected) {
+        status = ConnectionWidget::Status::Connected;
+    }
+    else if (someConnected) {
+        status = ConnectionWidget::Status::PartiallyConnected;
+    }
+    else if (anyRejected) {
+        status = ConnectionWidget::Status::NotAllowed;
+    }
 
     _connectionLabel->setStatus(status);
     _killProcesses->setEnabled(someConnected);

@@ -57,8 +57,6 @@ struct Node {
     std::string ipAddress;
     /// The port on which the Tray application on that computer is listening
     int port = -1;
-    /// The secret that is sent to the tray application for authentication
-    std::string secret;
     /// A user-friendly description that potentially better identifies the node
     std::string description;
 
@@ -68,6 +66,9 @@ struct Node {
     bool isConnecting = false;
     /// A flag representing whether the node is connected or not
     bool isConnected = false;
+    /// A flag representing whether the Tray refused the connection because this computer
+    /// is not one of the addresses that the Tray accepts connections from
+    bool isRejected = false;
 };
 
 void from_json(const nlohmann::json& j, Node& n);

@@ -15,7 +15,3 @@ add_subdirectory(json SYSTEM)
 set(JSON_VALIDATOR_INSTALL FALSE CACHE BOOL "" FORCE)
 add_subdirectory(json-schema-validator SYSTEM)
 set_target_properties(nlohmann_json_schema_validator PROPERTIES FOLDER External)
-
-add_subdirectory(simplecrypt SYSTEM)
-set_compile_options(simplecrypt)
-set_target_properties(simplecrypt PROPERTIES FOLDER External)

@@ -516,8 +516,13 @@ void MainWindow::handleInvalidAuth(Node::ID id, common::InvalidAuthMessage) {
     const Node* node = data::findNode(id);
     assert(node);
 
-    std::string m = std::format("Send invalid auth token to node {}", node->name);
-    QMessageBox::critical(this, "Error in Connection", QString::fromStdString(m));
+    // The cluster overview shows this as a separate state on the connection indicator, so
+    // there is no need to interrupt the user with a dialog
+    Log("Status", std::format(
+        "The Tray on node {} refused the connection as this computer is not one of the "
+        "addresses that it accepts connections from",
+        node->name
+    ));
 }
 
 void MainWindow::handleErrorMessage(Node::ID id, common::ErrorOccurredMessage message) {
@@ -592,14 +597,7 @@ void MainWindow::startCustomProgram(Node::ID nodeId, std::string executable,
     command.workingDirectory = std::move(workingDir);
     command.commandlineParameters = std::move(arguments);
 
-    if (!n->secret.empty()) {
-        command.secret = n->secret;
-    }
-
     nlohmann::json j = command;
-    if (!n->secret.empty()) {
-        command.secret = n->secret;
-    }
     _clusterConnectionHandler.sendMessage(*n, j);
 
     // Decrease the ID for the next custom program
@@ -634,9 +632,6 @@ void MainWindow::startProcess(Process::ID processId) const {
     assert(node);
 
     common::StartCommandMessage command = startProcessCommand(*process);
-    if (!node->secret.empty()) {
-        command.secret = node->secret;
-    }
 
     _clusterConnectionHandler.sendMessage(*node, command);
 }
@@ -648,9 +643,6 @@ void MainWindow::stopProcess(Process::ID processId) const {
     assert(node);
 
     common::ExitCommandMessage command = exitProcessCommand(*process);
-    if (!node->secret.empty()) {
-        command.secret = node->secret;
-    }
 
     _clusterConnectionHandler.sendMessage(*node, command);
 }
@@ -683,9 +675,6 @@ void MainWindow::killAllProcesses(Cluster::ID id) const {
         }
 
         common::KillAllMessage command;
-        if (!node->secret.empty()) {
-            command.secret = node->secret;
-        }
         _clusterConnectionHandler.sendMessage(*node, command);
     }
 }
@@ -695,9 +684,6 @@ void MainWindow::killAllProcesses(Node::ID id) const {
     assert(node);
 
     common::KillAllMessage command;
-    if (!node->secret.empty()) {
-        command.secret = node->secret;
-    }
     _clusterConnectionHandler.sendMessage(*node, command);
 }
 
@@ -707,9 +693,6 @@ void MainWindow::killTray(Node::ID id) const {
     assert(node);
 
     common::KillTrayMessage command;
-    if (!node->secret.empty()) {
-        command.secret = node->secret;
-    }
     _clusterConnectionHandler.sendMessage(*node, command);
 }
 
@@ -737,9 +720,6 @@ void MainWindow::killTrays(Cluster::ID id) const {
 
     for (const Node* node : nodes) {
         common::KillTrayMessage command;
-        if (!node->secret.empty()) {
-            command.secret = node->secret;
-        }
         _clusterConnectionHandler.sendMessage(*node, command);
     }
 }
@@ -750,9 +730,6 @@ void MainWindow::restartNode(Node::ID id) const {
     assert(node);
 
     common::RestartNodeMessage command;
-    if (!node->secret.empty()) {
-        command.secret = node->secret;
-    }
     _clusterConnectionHandler.sendMessage(*node, command);
 }
 
@@ -780,9 +757,6 @@ void MainWindow::restartNodes(Cluster::ID id) const {
 
     for (const Node* node : nodes) {
         common::RestartNodeMessage command;
-        if (!node->secret.empty()) {
-            command.secret = node->secret;
-        }
         _clusterConnectionHandler.sendMessage(*node, command);
     }
 }
@@ -793,9 +767,6 @@ void MainWindow::shutdownNode(Node::ID id) const {
     assert(node);
 
     common::ShutdownNodeMessage command;
-    if (!node->secret.empty()) {
-        command.secret = node->secret;
-    }
     _clusterConnectionHandler.sendMessage(*node, command);
 }
 
@@ -823,9 +794,6 @@ void MainWindow::shutdownNodes(Cluster::ID id) const {
 
     for (const Node* node : nodes) {
         common::ShutdownNodeMessage command;
-        if (!node->secret.empty()) {
-            command.secret = node->secret;
-        }
         _clusterConnectionHandler.sendMessage(*node, command);
     }
 }

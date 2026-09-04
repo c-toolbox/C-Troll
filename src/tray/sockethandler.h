@@ -39,8 +39,10 @@
 
 #include <QTcpServer>
 #include <nlohmann/json.hpp>
+#include "addressallowlist.h"
 #include <array>
 #include <string>
+#include <vector>
 
 namespace common { class JsonSocket; }
 
@@ -53,7 +55,7 @@ public:
         std::string peer;
     };
 
-    SocketHandler(int port, std::string secret);
+    SocketHandler(int port, const std::vector<std::string>& allowedAddresses);
     ~SocketHandler();
 
     std::array<MessageLog, 3> lastMessages() const;
@@ -73,7 +75,9 @@ private:
 
     QTcpServer _server;
     std::vector<common::JsonSocket*> _sockets;
-    std::string _secret;
+    common::AddressAllowList _allowList;
+    /// Set when no address was configured at all, in which case every peer is accepted
+    bool _allowAnyAddress = false;
 
     std::array<MessageLog, 3> _lastMessages;
 };

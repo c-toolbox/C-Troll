@@ -32,63 +32,44 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CTROLL__DATABASE_H__
-#define __CTROLL__DATABASE_H__
+#ifndef __COMMON__ADDRESSALLOWLIST_H__
+#define __COMMON__ADDRESSALLOWLIST_H__
 
-#include "cluster.h"
-#include "color.h"
-#include "node.h"
-#include "process.h"
-#include "program.h"
-#include <memory>
-#include <set>
+#include <QHostAddress>
 #include <string>
-#include <string_view>
+#include <utility>
 #include <vector>
 
-namespace data {
+namespace common {
 
-[[nodiscard]] std::vector<const Cluster*> clusters();
-[[nodiscard]] std::vector<const Node*> nodes();
-[[nodiscard]] std::vector<const Program*> programs();
-[[nodiscard]] std::vector<const Process*> processes();
-[[nodiscard]] std::set<std::string> tags();
+/**
+ * Matches the address of a connecting peer against a list of entries that were provided
+ * in a configuration file. Each entry is either a literal IPv4/IPv6 address, a subnet in
+ * CIDR notation (`192.168.0.0/24`), or the special value `localhost`. Entries that cannot
+ * be parsed are collected in \m invalidEntries so that the caller can report them.
+ *
+ * An instance that was created from an empty list matches nothing. Deciding whether that
+ * should mean "reject everything" or "accept everything" is left to the caller.
+ */
+class AddressAllowList {
+public:
+    AddressAllowList() = default;
+    explicit AddressAllowList(const std::vector<std::string>& entries);
 
-[[nodiscard]] const Cluster* findCluster(Cluster::ID id);
-[[nodiscard]] const Cluster* findCluster(std::string_view name);
-[[nodiscard]] std::vector<const Cluster*> findClustersForProgram(const Program& program);
-[[nodiscard]] std::vector<const Cluster*> findClusterForNode(const Node& node);
+    /// Returns \c true if no usable entry was provided
+    bool isEmpty() const;
 
-[[nodiscard]] const Node* findNode(Node::ID id);
-[[nodiscard]] const Node* findNode(std::string_view name);
-[[nodiscard]] std::vector<const Node*> findNodesForCluster(const Cluster& cluster);
-void setNodeConnecting(Node::ID id, bool connected);
-void setNodeConnected(Node::ID id, bool connected);
-void setNodeRejected(Node::ID id, bool rejected);
-void setNodeDisconnecting(Node::ID id);
+    bool contains(const QHostAddress& address) const;
+    bool contains(const std::string& address) const;
 
-[[nodiscard]] const Program* findProgram(Program::ID id);
-[[nodiscard]] const Program* findProgram(std::string_view name);
+    /// The entries that were neither a valid address nor a valid subnet
+    const std::vector<std::string>& invalidEntries() const;
 
-[[nodiscard]] const Program::Configuration* findConfigurationForProgram(
-    const Program& program, Program::Configuration::ID id);
-[[nodiscard]] const Program::Configuration* findConfigurationForProgram(
-    const Program& program, std::string_view name);
+private:
+    std::vector<std::pair<QHostAddress, int>> _subnets;
+    std::vector<std::string> _invalidEntries;
+};
 
-[[nodiscard]] bool hasTag(Program::ID id, const std::vector<std::string>& tags);
+} // namespace common
 
-[[nodiscard]] const Process* findProcess(Process::ID id);
-void addProcess(std::unique_ptr<Process> process);
-void setProcessStatus(Process::ID id, common::ProcessStatusMessage::Status status);
-
-[[nodiscard]] Color colorForTag(std::string_view tag);
-void setTagColors(std::vector<Color> colors);
-
-[[nodiscard]] bool loadData(std::string_view programPath, std::string_view clusterPath,
-    std::string_view nodePath);
-
-[[nodiscard]] std::size_t dataHash();
-
-} // namespace data
-
-#endif // __CTROLL__DATABASE_H__
+#endif // __COMMON__ADDRESSALLOWLIST_H__

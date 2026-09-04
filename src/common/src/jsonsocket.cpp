@@ -35,7 +35,6 @@
 #include "jsonsocket.h"
 
 #include "logging.h"
-#include <QCryptographicHash>
 #include <QNetworkProxy>
 
 namespace {
@@ -46,20 +45,10 @@ namespace {
 
 namespace common {
 
-JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket, std::string secret)
+JsonSocket::JsonSocket(std::unique_ptr<QTcpSocket> socket)
     : QObject()
     , _socket(std::move(socket))
 {
-    if (!secret.empty()) {
-        QByteArray secretHash = QCryptographicHash::hash(
-            QString::fromStdString(secret).toUtf8(),
-            QCryptographicHash::Sha1
-        );
-
-        quint64 key = secretHash.toULongLong();
-        _crypto = SimpleCrypt(key);
-    }
-
     connect(_socket.get(), &QTcpSocket::readyRead, this, &JsonSocket::readToBuffer);
     connect(_socket.get(), &QTcpSocket::disconnected, this, &JsonSocket::disconnected);
     _socket->setProxy(QNetworkProxy::NoProxy);
@@ -70,27 +59,19 @@ void JsonSocket::connectToHost(const std::string& host, int port) {
     _socket->connectToHost(QString::fromStdString(host), static_cast<quint16>(port));
 }
 
+void JsonSocket::disconnectFromHost() {
+    _socket->disconnectFromHost();
+}
+
 QTcpSocket::SocketState JsonSocket::state() const {
     return _socket->state();
 }
-
 void JsonSocket::write(const nlohmann::json& jsonDocument) {
-    std::string jsonText = jsonDocument.dump();
-    std::string length = std::to_string(jsonText.size());
-    std::string msg = std::format("{}#{}", std::move(length), std::move(jsonText));
+    const std::string jsonText = jsonDocument.dump();
+    const std::string msg = std::format("{}#{}", jsonText.size(), jsonText);
 
-    bool success;
-    if (_crypto.has_value()) {
-        QByteArray data = _crypto->encryptToByteArray(QString::fromStdString(msg));
-        qint64 res = _socket->write(data);
-        success = (data.size() == res);
-    }
-    else {
-        const size_t messageSize = msg.size();
-        qint64 res = _socket->write(msg.c_str());
-        success = (static_cast<qint64>(messageSize) == res);
-    }
-    if (!success) {
+    const qint64 res = _socket->write(msg.data(), static_cast<qint64>(msg.size()));
+    if (res != static_cast<qint64>(msg.size())) {
         ::Log("JsonSocket", std::format("Error writing message: {})", msg));
     }
     _socket->flush();
@@ -98,15 +79,11 @@ void JsonSocket::write(const nlohmann::json& jsonDocument) {
 
 void JsonSocket::readToBuffer() {
     try {
-        QByteArray incomingData = _socket->readAll();
+        const QByteArray incomingData = _socket->readAll();
 
-        if (_crypto.has_value()) {
-            QByteArray payload = _crypto->decryptToByteArray(incomingData);
-            incomingData = payload;
-        }
-
-        _buffer.resize(static_cast<size_t>(incomingData.size()));
-        std::copy(incomingData.begin(), incomingData.end(), _buffer.begin());
+        // A message can be split across multiple packages, so the new data has to be
+        // appended to whatever is left over from the previous read
+        _buffer.insert(_buffer.end(), incomingData.begin(), incomingData.end());
 
         parseBuffer();
     }

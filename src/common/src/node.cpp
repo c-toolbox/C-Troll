@@ -45,7 +45,6 @@ namespace {
     constexpr std::string_view KeyName = "name";
     constexpr std::string_view KeyIpAddress = "ip";
     constexpr std::string_view KeyPort = "port";
-    constexpr std::string_view KeySecret = "secret";
     constexpr std::string_view KeyDescription = "description";
 } // namespace
 
@@ -53,9 +52,6 @@ void from_json(const nlohmann::json& j, Node& n) {
     j.at(KeyName).get_to(n.name);
     j.at(KeyIpAddress).get_to(n.ipAddress);
     j.at(KeyPort).get_to(n.port);
-    if (auto it = j.find(KeySecret);  it != j.end()) {
-        it->get_to(n.secret);
-    }
     if (auto it = j.find(KeyDescription);  it != j.end()) {
         it->get_to(n.description);
     }
@@ -65,9 +61,6 @@ void to_json(nlohmann::json& j, const Node& n) {
     j[KeyName] = n.name;
     j[KeyIpAddress] = n.ipAddress;
     j[KeyPort] = n.port;
-    if (n.secret != Node().secret) {
-        j[KeySecret] = n.secret;
-    }
     if (n.description != Node().description) {
         j[KeyDescription] = n.description;
     }

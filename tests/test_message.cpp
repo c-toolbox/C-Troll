@@ -41,8 +41,7 @@ TEST_CASE("Message Default Ctor", "[Message]") {
     using namespace nlohmann;
     
     const json j = {
-        { common::Message::KeyType, "" },
-        { common::Message::KeySecret, "" }
+        { common::Message::KeyType, "" }
     };
 
     common::Message msg;
@@ -56,8 +55,7 @@ TEST_CASE("Message Type", "[Message]") {
     using namespace nlohmann;
     
     const json j = {
-        { common::Message::KeyType, "abc" },
-        { common::Message::KeySecret, "" }
+        { common::Message::KeyType, "abc" }
     };
 
     common::Message msg("abc");
@@ -68,38 +66,18 @@ TEST_CASE("Message Type", "[Message]") {
     CHECK(msg.type == "abc");
 }
 
-TEST_CASE("Message.secret", "[Message]") {
-    using namespace nlohmann;
-    
-    const json j = {
-        { common::Message::KeyType, "" },
-        { common::Message::KeySecret, "abc" }
-    };
-
-    common::Message msg;
-    msg.secret = "abc";
-
-    common::Message msgDeserialize;
-    from_json(j, msgDeserialize);
-    CHECK(msg == msgDeserialize);
-    CHECK(msgDeserialize.secret == "abc");
-}
-
 TEST_CASE("Message full", "[Message]") {
     using namespace nlohmann;
     
     const json j = {
-        { common::Message::KeyType, "abc" },
-        { common::Message::KeySecret, "def" }
+        { common::Message::KeyType, "abc" }
     };
 
     common::Message msg;
     msg.type = "abc";
-    msg.secret = "def";
 
     common::Message msgDeserialize;
     from_json(j, msgDeserialize);
     CHECK(msg == msgDeserialize);
     CHECK(msgDeserialize.type == "abc");
-    CHECK(msgDeserialize.secret == "def");
 }

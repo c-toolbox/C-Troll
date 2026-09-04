@@ -46,6 +46,7 @@ set(HEADER_FILES
   include/messages/startcommandmessage.h
   include/messages/trayconnectedmessage.h
   include/messages/traystatusmessage.h
+  include/addressallowlist.h
   include/baseconfiguration.h
   include/cluster.h
   include/jsonload.h
@@ -76,6 +77,7 @@ set(SOURCE_FILES
   src/messages/trayconnectedmessage.cpp
   src/messages/traystatusmessage.cpp
 
+  src/addressallowlist.cpp
   src/baseconfiguration.cpp
   src/cluster.cpp
   src/jsonsocket.cpp
@@ -111,6 +113,5 @@ target_link_libraries(
     Qt::Core
     Qt::Widgets
     Qt::Network
-    simplecrypt
 )
 qt_disable_unicode_defines(common)

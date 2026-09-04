@@ -14,10 +14,14 @@
       "exclusiveMinimum": 0,
       "exclusiveMaximum": 65536
     },
-    "secret": {
-      "type": "string",
-      "title": "Secret",
-      "description": "A secret message that C-Troll has to end along with every message to ensure that only authorized C-Troll applications are allowed to talk to this Tray. Providing an empty string is the same as not providing this key."
+    "allowedAddresses": {
+      "type": "array",
+      "title": "Allowed Addresses",
+      "description": "The list of addresses that are allowed to connect to this Tray. Each entry is either a literal IPv4 or IPv6 address, a subnet in CIDR notation such as 192.168.0.0/24, or the value 'localhost'. Connections from any other address are rejected and closed immediately. If this key is not provided, or the list is empty, connections from every address are accepted.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
     },
     "showWindow": {
       "type": "boolean",

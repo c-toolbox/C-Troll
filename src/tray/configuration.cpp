@@ -36,7 +36,7 @@
 
 namespace {
     constexpr std::string_view KeyPort = "port";
-    constexpr std::string_view KeySecret = "secret";
+    constexpr std::string_view KeyAllowedAddresses = "allowedAddresses";
     constexpr std::string_view KeyShowWindow = "showWindow";
 
     constexpr std::string_view KeyLogFile = "logFile";
@@ -45,7 +45,7 @@ namespace {
 
 void to_json(nlohmann::json& j, const Configuration& c) {
     j[KeyPort] = c.port;
-    j[KeySecret] = c.secret;
+    j[KeyAllowedAddresses] = c.allowedAddresses;
     j[KeyShowWindow] = c.showWindow;
     j[KeyLogFile] = c.logFile;
     if (c.logRotation.has_value()) {
@@ -56,8 +56,8 @@ void to_json(nlohmann::json& j, const Configuration& c) {
 void from_json(const nlohmann::json& j, Configuration& c) {
     j.at(KeyPort).get_to(c.port);
 
-    if (auto it = j.find(KeySecret);  it != j.end()) {
-        it->get_to(c.secret);
+    if (auto it = j.find(KeyAllowedAddresses);  it != j.end()) {
+        it->get_to(c.allowedAddresses);
     }
     if (auto it = j.find(KeyShowWindow);  it != j.end()) {
         it->get_to(c.showWindow);

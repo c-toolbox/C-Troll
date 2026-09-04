@@ -217,6 +217,10 @@ ConnectionWidget[state="partially connected"] {
   background: #aaaa33;
 }
 
+ConnectionWidget[state="not allowed"] {
+  background: #9933cc;
+}
+
 ConnectionWidget[state="disconnected"] {
   background: #dd3333;
 }

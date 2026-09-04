@@ -47,7 +47,6 @@ ExitCommandMessage::ExitCommandMessage()
 void to_json(nlohmann::json& j, const ExitCommandMessage& m) {
     j[Message::KeyType] = ExitCommandMessage::Type;
     j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
-    j[Message::KeySecret] = m.secret;
     j[KeyId] = m.id;
 }
 

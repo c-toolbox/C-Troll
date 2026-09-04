@@ -52,7 +52,6 @@ TEST_CASE("Node Example: Home", "[Node]") {
     CHECK(node.name == "Home");
     CHECK(node.ipAddress == "localhost");
     CHECK(node.port == 6001);
-    CHECK(node.secret.empty());
     CHECK(node.description.empty());
 }
 
@@ -71,7 +70,6 @@ TEST_CASE("Node Example: Laptop", "[Node]") {
     CHECK(node.name == "Laptop");
     CHECK(node.ipAddress == "2001:6b0:17:fc08:ec96:21d7:75bb:3d50");
     CHECK(node.port == 5000);
-    CHECK(node.secret.empty());
     CHECK(node.description.empty());
 }
 
@@ -91,27 +89,5 @@ TEST_CASE("Node Example: Local", "[Node]") {
     CHECK(node.name == "Local");
     CHECK(node.ipAddress == "localhost");
     CHECK(node.port == 5000);
-    CHECK(node.secret.empty());
-    CHECK(node.description == "The local machine");
-}
-
-TEST_CASE("Node Example: Local w/ secret", "[Node]") {
-    using namespace nlohmann;
-
-    const json conf = R"(
-{
-  "description": "The local machine",
-  "ip": "localhost",
-  "name": "Local",
-  "port": 5000,
-  "secret": "My super secret well-known fact"
-}
-)"_json;
-
-    Node node = conf;
-    CHECK(node.name == "Local");
-    CHECK(node.ipAddress == "localhost");
-    CHECK(node.port == 5000);
-    CHECK(node.secret == "My super secret well-known fact");
     CHECK(node.description == "The local machine");
 }

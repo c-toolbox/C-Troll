@@ -32,63 +32,84 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CTROLL__DATABASE_H__
-#define __CTROLL__DATABASE_H__
+#include <catch2/catch_test_macros.hpp>
 
-#include "cluster.h"
-#include "color.h"
-#include "node.h"
-#include "process.h"
-#include "program.h"
-#include <memory>
-#include <set>
-#include <string>
-#include <string_view>
-#include <vector>
+#include "addressallowlist.h"
 
-namespace data {
+TEST_CASE("AddressAllowList: Empty", "[AddressAllowList]") {
+    const common::AddressAllowList list = common::AddressAllowList({});
 
-[[nodiscard]] std::vector<const Cluster*> clusters();
-[[nodiscard]] std::vector<const Node*> nodes();
-[[nodiscard]] std::vector<const Program*> programs();
-[[nodiscard]] std::vector<const Process*> processes();
-[[nodiscard]] std::set<std::string> tags();
+    CHECK(list.isEmpty());
+    CHECK(!list.contains("127.0.0.1"));
+    CHECK(!list.contains("192.168.0.1"));
+}
 
-[[nodiscard]] const Cluster* findCluster(Cluster::ID id);
-[[nodiscard]] const Cluster* findCluster(std::string_view name);
-[[nodiscard]] std::vector<const Cluster*> findClustersForProgram(const Program& program);
-[[nodiscard]] std::vector<const Cluster*> findClusterForNode(const Node& node);
+TEST_CASE("AddressAllowList: Literal IPv4", "[AddressAllowList]") {
+    const common::AddressAllowList list =
+        common::AddressAllowList({ "192.168.0.1", "10.0.0.5" });
 
-[[nodiscard]] const Node* findNode(Node::ID id);
-[[nodiscard]] const Node* findNode(std::string_view name);
-[[nodiscard]] std::vector<const Node*> findNodesForCluster(const Cluster& cluster);
-void setNodeConnecting(Node::ID id, bool connected);
-void setNodeConnected(Node::ID id, bool connected);
-void setNodeRejected(Node::ID id, bool rejected);
-void setNodeDisconnecting(Node::ID id);
+    CHECK(!list.isEmpty());
+    CHECK(list.contains("192.168.0.1"));
+    CHECK(list.contains("10.0.0.5"));
+    CHECK(!list.contains("192.168.0.2"));
+    CHECK(!list.contains("10.0.0.6"));
+}
 
-[[nodiscard]] const Program* findProgram(Program::ID id);
-[[nodiscard]] const Program* findProgram(std::string_view name);
+TEST_CASE("AddressAllowList: IPv4 subnet", "[AddressAllowList]") {
+    const common::AddressAllowList list =
+        common::AddressAllowList({ "192.168.0.0/24" });
 
-[[nodiscard]] const Program::Configuration* findConfigurationForProgram(
-    const Program& program, Program::Configuration::ID id);
-[[nodiscard]] const Program::Configuration* findConfigurationForProgram(
-    const Program& program, std::string_view name);
+    CHECK(list.contains("192.168.0.1"));
+    CHECK(list.contains("192.168.0.255"));
+    CHECK(!list.contains("192.168.1.1"));
+    CHECK(!list.contains("10.0.0.1"));
+}
 
-[[nodiscard]] bool hasTag(Program::ID id, const std::vector<std::string>& tags);
+TEST_CASE("AddressAllowList: localhost", "[AddressAllowList]") {
+    const common::AddressAllowList list = common::AddressAllowList({ "localhost" });
 
-[[nodiscard]] const Process* findProcess(Process::ID id);
-void addProcess(std::unique_ptr<Process> process);
-void setProcessStatus(Process::ID id, common::ProcessStatusMessage::Status status);
+    CHECK(list.contains("127.0.0.1"));
+    CHECK(list.contains("::1"));
+    CHECK(!list.contains("192.168.0.1"));
+}
 
-[[nodiscard]] Color colorForTag(std::string_view tag);
-void setTagColors(std::vector<Color> colors);
+TEST_CASE("AddressAllowList: IPv6", "[AddressAllowList]") {
+    const common::AddressAllowList list =
+        common::AddressAllowList({ "2001:6b0:17:fc08:ec96:21d7:75bb:3d50" });
 
-[[nodiscard]] bool loadData(std::string_view programPath, std::string_view clusterPath,
-    std::string_view nodePath);
+    CHECK(list.contains("2001:6b0:17:fc08:ec96:21d7:75bb:3d50"));
+    CHECK(!list.contains("2001:6b0:17:fc08:ec96:21d7:75bb:3d51"));
+}
 
-[[nodiscard]] std::size_t dataHash();
+TEST_CASE("AddressAllowList: IPv4-mapped IPv6 peer", "[AddressAllowList]") {
+    // A dual-stack server reports IPv4 peers in this form
+    const common::AddressAllowList list = common::AddressAllowList({ "192.168.0.1" });
 
-} // namespace data
+    CHECK(list.contains("::ffff:192.168.0.1"));
+    CHECK(!list.contains("::ffff:192.168.0.2"));
+}
 
-#endif // __CTROLL__DATABASE_H__
+TEST_CASE("AddressAllowList: Invalid entries", "[AddressAllowList]") {
+    const common::AddressAllowList list =
+        common::AddressAllowList({ "192.168.0.1", "not-an-address", "" });
+
+    CHECK(list.contains("192.168.0.1"));
+    REQUIRE(list.invalidEntries().size() == 1);
+    CHECK(list.invalidEntries().front() == "not-an-address");
+}
+
+TEST_CASE("AddressAllowList: Only invalid entries denies everything",
+          "[AddressAllowList]")
+{
+    const common::AddressAllowList list = common::AddressAllowList({ "not-an-address" });
+
+    CHECK(list.isEmpty());
+    CHECK(!list.contains("127.0.0.1"));
+}
+
+TEST_CASE("AddressAllowList: Malformed peer address", "[AddressAllowList]") {
+    const common::AddressAllowList list = common::AddressAllowList({ "192.168.0.1" });
+
+    CHECK(!list.contains("definitely not an address"));
+    CHECK(!list.contains(""));
+}

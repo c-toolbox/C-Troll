@@ -40,10 +40,9 @@ ShutdownNodeMessage::ShutdownNodeMessage()
     : Message(std::string(ShutdownNodeMessage::Type))
 {}
 
-void to_json(nlohmann::json& j, const ShutdownNodeMessage& m) {
+void to_json(nlohmann::json& j, const ShutdownNodeMessage&) {
     j[Message::KeyType] = ShutdownNodeMessage::Type;
     j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
-    j[Message::KeySecret] = m.secret;
 }
 
 void from_json(const nlohmann::json& j, ShutdownNodeMessage& m) {

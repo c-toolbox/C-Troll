@@ -40,10 +40,9 @@ KillAllMessage::KillAllMessage()
     : Message(std::string(KillAllMessage::Type))
 {}
 
-void to_json(nlohmann::json& j, const KillAllMessage& m) {
+void to_json(nlohmann::json& j, const KillAllMessage&) {
     j[Message::KeyType] = KillAllMessage::Type;
     j[Message::KeyVersion] = { api::MajorVersion, api::MinorVersion, api::PatchVersion };
-    j[Message::KeySecret] = m.secret;
 }
 
 void from_json(const nlohmann::json& j, KillAllMessage& m) {

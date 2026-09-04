@@ -32,63 +32,67 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __CTROLL__DATABASE_H__
-#define __CTROLL__DATABASE_H__
+#include "addressallowlist.h"
 
-#include "cluster.h"
-#include "color.h"
-#include "node.h"
-#include "process.h"
-#include "program.h"
-#include <memory>
-#include <set>
-#include <string>
-#include <string_view>
-#include <vector>
+namespace {
+    // A dual-stack listening socket reports IPv4 peers as ::ffff:a.b.c.d, which would not
+    // match an entry that was written as a plain IPv4 address
+    QHostAddress normalized(const QHostAddress& address) {
+        bool isIpv4 = false;
+        const quint32 ipv4 = address.toIPv4Address(&isIpv4);
+        return isIpv4 ? QHostAddress(ipv4) : address;
+    }
+} // namespace
 
-namespace data {
+namespace common {
 
-[[nodiscard]] std::vector<const Cluster*> clusters();
-[[nodiscard]] std::vector<const Node*> nodes();
-[[nodiscard]] std::vector<const Program*> programs();
-[[nodiscard]] std::vector<const Process*> processes();
-[[nodiscard]] std::set<std::string> tags();
+AddressAllowList::AddressAllowList(const std::vector<std::string>& entries) {
+    for (const std::string& entry : entries) {
+        const QString value = QString::fromStdString(entry).trimmed();
+        if (value.isEmpty()) {
+            continue;
+        }
 
-[[nodiscard]] const Cluster* findCluster(Cluster::ID id);
-[[nodiscard]] const Cluster* findCluster(std::string_view name);
-[[nodiscard]] std::vector<const Cluster*> findClustersForProgram(const Program& program);
-[[nodiscard]] std::vector<const Cluster*> findClusterForNode(const Node& node);
+        if (value.compare(QLatin1String("localhost"), Qt::CaseInsensitive) == 0) {
+            _subnets.emplace_back(QHostAddress(QHostAddress::LocalHost), 32);
+            _subnets.emplace_back(QHostAddress(QHostAddress::LocalHostIPv6), 128);
+            continue;
+        }
 
-[[nodiscard]] const Node* findNode(Node::ID id);
-[[nodiscard]] const Node* findNode(std::string_view name);
-[[nodiscard]] std::vector<const Node*> findNodesForCluster(const Cluster& cluster);
-void setNodeConnecting(Node::ID id, bool connected);
-void setNodeConnected(Node::ID id, bool connected);
-void setNodeRejected(Node::ID id, bool rejected);
-void setNodeDisconnecting(Node::ID id);
+        // Handles both literal addresses and CIDR notation; -1 signals a parsing failure
+        const QPair<QHostAddress, int> subnet = QHostAddress::parseSubnet(value);
+        if (subnet.second == -1) {
+            _invalidEntries.push_back(entry);
+            continue;
+        }
+        _subnets.emplace_back(subnet.first, subnet.second);
+    }
+}
 
-[[nodiscard]] const Program* findProgram(Program::ID id);
-[[nodiscard]] const Program* findProgram(std::string_view name);
+bool AddressAllowList::isEmpty() const {
+    return _subnets.empty();
+}
 
-[[nodiscard]] const Program::Configuration* findConfigurationForProgram(
-    const Program& program, Program::Configuration::ID id);
-[[nodiscard]] const Program::Configuration* findConfigurationForProgram(
-    const Program& program, std::string_view name);
+bool AddressAllowList::contains(const QHostAddress& address) const {
+    if (address.isNull()) {
+        return false;
+    }
 
-[[nodiscard]] bool hasTag(Program::ID id, const std::vector<std::string>& tags);
+    const QHostAddress addr = normalized(address);
+    for (const std::pair<QHostAddress, int>& subnet : _subnets) {
+        if (addr.isInSubnet(subnet.first, subnet.second)) {
+            return true;
+        }
+    }
+    return false;
+}
 
-[[nodiscard]] const Process* findProcess(Process::ID id);
-void addProcess(std::unique_ptr<Process> process);
-void setProcessStatus(Process::ID id, common::ProcessStatusMessage::Status status);
+bool AddressAllowList::contains(const std::string& address) const {
+    return contains(QHostAddress(QString::fromStdString(address)));
+}
 
-[[nodiscard]] Color colorForTag(std::string_view tag);
-void setTagColors(std::vector<Color> colors);
+const std::vector<std::string>& AddressAllowList::invalidEntries() const {
+    return _invalidEntries;
+}
 
-[[nodiscard]] bool loadData(std::string_view programPath, std::string_view clusterPath,
-    std::string_view nodePath);
-
-[[nodiscard]] std::size_t dataHash();
-
-} // namespace data
-
-#endif // __CTROLL__DATABASE_H__
+} // namespace common

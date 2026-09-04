@@ -107,24 +107,6 @@ TEST_CASE("(Node) port", "[Node]") {
     CHECK(j1 == j2);
 }
 
-TEST_CASE("(Node) secret", "[Node]") {
-    Node msg;
-    msg.secret = "foobar";
-
-
-    nlohmann::json j1;
-    to_json(j1, msg);
-
-    Node msgDeserialize;
-    from_json(j1, msgDeserialize);
-    CHECK(msg == msgDeserialize);
-    CHECK(msgDeserialize.secret == "foobar");
-
-    nlohmann::json j2;
-    to_json(j2, msgDeserialize);
-    CHECK(j1 == j2);
-}
-
 TEST_CASE("(Node) description", "[Node]") {
     Node msg;
     msg.description = "foobar";

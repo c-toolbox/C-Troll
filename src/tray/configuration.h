@@ -39,13 +39,16 @@
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <string>
+#include <vector>
 
 struct Configuration {
     /// The port on which this Tray should listen to incoming connections
     int port = 5000;
 
-    /// The secret that is used to encrypt messages and be used as a validation token
-    std::string secret;
+    /// The addresses that are allowed to connect to this Tray. Each entry is either a
+    /// literal IPv4/IPv6 address, a subnet in CIDR notation, or `localhost`. If the list
+    /// is empty, connections from any address are accepted
+    std::vector<std::string> allowedAddresses;
 
     /// If this is set to true, the centralwindow will be shown on startup
     bool showWindow = false;

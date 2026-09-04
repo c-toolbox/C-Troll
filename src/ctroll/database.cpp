@@ -183,6 +183,16 @@ void setNodeConnected(Node::ID id, bool connected) {
     }
 }
 
+void setNodeRejected(Node::ID id, bool rejected) {
+    const auto it = std::find_if(
+        gNodes.begin(), gNodes.end(),
+        [id](const std::unique_ptr<Node>& n) { return n->id == id; }
+    );
+    if (it != gNodes.end()) {
+        (*it)->isRejected = rejected;
+    }
+}
+
 void setNodeDisconnecting(Node::ID id) {
     const auto it = std::find_if(
         gNodes.begin(), gNodes.end(),
@@ -193,7 +203,6 @@ void setNodeDisconnecting(Node::ID id) {
         (*it)->isConnected = false;
     }
 }
-
 const Program* findProgram(Program::ID id) {
     const auto it = std::find_if(
         gPrograms.begin(), gPrograms.end(),
@@ -461,7 +470,6 @@ bool loadData(std::string_view programPath, std::string_view clusterPath,
         addHash(std::hash<std::string>()(node->name));
         addHash(std::hash<std::string>()(node->ipAddress));
         addHash(std::hash<int>()(node->port));
-        addHash(std::hash<std::string>()(node->secret));
         addHash(std::hash<bool>()(node->isConnected));
     }
 

@@ -58,7 +58,6 @@ private:
     QLineEdit* _name = nullptr;
     QLineEdit* _ip = nullptr;
     QSpinBox* _port = nullptr;
-    QLineEdit* _secret = nullptr;
     QLineEdit* _description = nullptr;
 
     QPushButton* _saveButton = nullptr;

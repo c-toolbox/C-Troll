@@ -53,6 +53,7 @@ public:
         Connected = 0,
         ConnectedButInvalid, ///< If a port is listening, but it is not the tray
         PartiallyConnected,
+        NotAllowed, ///< If the Tray refused this computer as a controlling address
         Disconnected
     };
 

@@ -45,7 +45,6 @@ namespace common {
 struct Message {
     static constexpr std::string_view KeyType = "type";
     static constexpr std::string_view KeyVersion = "version";
-    static constexpr std::string_view KeySecret = "secret";
 
     Message() = default;
     explicit Message(std::string type);
@@ -53,11 +52,6 @@ struct Message {
 
     /// A string representing the type of payload contained in this Message
     std::string type;
-
-    /// A string representing the SHA512 hashed secret that is needed to communicate with
-    /// the tray socket that this message gets sent to. For messages that go from the tray
-    /// to the main application, this value is ignored
-    std::string secret;
 };
 
 using ApiVersion = std::array<int, 3>;

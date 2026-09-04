@@ -81,7 +81,7 @@ void ClusterConnectionHandler::initialize() {
         );
 
         std::unique_ptr<common::JsonSocket> jsonSocket =
-            std::make_unique<common::JsonSocket>(std::move(socket), node->secret);
+            std::make_unique<common::JsonSocket>(std::move(socket));
 
         connect(
             jsonSocket.get(), &common::JsonSocket::messageReceived,
@@ -186,6 +186,7 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
         assert(!node->isConnected);
         data::setNodeConnecting(nodeId, false);
         data::setNodeConnected(nodeId, true);
+        data::setNodeRejected(nodeId, false);
 
         std::vector<const Cluster*> clusters = data::findClusterForNode(*node);
         for (const Cluster* cluster : clusters) {
@@ -194,6 +195,16 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
     }
     else if (common::isValidMessage<common::InvalidAuthMessage>(message)) {
         common::InvalidAuthMessage msg = message;
+
+        const Node* node = data::findNode(nodeId);
+        assert(node);
+        data::setNodeRejected(nodeId, true);
+
+        std::vector<const Cluster*> clusters = data::findClusterForNode(*node);
+        for (const Cluster* cluster : clusters) {
+            emit connectedStatusChanged(cluster->id, node->id);
+        }
+
         emit receivedInvalidAuthStatus(nodeId, msg);
     }
     else if (common::isValidMessage<common::ProcessOutputMessage>(message)) {

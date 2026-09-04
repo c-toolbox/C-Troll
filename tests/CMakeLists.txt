@@ -34,6 +34,7 @@
 
 add_executable(UnitTest
   # Configurations
+  test_addressallowlist.cpp
   test_cluster.cpp
   test_cluster_examples.cpp
   test_node.cpp
