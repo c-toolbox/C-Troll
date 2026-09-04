@@ -71,3 +71,54 @@ endif ()
 
 add_subdirectory(src)
 add_subdirectory(tests)
+
+
+##########################################################################################
+# Deployment                                                                             #
+##########################################################################################
+
+install(TARGETS C-Troll Editor Starter Tray RUNTIME DESTINATION ".")
+
+# Qt and the third-party libraries are copied next to the executables by vcpkg's applocal
+# deployment during the build, so they are picked up from the build output directory. The
+# excluded plugins are only pulled in as transitive dependencies of Qt6Svg and are not
+# used by any of the applications
+install(
+  DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/"
+  DESTINATION "."
+  FILES_MATCHING
+    PATTERN "*.dll"
+    PATTERN "Qt6Svg*.dll" EXCLUDE
+    PATTERN "iconengines" EXCLUDE
+    PATTERN "imageformats" EXCLUDE
+    PATTERN "networkinformation" EXCLUDE
+)
+
+# The applocal deployment does not cover Qt plugins, which are loaded at runtime and are
+# therefore not detected as dependencies of the executables. The OpenSSL TLS backend is
+# left out on purpose as Schannel is the native backend on Windows
+install(FILES "$<TARGET_FILE:Qt6::QWindowsIntegrationPlugin>" DESTINATION "platforms")
+install(FILES "$<TARGET_FILE:Qt6::QModernWindowsStylePlugin>" DESTINATION "styles")
+install(
+  FILES
+    "$<TARGET_FILE:Qt6::QSchannelBackendPlugin>"
+    "$<TARGET_FILE:Qt6::QTlsBackendCertOnlyPlugin>"
+  DESTINATION "tls"
+)
+
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/example" DESTINATION ".")
+install(
+  FILES
+    "${PROJECT_SOURCE_DIR}/CREDITS"
+    "${PROJECT_SOURCE_DIR}/LICENSE"
+    "${PROJECT_SOURCE_DIR}/README.md"
+  DESTINATION "."
+)
+
+set(CPACK_GENERATOR "ZIP")
+set(CPACK_PACKAGE_NAME "C-Troll")
+set(CPACK_PACKAGE_FILE_NAME "C-Troll")
+set(CPACK_PACKAGE_DIRECTORY "${PROJECT_SOURCE_DIR}")
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)
+set(CPACK_VERBATIM_VARIABLES ON)
+include(CPack)

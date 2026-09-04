@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
     "minor": 25,
@@ -21,7 +21,10 @@
       "name": "deploy",
       "inherits": "windows-msvc",
       "displayName": "Deployment build",
-      "binaryDir": "${sourceDir}/build-deploy"
+      "binaryDir": "${sourceDir}/build-deploy",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install"
+      }
     }
   ],
   "buildPresets": [
@@ -34,6 +37,29 @@
       "name": "release",
       "configurePreset": "windows-msvc",
       "configuration": "Release"
+    },
+    {
+      "name": "deploy",
+      "configurePreset": "deploy",
+      "configuration": "RelWithDebInfo",
+      "targets": [ "C-Troll", "Editor", "Starter", "Tray" ]
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "deploy",
+      "configurePreset": "deploy",
+      "configurations": [ "RelWithDebInfo" ]
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "deploy",
+      "steps": [
+        { "type": "configure", "name": "deploy" },
+        { "type": "build", "name": "deploy" },
+        { "type": "package", "name": "deploy" }
+      ]
     }
   ]
 }
