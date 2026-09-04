@@ -139,6 +139,24 @@ TEST_CASE("StartCommand.commandlineParameters", "[StartCommand]") {
     CHECK(j1 == j2);
 }
 
+TEST_CASE("StartCommand.preStart", "[StartCommand]") {
+    common::StartCommandMessage msg;
+    msg.preStart = "abc";
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    common::StartCommandMessage msgDeserialize;
+    from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.preStart == "abc");
+
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
+}
+
 TEST_CASE("StartCommand.forwardStdOutStdErr", "[StartCommand]") {
     common::StartCommandMessage msg;
     msg.forwardStdOutStdErr = true;
@@ -253,6 +271,7 @@ TEST_CASE("StartCommand full", "[StartCommand]") {
     msg.executable = "abc";
     msg.workingDirectory = "def";
     msg.commandlineParameters = "ghi";
+    msg.preStart = "jkl";
     msg.forwardStdOutStdErr = true;
     msg.programId = 13;
     msg.configurationId = 14;
@@ -271,6 +290,7 @@ TEST_CASE("StartCommand full", "[StartCommand]") {
     CHECK(msgDeserialize.executable == "abc");
     CHECK(msgDeserialize.workingDirectory == "def");
     CHECK(msgDeserialize.commandlineParameters == "ghi");
+    CHECK(msgDeserialize.preStart == "jkl");
     CHECK(msgDeserialize.forwardStdOutStdErr == true);
     CHECK(msgDeserialize.programId == 13);
     CHECK(msgDeserialize.configurationId == 14);

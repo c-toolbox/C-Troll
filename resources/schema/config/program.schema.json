@@ -76,6 +76,11 @@
       "title": "Pre-Start Script",
       "description": "A script that gets executed on the C-Troll computer before this program starts"
     },
+    "preStartNode": {
+      "type": "string",
+      "title": "Pre-Start Script (Node)",
+      "description": "A script that gets executed on each node of the cluster before this program is started on that node. Each node waits for its own script to finish, but does not wait for the other nodes or for C-Troll"
+    },
     "shouldForwardMessages": {
       "type": "boolean",
       "title": "Should Forward Console Messages",

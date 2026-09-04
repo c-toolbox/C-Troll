@@ -231,11 +231,20 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     _preStart->setPlaceholderText("optional");
     editLayout->addWidget(_preStart, 8, 1, 1, 2);
 
-    editLayout->addWidget(new QLabel("Description:"), 9, 0);
+    editLayout->addWidget(new QLabel("PreStart Script (Node)"), 9, 0);
+    _preStartNode = new QLineEdit;
+    _preStartNode->setToolTip(
+        "A script that gets executed on each node before this program is started on that "
+        "node. Each node waits for its own script to finish, but not for the other nodes"
+    );
+    _preStartNode->setPlaceholderText("optional");
+    editLayout->addWidget(_preStartNode, 9, 1, 1, 2);
+
+    editLayout->addWidget(new QLabel("Description:"), 10, 0);
     _description = new QLineEdit;
     _description->setToolTip("Additional information for the user about the program");
     _description->setPlaceholderText("optional");
-    editLayout->addWidget(_description, 9, 1, 1, 2);
+    editLayout->addWidget(_description, 10, 1, 1, 2);
 
     QLabel* parametersLabel = new QLabel(
         "The complete arguments for the program are given in the following order: 1. the "
@@ -244,14 +253,14 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     );
     parametersLabel->setWordWrap(true);
     parametersLabel->setObjectName("information-label");
-    editLayout->addWidget(parametersLabel, 10, 0, 1, 3);
+    editLayout->addWidget(parametersLabel, 11, 0, 1, 3);
 
-    editLayout->addWidget(new Spacer, 11, 0, 1, 3);
+    editLayout->addWidget(new Spacer, 12, 0, 1, 3);
 
     {
         // Configurations
 
-        editLayout->addWidget(new QLabel("Configurations"), 12, 0);
+        editLayout->addWidget(new QLabel("Configurations"), 13, 0);
 
         QPushButton* newConfiguration = new AddButton;
         connect(
@@ -267,7 +276,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 updateSaveButton();
             }
         );
-        editLayout->addWidget(newConfiguration, 12, 1, 1, 2, Qt::AlignRight);
+        editLayout->addWidget(newConfiguration, 13, 1, 1, 2, Qt::AlignRight);
 
         _configurations = new DynamicList;
         _configurations->setToolTip(
@@ -277,15 +286,15 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
             _configurations, &DynamicList::updated,
             this, &ProgramDialog::updateSaveButton
         );
-        editLayout->addWidget(_configurations, 13, 0, 1, 3);
+        editLayout->addWidget(_configurations, 14, 0, 1, 3);
     }
 
-    editLayout->addWidget(new Spacer, 14, 0, 1, 3);
+    editLayout->addWidget(new Spacer, 15, 0, 1, 3);
 
     {
         // Clusters
 
-        editLayout->addWidget(new QLabel("Clusters"), 15, 0);
+        editLayout->addWidget(new QLabel("Clusters"), 16, 0);
 
         QPushButton* newCluster = new AddButton;
         connect(
@@ -299,19 +308,19 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 }
             }
         );
-        editLayout->addWidget(newCluster, 15, 1, 1, 2, Qt::AlignRight);
+        editLayout->addWidget(newCluster, 16, 1, 1, 2, Qt::AlignRight);
 
         _clusters = new DynamicList;
         _clusters->setToolTip("The list of clusters on which the program can be run");
         connect(_clusters, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
-        editLayout->addWidget(_clusters, 16, 0, 1, 3);
+        editLayout->addWidget(_clusters, 17, 0, 1, 3);
     }
 
-    editLayout->addWidget(new Spacer, 17, 0, 1, 3);
+    editLayout->addWidget(new Spacer, 18, 0, 1, 3);
 
     {
         // Tags
-        editLayout->addWidget(new QLabel("Tags (optional)"), 18, 0);
+        editLayout->addWidget(new QLabel("Tags (optional)"), 19, 0);
 
         QPushButton* t = new AddButton;
         connect(
@@ -323,13 +332,13 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 updateSaveButton();
             }
         );
-        editLayout->addWidget(t, 18, 1, 1, 2, Qt::AlignRight);
+        editLayout->addWidget(t, 19, 1, 1, 2, Qt::AlignRight);
 
         _tags = new DynamicList;
         _tags->setToolTip("A list of all tags that this program is associated with");
         connect(_tags, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
 
-        editLayout->addWidget(_tags, 19, 0, 1, 3);
+        editLayout->addWidget(_tags, 20, 0, 1, 3);
     }
 
     layout->addWidget(edit);
@@ -366,6 +375,10 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
         if (program.delay.has_value()) {
             _delay->setValue(static_cast<int>(program.delay->count()));
         }
+        _preStart->setText(QString::fromStdString(program.preStart));
+        _preStart->setCursorPosition(0);
+        _preStartNode->setText(QString::fromStdString(program.preStartNode));
+        _preStartNode->setCursorPosition(0);
         _description->setText(QString::fromStdString(program.description));
         for (const std::string& tag : program.tags) {
             QLineEdit* t = new QLineEdit(QString::fromStdString(tag));
@@ -437,6 +450,7 @@ void ProgramDialog::save() {
         program.delay = std::chrono::milliseconds(_delay->value());
     }
     program.preStart = _preStart->text().toStdString();
+    program.preStartNode = _preStartNode->text().toStdString();
     program.description = _description->text().toStdString();
     for (QLineEdit* tag : _tags->items<QLineEdit>()) {
         std::string t = tag->text().toStdString();

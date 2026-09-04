@@ -41,6 +41,7 @@ namespace {
     constexpr std::string_view KeyExecutable = "executable";
     constexpr std::string_view KeyWorkingDirectory = "workingDirectory";
     constexpr std::string_view KeyCommandlineArguments = "commandlineArguments";
+    constexpr std::string_view KeyPreStart = "prestart";
 
     constexpr std::string_view KeyProgramId = "programId";
     constexpr std::string_view KeyConfigurationId = "configurationId";
@@ -70,6 +71,9 @@ void to_json(nlohmann::json& j, const StartCommandMessage& m) {
     if (!m.commandlineParameters.empty()) {
         j[KeyCommandlineArguments] = m.commandlineParameters;
     }
+    if (!m.preStart.empty()) {
+        j[KeyPreStart] = m.preStart;
+    }
     j[KeyProgramId] = m.programId;
     j[KeyConfigurationId] = m.configurationId;
     j[KeyClusterId] = m.clusterId;
@@ -94,6 +98,10 @@ void from_json(const nlohmann::json& j, StartCommandMessage& m) {
 
     if (auto it = j.find(KeyCommandlineArguments);  it != j.end()) {
         it->get_to(m.commandlineParameters);
+    }
+
+    if (auto it = j.find(KeyPreStart);  it != j.end()) {
+        it->get_to(m.preStart);
     }
 
     j.at(KeyProgramId).get_to(m.programId);

@@ -345,6 +345,18 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
     msg.status = common::ProcessStatusMessage::Status::Starting;
     emit sendSocketMessage(msg);
 
+    // The pre-start script has to finish on this node before the actual process is
+    // started. Other nodes are unaffected as each Tray only waits for its own script
+    if (!command.preStart.empty()) {
+        Log(std::format("Starting pre-start script '{}'", command.preStart));
+        QProcess preStart;
+        preStart.start(QString::fromStdString(command.preStart));
+        preStart.waitForFinished(-1);
+        Log(std::format(
+            "Pre-start script finished with exit code {}", preStart.exitCode()
+        ));
+    }
+
     if (!command.workingDirectory.empty()) {
         process->setWorkingDirectory(QString::fromStdString(command.workingDirectory));
     }

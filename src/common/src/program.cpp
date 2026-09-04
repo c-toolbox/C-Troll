@@ -52,6 +52,7 @@ namespace {
     constexpr std::string_view KeyEnabled = "enabled";
     constexpr std::string_view KeyDelay = "delay";
     constexpr std::string_view KeyPreStart = "prestart";
+    constexpr std::string_view KeyPreStartNode = "prestartnode";
     constexpr std::string_view KeyConfigurations = "configurations";
 
     constexpr std::string_view KeyConfigurationName = "name";
@@ -125,6 +126,9 @@ void from_json(const nlohmann::json& j, Program& p) {
     if (auto it = j.find(KeyPreStart);  it != j.end()) {
         it->get_to(p.preStart);
     }
+    if (auto it = j.find(KeyPreStartNode);  it != j.end()) {
+        it->get_to(p.preStartNode);
+    }
     if (auto it = j.find(KeyConfigurations);  it != j.end()) {
         it->get_to(p.configurations);
     }
@@ -179,6 +183,9 @@ void to_json(nlohmann::json& j, const Program& p) {
     }
     if (p.preStart != Program().preStart) {
         j[KeyPreStart] = p.preStart;
+    }
+    if (p.preStartNode != Program().preStartNode) {
+        j[KeyPreStartNode] = p.preStartNode;
     }
     j[KeyConfigurations] = p.configurations;
     j[KeyClusters] = p.clusters;

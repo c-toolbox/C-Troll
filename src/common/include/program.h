@@ -97,6 +97,9 @@ struct Program {
     /// An optional application that gets executed on the C-Troll computer before this
     /// program is started
     std::string preStart;
+    /// An optional application that gets executed on each node of the cluster before this
+    /// program is started on that node. Each node only waits for its own script
+    std::string preStartNode;
     /// A list of tags that are associated with this Program
     std::vector<std::string> tags;
     /// A user-friendly description that potentially better identifies the whole program

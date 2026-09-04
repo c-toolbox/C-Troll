@@ -58,6 +58,8 @@ struct StartCommandMessage : public Message {
     std::string workingDirectory;
     /// The list of commandline parameters to be passed to executable
     std::string commandlineParameters;
+    /// An optional script that has to finish on this node before executable is started
+    std::string preStart;
     /// This value determines whether the process should send back console messages
     bool forwardStdOutStdErr = false;
     /// This value determines whether the program should auto restart if it crashes

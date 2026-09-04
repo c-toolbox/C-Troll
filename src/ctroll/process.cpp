@@ -96,6 +96,7 @@ std::optional<common::StartCommandMessage> startProcessCommand(const Process& pr
     t.commandlineParameters = std::format(
         "{} {} {}", prg.commandlineParameters, conf.parameters, it->parameters
     );
+    t.preStart = prg.preStartNode;
     t.programId = process.programId.v;
     t.configurationId = process.configurationId.v;
     t.clusterId = process.clusterId.v;

@@ -197,6 +197,24 @@ TEST_CASE("Program.preStart", "[Program]") {
     CHECK(j1 == j2);
 }
 
+TEST_CASE("Program.preStartNode", "[Program]") {
+    Program msg;
+    msg.preStartNode = "abc";
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Program msgDeserialize;
+    from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    CHECK(msgDeserialize.preStartNode == "abc");
+
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
+}
+
 TEST_CASE("Program.tags", "[Program]") {
     Program msg;
     msg.tags.push_back("foo");
@@ -278,6 +296,7 @@ TEST_CASE("Program.clusters", "[Program]") {
     msg.isEnabled = false;
     msg.delay = std::chrono::milliseconds(13);
     msg.preStart = "barfoo";
+    msg.preStartNode = "barfoonode";
     msg.tags.push_back("foo");
     msg.tags.push_back("bar");
     msg.description = "foobar";
@@ -307,6 +326,7 @@ TEST_CASE("Program.clusters", "[Program]") {
     CHECK(msgDeserialize.isEnabled == false);
     CHECK(msgDeserialize.delay == std::chrono::milliseconds(13));
     CHECK(msgDeserialize.preStart == "barfoo");
+    CHECK(msgDeserialize.preStartNode == "barfoonode");
     REQUIRE(msgDeserialize.tags.size() == 2);
     CHECK(msgDeserialize.tags[0] == "foo");
     CHECK(msgDeserialize.tags[1] == "bar");

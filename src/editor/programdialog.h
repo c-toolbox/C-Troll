@@ -94,6 +94,7 @@ private:
     QSpinBox* _delay = nullptr;
 
     QLineEdit* _preStart = nullptr;
+    QLineEdit* _preStartNode = nullptr;
     QLineEdit* _description = nullptr;
 
     DynamicList* _tags = nullptr;
