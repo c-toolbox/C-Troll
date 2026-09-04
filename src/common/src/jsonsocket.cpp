@@ -90,43 +90,74 @@ void JsonSocket::readToBuffer() {
     catch (const std::exception&) {
         ::Log("JsonSocket::readToBuffer", "Caught exception when trying to read buffer");
         ::Log("JsonSocket::readToBuffer (Buffer Size", std::to_string(_buffer.size()));
-        ::Log(
-            "JsonSocket::readToBuffer (Buffer Contents)",
-            std::string(_buffer.begin(), _buffer.end())
-        );
         ::Log("JsonSocket::readToBuffer (payload size)", std::to_string(_payloadSize));
-
-        _payloadSize = -1;
-        _buffer.clear();
     }
 }
 
 void JsonSocket::parseBuffer() {
-    // If it is the first package to arrive, we extract the expected length of the message
-    if (_payloadSize == -1) {
-        const auto it = std::find(_buffer.begin(), _buffer.end(), '#');
-        if (it != _buffer.end()) {
-            std::string sizeString = std::string(_buffer.begin(), it);
-            _payloadSize = std::stoi(sizeString);
-            _buffer.erase(_buffer.begin(), it + 1);
-        }
-    }
+    // A single read might contain any number of messages, so we keep extracting messages
+    // until the buffer only holds an incomplete one
+    while (true) {
+        // If it is the first package to arrive, we extract the expected length of the
+        // message
+        if (_payloadSize == -1) {
+            const auto it = std::find(_buffer.begin(), _buffer.end(), '#');
+            if (it == _buffer.end()) {
+                // The header has not been fully received yet
+                return;
+            }
 
-    if (_payloadSize > 0 && (_payloadSize <= static_cast<int>(_buffer.size()))) {
-        std::vector<char> data = std::vector<char>(
+            const std::string sizeString = std::string(_buffer.begin(), it);
+            _buffer.erase(_buffer.begin(), it + 1);
+
+            int payloadSize = -1;
+            try {
+                size_t nCharacters = 0;
+                payloadSize = std::stoi(sizeString, &nCharacters);
+                if (nCharacters != sizeString.size() || payloadSize < 0) {
+                    payloadSize = -1;
+                }
+            }
+            catch (const std::exception&) {
+                payloadSize = -1;
+            }
+
+            if (payloadSize == -1) {
+                // The header is malformed, so we drop it and try to resynchronize on the
+                // next header separator rather than discarding the remaining messages
+                ::Log(
+                    "JsonSocket::parseBuffer",
+                    std::format("Received invalid message header '{}'", sizeString)
+                );
+                continue;
+            }
+
+            _payloadSize = payloadSize;
+        }
+
+        if (_payloadSize > static_cast<int>(_buffer.size())) {
+            // The payload has not been fully received yet
+            return;
+        }
+
+        const std::string json = std::string(
             _buffer.begin(),
             _buffer.begin() + _payloadSize
         );
-        std::string json = std::string(data.data(), static_cast<size_t>(_payloadSize));
         _buffer.erase(_buffer.begin(), _buffer.begin() + _payloadSize);
         _payloadSize = -1;
 
-        nlohmann::json message = nlohmann::json::parse(json);
-        emit messageReceived(message);
-
-        if (!_buffer.empty()) {
-            // This can only happen if we get one TCP package with multiple messages in it
-            parseBuffer();
+        try {
+            nlohmann::json message = nlohmann::json::parse(json);
+            emit messageReceived(std::move(message));
+        }
+        catch (const std::exception&) {
+            // Only the offending message is dropped; the framing stays intact so any
+            // following message can still be parsed
+            ::Log(
+                "JsonSocket::parseBuffer",
+                std::format("Error parsing message '{}'", json)
+            );
         }
     }
 }
