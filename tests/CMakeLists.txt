@@ -57,5 +57,4 @@ add_executable(UnitTest
   test_trayconnectedmessage.cpp
   test_traystatusmessage.cpp
 )
-target_include_directories(UnitTest PUBLIC ${CMAKE_SOURCE_DIR}/ext/catch2/single_include)
-target_link_libraries(UnitTest PUBLIC common Catch2WithMain)
+target_link_libraries(UnitTest PUBLIC common Catch2::Catch2WithMain)

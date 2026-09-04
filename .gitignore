@@ -1,6 +1,7 @@
 bin
 build
 build-deploy
+vcpkg_installed
 .vscode/settings.json
 C-Troll.zip
 .vs

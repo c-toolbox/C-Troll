@@ -1,0 +1,37 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "c-troll",
+  "version": "2.0.0",
+  "homepage": "https://github.com/c-toolbox/C-Troll",
+  "license": "BSD-3-Clause",
+  "builtin-baseline": "04a9d8e5212d01ee1dd9478eadd9caade4f8b0d4",
+  "dependencies": [
+    "catch2",
+    "cpp-httplib",
+    "json-schema-validator",
+    "nlohmann-json",
+    {
+      "name": "qtbase",
+      "default-features": false,
+      "features": [
+        "brotli",
+        "concurrent",
+        "dnslookup",
+        "doubleconversion",
+        "freetype",
+        "gui",
+        "harfbuzz",
+        "jpeg",
+        "network",
+        "opengl",
+        "openssl",
+        "pcre2",
+        "png",
+        "thread",
+        "widgets",
+        "windeployqt",
+        "zstd"
+      ]
+    }
+  ]
+}

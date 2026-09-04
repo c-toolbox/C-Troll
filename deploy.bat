@@ -11,14 +11,11 @@ if exist bin move bin bin-old
 
 
 echo ### Run CMake into the 'build-deploy' folder
-mkdir build-deploy
-cd build-deploy
-cmake ..
+cmake --preset deploy
 
 
 echo ### Build C-Troll in RelWithDebInfo mode
-cmake --build . --config RelWithDebInfo --target C-Troll Editor Starter Tray --parallel -- /p:CL_MPcount=16
-cd ..
+cmake --build build-deploy --config RelWithDebInfo --target C-Troll Editor Starter Tray --parallel -- /p:CL_MPcount=16
 
 
 echo ### Remove files we don't need

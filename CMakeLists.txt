@@ -42,8 +42,14 @@ if (NOT (WIN32 AND MSVC))
   message(FATAL_ERROR "C-Troll only supports Visual Studio on Windows")
 endif ()
 
+# Match the dynamic CRT used by the x64-windows vcpkg triplet in both Debug and Release
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 find_package(Qt6 COMPONENTS Core Gui Network Widgets REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(nlohmann_json_schema_validator CONFIG REQUIRED)
+find_package(httplib CONFIG REQUIRED)
+find_package(Catch2 3 CONFIG REQUIRED)
 
 # Generate compile_commands.json to make it easier to work with clang based tools
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -63,6 +69,5 @@ if (ENABLE_IPO)
   endif ()
 endif ()
 
-add_subdirectory(ext SYSTEM)
 add_subdirectory(src)
 add_subdirectory(tests)

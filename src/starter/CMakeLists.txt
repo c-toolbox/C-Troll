@@ -33,5 +33,4 @@
 ##########################################################################################
 
 add_executable(Starter main.cpp)
-target_include_directories(Starter PRIVATE ${PROJECT_SOURCE_DIR}/ext/cpp-httplib)
-target_link_libraries(Starter PRIVATE common)
+target_link_libraries(Starter PRIVATE common httplib::httplib)

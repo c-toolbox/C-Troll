@@ -108,8 +108,8 @@ target_link_libraries(
   common
   PUBLIC
     project_options
-    nlohmann_json
-    nlohmann_json_schema_validator
+    nlohmann_json::nlohmann_json
+    nlohmann_json_schema_validator::validator
     Qt::Core
     Qt::Widgets
     Qt::Network
