@@ -120,6 +120,12 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
 
     //
     // Load the data
+    Log(
+        "Status",
+        std::format(
+            "Loading data relative to '{}'", std::filesystem::current_path().string()
+        )
+    );
     Log("Status", std::format("Loading programs from '{}'", config.applicationPath));
     if (!std::filesystem::exists(config.applicationPath)) {
         std::string msg = std::format(
