@@ -350,7 +350,7 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
     if (!command.preStart.empty()) {
         Log(std::format("Starting pre-start script '{}'", command.preStart));
         QProcess preStart;
-        preStart.start(QString::fromStdString(command.preStart));
+        preStart.startCommand(QString::fromStdString(command.preStart));
         preStart.waitForFinished(-1);
         Log(std::format(
             "Pre-start script finished with exit code {}", preStart.exitCode()
@@ -368,13 +368,13 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
 
     if (command.commandlineParameters.empty()) {
         std::string cmd = std::format("\"{}\"", command.executable);
-        process->start(QString::fromStdString(cmd));
+        process->startCommand(QString::fromStdString(cmd));
     }
     else {
         std::string cmd = std::format(
             "\"{}\" {}", command.executable, command.commandlineParameters
         );
-        process->start(QString::fromStdString(cmd));
+        process->startCommand(QString::fromStdString(cmd));
     }
 
     // If the executable does not exist, the process might still be in the NotRunning

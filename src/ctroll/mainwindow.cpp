@@ -583,7 +583,7 @@ void MainWindow::startProgram(Cluster::ID clusterId, Program::ID programId,
     if (!p->preStart.empty()) {
         Log("Program", "Starting pre-start script");
         QProcess proc;
-        proc.start(QString::fromStdString(p->preStart));
+        proc.startCommand(QString::fromStdString(p->preStart));
         proc.waitForFinished(-1);
     }
 
