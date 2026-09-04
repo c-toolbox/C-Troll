@@ -34,3 +34,4 @@
 
 add_executable(Starter main.cpp)
 target_link_libraries(Starter PRIVATE common httplib::httplib)
+copy_qt_plugins(Starter)

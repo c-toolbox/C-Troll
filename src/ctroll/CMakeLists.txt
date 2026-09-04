@@ -96,6 +96,8 @@ add_custom_command(
   PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 )
 
-# Qt libraries and plugins are deployed by vcpkg's applocal step in the toolchain file
+# The Qt libraries are deployed by vcpkg's applocal step in the toolchain file, but the
+# plugins are not
+copy_qt_plugins(C-Troll)
 
 qt_finalize_target(C-Troll)

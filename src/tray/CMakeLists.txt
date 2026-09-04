@@ -69,4 +69,5 @@ add_executable(Tray WIN32
 )
 target_link_libraries(Tray PRIVATE common Qt6::Core Qt6::Widgets Qt6::Network)
 qt_disable_unicode_defines(Tray)
+copy_qt_plugins(Tray)
 qt_finalize_target(Tray)

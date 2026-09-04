@@ -79,4 +79,5 @@ add_executable(Editor WIN32
 )
 target_link_libraries(Editor PRIVATE common Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
 qt_disable_unicode_defines(Editor)
+copy_qt_plugins(Editor)
 qt_finalize_target(Editor)

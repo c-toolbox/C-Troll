@@ -69,6 +69,43 @@ if (ENABLE_IPO)
   endif ()
 endif ()
 
+##########################################################################################
+# Qt plugins                                                                             #
+##########################################################################################
+
+# vcpkg's applocal deployment only copies the libraries that the executables link against
+# and thus misses the Qt plugins, which are loaded at runtime instead. Without at least
+# the platform plugin being present next to the executable, no Qt application is able to
+# start. The OpenSSL TLS backend is left out on purpose as Schannel is the native backend
+# on Windows
+set(QtPlugins
+  Qt6::QWindowsIntegrationPlugin
+  Qt6::QModernWindowsStylePlugin
+  Qt6::QSchannelBackendPlugin
+  Qt6::QTlsBackendCertOnlyPlugin
+)
+set(QtPluginFolders
+  "platforms"
+  "styles"
+  "tls"
+  "tls"
+)
+
+# Has to be called from the same directory in which the target was created
+function (copy_qt_plugins target)
+  foreach (plugin folder IN ZIP_LISTS QtPlugins QtPluginFolders)
+    add_custom_command(
+      TARGET ${target} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory
+        "$<TARGET_FILE_DIR:${target}>/${folder}"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:${plugin}>"
+        "$<TARGET_FILE_DIR:${target}>/${folder}"
+      VERBATIM
+    )
+  endforeach ()
+endfunction ()
+
 add_subdirectory(src)
 add_subdirectory(tests)
 
@@ -79,31 +116,14 @@ add_subdirectory(tests)
 
 install(TARGETS C-Troll Editor Starter Tray RUNTIME DESTINATION ".")
 
-# Qt and the third-party libraries are copied next to the executables by vcpkg's applocal
-# deployment during the build, so they are picked up from the build output directory. The
-# excluded plugins are only pulled in as transitive dependencies of Qt6Svg and are not
-# used by any of the applications
+# Qt, the Qt plugins, and the third-party libraries are all copied next to the executables
+# during the build, so they are picked up from the build output directory
 install(
   DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/"
   DESTINATION "."
   FILES_MATCHING
     PATTERN "*.dll"
     PATTERN "Qt6Svg*.dll" EXCLUDE
-    PATTERN "iconengines" EXCLUDE
-    PATTERN "imageformats" EXCLUDE
-    PATTERN "networkinformation" EXCLUDE
-)
-
-# The applocal deployment does not cover Qt plugins, which are loaded at runtime and are
-# therefore not detected as dependencies of the executables. The OpenSSL TLS backend is
-# left out on purpose as Schannel is the native backend on Windows
-install(FILES "$<TARGET_FILE:Qt6::QWindowsIntegrationPlugin>" DESTINATION "platforms")
-install(FILES "$<TARGET_FILE:Qt6::QModernWindowsStylePlugin>" DESTINATION "styles")
-install(
-  FILES
-    "$<TARGET_FILE:Qt6::QSchannelBackendPlugin>"
-    "$<TARGET_FILE:Qt6::QTlsBackendCertOnlyPlugin>"
-  DESTINATION "tls"
 )
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/example" DESTINATION ".")

@@ -58,7 +58,10 @@ JsonError::JsonError(ErrorHandler handler)
 
 nlohmann::json_schema::json_validator loadValidator(std::string path) {
     QFile file = QFile(QString::fromStdString(path));
-    file.open(QFile::ReadOnly | QFile::Text);
+    const bool success = file.open(QFile::ReadOnly | QFile::Text);
+    if (!success) {
+        return {};
+    }
     QByteArray ba = file.readAll();
     std::string content = std::string(ba.constData(), ba.length());
     nlohmann::json schema = nlohmann::json::parse(content);
