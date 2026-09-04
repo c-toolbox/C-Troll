@@ -99,12 +99,16 @@ private:
     void createAndRunProcessFromCommandMessage(
         const common::StartCommandMessage& command);
 
-    std::vector<ProcessInfo>::const_iterator processIt(QProcess* process);
-    std::vector<ProcessInfo>::const_iterator processIt(int id);
+    // Removes the process from the list, destroys the owned QProcess and returns a copy
+    // of the removed information
+    ProcessInfo removeProcess(std::map<int, ProcessInfo>::const_iterator it);
+
+    std::map<int, ProcessInfo>::const_iterator processIt(QProcess* process) const;
+    std::map<int, ProcessInfo>::const_iterator processIt(int id) const;
 
     // The key of this map is a unique id (received from core)
     // The value is the process which is running
-    std::vector<ProcessInfo> _processes;
+    std::map<int, ProcessInfo> _processes;
 
     std::size_t _controllerDataHash = 0;
 };

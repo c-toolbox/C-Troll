@@ -82,7 +82,8 @@ ProcessHandler::~ProcessHandler() {
 
 void ProcessHandler::newConnection() {
     common::TrayStatusMessage msg;
-    for (const ProcessInfo& p : _processes) {
+    for (const std::pair<const int, ProcessInfo>& it : _processes) {
+        const ProcessInfo& p = it.second;
         common::TrayStatusMessage::ProcessInfo pi = {
             .processId = p.processId,
             .programId = p.programId,
@@ -127,7 +128,7 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                 // @TODO When would this be executed? We shouldn't be able to start a
                 // process twice with the same id?
                 Debug("Starting existing process for command");
-                executeProcessWithCommandMessage(p->process, command);
+                executeProcessWithCommandMessage(p->second.process, command);
             }
         }
         else if (common::isValidMessage<common::ExitCommandMessage>(message)) {
@@ -151,27 +152,21 @@ void ProcessHandler::handleSocketMessage(const nlohmann::json& message,
                 // @TODO How does the terminate behave when the program is hanging? There
                 // seems to be a problem that a program is not correctly terminated in
                 // those cases
-                p->process->terminate();
+                p->second.process->terminate();
                 returnMsg.status = common::ProcessStatusMessage::Status::NormalExit;
-                // Find specific value in process map i.e. process
-                const auto pIt = processIt(p->process);
+                returnMsg.processId = p->second.processId;
+                emit sendSocketMessage(returnMsg);
 
-                if (pIt != _processes.end()) {
-                    Debug("Found process");
-                    returnMsg.processId = pIt->processId;
-                    emit sendSocketMessage(returnMsg);
-
-                    // Remove this process from the list as we consider it finished
-                    ProcessInfo info = *pIt;
-                    _processes.erase(pIt);
-                    emit closedProcess(info);
-                }
+                // Remove this process from the list as we consider it finished
+                const ProcessInfo info = removeProcess(p);
+                emit closedProcess(info);
             }
         }
         else if (common::isValidMessage<common::KillAllMessage>(message)) {
             Log(std::format("Received [{}]: {}", peer, message.dump()));
 
-            for (ProcessInfo& p : _processes) {
+            for (std::pair<const int, ProcessInfo>& it : _processes) {
+                ProcessInfo& p = it.second;
                 Log(std::format("Killing process {}", p.processId));
 
                 p.wasUserTerminated = true;
@@ -217,7 +212,7 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
         return;
     }
 
-    if (p->wasUserTerminated && error == QProcess::Crashed) {
+    if (p->second.wasUserTerminated && error == QProcess::Crashed) {
         // If the process was terminated on behest of the user, than this error message
         // is going to be the error that tells us that the program "crashed", which we
         // don't want to sent to the UI as it would be confusing. If the user wanted to
@@ -225,18 +220,17 @@ void ProcessHandler::handlerErrorOccurred(QProcess::ProcessError error) {
         return;
     }
 
-    Debug(std::format("Found process {}", p->processId));
+    Debug(std::format("Found process {}", p->second.processId));
     common::ProcessStatusMessage msg;
-    msg.processId = p->processId;
+    msg.processId = p->second.processId;
     msg.status = toTrayStatus(error);
     emit sendSocketMessage(msg);
 
     // The FailedToStart error is handled differently since that is the one that will
     // not also lead to a `handleFinished` call
     if (error == QProcess::ProcessError::FailedToStart) {
-        Debug(std::format("Removing process {}", p->processId));
-        ProcessInfo info = *p;
-        _processes.erase(p);
+        Debug(std::format("Removing process {}", p->second.processId));
+        const ProcessInfo info = removeProcess(p);
         emit closedProcess(info);
     }
 }
@@ -249,11 +243,11 @@ void ProcessHandler::handleStarted() {
     auto p = processIt(process);
     assert(p != _processes.end());
     if (p != _processes.end()) {
-        Debug(std::format("Found process {}", p->processId));
+        Debug(std::format("Found process {}", p->second.processId));
 
         // Send out the TrayProcessStatus with the status string
         common::ProcessStatusMessage msg;
-        msg.processId = p->processId;
+        msg.processId = p->second.processId;
         msg.status = common::ProcessStatusMessage::Status::Running;
         emit sendSocketMessage(msg);
     }
@@ -272,11 +266,11 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
         return;
     }
 
-    Debug(std::format("Found process {}", p->processId));
+    Debug(std::format("Found process {}", p->second.processId));
 
     common::ProcessStatusMessage msg;
-    msg.processId = p->processId;
-    if (p->wasUserTerminated) {
+    msg.processId = p->second.processId;
+    if (p->second.wasUserTerminated) {
         // If the user terminated the process it will report back an exitStatus of
         // 'CrashExit', which does not really convey the right reason to the user
         msg.status = common::ProcessStatusMessage::Status::NormalExit;
@@ -284,18 +278,16 @@ void ProcessHandler::handleFinished(int, QProcess::ExitStatus exitStatus) {
     else {
         msg.status = toTrayStatus(exitStatus);
     }
-    
-    ProcessInfo info = *p;
 
     const bool shouldRestart =
-        info.shouldAutoRestart && exitStatus == QProcess::CrashExit;
+        p->second.shouldAutoRestart && exitStatus == QProcess::CrashExit;
     if (!shouldRestart) {
         // Inform C-Troll about the death of the process
         emit sendSocketMessage(msg);
     }
 
     // Remove this process from the list as we consider it finished
-    _processes.erase(p);
+    const ProcessInfo info = removeProcess(p);
     emit closedProcess(info);
 
     // Restart the process
@@ -313,11 +305,11 @@ void ProcessHandler::handleReadyReadStandardError() {
     auto p = processIt(proc);
     assert(p != _processes.end());
     if (p != _processes.end()) {
-        Debug(std::format("Found process {}", p->processId));
+        Debug(std::format("Found process {}", p->second.processId));
 
         // Send out the TrayProcessLogMessage with the stderror key
         common::ProcessOutputMessage msg;
-        msg.processId = p->processId;
+        msg.processId = p->second.processId;
         msg.outputType = common::ProcessOutputMessage::OutputType::StdErr;
         msg.message =
             QString::fromLatin1(proc->readAllStandardError()).toLocal8Bit().constData();
@@ -332,7 +324,7 @@ void ProcessHandler::handleReadyReadStandardOutput() {
     auto p = processIt(proc);
     if (p != _processes.end()) {
         common::ProcessOutputMessage msg;
-        msg.processId = p->processId;
+        msg.processId = p->second.processId;
         msg.message =
             QString::fromLatin1(proc->readAllStandardOutput()).toLocal8Bit().constData();
         msg.outputType = common::ProcessOutputMessage::OutputType::StdOut;
@@ -380,7 +372,7 @@ void ProcessHandler::executeProcessWithCommandMessage(QProcess* process,
         process->waitForStarted();
         const auto p = processIt(process);
         assert(p != _processes.end());
-        emit startedProcess(*p);
+        emit startedProcess(p->second);
     }
 }
 
@@ -429,27 +421,40 @@ void ProcessHandler::createAndRunProcessFromCommandMessage(
         .shouldAutoRestart = cmd.autoRestart,
         .startMessage = cmd
     };
-    _processes.push_back(info);
+    _processes[info.processId] = info;
 
     // Run the process with the command
     executeProcessWithCommandMessage(proc, cmd);
 }
 
-std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::processIt(
-                                                                        QProcess* process)
+std::map<int, ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::processIt(
+                                                                  QProcess* process) const
 {
     const auto p = std::find_if(
         _processes.begin(), _processes.end(),
-        [process](const ProcessInfo& proc) { return proc.process == process; }
+        [process](const std::pair<const int, ProcessInfo>& proc) {
+            return proc.second.process == process;
+        }
     );
     return p;
 }
 
-std::vector<ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::processIt(int id)
+std::map<int, ProcessHandler::ProcessInfo>::const_iterator ProcessHandler::processIt(
+                                                                          int id) const
 {
-    const auto p = std::find_if(
-        _processes.begin(), _processes.end(),
-        [id](const ProcessInfo& proc) { return proc.processId == id; }
-    );
-    return p;
+    return _processes.find(id);
+}
+
+ProcessHandler::ProcessInfo ProcessHandler::removeProcess(
+                                       std::map<int, ProcessInfo>::const_iterator it)
+{
+    ProcessInfo info = it->second;
+    _processes.erase(it);
+
+    if (info.process) {
+        info.process->disconnect(this);
+        info.process->deleteLater();
+        info.process = nullptr;
+    }
+    return info;
 }
