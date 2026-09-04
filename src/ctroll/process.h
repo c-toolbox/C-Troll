@@ -39,6 +39,7 @@
 #include "node.h"
 #include "program.h"
 #include "typedid.h"
+#include <optional>
 
 struct Process {
     using ID = TypedId<struct ProcessIdTag>;
@@ -64,7 +65,9 @@ private:
     inline static int nextId = 0;
 };
 
-common::StartCommandMessage startProcessCommand(const Process& process);
+// Returns the start command for the provided process or std::nullopt if the process
+// refers to a program, configuration, or cluster that does not exist (anymore)
+std::optional<common::StartCommandMessage> startProcessCommand(const Process& process);
 common::ExitCommandMessage exitProcessCommand(const Process& process);
 
 

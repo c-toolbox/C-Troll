@@ -39,25 +39,55 @@
 #include "logging.h"
 #include <assert.h>
 
-common::StartCommandMessage startProcessCommand(const Process& process) {
+std::optional<common::StartCommandMessage> startProcessCommand(const Process& process) {
     const Program* program = data::findProgram(process.programId);
-    assert(program);
+    if (!program) {
+        Log(
+            "startProcessCommand",
+            std::format("Could not find program with id {}", process.programId.v)
+        );
+        return std::nullopt;
+    }
     const Program& prg = *program;
 
     const Program::Configuration* configuration = data::findConfigurationForProgram(
         prg,
         process.configurationId
     );
-    assert(configuration);
+    if (!configuration) {
+        Log(
+            "startProcessCommand",
+            std::format(
+                "Could not find configuration with id {} for program {}",
+                process.configurationId.v, process.programId.v
+            )
+        );
+        return std::nullopt;
+    }
     const Program::Configuration& conf = *configuration;
 
     const Cluster* cluster = data::findCluster(process.clusterId);
-    assert(cluster);
+    if (!cluster) {
+        Log(
+            "startProcessCommand",
+            std::format("Could not find cluster with id {}", process.clusterId.v)
+        );
+        return std::nullopt;
+    }
     auto it = std::find_if(
         program->clusters.begin(), program->clusters.end(),
         [cluster](const Program::Cluster& c) { return c.name == cluster->name; }
     );
-    assert(it != program->clusters.end());
+    if (it == program->clusters.end()) {
+        Log(
+            "startProcessCommand",
+            std::format(
+                "Program {} is not configured for cluster {}",
+                process.programId.v, cluster->name
+            )
+        );
+        return std::nullopt;
+    }
 
     common::StartCommandMessage t;
     t.id = process.id.v;

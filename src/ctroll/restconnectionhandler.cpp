@@ -252,7 +252,13 @@ void RestConnectionHandler::newConnectionEstablished() {
 
 void RestConnectionHandler::handleNewConnection() {
     QTcpSocket* socket = dynamic_cast<QTcpSocket*>(QObject::sender());
-    assert(socket);
+    if (!socket) {
+        Log(
+            "RestConnectionHandler::handleNewConnection",
+            "Received a message from an unexpected sender type"
+        );
+        return;
+    }
     Debug(std::format(
         "Handling new message from {}", socket->peerAddress().toString().toStdString()
     ));

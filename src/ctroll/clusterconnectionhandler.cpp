@@ -114,6 +114,16 @@ void ClusterConnectionHandler::initialize() {
                 // Try to reconnect all sockets that are currently unconnected
                 if (p.second->state() == QAbstractSocket::SocketState::UnconnectedState) {
                     const Node* node = data::findNode(p.first);
+                    if (!node) {
+                        Log(
+                            "ClusterConnectionHandler",
+                            std::format(
+                                "Could not find node with id {} while reconnecting",
+                                p.first.v
+                            )
+                        );
+                        continue;
+                    }
                     p.second->connectToHost(node->ipAddress, node->port);
                 }
             }
@@ -133,7 +143,13 @@ void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
     }
 
     const Node* node = data::findNode(nodeId);
-    assert(node);
+    if (!node) {
+        Log(
+            "ClusterConnectionHandler",
+            std::format("Could not find node with id {} for socket state change", nodeId.v)
+        );
+        return;
+    }
 
     Log(std::format(
         "Socket State Change [{}:{}]",
@@ -155,19 +171,30 @@ void ClusterConnectionHandler::handleSocketStateChange(Node::ID nodeId,
 
 void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID nodeId) {
     const auto it = _sockets.find(nodeId);
-    assert(it != _sockets.end());
-    assert(data::findNode(nodeId)->isConnecting || data::findNode(nodeId)->isConnected);
+    if (it == _sockets.end()) {
+        Log(
+            "ClusterConnectionHandler",
+            std::format("Received message from unknown socket with id {}", nodeId.v)
+        );
+        return;
+    }
+    const Node* sender = data::findNode(nodeId);
+    if (!sender) {
+        Log(
+            "ClusterConnectionHandler",
+            std::format("Received message from unknown node with id {}", nodeId.v)
+        );
+        return;
+    }
 
 #ifdef QT_DEBUG
-    assert(data::findNode(nodeId));
     std::string content = common::isValidMessage<common::ProcessOutputMessage>(message) ?
         std::string(common::ProcessOutputMessage::Type) :
         message.dump();
 
     std::string cat = std::format(
         "Received [{}:{} ({})]",
-        data::findNode(nodeId)->ipAddress, data::findNode(nodeId)->port,
-        data::findNode(nodeId)->name
+        sender->ipAddress, sender->port, sender->name
     );
     Debug(std::move(cat), std::move(content));
 #endif // QT_DEBUG
@@ -181,28 +208,23 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
         emit receivedTrayStatus(nodeId, status);
     }
     else if (common::isValidMessage<common::TrayConnectedMessage>(message)) {
-        const Node* node = data::findNode(nodeId);
-        assert(node->isConnecting);
-        assert(!node->isConnected);
         data::setNodeConnecting(nodeId, false);
         data::setNodeConnected(nodeId, true);
         data::setNodeRejected(nodeId, false);
 
-        std::vector<const Cluster*> clusters = data::findClusterForNode(*node);
+        std::vector<const Cluster*> clusters = data::findClusterForNode(*sender);
         for (const Cluster* cluster : clusters) {
-            emit connectedStatusChanged(cluster->id, node->id);
+            emit connectedStatusChanged(cluster->id, sender->id);
         }
     }
     else if (common::isValidMessage<common::InvalidAuthMessage>(message)) {
         common::InvalidAuthMessage msg = message;
 
-        const Node* node = data::findNode(nodeId);
-        assert(node);
         data::setNodeRejected(nodeId, true);
 
-        std::vector<const Cluster*> clusters = data::findClusterForNode(*node);
+        std::vector<const Cluster*> clusters = data::findClusterForNode(*sender);
         for (const Cluster* cluster : clusters) {
-            emit connectedStatusChanged(cluster->id, node->id);
+            emit connectedStatusChanged(cluster->id, sender->id);
         }
 
         emit receivedInvalidAuthStatus(nodeId, msg);
@@ -216,13 +238,10 @@ void ClusterConnectionHandler::handleMessage(nlohmann::json message, Node::ID no
         emit receivedErrorMessage(nodeId, msg);
     }
     else {
-        const Node* n = data::findNode(nodeId);
-        assert(n);
-        std::vector<const Cluster*> clusters = data::findClusterForNode(*n);
+        std::vector<const Cluster*> clusters = data::findClusterForNode(*sender);
 
         for (const Cluster* c : clusters) {
-            assert(c);
-            Log(std::format("Received [{} / {}]", c->name, n->name), message.dump());
+            Log(std::format("Received [{} / {}]", c->name, sender->name), message.dump());
         }
     }
 }
@@ -235,7 +254,13 @@ void ClusterConnectionHandler::sendMessage(const Node& node, nlohmann::json msg)
         msg.dump()
     );
     const auto it = _sockets.find(node.id);
-    assert(it != _sockets.end());
+    if (it == _sockets.end()) {
+        Log(
+            "ClusterConnectionHandler",
+            std::format("No socket available for node {}", node.name)
+        );
+        return;
+    }
 
     it->second->write(msg);
 }

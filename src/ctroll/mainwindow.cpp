@@ -627,20 +627,47 @@ void MainWindow::stopProgram(Cluster::ID clusterId, Program::ID programId,
 
 void MainWindow::startProcess(Process::ID processId) const {
     const Process* process = data::findProcess(processId);
-    assert(process);
+    if (!process) {
+        Log(
+            "MainWindow::startProcess",
+            std::format("Could not find process with id {}", processId.v)
+        );
+        return;
+    }
     const Node* node = data::findNode(process->nodeId);
-    assert(node);
+    if (!node) {
+        Log(
+            "MainWindow::startProcess",
+            std::format("Could not find node with id {}", process->nodeId.v)
+        );
+        return;
+    }
 
-    common::StartCommandMessage command = startProcessCommand(*process);
+    std::optional<common::StartCommandMessage> command = startProcessCommand(*process);
+    if (!command.has_value()) {
+        return;
+    }
 
-    _clusterConnectionHandler.sendMessage(*node, command);
+    _clusterConnectionHandler.sendMessage(*node, *command);
 }
 
 void MainWindow::stopProcess(Process::ID processId) const {
     const Process* process = data::findProcess(processId);
-    assert(process);
+    if (!process) {
+        Log(
+            "MainWindow::stopProcess",
+            std::format("Could not find process with id {}", processId.v)
+        );
+        return;
+    }
     const Node* node = data::findNode(process->nodeId);
-    assert(node);
+    if (!node) {
+        Log(
+            "MainWindow::stopProcess",
+            std::format("Could not find node with id {}", process->nodeId.v)
+        );
+        return;
+    }
 
     common::ExitCommandMessage command = exitProcessCommand(*process);
 
