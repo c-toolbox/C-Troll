@@ -90,8 +90,7 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     QAction* restart = new QAction("Restart", this);
     restart->setToolTip("Restarts C-Troll to reload the configuration and data files");
     connect(
-        restart,
-        &QAction::triggered,
+        restart, &QAction::triggered,
         [this]() {
             Log("Info", "Restarting C-Troll");
             _isClosingApplication = true;
@@ -103,8 +102,7 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     // The third menu item terminates the application
     QAction* quit = new QAction("Quit", this);
     connect(
-        quit,
-        &QAction::triggered,
+        quit, &QAction::triggered,
         [this]() {
             _isClosingApplication = true;
             qApp->quit();

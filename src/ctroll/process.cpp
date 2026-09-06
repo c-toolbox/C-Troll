@@ -96,6 +96,19 @@ std::optional<common::StartCommandMessage> startProcessCommand(const Process& pr
     t.commandlineParameters = std::format(
         "{} {} {}", prg.commandlineParameters, conf.parameters, it->parameters
     );
+
+    const ::Node* node = data::findNode(process.nodeId);
+    if (node) {
+        const auto nIt = std::find_if(
+            prg.nodes.begin(),
+            prg.nodes.end(),
+            [node](const Program::NodeParameters& n) { return n.name == node->name; }
+        );
+        if (nIt != prg.nodes.end() && !nIt->parameters.empty()) {
+            t.commandlineParameters += std::format(" {}", nIt->parameters);
+        }
+    }
+
     t.preStart = prg.preStartNode;
     t.programId = process.programId.v;
     t.configurationId = process.configurationId.v;

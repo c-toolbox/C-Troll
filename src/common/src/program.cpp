@@ -45,6 +45,7 @@ namespace {
     constexpr std::string_view KeyCommandlineParameters = "commandlineParameters";
     constexpr std::string_view KeyWorkingDirectory = "workingDirectory";
     constexpr std::string_view KeyClusters = "clusters";
+    constexpr std::string_view KeyNodes = "nodes";
     constexpr std::string_view KeyTags = "tags";
     constexpr std::string_view KeyDescription = "description";
     constexpr std::string_view KeyForwardMessages = "shouldForwardMessages";
@@ -61,6 +62,9 @@ namespace {
 
     constexpr std::string_view KeyClusterName = "name";
     constexpr std::string_view KeyClusterParameters = "parameters";
+
+    constexpr std::string_view KeyNodeName = "name";
+    constexpr std::string_view KeyNodeParameters = "parameters";
 } // namespace
 
 void from_json(const nlohmann::json& j, Program::Configuration& p) {
@@ -92,6 +96,20 @@ void to_json(nlohmann::json& j, const Program::Cluster& c) {
     j[KeyClusterName] = c.name;
     if (c.parameters != Program::Cluster().parameters) {
         j[KeyClusterParameters] = c.parameters;
+    }
+}
+
+void from_json(const nlohmann::json& j, Program::NodeParameters& n) {
+    j.at(KeyNodeName).get_to(n.name);
+    if (auto it = j.find(KeyNodeParameters);  it != j.end()) {
+        it->get_to(n.parameters);
+    }
+}
+
+void to_json(nlohmann::json& j, const Program::NodeParameters& n) {
+    j[KeyNodeName] = n.name;
+    if (n.parameters != Program::NodeParameters().parameters) {
+        j[KeyNodeParameters] = n.parameters;
     }
 }
 
@@ -135,6 +153,10 @@ void from_json(const nlohmann::json& j, Program& p) {
     else {
         // There always has to be at least a default configuration
         p.configurations.push_back({ Program::Configuration::ID(0), "Default", "", "" });
+    }
+
+    if (auto it = j.find(KeyNodes);  it != j.end()) {
+        it->get_to(p.nodes);
     }
 
     // For backwards-compatibility with v1, we still support the option to provide the
@@ -189,6 +211,9 @@ void to_json(nlohmann::json& j, const Program& p) {
     }
     j[KeyConfigurations] = p.configurations;
     j[KeyClusters] = p.clusters;
+    if (p.nodes != Program().nodes) {
+        j[KeyNodes] = p.nodes;
+    }
 }
 
 std::pair<std::vector<Program>, bool> loadProgramsFromDirectory(

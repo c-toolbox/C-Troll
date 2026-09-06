@@ -54,6 +54,31 @@
       },
       "uniqueItems": true
     },
+    "nodes": {
+      "type": "array",
+      "title": "Nodes",
+      "description": "A list of node-specific commandline parameters. Each entry refers to a node by name and provides additional commandline parameters that are only added when the program is started on that specific node",
+      "items": {
+        "type": "object",
+        "title": "Node",
+        "description": "Node-specific commandline parameters",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name of the node for which these parameters are used",
+            "minLength": 1
+          },
+          "parameters": {
+            "type": "string",
+            "title": "Parameters",
+            "description": "Additional commandline arguments that are only added when starting the program on this node"
+          }
+        },
+        "required": [ "name" ]
+      },
+      "uniqueItems": true
+    },
     "tags": {
       "type": "array",
       "title": "Tags",

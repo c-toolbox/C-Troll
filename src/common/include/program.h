@@ -72,6 +72,16 @@ struct Program {
         std::string parameters;
     };
 
+    struct NodeParameters {
+        bool operator==(const NodeParameters& rhs) const noexcept = default;
+
+        /// The name of the node
+        std::string name;
+
+        /// The commandline arguments that are specific for this node
+        std::string parameters;
+    };
+
     using ID = TypedId<struct ProgramTag>;
 
     bool operator==(const Program& rhs) const noexcept = default;
@@ -108,6 +118,8 @@ struct Program {
     std::vector<Configuration> configurations;
     /// List of all clusters
     std::vector<Cluster> clusters;
+    /// Optional list of node-specific commandline parameters
+    std::vector<NodeParameters> nodes;
 };
 
 std::pair<std::vector<Program>, bool> loadProgramsFromDirectory(

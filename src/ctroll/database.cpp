@@ -427,6 +427,14 @@ bool loadData(std::string_view programPath, std::string_view clusterPath,
                 ));
             }
         }
+        for (const Program::NodeParameters& node : program.nodes) {
+            const Node* n = data::findNode(node.name);
+            if (!n) {
+                throw std::runtime_error(std::format(
+                    "Could not find node '{}'", node.name
+                ));
+            }
+        }
 
         std::unique_ptr<Program> p = std::make_unique<Program>(std::move(program));
 
@@ -492,6 +500,10 @@ bool loadData(std::string_view programPath, std::string_view clusterPath,
             const Cluster* c = findCluster(cluster.name);
             addHash(std::hash<int>()(c->id.v));
             addHash(std::hash<std::string>()(cluster.parameters));
+        }
+        for (const Program::NodeParameters& node : program->nodes) {
+            addHash(std::hash<std::string>()(node.name));
+            addHash(std::hash<std::string>()(node.parameters));
         }
     }
 

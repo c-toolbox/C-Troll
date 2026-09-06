@@ -68,7 +68,15 @@ public:
         QLineEdit* arguments = nullptr;
     };
 
-    ProgramDialog(QWidget* parent, std::string programPath, std::string clusterPath);
+    struct NodeWidget : QWidget {
+        NodeWidget(const std::string& node, const std::string& parameters);
+
+        QLabel* label = nullptr;
+        QLineEdit* arguments = nullptr;
+    };
+
+    ProgramDialog(QWidget* parent, std::string programPath, std::string clusterPath,
+        std::string nodePath);
 
     void setExecutableInformation(std::filesystem::path path);
 
@@ -78,9 +86,11 @@ private slots:
 
 private:
     std::string selectCluster();
+    std::string selectNode();
 
     const std::string _programPath;
     const std::string _clusterPath;
+    const std::string _nodePath;
 
     QLineEdit* _name = nullptr;
     QLineEdit* _executable = nullptr;
@@ -100,6 +110,7 @@ private:
     DynamicList* _tags = nullptr;
     DynamicList* _configurations = nullptr;
     DynamicList* _clusters = nullptr;
+    DynamicList* _nodes = nullptr;
 
     QPushButton* _saveButton = nullptr;
 };

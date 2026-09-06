@@ -188,7 +188,12 @@ void MainWindow::dropEvent(QDropEvent* event) {
     std::filesystem::path configPath = _applicationPath / p.filename();
     configPath.replace_extension(".json");
 
-    ProgramDialog dialog = ProgramDialog(this, configPath.string(), _clusterPath);
+    ProgramDialog dialog = ProgramDialog(
+        this,
+        configPath.string(),
+        _clusterPath,
+        _nodePath
+    );
 
     std::string exe = p.string();
     if (exe.starts_with("file:///")) {
@@ -222,5 +227,5 @@ void MainWindow::editCluster(std::string path) {
 }
 
 void MainWindow::editProgram(std::string path) {
-    ProgramDialog(this, std::move(path), _clusterPath).exec();
+    ProgramDialog(this, std::move(path), _clusterPath, _nodePath).exec();
 }

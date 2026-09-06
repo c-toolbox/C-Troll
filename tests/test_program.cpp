@@ -349,6 +349,29 @@ TEST_CASE("Program.clusters", "[Program]") {
     CHECK(j1 == j2);
 }
 
+TEST_CASE("Program.nodes", "[Program]") {
+    Program msg;
+    msg.nodes.emplace_back("foo", "abc");
+    msg.nodes.emplace_back("bar", "");
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Program msgDeserialize;
+    from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    REQUIRE(msgDeserialize.nodes.size() == 2);
+    CHECK(msgDeserialize.nodes[0].name == "foo");
+    CHECK(msgDeserialize.nodes[0].parameters == "abc");
+    CHECK(msgDeserialize.nodes[1].name == "bar");
+    CHECK(msgDeserialize.nodes[1].parameters == "");
+
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
+}
+
 TEST_CASE("Program full", "[Program]") {
     Program msg;
     msg.clusters.emplace_back("foo", "abc");

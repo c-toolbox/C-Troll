@@ -36,6 +36,7 @@
 
 #include "addbutton.h"
 #include "jsonload.h"
+#include "node.h"
 #include "program.h"
 #include "removebutton.h"
 #include "spacer.h"
@@ -95,11 +96,31 @@ ProgramDialog::ClusterWidget::ClusterWidget(const std::string& cluster,
     layout->setStretch(1, 3);
 }
 
+ProgramDialog::NodeWidget::NodeWidget(const std::string& node,
+                                      const std::string& parameters)
+{
+    QBoxLayout* layout = new QHBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    label = new QLabel(QString::fromStdString(node));
+    layout->addWidget(label);
+    layout->setStretch(0, 2);
+
+    arguments = new QLineEdit;
+    arguments->setText(QString::fromStdString(parameters));
+    arguments->setCursorPosition(0);
+    arguments->setToolTip("Additional commandline parameters that are passed");
+    arguments->setPlaceholderText("optional");
+    layout->addWidget(arguments);
+    layout->setStretch(1, 3);
+}
+
 ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
-                             std::string clusterPath)
+                             std::string clusterPath, std::string nodePath)
     : QDialog(parent)
     , _programPath(std::move(programPath))
     , _clusterPath(std::move(clusterPath))
+    , _nodePath(std::move(nodePath))
 {
     setWindowTitle(QString::fromStdString(std::format("Program: {}", _programPath)));
     resize(800, 900);
@@ -249,7 +270,7 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     QLabel* parametersLabel = new QLabel(
         "The complete arguments for the program are given in the following order: 1. the "
         "global parameters;  2. the configuration-specific parameters;  3. the "
-        "cluster-specific parameters."
+        "cluster-specific parameters;  4. the node-specific parameters."
     );
     parametersLabel->setWordWrap(true);
     parametersLabel->setObjectName("information-label");
@@ -319,8 +340,38 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     editLayout->addWidget(new Spacer, 18, 0, 1, 3);
 
     {
+        // Nodes
+
+        editLayout->addWidget(new QLabel("Node Parameters (optional)"), 19, 0);
+
+        QPushButton* newNode = new AddButton;
+        connect(
+            newNode, &QPushButton::clicked,
+            [this]() {
+                std::string name = selectNode();
+                if (!name.empty()) {
+                    NodeWidget* node = new NodeWidget(name, "");
+                    _nodes->addItem(node);
+                    updateSaveButton();
+                }
+            }
+        );
+        editLayout->addWidget(newNode, 19, 1, 1, 2, Qt::AlignRight);
+
+        _nodes = new DynamicList;
+        _nodes->setToolTip(
+            "Additional commandline parameters that are only added when the program is "
+            "started on that specific node"
+        );
+        connect(_nodes, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
+        editLayout->addWidget(_nodes, 20, 0, 1, 3);
+    }
+
+    editLayout->addWidget(new Spacer, 21, 0, 1, 3);
+
+    {
         // Tags
-        editLayout->addWidget(new QLabel("Tags (optional)"), 19, 0);
+        editLayout->addWidget(new QLabel("Tags (optional)"), 22, 0);
 
         QPushButton* t = new AddButton;
         connect(
@@ -332,13 +383,13 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 updateSaveButton();
             }
         );
-        editLayout->addWidget(t, 19, 1, 1, 2, Qt::AlignRight);
+        editLayout->addWidget(t, 22, 1, 1, 2, Qt::AlignRight);
 
         _tags = new DynamicList;
         _tags->setToolTip("A list of all tags that this program is associated with");
         connect(_tags, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
 
-        editLayout->addWidget(_tags, 20, 0, 1, 3);
+        editLayout->addWidget(_tags, 23, 0, 1, 3);
     }
 
     layout->addWidget(edit);
@@ -414,6 +465,23 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 c->setToolTip("Could not find cluster in clusters folder");
             }
         }
+
+        std::pair<std::vector<Node>, bool> nodes =
+            common::loadJsonFromDirectory<Node>(_nodePath);
+        for (const Program::NodeParameters& node : program.nodes) {
+            NodeWidget* n = new NodeWidget(node.name, node.parameters);
+            _nodes->addItem(n);
+
+            const auto it = std::find_if(
+                nodes.first.begin(),
+                nodes.first.end(),
+                [node](const Node& n) { return n.name == node.name; }
+            );
+            if (it == nodes.first.end()) {
+                n->label->setObjectName("invalid");
+                n->setToolTip("Could not find node in nodes folder");
+            }
+        }
     }
     else {
         // If it doesn't exist, we want to create at least a default configuration to
@@ -471,6 +539,12 @@ void ProgramDialog::save() {
         c.parameters = cluster->arguments->text().toStdString();
         program.clusters.push_back(c);
     }
+    for (NodeWidget* node : _nodes->items<NodeWidget>()) {
+        Program::NodeParameters n;
+        n.name = node->label->text().toStdString();
+        n.parameters = node->arguments->text().toStdString();
+        program.nodes.push_back(n);
+    }
 
     common::saveToJson(_programPath, program);
 
@@ -516,6 +590,50 @@ std::string ProgramDialog::selectCluster() {
         this,
         "Add Cluster",
         "Select the cluster to add",
+        list,
+        0,
+        true,
+        &ok
+    );
+
+    return ok ? selected.toStdString() : "";
+}
+
+std::string ProgramDialog::selectNode() {
+    std::pair<std::vector<Node>, bool> nodes =
+        common::loadJsonFromDirectory<Node>(_nodePath);
+
+    std::vector<NodeWidget*> currNodes = _nodes->items<NodeWidget>();
+    nodes.first.erase(
+        std::remove_if(
+            nodes.first.begin(), nodes.first.end(),
+            [&currNodes](const Node& n) {
+                const auto it = std::find_if(
+                    currNodes.begin(), currNodes.end(),
+                    [n](NodeWidget* nw) {
+                        return nw->label->text().toStdString() == n.name;
+                    }
+                );
+                return it != currNodes.end();
+            }
+        ),
+        nodes.first.end()
+    );
+
+    if (nodes.first.empty()) {
+        QMessageBox::information(this, "Add nodes", "No available nodes left to add");
+    }
+
+    QStringList list;
+    for (const Node& node : nodes.first) {
+        list.push_back(QString::fromStdString(node.name));
+    }
+
+    bool ok;
+    QString selected = QInputDialog::getItem(
+        this,
+        "Add Node",
+        "Select the node to add",
         list,
         0,
         true,
