@@ -48,6 +48,47 @@
 
 namespace common {
 
+/// The name of the value in every configuration file that describes its layout
+constexpr std::string_view KeyVersion = "version";
+
+/// Configuration files that were written before the `version` value was introduced do not
+/// contain it and are treated as being of this version
+constexpr int LegacyFileVersion = 1;
+
+/**
+ * Returns the file format version that is stored in \p j or #LegacyFileVersion if \p j
+ * does not contain a `version` value.
+ *
+ * \param j The JSON object representing the contents of a configuration file
+ * \param supportedVersion The newest version of \p fileType that this application can
+ *        read
+ * \param fileType A human-readable name of the configuration file type that is used in
+ *        the error message
+ * \throw std::runtime_error If \p j declares a version newer than \p supportedVersion
+ */
+inline int versionFromJson(const nlohmann::json& j, int supportedVersion,
+                           std::string_view fileType)
+{
+    int version = LegacyFileVersion;
+    if (auto it = j.find(KeyVersion);  it != j.end()) {
+        it->get_to(version);
+    }
+
+    if (version < LegacyFileVersion) {
+        throw std::runtime_error(std::format(
+            "Illegal version {} found in {} configuration file", version, fileType
+        ));
+    }
+    if (version > supportedVersion) {
+        throw std::runtime_error(std::format(
+            "Unsupported version {} found in {} configuration file. This application "
+            "only supports versions up to {}", version, fileType, supportedVersion
+        ));
+    }
+
+    return version;
+}
+
 /**
  * This function loads an object \tparam T from the specified \p jsonFile. \p jsonFile has
  * to be a fully qualified path to the JSON file on disk and \p baseDirectory is the part

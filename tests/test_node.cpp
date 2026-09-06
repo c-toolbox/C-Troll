@@ -35,6 +35,7 @@
 #include "catch2/catch_test_macros.hpp"
 
 #include "node.h"
+#include "version.h"
 #include <nlohmann/json.hpp>
 
 TEST_CASE("Node Default Ctor", "[Node]") {
@@ -123,4 +124,33 @@ TEST_CASE("(Node) description", "[Node]") {
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
     CHECK(j1 == j2);
+}
+
+TEST_CASE("(Node) version", "[Node]") {
+    Node msg;
+
+    nlohmann::json j;
+    to_json(j, msg);
+    CHECK(j.at("version").get<int>() == config::NodeFileVersion);
+}
+
+TEST_CASE("(Node) version missing", "[Node]") {
+    using namespace nlohmann;
+
+    // Files that were written before the 'version' tag was introduced have to keep
+    // working and are treated as version 1
+    const json conf = R"({ "name": "name", "ip": "localhost", "port": 5000 })"_json;
+
+    Node node = conf;
+    CHECK(node.name == "name");
+}
+
+TEST_CASE("(Node) version unsupported", "[Node]") {
+    using namespace nlohmann;
+
+    json conf = R"({ "name": "name", "ip": "localhost", "port": 5000 })"_json;
+    conf["version"] = config::NodeFileVersion + 1;
+
+    Node node;
+    CHECK_THROWS_AS(::from_json(conf, node), std::runtime_error);
 }

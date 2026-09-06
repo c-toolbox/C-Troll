@@ -35,6 +35,7 @@
 #include "catch2/catch_test_macros.hpp"
 
 #include "program.h"
+#include "version.h"
 #include <nlohmann/json.hpp>
 
 TEST_CASE("Program Default Ctor", "[Program]") {
@@ -459,4 +460,41 @@ TEST_CASE("Program v1->v2 upgrade", "[Program]") {
     CHECK(v2.clusters[2].parameters.empty());
 
     CHECK(v1 == v2);
+}
+
+TEST_CASE("Program.version", "[Program]") {
+    Program msg;
+
+    nlohmann::json j;
+    to_json(j, msg);
+    CHECK(j.at("version").get<int>() == config::ProgramFileVersion);
+}
+
+TEST_CASE("Program.version missing", "[Program]") {
+    using namespace nlohmann;
+
+    // Files that were written before the 'version' tag was introduced have to keep
+    // working and are treated as version 1
+    const json conf = R"({
+  "name": "name",
+  "executable": "exe",
+  "clusters": [ { "name": "Cluster" } ]
+})"_json;
+
+    Program program = conf;
+    CHECK(program.name == "name");
+}
+
+TEST_CASE("Program.version unsupported", "[Program]") {
+    using namespace nlohmann;
+
+    json conf = R"({
+  "name": "name",
+  "executable": "exe",
+  "clusters": [ { "name": "Cluster" } ]
+})"_json;
+    conf["version"] = config::ProgramFileVersion + 1;
+
+    Program program;
+    CHECK_THROWS_AS(::from_json(conf, program), std::runtime_error);
 }

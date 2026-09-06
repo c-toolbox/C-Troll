@@ -34,6 +34,9 @@
 
 #include "baseconfiguration.h"
 
+#include "jsonload.h"
+#include "version.h"
+
 namespace {
     constexpr std::string_view KeyApplicationPath = "applicationPath";
     constexpr std::string_view KeyClusterPath = "clusterPath";
@@ -41,12 +44,15 @@ namespace {
 } // namespace
 
 void to_json(nlohmann::json& j, const BaseConfiguration& c) {
+    j[common::KeyVersion] = config::CTrollFileVersion;
     j[KeyApplicationPath] = c.applicationPath;
     j[KeyClusterPath] = c.clusterPath;
     j[KeyNodePath] = c.nodePath;
 }
 
 void from_json(const nlohmann::json& j, BaseConfiguration& c) {
+    common::versionFromJson(j, config::CTrollFileVersion, "application");
+
     j.at(KeyApplicationPath).get_to(c.applicationPath);
     j.at(KeyClusterPath).get_to(c.clusterPath);
     j.at(KeyNodePath).get_to(c.nodePath);

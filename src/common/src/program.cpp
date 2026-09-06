@@ -36,6 +36,7 @@
 
 #include "jsonload.h"
 #include "logging.h"
+#include "version.h"
 #include <assert.h>
 #include <string_view>
 
@@ -135,6 +136,8 @@ void to_json(nlohmann::json& j, const Program::Favorite& f) {
 }
 
 void from_json(const nlohmann::json& j, Program& p) {
+    common::versionFromJson(j, config::ProgramFileVersion, "program");
+
     j.at(KeyName).get_to(p.name);
     j.at(KeyExecutable).get_to(p.executable);
     if (auto it = j.find(KeyCommandlineParameters);  it != j.end()) {
@@ -202,6 +205,7 @@ void from_json(const nlohmann::json& j, Program& p) {
 }
 
 void to_json(nlohmann::json& j, const Program& p) {
+    j[common::KeyVersion] = config::ProgramFileVersion;
     j[KeyName] = p.name;
     j[KeyExecutable] = p.executable;
     if (p.commandlineParameters != Program().commandlineParameters) {

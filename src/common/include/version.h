@@ -94,4 +94,25 @@ namespace api {
     constexpr std::string_view Version = "2.1.0";
 } // namespace api
 
+
+// These are the versions of the individual JSON configuration file formats. Every
+// configuration file contains a `version` value that describes the layout of that file.
+// Configuration files that predate the introduction of that value do not contain it and
+// are treated as `common::LegacyFileVersion`. A version number has to be increased
+// whenever the layout of the corresponding file changes in a way that a file written with
+// the previous version cannot be read verbatim anymore. The loading code then has to
+// handle all versions from `common::LegacyFileVersion` up to the current one. Files that
+// declare a version that is newer than the one supported here are rejected.
+
+namespace config {
+    constexpr int ClusterFileVersion = 1;
+    constexpr int NodeFileVersion = 1;
+    constexpr int ProgramFileVersion = 1;
+
+    // The C-Troll and the Editor share the same configuration file and therefore also
+    // share the same version number
+    constexpr int CTrollFileVersion = 1;
+    constexpr int TrayFileVersion = 1;
+} // namespace config
+
 #endif // __COMMON__VERSION_H__

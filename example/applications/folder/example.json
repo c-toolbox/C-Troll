@@ -1,4 +1,5 @@
 {
+  "version": 1,
   "name": "Application name",
   "executable": "executable name",
   "commandlineParameters": "--",

@@ -7,6 +7,13 @@
 
   "type": "object",
   "properties": {
+    "version": {
+      "type": "integer",
+      "title": "File version",
+      "description": "The version of the layout of this cluster configuration file. If this value is not provided, the file is assumed to be of version 1",
+      "minimum": 1,
+      "maximum": 1
+    },
     "name": {
       "type": "string",
       "title": "Cluster name",

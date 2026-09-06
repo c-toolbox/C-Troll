@@ -34,6 +34,9 @@
 
 #include "configuration.h"
 
+#include "jsonload.h"
+#include "version.h"
+
 namespace {
     constexpr std::string_view KeyPort = "port";
     constexpr std::string_view KeyAllowedAddresses = "allowedAddresses";
@@ -44,6 +47,7 @@ namespace {
 } // namespace
 
 void to_json(nlohmann::json& j, const Configuration& c) {
+    j[common::KeyVersion] = config::TrayFileVersion;
     j[KeyPort] = c.port;
     j[KeyAllowedAddresses] = c.allowedAddresses;
     j[KeyShowWindow] = c.showWindow;
@@ -54,6 +58,8 @@ void to_json(nlohmann::json& j, const Configuration& c) {
 }
 
 void from_json(const nlohmann::json& j, Configuration& c) {
+    common::versionFromJson(j, config::TrayFileVersion, "tray");
+
     j.at(KeyPort).get_to(c.port);
 
     if (auto it = j.find(KeyAllowedAddresses);  it != j.end()) {

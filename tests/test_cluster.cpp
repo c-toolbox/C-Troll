@@ -35,6 +35,7 @@
 #include "catch2/catch_test_macros.hpp"
 
 #include "cluster.h"
+#include "version.h"
 #include <nlohmann/json.hpp>
 
 TEST_CASE("Cluster Default Ctor", "[Cluster]") {
@@ -131,4 +132,33 @@ TEST_CASE("Cluster.nodes", "[Cluster]") {
     nlohmann::json j2;
     to_json(j2, msgDeserialize);
     CHECK(j1 == j2);
+}
+
+TEST_CASE("Cluster.version", "[Cluster]") {
+    Cluster msg;
+
+    nlohmann::json j;
+    to_json(j, msg);
+    CHECK(j.at("version").get<int>() == config::ClusterFileVersion);
+}
+
+TEST_CASE("Cluster.version missing", "[Cluster]") {
+    using namespace nlohmann;
+
+    // Files that were written before the 'version' tag was introduced have to keep
+    // working and are treated as version 1
+    const json conf = R"({ "name": "name", "nodes": [ "node" ] })"_json;
+
+    Cluster cluster = conf;
+    CHECK(cluster.name == "name");
+}
+
+TEST_CASE("Cluster.version unsupported", "[Cluster]") {
+    using namespace nlohmann;
+
+    json conf = R"({ "name": "name", "nodes": [ "node" ] })"_json;
+    conf["version"] = config::ClusterFileVersion + 1;
+
+    Cluster cluster;
+    CHECK_THROWS_AS(::from_json(conf, cluster), std::runtime_error);
 }

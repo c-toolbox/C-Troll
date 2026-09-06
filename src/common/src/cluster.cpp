@@ -36,6 +36,7 @@
 
 #include "jsonload.h"
 #include "logging.h"
+#include "version.h"
 #include <assert.h>
 #include <filesystem>
 #include <string_view>
@@ -48,6 +49,8 @@ namespace {
 } // namespace
 
 void from_json(const nlohmann::json& j, Cluster& c) {
+    common::versionFromJson(j, config::ClusterFileVersion, "cluster");
+
     j.at(KeyName).get_to(c.name);
     if (auto it = j.find(KeyEnabled);  it != j.end()) {
         it->get_to(c.isEnabled);
@@ -60,6 +63,7 @@ void from_json(const nlohmann::json& j, Cluster& c) {
 }
 
 void to_json(nlohmann::json& j, const Cluster& c) {
+    j[common::KeyVersion] = config::ClusterFileVersion;
     j[KeyName] = c.name;
     j[KeyEnabled] = c.isEnabled;
     if (c.description != Cluster().description) {

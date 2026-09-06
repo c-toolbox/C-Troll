@@ -36,6 +36,7 @@
 
 #include "jsonload.h"
 #include "logging.h"
+#include "version.h"
 #include <assert.h>
 #include <filesystem>
 #include <set>
@@ -49,6 +50,8 @@ namespace {
 } // namespace
 
 void from_json(const nlohmann::json& j, Node& n) {
+    common::versionFromJson(j, config::NodeFileVersion, "node");
+
     j.at(KeyName).get_to(n.name);
     j.at(KeyIpAddress).get_to(n.ipAddress);
     j.at(KeyPort).get_to(n.port);
@@ -58,6 +61,7 @@ void from_json(const nlohmann::json& j, Node& n) {
 }
 
 void to_json(nlohmann::json& j, const Node& n) {
+    j[common::KeyVersion] = config::NodeFileVersion;
     j[KeyName] = n.name;
     j[KeyIpAddress] = n.ipAddress;
     j[KeyPort] = n.port;
