@@ -152,6 +152,33 @@ programs--ProgramWidget   QPushButton#gotoFolder:pressed {
 }
 
 /*
+ * FavoritesWidget
+ */
+
+programs--FavoritesWidget  QPushButton {
+  font-size: 16pt;
+  font-weight: bold;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+programs--FavoritesWidget  QPushButton#stop {
+  background-color: #703030;
+}
+
+programs--FavoritesWidget  QPushButton#stop:hover {
+  background-color: #803535;
+}
+
+programs--FavoritesWidget  QPushButton#mixed {
+  background-color: #706030;
+}
+
+programs--FavoritesWidget  QPushButton#mixed:hover {
+  background-color: #807035;
+}
+
+/*
  * ClusterWidget
  */
 

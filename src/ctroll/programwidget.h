@@ -52,7 +52,9 @@ namespace programs {
 class ProgramButton : public QPushButton {
 Q_OBJECT
 public:
-    ProgramButton(const Cluster* cluster, const Program::Configuration* configuration);
+    /// If \p displayName is empty, the name of the \p configuration is used as the label
+    ProgramButton(const Cluster* cluster, const Program::Configuration* configuration,
+        std::string displayName = std::string());
 
     void updateStatus();
     void processUpdated(Process::ID processId);
@@ -78,6 +80,10 @@ private:
 
     const Cluster* _cluster = nullptr;
     const Program::Configuration* _configuration = nullptr;
+
+    QString _startText;
+    QString _stopText;
+    QString _mixedText;
 
     struct ProcessInfo {
         Process::ID processId;

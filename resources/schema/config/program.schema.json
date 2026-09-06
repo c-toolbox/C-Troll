@@ -116,6 +116,37 @@
       "title": "Is Enabled",
       "description": "This signals to C-Troll whether the program configured is currently active or not. It is not possible start a disabled program and they will not show up in the list, behaving the same as if this configuration file does not exist."
     },
+    "favorites": {
+      "type": "array",
+      "title": "Favorites",
+      "description": "A list of cluster and configuration combinations for this program that are shown as large buttons on the Favorites tab of C-Troll, providing quick access to the most commonly used programs",
+      "items": {
+        "type": "object",
+        "title": "Favorite",
+        "description": "A single combination of a cluster and a configuration that is shown on the Favorites tab",
+        "properties": {
+          "cluster": {
+            "type": "string",
+            "title": "Cluster",
+            "description": "The name of the cluster on which this favorite starts the program. This has to be one of the clusters listed in the clusters of this program",
+            "minLength": 1
+          },
+          "configuration": {
+            "type": "string",
+            "title": "Configuration",
+            "description": "The name of the configuration with which this favorite starts the program. This has to be one of the configurations of this program",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The user-facing name that is shown on the button on the Favorites tab. If this value is not provided or it is the empty string, the name of the program is used instead"
+          }
+        },
+        "required": [ "cluster", "configuration" ]
+      },
+      "uniqueItems": true
+    },
     "delay": {
       "type": "integer",
       "title": "Startup Delay",

@@ -55,6 +55,7 @@ namespace {
     constexpr std::string_view KeyPreStart = "prestart";
     constexpr std::string_view KeyPreStartNode = "prestartnode";
     constexpr std::string_view KeyConfigurations = "configurations";
+    constexpr std::string_view KeyFavorites = "favorites";
 
     constexpr std::string_view KeyConfigurationName = "name";
     constexpr std::string_view KeyConfigurationParameters = "parameters";
@@ -65,6 +66,10 @@ namespace {
 
     constexpr std::string_view KeyNodeName = "name";
     constexpr std::string_view KeyNodeParameters = "parameters";
+
+    constexpr std::string_view KeyFavoriteCluster = "cluster";
+    constexpr std::string_view KeyFavoriteConfiguration = "configuration";
+    constexpr std::string_view KeyFavoriteName = "name";
 } // namespace
 
 void from_json(const nlohmann::json& j, Program::Configuration& p) {
@@ -113,6 +118,22 @@ void to_json(nlohmann::json& j, const Program::NodeParameters& n) {
     }
 }
 
+void from_json(const nlohmann::json& j, Program::Favorite& f) {
+    j.at(KeyFavoriteCluster).get_to(f.cluster);
+    j.at(KeyFavoriteConfiguration).get_to(f.configuration);
+    if (auto it = j.find(KeyFavoriteName);  it != j.end()) {
+        it->get_to(f.name);
+    }
+}
+
+void to_json(nlohmann::json& j, const Program::Favorite& f) {
+    j[KeyFavoriteCluster] = f.cluster;
+    j[KeyFavoriteConfiguration] = f.configuration;
+    if (f.name != Program::Favorite().name) {
+        j[KeyFavoriteName] = f.name;
+    }
+}
+
 void from_json(const nlohmann::json& j, Program& p) {
     j.at(KeyName).get_to(p.name);
     j.at(KeyExecutable).get_to(p.executable);
@@ -157,6 +178,10 @@ void from_json(const nlohmann::json& j, Program& p) {
 
     if (auto it = j.find(KeyNodes);  it != j.end()) {
         it->get_to(p.nodes);
+    }
+
+    if (auto it = j.find(KeyFavorites);  it != j.end()) {
+        it->get_to(p.favorites);
     }
 
     // For backwards-compatibility with v1, we still support the option to provide the
@@ -213,6 +238,9 @@ void to_json(nlohmann::json& j, const Program& p) {
     j[KeyClusters] = p.clusters;
     if (p.nodes != Program().nodes) {
         j[KeyNodes] = p.nodes;
+    }
+    if (p.favorites != Program().favorites) {
+        j[KeyFavorites] = p.favorites;
     }
 }
 

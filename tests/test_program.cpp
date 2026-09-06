@@ -53,23 +53,6 @@ TEST_CASE("Program Default Ctor", "[Program]") {
     CHECK(j1 == j2);
 }
 
-TEST_CASE("Program.name", "[Program]") {
-    Program msg;
-    msg.name = "foobar";
-
-
-    nlohmann::json j1;
-    to_json(j1, msg);
-
-    Program msgDeserialize;
-    from_json(j1, msgDeserialize);
-    CHECK(msg == msgDeserialize);
-    CHECK(msgDeserialize.name == "foobar");
-
-    nlohmann::json j2;
-    to_json(j2, msgDeserialize);
-    CHECK(j1 == j2);
-}
 
 TEST_CASE("Program.executable", "[Program]") {
     Program msg;
@@ -155,6 +138,38 @@ TEST_CASE("Program.isEnabled", "[Program]") {
     from_json(j1, msgDeserialize);
     CHECK(msg == msgDeserialize);
     CHECK(msgDeserialize.isEnabled == false);
+
+    nlohmann::json j2;
+    to_json(j2, msgDeserialize);
+    CHECK(j1 == j2);
+}
+
+TEST_CASE("Program.favorites", "[Program]") {
+    Program msg;
+    msg.favorites.push_back({
+        .cluster = "cluster1",
+        .configuration = "configuration1",
+        .name = "favorite1"
+    });
+    msg.favorites.push_back({
+        .cluster = "cluster2",
+        .configuration = "configuration2"
+    });
+
+
+    nlohmann::json j1;
+    to_json(j1, msg);
+
+    Program msgDeserialize;
+    from_json(j1, msgDeserialize);
+    CHECK(msg == msgDeserialize);
+    REQUIRE(msgDeserialize.favorites.size() == 2);
+    CHECK(msgDeserialize.favorites[0].cluster == "cluster1");
+    CHECK(msgDeserialize.favorites[0].configuration == "configuration1");
+    CHECK(msgDeserialize.favorites[0].name == "favorite1");
+    CHECK(msgDeserialize.favorites[1].cluster == "cluster2");
+    CHECK(msgDeserialize.favorites[1].configuration == "configuration2");
+    CHECK(msgDeserialize.favorites[1].name.empty());
 
     nlohmann::json j2;
     to_json(j2, msgDeserialize);

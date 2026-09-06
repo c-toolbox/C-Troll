@@ -38,6 +38,7 @@ set(HEADER_FILES
   color.h
   configuration.h
   database.h
+  favoriteswidget.h
   logwidget.h
   mainwindow.h
   process.h
@@ -53,6 +54,7 @@ set(SOURCE_FILES
   color.cpp
   configuration.cpp
   database.cpp
+  favoriteswidget.cpp
   logwidget.cpp
   mainwindow.cpp
   process.cpp
@@ -69,6 +71,7 @@ qt_wrap_cpp(
   MOC_FILES
   clusterconnectionhandler.h
   clusterwidget.h
+  favoriteswidget.h
   mainwindow.h
   processwidget.h
   programwidget.h

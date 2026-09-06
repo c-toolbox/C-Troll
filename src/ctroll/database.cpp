@@ -435,6 +435,34 @@ bool loadData(std::string_view programPath, std::string_view clusterPath,
                 ));
             }
         }
+        for (const Program::Favorite& favorite : program.favorites) {
+            const bool hasCluster = std::any_of(
+                program.clusters.begin(), program.clusters.end(),
+                [&favorite](const Program::Cluster& c) {
+                    return c.name == favorite.cluster;
+                }
+            );
+            if (!hasCluster) {
+                throw std::runtime_error(std::format(
+                    "Favorite of program '{}' refers to cluster '{}' which is not one of "
+                    "the clusters of that program", program.name, favorite.cluster
+                ));
+            }
+
+            const bool hasConfiguration = std::any_of(
+                program.configurations.begin(), program.configurations.end(),
+                [&favorite](const Program::Configuration& c) {
+                    return c.name == favorite.configuration;
+                }
+            );
+            if (!hasConfiguration) {
+                throw std::runtime_error(std::format(
+                    "Favorite of program '{}' refers to configuration '{}' which is not "
+                    "one of the configurations of that program",
+                    program.name, favorite.configuration
+                ));
+            }
+        }
 
         std::unique_ptr<Program> p = std::make_unique<Program>(std::move(program));
 

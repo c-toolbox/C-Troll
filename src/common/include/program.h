@@ -82,6 +82,20 @@ struct Program {
         std::string parameters;
     };
 
+    struct Favorite {
+        bool operator==(const Favorite& rhs) const noexcept = default;
+
+        /// The name of the cluster on which this favorite starts the Program
+        std::string cluster;
+
+        /// The name of the configuration with which this favorite starts the Program
+        std::string configuration;
+
+        /// The user-facing name that is shown on the button on the Favorites tab. If
+        /// this is empty, the name of the Program is used instead
+        std::string name;
+    };
+
     using ID = TypedId<struct ProgramTag>;
 
     bool operator==(const Program& rhs) const noexcept = default;
@@ -120,6 +134,8 @@ struct Program {
     std::vector<Cluster> clusters;
     /// Optional list of node-specific commandline parameters
     std::vector<NodeParameters> nodes;
+    /// Optional list of cluster+configuration combinations shown on the Favorites tab
+    std::vector<Favorite> favorites;
 };
 
 std::pair<std::vector<Program>, bool> loadProgramsFromDirectory(

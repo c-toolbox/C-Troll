@@ -53,7 +53,10 @@ class ClustersWidget;
 class ProcessesWidget;
 class RestConnectionHandler;
 
-namespace programs { class ProgramsWidget; }
+namespace programs {
+    class FavoritesWidget;
+    class ProgramsWidget;
+} // namespace programs
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
@@ -100,6 +103,7 @@ private:
     void log(std::string msg);
 
     programs::ProgramsWidget* _programWidget = nullptr;
+    programs::FavoritesWidget* _favoritesWidget = nullptr;
     ClustersWidget* _clustersWidget = nullptr;
     ProcessesWidget* _processesWidget = nullptr;
     LogWidget _logWidget;

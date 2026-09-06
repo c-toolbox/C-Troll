@@ -37,6 +37,7 @@
 #include "clusterwidget.h"
 #include "configuration.h"
 #include "database.h"
+#include "favoriteswidget.h"
 #include "jsonload.h"
 #include "messages.h"
 #include "processwidget.h"
@@ -193,6 +194,32 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
 
     //
     // Create the widgets
+    // Favorites
+    if (programs::hasFavorites()) {
+        _favoritesWidget = new programs::FavoritesWidget;
+        connect(
+            _favoritesWidget, &programs::FavoritesWidget::startProgram,
+            this, &MainWindow::startProgram
+        );
+        connect(
+            _favoritesWidget, &programs::FavoritesWidget::stopProgram,
+            this, &MainWindow::stopProgram
+        );
+        connect(
+            _favoritesWidget, &programs::FavoritesWidget::restartProcess,
+            this, &MainWindow::startProcess
+        );
+        connect(
+            _favoritesWidget, &programs::FavoritesWidget::stopProcess,
+            this, &MainWindow::stopProcess
+        );
+        connect(
+            &_clusterConnectionHandler, &ClusterConnectionHandler::connectedStatusChanged,
+            _favoritesWidget, &programs::FavoritesWidget::connectedStatusChanged
+        );
+    }
+
+
     // Programs
     _programWidget = new programs::ProgramsWidget;
 
@@ -310,6 +337,9 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     );
 
     // Set up the tab widget
+    if (_favoritesWidget) {
+        tabWidget->addTab(_favoritesWidget, "Favorites");
+    }
     tabWidget->addTab(_programWidget, "Programs");
     tabWidget->addTab(_clustersWidget, "Clusters");
     tabWidget->addTab(_processesWidget, "Processes");
@@ -473,6 +503,9 @@ void MainWindow::handleTrayProcess(common::ProcessStatusMessage status) {
     // The process was already known to us, which should always be the case
     _processesWidget->processUpdated(process->id);
     _programWidget->processUpdated(process->id);
+    if (_favoritesWidget) {
+        _favoritesWidget->processUpdated(process->id);
+    }
 }
 
 void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
@@ -537,6 +570,9 @@ void MainWindow::handleTrayStatus(Node::ID, common::TrayStatusMessage status) {
         data::addProcess(std::move(process));
         _processesWidget->processAdded(pid);
         _programWidget->processUpdated(pid);
+        if (_favoritesWidget) {
+            _favoritesWidget->processUpdated(pid);
+        }
     }
 }
 

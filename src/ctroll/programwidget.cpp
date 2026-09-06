@@ -53,15 +53,33 @@
 namespace programs {
 
 ProgramButton::ProgramButton(const Cluster* cluster,
-                             const Program::Configuration* configuration)
-    : QPushButton(QString::fromStdString(configuration->name))
-    , _cluster(cluster)
+                             const Program::Configuration* configuration,
+                             std::string displayName)
+    : _cluster(cluster)
     , _configuration(configuration)
+    , _startText(
+        QString::fromStdString(displayName.empty() ? configuration->name : displayName)
+    )
+    , _stopText(
+        QString::fromStdString(
+            displayName.empty() ?
+                "Stop:" + cluster->name :
+                "Stop\n" + displayName
+        )
+    )
+    , _mixedText(
+        QString::fromStdString(
+            displayName.empty() ?
+                "Mixed:" + cluster->name :
+                "Mixed\n" + displayName
+        )
+    )
     , _actionMenu(new QMenu(this))
 {
     assert(cluster);
     assert(configuration);
 
+    setText(_startText);
     setToolTip(QString::fromStdString(configuration->description));
     setEnabled(false);
     connect(this, &QPushButton::clicked, this, &ProgramButton::handleButtonPress);
@@ -151,17 +169,17 @@ void ProgramButton::updateButton() {
     if (hasNoProcessRunning()) {
         setMenu(nullptr);
         setObjectName("start"); // used in the QSS sheet to style this button
-        setText(QString::fromStdString(_configuration->name));
+        setText(_startText);
     }
     else if (hasAllProcessesRunning()) {
         setMenu(nullptr);
         setObjectName("stop"); // used in the QSS sheet to style this button
-        setText(QString::fromStdString("Stop:" + _cluster->name));
+        setText(_stopText);
     }
     else {
         setMenu(_actionMenu);
         setObjectName("mixed"); // used in the QSS sheet to style this button
-        setText(QString::fromStdString("Mixed:" + _cluster->name));
+        setText(_mixedText);
 
         updateMenu();
     }

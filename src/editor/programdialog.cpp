@@ -115,6 +115,37 @@ ProgramDialog::NodeWidget::NodeWidget(const std::string& node,
     layout->setStretch(1, 3);
 }
 
+ProgramDialog::FavoriteWidget::FavoriteWidget(const std::string& cluster,
+                                              const std::string& configuration,
+                                              const std::string& name)
+{
+    QBoxLayout* layout = new QHBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    this->cluster = new QLabel(QString::fromStdString(cluster));
+    this->cluster->setToolTip("The cluster on which this favorite starts the program");
+    layout->addWidget(this->cluster);
+    layout->setStretch(0, 2);
+
+    this->configuration = new QLabel(QString::fromStdString(configuration));
+    this->configuration->setToolTip(
+        "The configuration with which this favorite starts the program"
+    );
+    layout->addWidget(this->configuration);
+    layout->setStretch(1, 2);
+
+    this->name = new QLineEdit;
+    this->name->setText(QString::fromStdString(name));
+    this->name->setCursorPosition(0);
+    this->name->setToolTip(
+        "The name shown on the button on the Favorites tab. If this is empty, the name "
+        "of the program is used instead"
+    );
+    this->name->setPlaceholderText("optional");
+    layout->addWidget(this->name);
+    layout->setStretch(2, 3);
+}
+
 ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                              std::string clusterPath, std::string nodePath)
     : QDialog(parent)
@@ -370,8 +401,42 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
     editLayout->addWidget(new Spacer, 21, 0, 1, 3);
 
     {
+        // Favorites
+
+        editLayout->addWidget(new QLabel("Favorites (optional)"), 22, 0);
+
+        QPushButton* newFavorite = new AddButton;
+        connect(
+            newFavorite, &QPushButton::clicked,
+            [this]() {
+                std::optional<std::pair<std::string, std::string>> f = selectFavorite();
+                if (f.has_value()) {
+                    FavoriteWidget* favorite =
+                        new FavoriteWidget(f->first, f->second, "");
+                    _favorites->addItem(favorite);
+                    updateSaveButton();
+                }
+            }
+        );
+        editLayout->addWidget(newFavorite, 22, 1, 1, 2, Qt::AlignRight);
+
+        _favorites = new DynamicList;
+        _favorites->setToolTip(
+            "The cluster and configuration combinations of this program that are shown "
+            "on the Favorites tab of C-Troll"
+        );
+        connect(
+            _favorites, &DynamicList::updated,
+            this, &ProgramDialog::updateSaveButton
+        );
+        editLayout->addWidget(_favorites, 23, 0, 1, 3);
+    }
+
+    editLayout->addWidget(new Spacer, 24, 0, 1, 3);
+
+    {
         // Tags
-        editLayout->addWidget(new QLabel("Tags (optional)"), 22, 0);
+        editLayout->addWidget(new QLabel("Tags (optional)"), 25, 0);
 
         QPushButton* t = new AddButton;
         connect(
@@ -383,13 +448,13 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 updateSaveButton();
             }
         );
-        editLayout->addWidget(t, 22, 1, 1, 2, Qt::AlignRight);
+        editLayout->addWidget(t, 25, 1, 1, 2, Qt::AlignRight);
 
         _tags = new DynamicList;
         _tags->setToolTip("A list of all tags that this program is associated with");
         connect(_tags, &DynamicList::updated, this, &ProgramDialog::updateSaveButton);
 
-        editLayout->addWidget(_tags, 23, 0, 1, 3);
+        editLayout->addWidget(_tags, 26, 0, 1, 3);
     }
 
     layout->addWidget(edit);
@@ -482,6 +547,39 @@ ProgramDialog::ProgramDialog(QWidget* parent, std::string programPath,
                 n->setToolTip("Could not find node in nodes folder");
             }
         }
+
+        for (const Program::Favorite& favorite : program.favorites) {
+            FavoriteWidget* f = new FavoriteWidget(
+                favorite.cluster,
+                favorite.configuration,
+                favorite.name
+            );
+            _favorites->addItem(f);
+
+            const bool hasCluster = std::any_of(
+                program.clusters.begin(), program.clusters.end(),
+                [&favorite](const Program::Cluster& c) {
+                    return c.name == favorite.cluster;
+                }
+            );
+            if (!hasCluster) {
+                f->cluster->setObjectName("invalid");
+                f->setToolTip("Could not find cluster in the clusters of this program");
+            }
+
+            const bool hasConfiguration = std::any_of(
+                program.configurations.begin(), program.configurations.end(),
+                [&favorite](const Program::Configuration& c) {
+                    return c.name == favorite.configuration;
+                }
+            );
+            if (!hasConfiguration) {
+                f->configuration->setObjectName("invalid");
+                f->setToolTip(
+                    "Could not find configuration in the configurations of this program"
+                );
+            }
+        }
     }
     else {
         // If it doesn't exist, we want to create at least a default configuration to
@@ -544,6 +642,13 @@ void ProgramDialog::save() {
         n.name = node->label->text().toStdString();
         n.parameters = node->arguments->text().toStdString();
         program.nodes.push_back(n);
+    }
+    for (FavoriteWidget* favorite : _favorites->items<FavoriteWidget>()) {
+        Program::Favorite f;
+        f.cluster = favorite->cluster->text().toStdString();
+        f.configuration = favorite->configuration->text().toStdString();
+        f.name = favorite->name->text().toStdString();
+        program.favorites.push_back(f);
     }
 
     common::saveToJson(_programPath, program);
@@ -641,6 +746,57 @@ std::string ProgramDialog::selectNode() {
     );
 
     return ok ? selected.toStdString() : "";
+}
+
+std::optional<std::pair<std::string, std::string>> ProgramDialog::selectFavorite() {
+    QStringList clusters;
+    for (ClusterWidget* c : _clusters->items<ClusterWidget>()) {
+        clusters.push_back(c->label->text());
+    }
+    QStringList configurations;
+    for (ConfigurationWidget* c : _configurations->items<ConfigurationWidget>()) {
+        if (!c->name->text().isEmpty()) {
+            configurations.push_back(c->name->text());
+        }
+    }
+
+    if (clusters.empty() || configurations.empty()) {
+        QMessageBox::information(
+            this,
+            "Add favorite",
+            "A favorite requires at least one cluster and one configuration"
+        );
+        return std::nullopt;
+    }
+
+    bool ok = false;
+    const QString cluster = QInputDialog::getItem(
+        this,
+        "Add Favorite",
+        "Select the cluster on which the favorite starts the program",
+        clusters,
+        0,
+        false,
+        &ok
+    );
+    if (!ok) {
+        return std::nullopt;
+    }
+
+    const QString configuration = QInputDialog::getItem(
+        this,
+        "Add Favorite",
+        "Select the configuration with which the favorite starts the program",
+        configurations,
+        0,
+        false,
+        &ok
+    );
+    if (!ok) {
+        return std::nullopt;
+    }
+
+    return std::pair(cluster.toStdString(), configuration.toStdString());
 }
 
 void ProgramDialog::updateSaveButton() {

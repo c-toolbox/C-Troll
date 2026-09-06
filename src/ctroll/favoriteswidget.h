@@ -32,100 +32,53 @@
  *                                                                                       *
  ****************************************************************************************/
 
-#ifndef __EDITOR__PROGRAMDIALOG_H__
-#define __EDITOR__PROGRAMDIALOG_H__
+#ifndef __CTROLL__FAVORITESWIDGET_H__
+#define __CTROLL__FAVORITESWIDGET_H__
 
-#include <QDialog>
-
-#include "dynamiclist.h"
 #include <QWidget>
-#include <filesystem>
-#include <optional>
-#include <string>
-#include <utility>
+
+#include "process.h"
+#include "program.h"
 #include <vector>
 
-class QBoxLayout;
-class QCheckBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QSpinBox;
+namespace programs {
 
-class ProgramDialog : public QDialog {
+class ProgramButton;
+
+/// Returns whether any of the currently loaded Programs is marked as a favorite
+[[nodiscard]] bool hasFavorites();
+
+/// Shows all Programs that are marked as a favorite as large buttons arranged in a grid
+class FavoritesWidget : public QWidget {
 Q_OBJECT
 public:
-    struct ConfigurationWidget : QWidget {
-        ConfigurationWidget();
+    FavoritesWidget();
 
-        QLineEdit* name = nullptr;
-        QLineEdit* parameters = nullptr;
-        QLineEdit* description = nullptr;
-    };
+    void processUpdated(Process::ID processId);
 
-    struct ClusterWidget : QWidget {
-        ClusterWidget(const std::string& cluster, const std::string& parameters);
+public slots:
+    void connectedStatusChanged(Cluster::ID cluster, Node::ID node);
 
-        QLabel* label = nullptr;
-        QLineEdit* arguments = nullptr;
-    };
+signals:
+    void startProgram(Cluster::ID clusterId, Program::ID programId,
+        Program::Configuration::ID configurationId);
+    void stopProgram(Cluster::ID clusterId, Program::ID programId,
+        Program::Configuration::ID configurationId);
 
-    struct NodeWidget : QWidget {
-        NodeWidget(const std::string& node, const std::string& parameters);
-
-        QLabel* label = nullptr;
-        QLineEdit* arguments = nullptr;
-    };
-
-    struct FavoriteWidget : QWidget {
-        FavoriteWidget(const std::string& cluster, const std::string& configuration,
-            const std::string& name);
-
-        QLabel* cluster = nullptr;
-        QLabel* configuration = nullptr;
-        QLineEdit* name = nullptr;
-    };
-
-    ProgramDialog(QWidget* parent, std::string programPath, std::string clusterPath,
-        std::string nodePath);
-
-    void setExecutableInformation(std::filesystem::path path);
-
-private slots:
-    void save();
-    void updateSaveButton();
+    void restartProcess(Process::ID processId);
+    void stopProcess(Process::ID processId);
 
 private:
-    std::string selectCluster();
-    std::string selectNode();
-    std::optional<std::pair<std::string, std::string>> selectFavorite();
+    struct ButtonInfo {
+        Program::ID programId;
+        Cluster::ID clusterId;
+        Program::Configuration::ID configurationId;
+        ProgramButton* button = nullptr;
+    };
 
-    const std::string _programPath;
-    const std::string _clusterPath;
-    const std::string _nodePath;
-
-    QLineEdit* _name = nullptr;
-    QLineEdit* _executable = nullptr;
-    QLineEdit* _commandLineParameters = nullptr;
-    QLineEdit* _workingDirectory = nullptr;
-    QCheckBox* _isEnabled = nullptr;
-    QCheckBox* _shouldForwardMessages = nullptr;
-    QCheckBox* _shouldAutoRestart = nullptr;
-
-    QCheckBox* _hasDelay = nullptr;
-    QSpinBox* _delay = nullptr;
-
-    QLineEdit* _preStart = nullptr;
-    QLineEdit* _preStartNode = nullptr;
-    QLineEdit* _description = nullptr;
-
-    DynamicList* _tags = nullptr;
-    DynamicList* _configurations = nullptr;
-    DynamicList* _clusters = nullptr;
-    DynamicList* _nodes = nullptr;
-    DynamicList* _favorites = nullptr;
-
-    QPushButton* _saveButton = nullptr;
+    std::vector<ButtonInfo> _buttons;
 };
 
-#endif // __EDITOR__PROGRAMDIALOG_H__
+} // namespace programs
+
+#endif // __CTROLL__FAVORITESWIDGET_H__
