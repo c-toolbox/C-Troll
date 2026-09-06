@@ -316,6 +316,15 @@ MainWindow::MainWindow(std::vector<std::string> defaultTags, Configuration confi
     tabWidget->addTab(&_logWidget, "Log");
     tabWidget->addTab(new SettingsWidget(config, "config.json"), "Settings");
 
+    // Open with a size that fits every tab, keeping the room for the Favorites tab even
+    // if it is currently not part of the tab widget
+    ensurePolished();
+    const QTabBar* tabBar = tabWidget->tabBar();
+    const int nTabs = tabBar->count();
+    const int nMaxTabs = _favoritesWidget ? nTabs : nTabs + 1;
+    const int tabBarHeight = (tabBar->sizeHint().height() * nMaxTabs) / nTabs;
+    resize(width(), std::max(height(), tabBarHeight));
+
     _clusterConnectionHandler.initialize();
 
 
