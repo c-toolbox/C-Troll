@@ -72,10 +72,15 @@ int main(int argc, const char** argv) {
     Client cli = httplib::Client(server);
     cli.set_keep_alive(false);
     cli.set_follow_location(true);
+    // The request is only a trigger, so don't wait around for long if the server is
+    // unreachable or doesn't answer
+    cli.set_connection_timeout(std::chrono::seconds(5));
+    cli.set_read_timeout(std::chrono::seconds(5));
+    cli.set_write_timeout(std::chrono::seconds(5));
     if (username.has_value() && password.has_value()) {
         cli.set_basic_auth(*username, *password);
     }
-    cli.Post(
+    Result res = cli.Post(
         "/program/start",
         Params {
             { "program", program },
@@ -83,4 +88,11 @@ int main(int argc, const char** argv) {
             { "configuration", configuration}
         }
     );
+
+    if (!res) {
+        std::cerr << "Request failed: " << to_string(res.error()) << '\n';
+        return EXIT_FAILURE;
+    }
+    std::cout << res->status << ' ' << res->body << '\n';
+    return (res->status >= 200 && res->status < 300) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
