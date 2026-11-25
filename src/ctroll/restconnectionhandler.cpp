@@ -98,7 +98,8 @@ namespace {
         }(response);
 
         std::string message = std::format(
-            "HTTP/1.1 {}\nContent-Length: {}\n\n{}", code, content.size(), content
+            "HTTP/1.1 {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            code, content.size(), content
         );
         socket.write(message.data(), static_cast<qint64>(message.size()));
     }
@@ -121,7 +122,8 @@ namespace {
 
         std::string content = payload.dump();
         std::string message = std::format(
-            "HTTP/1.1 {}\nContent-Type: application/json\nContent-Length: {}\n\n{}",
+            "HTTP/1.1 {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\n"
+            "Connection: close\r\n\r\n{}",
             code, content.size(), content
         );
         socket.write(message.data(), static_cast<qint64>(message.size()));
@@ -246,6 +248,7 @@ void RestConnectionHandler::newConnectionEstablished() {
             socket, &QTcpSocket::readyRead,
             this, &RestConnectionHandler::handleNewConnection
         );
+        connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
     }
 }
 
@@ -261,6 +264,15 @@ void RestConnectionHandler::handleNewConnection() {
     Debug(std::format(
         "Handling new message from {}", socket->peerAddress().toString().toStdString()
     ));
+
+    // We don't support persistent connections, so every request gets exactly one
+    // response after which the connection is closed. Without closing, clients that wait
+    // for the server to end the connection would hang. `disconnectFromHost` flushes any
+    // pending writes before closing the socket
+    struct CloseOnExit {
+        QTcpSocket* s;
+        ~CloseOnExit() { s->disconnectFromHost(); }
+    } closeOnExit = { socket };
 
     if (_acceptOnlyLoopbackConnection && !socket->peerAddress().isLoopback()) {
         Debug("Rejecting due to not from a loopback");
